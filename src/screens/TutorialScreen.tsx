@@ -94,44 +94,61 @@ export default function TutorialScreen({ onUnderstood, onBack }: TutorialScreenP
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[550px] h-72 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-5 max-w-2xl w-full">
-        {/* Top bar with back button */}
+        {/* Top bar */}
         <div className="w-full flex items-center justify-between">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-white/40 hover:text-cyan-400 transition-colors text-xs tracking-widest font-mono cursor-pointer"
+            className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors cursor-pointer"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            ← VOLTAR AO INÍCIO
+            ◀ &nbsp; VOLTAR
           </button>
 
-          <span
-            className="text-[10px] text-purple-400/80 tracking-widest font-mono"
-            style={{ fontFamily: "'Space Mono', monospace" }}
-          >
-            MINI-TREINAMENTO INTERATIVO
-          </span>
-        </div>
-
-        {/* Header */}
-        <div className="text-center flex flex-col items-center gap-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-purple-500/30 bg-purple-950/30">
+          <div className="flex items-center gap-2">
             <span
-              className="text-[10px] text-purple-300 tracking-widest font-mono uppercase"
+              className="text-xs px-2.5 py-1 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 tracking-wider"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              {stepInfo.title}
+              TUTORIAL INTERATIVO
             </span>
           </div>
 
-          <h1
-            className="text-3xl sm:text-4xl font-black tracking-tight text-white"
-            style={{
-              fontFamily: "'Orbitron', sans-serif",
-              textShadow: "0 0 30px rgba(139,92,246,0.35)",
-            }}
+          <button
+            onClick={handleResetTutorial}
+            className="text-xs text-white/30 hover:text-white/70 transition-colors cursor-pointer"
+            style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            PROTOCOLO BUBBLE
-          </h1>
+            ↺ REINICIAR
+          </button>
+        </div>
+
+        {/* Protocol badge & title */}
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span
+              className="text-[11px] text-cyan-400 tracking-[0.25em] uppercase"
+              style={{ fontFamily: "'Space Mono', monospace" }}
+            >
+              BUBBLE SORT • COMPARAÇÃO DE PARES VIZINHOS
+            </span>
+          </div>
+          <h2
+            className="text-2xl font-black text-white tracking-tight"
+            style={{ fontFamily: "'Orbitron', sans-serif" }}
+          >
+            {stepInfo.title}
+          </h2>
+        </div>
+
+        {/* Step telemetry bar */}
+        <div className="w-full flex items-center justify-between px-1 text-xs font-mono">
+          <span className="text-cyan-300/80 bg-cyan-950/40 border border-cyan-500/20 px-2 py-0.5 rounded">
+            PASSADA {gameState.completed ? 2 : gameState.passIndex + 1}
+          </span>
+          <span className="text-white/40">
+            COMPARAÇÃO {gameState.completed ? 3 : gameState.comparisonIndex + 1}/3
+          </span>
         </div>
 
         {/* Context / Prompt Card */}
@@ -145,7 +162,7 @@ export default function TutorialScreen({ onUnderstood, onBack }: TutorialScreenP
         </div>
 
         {/* Conveyor belt with boxes */}
-        <div className="w-full panel-border bg-[#080f28]/90 rounded-xl p-6 sm:p-8 flex flex-col items-center gap-4">
+        <div className="w-full panel-border bg-[#080f28]/90 rounded-xl p-5 sm:p-6 flex flex-col items-center gap-4">
           <div className="w-full flex justify-between items-center px-2">
             <span
               className="text-[10px] text-cyan-400/60 tracking-widest font-mono"
@@ -167,10 +184,10 @@ export default function TutorialScreen({ onUnderstood, onBack }: TutorialScreenP
           {/* Conveyor track */}
           <div className="conveyor-track py-6 px-6 sm:px-12 rounded-xl relative flex items-center justify-center gap-4 sm:gap-8 w-full">
             {/* Corner indicators */}
-            <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-cyan-500/30" />
-            <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-cyan-500/30" />
-            <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-cyan-500/30" />
-            <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-cyan-500/30" />
+            <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-cyan-500/30 pointer-events-none" />
+            <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-cyan-500/30 pointer-events-none" />
+            <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-cyan-500/30 pointer-events-none" />
+            <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-cyan-500/30 pointer-events-none" />
 
             {gameState.currentValues.map((val, idx) => {
               const isSelected =
@@ -190,10 +207,8 @@ export default function TutorialScreen({ onUnderstood, onBack }: TutorialScreenP
                   key={`box-${idx}-${val}`}
                   value={val}
                   index={idx}
-                  selected={isSelected}
-                  sorted={isSorted}
+                  role={isSelected ? "pair" : isSorted ? "sorted" : "default"}
                   disabled={isAnimating || gameState.completed}
-                  badge={isSelected ? "PAR" : isSorted ? "OK" : "PKG"}
                   animating={anim}
                   size="lg"
                   onClick={() => {}}
@@ -219,6 +234,22 @@ export default function TutorialScreen({ onUnderstood, onBack }: TutorialScreenP
               <span>TODAS AS CARGAS ESTÃO EM ORDEM CRESCENTE</span>
             </div>
           )}
+
+          {/* Semantics role legend */}
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2 border-t border-white/5 text-[10px] font-mono text-white/50 select-none">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded bg-cyan-500/30 border border-cyan-400" />
+              PAR (Vizinhos sob Inspeção)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded bg-emerald-500/30 border border-emerald-500" />
+              OK (Consolidado)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded bg-blue-950 border border-blue-500/30" />
+              PKG (Aguardando)
+            </span>
+          </div>
         </div>
 
         {/* Pass Notice Callout (Concept of Pass) */}

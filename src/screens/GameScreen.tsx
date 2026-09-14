@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import NumberedBox from "../components/NumberedBox";
+import NumberedBox, { type BoxRole } from "../components/NumberedBox";
 import StatsPanel from "../components/StatsPanel";
 import InstructionPanel from "../components/InstructionPanel";
 import PhaseHeader from "../components/PhaseHeader";
@@ -370,7 +370,6 @@ export default function GameScreen({
   return (
     <div className="relative w-full h-full overflow-hidden bg-[#060b1a] bg-grid scanlines flex flex-col">
       {/* Header */}
-      {/* Header */}
       <PhaseHeader
         protocol={variant === "EARLY_EXIT" ? "BUBBLE (DESAFIO)" : "BUBBLE"}
         phase={phase}
@@ -378,11 +377,11 @@ export default function GameScreen({
       />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-start sm:justify-center gap-4 sm:gap-6 px-4 sm:px-6 py-4 pb-12 sm:pb-16 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-start gap-4 sm:gap-6 px-4 sm:px-6 py-4 pb-16 sm:pb-24 overflow-y-auto">
         {/* Ambient glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-64 bg-blue-600/4 rounded-full blur-[100px] pointer-events-none" />
 
-        {/* Phase & Pass / Comparison info */}
+        {/* Phase & Pass info */}
         <div className="relative z-10 text-center flex flex-col items-center gap-1">
           {variant === "EARLY_EXIT" && (
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-amber-500/40 bg-amber-950/40 text-[10px] text-amber-300 font-mono tracking-widest uppercase">
@@ -397,29 +396,102 @@ export default function GameScreen({
               ? (modeTitle ?? `MODO DESAFIO — CENÁRIO ${phase}`)
               : `PROTOCOLO BUBBLE — FASE ${phase}`}
           </h2>
+        </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
+        {/* Subcabeçalho de Telemetria e Invariante de Laço */}
+        <div className="relative z-10 w-full max-w-2xl flex flex-wrap items-center justify-between gap-2 px-1">
+          <div className="flex items-center gap-2">
             <span
-              className="px-2.5 py-0.5 rounded border border-cyan-500/30 bg-cyan-950/40 text-cyan-300 text-xs font-mono tracking-widest"
+              className="text-xs px-2.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-mono tracking-wider uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              PASSADA {currentPassNumber}/{totalPasses}
+              FASE {phase} DE {totalPhases}
             </span>
+            <span
+              className="text-xs px-2.5 py-0.5 rounded bg-purple-950/40 border border-purple-500/30 text-purple-300 font-mono tracking-wider uppercase"
+              style={{ fontFamily: "'Space Mono', monospace" }}
+            >
+              PASSADA {currentPassNumber} DE {totalPasses}
+            </span>
+          </div>
 
+          <div className="flex items-center gap-3 text-xs font-mono text-white/50">
+            <span>
+              COMPARAÇÕES:{" "}
+              <strong className="text-cyan-300">
+                {gameState.comparisons}
+              </strong>
+            </span>
+            <span>•</span>
+            <span>
+              TROCAS:{" "}
+              <strong className="text-purple-300">{gameState.swaps}</strong>
+            </span>
+            <span>•</span>
+            <span>
+              ERROS:{" "}
+              <strong
+                className={gameState.errors > 0 ? "text-amber-400" : "text-white/70"}
+              >
+                {gameState.errors}
+              </strong>
+            </span>
+            {sessionMetrics.hintsUsed > 0 && (
+              <>
+                <span>•</span>
+                <span>
+                  DICAS:{" "}
+                  <strong className="text-cyan-400">{sessionMetrics.hintsUsed}</strong>
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Banner Relacional Concreto (Inspeção da Condição Algorítmica) */}
+        <div className="relative z-10 w-full max-w-2xl rounded-lg bg-[#0a1638]/70 border border-cyan-500/30 p-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-md">
+          <div className="flex flex-wrap items-center gap-4">
             {!gameState.completed && expected ? (
-              <span
-                className="px-2.5 py-0.5 rounded border border-purple-500/30 bg-purple-950/40 text-purple-300 text-xs font-mono tracking-widest"
-                style={{ fontFamily: "'Space Mono', monospace" }}
-              >
-                COMPARAÇÃO {currentComparisonNumber}/{totalComparisonsInPass} (PAR #{expected.leftIndex + 1} E #{expected.rightIndex + 1})
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-white/40 uppercase">Par sob Inspeção:</span>
+                <span className="text-cyan-300 font-bold bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-400/40 animate-pulse">
+                  #{expected.leftIndex + 1} ({expected.leftValue}) e #{expected.rightIndex + 1} ({expected.rightValue})
+                </span>
+              </div>
             ) : (
-              <span
-                className="px-2.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-950/40 text-emerald-300 text-xs font-mono tracking-widest"
-                style={{ fontFamily: "'Space Mono', monospace" }}
-              >
-                CONCLUÍDO
+              <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                Vetor Consolidado
               </span>
+            )}
+          </div>
+
+          {/* Textual comparison formula */}
+          <div className="text-xs font-bold text-right ml-auto flex items-center gap-2">
+            {!gameState.completed && expected ? (
+              <>
+                <span className="text-white/80">
+                  Condição:{" "}
+                  <span className="text-cyan-300">
+                    A[{expected.leftIndex}] ({expected.leftValue})
+                  </span>{" "}
+                  &gt;{" "}
+                  <span className="text-cyan-300">
+                    A[{expected.rightIndex}] ({expected.rightValue})
+                  </span>
+                </span>
+                <span
+                  className={`px-2 py-0.5 rounded text-[10px] font-mono tracking-wider font-bold ${
+                    expected.leftValue > expected.rightValue
+                      ? "bg-amber-950/60 text-amber-300 border border-amber-500/40"
+                      : "bg-emerald-950/60 text-emerald-300 border border-emerald-500/40"
+                  }`}
+                >
+                  {expected.leftValue > expected.rightValue ? "VERDADEIRO" : "FALSO"}
+                </span>
+              </>
+            ) : (
+              <span className="text-emerald-400">Todas as cargas em ordem</span>
             )}
           </div>
         </div>
@@ -460,6 +532,7 @@ export default function GameScreen({
                   expected !== null &&
                   (index === expected.leftIndex || index === expected.rightIndex);
                 const isSorted = sortedIndices.includes(index);
+                const boxRole: BoxRole = isExpected ? "pair" : isSorted ? "sorted" : "default";
 
                 let animDir: "left" | "right" | null = null;
                 if (animatingPair) {
@@ -472,9 +545,8 @@ export default function GameScreen({
                     key={`box-${index}`}
                     value={value}
                     index={index}
-                    selected={isExpected}
+                    role={boxRole}
                     disabled={isAnimating || gameState.completed}
-                    sorted={isSorted}
                     onClick={handleBoxClick}
                     animating={animDir}
                     size={boxSize}
@@ -484,18 +556,54 @@ export default function GameScreen({
             </div>
           </div>
 
-          {/* Direction arrow */}
-          <div className="flex items-center justify-end gap-1 mt-2 px-2">
-            <span
-              className="text-[9px] text-white/15"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              DESTINO →
+          {/* Semantics role legend */}
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2 border-t border-white/5 text-[10px] font-mono text-white/50 select-none">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded bg-cyan-500/30 border border-cyan-400" />
+              PAR (Vizinhos sob Inspeção)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded bg-emerald-500/30 border border-emerald-500" />
+              OK (Consolidado)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded bg-blue-950 border border-blue-500/30" />
+              PKG (Aguardando)
             </span>
           </div>
 
           {/* Bottom rail */}
           <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent mt-2" />
+        </div>
+
+        {/* Progress bar */}
+        <div className="relative z-10 w-full max-w-2xl flex items-center gap-3 px-2">
+          <span
+            className="text-[10px] text-white/30 font-mono uppercase tracking-wider"
+            style={{ fontFamily: "'Space Mono', monospace" }}
+          >
+            Progresso:
+          </span>
+          <div className="flex-1 h-2 rounded-full bg-[#0d1635] border border-cyan-500/20 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 transition-all duration-300 rounded-full"
+              style={{
+                width: `${progressPercent}%`,
+                boxShadow: "0 0 8px rgba(0,245,255,0.4)",
+              }}
+            />
+          </div>
+          <span
+            className="text-xs font-bold text-cyan-300 font-mono"
+            style={{ fontFamily: "'Space Mono', monospace" }}
+          >
+            {progressPercent}%
+          </span>
+        </div>
+
+        {/* Instruction panel (ANTES da botoeira) */}
+        <div className="relative z-10 w-full max-w-2xl">
+          <InstructionPanel message={message.text} type={message.type} />
         </div>
 
         {/* Decision Controls (TROCAR vs MANTER) */}
@@ -535,11 +643,6 @@ export default function GameScreen({
           )}
         </div>
 
-        {/* Instruction panel */}
-        <div className="relative z-10 w-full max-w-2xl">
-          <InstructionPanel message={message.text} type={message.type} />
-        </div>
-
         {/* Bottom controls */}
         <div className="relative z-10 flex items-center justify-between w-full max-w-2xl">
           {/* Stats */}
@@ -563,33 +666,6 @@ export default function GameScreen({
             >
               ↺ REINICIAR
             </GameButton>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="relative z-10 w-full max-w-2xl">
-          <div className="flex justify-between mb-1">
-            <span
-              className="text-[9px] text-white/20 tracking-widest"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              PROGRESSO
-            </span>
-            <span
-              className="text-[9px] text-cyan-400/60"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              {progressPercent}%
-            </span>
-          </div>
-          <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full transition-all duration-500"
-              style={{
-                width: `${progressPercent}%`,
-                boxShadow: "0 0 8px rgba(0,245,255,0.4)",
-              }}
-            />
           </div>
         </div>
       </div>

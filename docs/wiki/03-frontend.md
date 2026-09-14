@@ -223,21 +223,19 @@ flowchart TD
   - Botão "↺ REPETIR FASE" aciona `onRepeat()`; botão principal aciona `onNext()`.
 - **Callbacks e Props:** `onRepeat: () => void`, `onNext: () => void`, `onViewReplay?: () => void`, `protocol?: "bubble" | "selection"`, `variant?: BubbleSortVariant`, `earlyExitTriggered?: boolean`, `terminationPass?: number`, `canonicalComparisons?: number`, `comparisonsAvoided?: number`.
 
-### 3.9. `src/screens/CampaignCompleteScreen.tsx`
-- **Responsabilidades:** Tela de homologação técnica e encerramento do Protocolo Bubble Sort ao término de todas as fases da campanha.
+### 3.9. `src/screens/CampaignCompleteScreen.tsx` e `src/screens/campaignCompleteConfig.ts`
+- **Responsabilidades:** Tela unificada orientada a dados e encerramento técnico de campanhas ao término de todas as fases, parametrizada via dicionário declarativo de metadados (`src/screens/campaignCompleteConfig.ts`), eliminando duplicações e bifurcações `if` espalhadas no JSX.
 - **Destaques de Implementação:**
-  - Apresenta o fechamento narrativo do setor de triagem ("Protocolo Bubble Concluído", sem falsas afirmações de aprendizado absoluto antes de pesquisas empíricas);
-  - Painel de 5 métricas factuais globais calculadas via `calculateCampaignSummary`:
-    - Fases Concluídas ($3 / 3$);
-    - Comparações Totais acumuladas ($6 + 10 + 15 = 31$);
-    - Trocas Totais acumuladas ($5 + 6 + 9 = 20$);
-    - Decisões Incorretas Totais (`totalErrors`);
-    - Dicas Utilizadas Totais (`totalHintsUsed`).
-  - Relatório discriminado por etapa em grid responsivo com os contadores (`comparisons`, `swaps`, `errors`, `hintsUsed`, `score`, `elapsedTimeMs`) e miniatura dos vetores ordenados finais;
-  - **Acesso ao Modo Desafio (P1.8):** Botão rápido `[ ⚡ EXPERIMENTAR MODO DESAFIO: EARLY EXIT → ]` exibido quando `onStartChallenge` está disponível;
-  - Botão "⌂ VOLTAR AO INÍCIO" (`onReturnHome`): reseta todos os resultados em memória, reseta para Fase 1 e retorna para `HomeScreen`;
-  - Botão "↺ REJOGAR PROTOCOLO" (`onRestartProtocol`): direciona para o briefing do Treinamento Regular com retorno seguro para `campaign-complete`.
-- **Callbacks:** `onReturnHome: () => void`, `onRestartProtocol?: () => void`, `onStartChallenge?: () => void`.
+  - Suporta os protocolos `bubble` e `selection` através de configuração tipada (`ProtocolCompleteConfig`):
+    - Identidade visual temática (glows ciano/esmeralda no Bubble, púrpura/ciano no Selection);
+    - Badges superiores e cabeçalhos narrativos personalizados;
+    - Painel factual de 5 métricas globais (`completedPhases`, `totalComparisons`, `totalSwaps`, `totalErrors`, `totalHintsUsed`);
+    - Rótulos pedagógicos específicos (ex.: "Trocas Adjacentes" vs "Trocas Totais / Transferências");
+    - Nota pedagógica integrada com destaque de invariante (princípio fundamental do algoritmo);
+  - **Relatório por Etapa:** Grid responsivo exibindo o resultado analítico de cada fase com vetores finais ordenados e Pontuação do Protocolo;
+  - **Acesso ao Modo Desafio (P1.8):** Botão `[ ⚡ EXPERIMENTAR MODO DESAFIO: EARLY EXIT → ]` exibido quando `onStartChallenge` está disponível;
+  - **Wrapper Ergonômico:** `src/screens/SelectionCampaignCompleteScreen.tsx` funciona como wrapper transparente e retrocompatível delegando para `CampaignCompleteScreen` com `protocol="selection"`.
+- **Callbacks e Props:** `protocol?: "bubble" | "selection"`, `results: PhaseResult[]`, `totalPhases?: number`, `onReturnHome: () => void`, `onRestartProtocol?: () => void`, `onStartChallenge?: () => void`.
 
 ### 3.10. `src/screens/ReplayScreen.tsx`
 - **Responsabilidades:** Reprodução visual somente-leitura da execução de qualquer fase concluída do Protocolo Bubble Sort (P1.3, ADR 0004), com pseudocódigo sincronizado em tempo real (P1.4, ADR 0005) e suporte à variante otimizada (P1.8, ADR 0008).

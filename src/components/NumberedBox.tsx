@@ -5,6 +5,7 @@ export type BoxRole =
   | "scan"
   | "scan-min"
   | "sorted"
+  | "ordered"
   | "pair"
   | "default";
 
@@ -68,6 +69,8 @@ export default function NumberedBox({
         return "MÍN • SCAN";
       case "sorted":
         return "OK";
+      case "ordered":
+        return "ORD";
       case "pair":
         return "PAR";
       case "default":
@@ -124,6 +127,14 @@ export default function NumberedBox({
           border: "1px solid rgba(16,185,129,0.3)",
           text: "text-emerald-400",
           badgeColor: "text-emerald-500/70",
+          pulse: false,
+        };
+      case "ordered":
+        return {
+          bg: "bg-emerald-950/40",
+          border: "1px dashed rgba(16,185,129,0.5)",
+          text: "text-emerald-300",
+          badgeColor: "text-emerald-400 font-bold",
           pulse: false,
         };
       case "pair":

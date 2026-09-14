@@ -254,6 +254,103 @@ Para garantir uniformidade e consistência narrativa em todas as mensagens, bot�
 | **Preservação de Mínimo (Selection)** | `Manter Candidato` | Ignorar, Pular, Descartar | Reafirma que a decisão de não alterar é consciente |
 | **Troca de Fechamento (Selection)** | `Transferir Menor Carga` | Trocar logo, Mover, Jogar | Deixa evidente que a transferência ocorre no fim da varredura |
 | **Fechamento sem Troca (Selection)** | `Consolidar Posição` | Nada a fazer, Pular, Ok | Formaliza que o elemento já estava na posição correta |
-| **O Elemento Fixado** | `Ordenado` ou `Fixado` | Bloqueado, Travado, Seguro | Indica matematicamente que a posição canônica foi atingida |
+| **O Elemento Fixado** | `Consolidado` com selo `OK` | Bloqueado, Travado, Seguro | Indica matematicamente que a posição canônica foi atingida |
 | **A Verificação Local** | `Comparar Vizinhos` | Testar, Checar, Olhar | Reforça a restrição da adjacência física do Bubble Sort |
 | **As Métricas** | `Comparações` e `Trocas` | Clicks, Pontos, Movimentos | Alinha o vocabulário diretamente com a análise de complexidade |
+
+---
+
+## 8. Padrão Unificado de Telas (P2.1-G-A — ADR 0016)
+
+O Sorting Station adota um padrão arquitetural estrito para cada uma de suas 8 tipologias de telas:
+
+### 1. Home Screen (Hub de Protocolos)
+- **Topo:** Cápsula de status da estação (`CENTRAL LOGÍSTICA V2.0`), logotipo com tipografia `Orbitron` e efeitos de neon, subtítulo temático;
+- **Centro (Hub de Protocolos):** Grid/Lista simétrica de cartões para cada algoritmo suportado (`Bubble Sort`, `Selection Sort`, e `Insertion Sort [Em Breve]`). Cada cartão exibe:
+  - Nome formal do protocolo;
+  - Metáfora central (ex.: "Pares Vizinhos", "Scanner de Mínimo");
+  - Indicador de status de progresso (ex.: "3/3 Fases" ou "Novo");
+  - Recorde consolidado (melhor pontuação e menor número de erros);
+  - Ações diretas: "Jogar Campanha", "Modo Desafio" (se elegível), "Tutorial" e "Demonstração".
+- **Rodapé:** Versão do sistema, links institucionais e indicador de conectividade local.
+
+### 2. Briefing Screen (Pre-Training Interface)
+- Implementada via componente orientada a dados [`ProtocolModeBriefingScreen.tsx`](../../src/screens/ProtocolModeBriefingScreen.tsx);
+- **Topo:** Cápsula de status com variante de cor do protocolo, nome do algoritmo e título do modo;
+- **Centro:**
+  - Parágrafo de objetivo de aprendizagem formal;
+  - Grid 2x2 com as 4 regras operacionais fundamentais daquele algoritmo;
+  - Linha de 3 métricas teóricas destacadas (Método, Comparações $C(n)$, Trocas $M(n)$);
+  - Card de particularidades teóricas e analíticas;
+- **Ações:** Botão `[ ◀ VOLTAR ]` e CTA primário `[ INICIAR PROTOCOLO ]`.
+
+### 3. Modo Demonstração (Automated Showcase)
+- Instanciação de reprodução autônoma (reaproveitando a arquitetura do Replay);
+- **Topo:** Barra superior com botão `[ ◀ SAIR DA DEMONSTRAÇÃO ]` e badge `MODO DEMONSTRAÇÃO • AUTOPLAY`;
+- **Centro Superior:** Esteira com caixas animadas e rótulos semânticos (`BoxRole`);
+- **Centro Inferior:** Bloco de pseudocódigo em português com iluminação dinâmica da linha em execução em tempo real;
+- **Rodapé:** Barra de controles temporais (Pausar/Play, Velocidade 1x/2x, Próximo passo, Reiniciar).
+
+### 4. Tutorial Interativo (Guided Hands-on)
+- Baseado em vetor curto curado e determinístico ($n=3$);
+- **Topo:** Barra superior unificada com `[ ◀ VOLTAR ]`, badge central `TUTORIAL INTERATIVO` e `[ ↺ REINICIAR ]`;
+- **Subcabeçalho:** Badge de protocolo e título do micro-passo atual (`stepInfo.title`);
+- **Barra de Telemetria FSM:** Indicadores de fase operacional, ponteiros e contador de erros da sessão;
+- **Esteira:** `NumberedBox` utilizando `BoxRole` semântico, acompanhado da legenda de cores;
+- **Feedback & Dicas:** Card de feedback explicativo com sistema de dicas ativas sob demanda (`[ 💡 DICA ]`);
+- **Controles:** Botoeira contextual com botões travados durante animações.
+
+### 5. Gameplay da Campanha (Interactive Challenge)
+- **Topo:** [`PhaseHeader.tsx`](../../src/components/PhaseHeader.tsx) com nome do protocolo, fase atual ($1/3, 2/3, 3/3$) e status do sistema;
+- **Subcabeçalho:** Badge de modo, título da fase e contadores operacionais factuais;
+- **Banner Relacional Textual:** Linha em destaque explicitando a comparação matemática em execução (ex.: $A[j] < A[\text{minIndex}]$);
+- **Esteira:** Trilhos energizados com suporte a rolagem horizontal (`overflow-x-auto min-w-max`), caixas semânticas `NumberedBox` e legenda de papéis (`BoxRole`);
+- **Barra de Progresso:** Barra contínua de 0% a 100% refletindo o avanço exato de micro-passos algorítmicos;
+- **Painel de Feedback:** [`InstructionPanel.tsx`](../../src/components/InstructionPanel.tsx) posicionado acima da botoeira contextual;
+- **Botoeira Contextual:** Botões de ação derivados estritamente da FSM do algoritmo, com bloqueio mútuo e guarda síncrona;
+- **Rodapé:** Atalho discreto para Dica Pedagógica e Reinício de Turno.
+
+### 6. Result Screen (Resultado Factual e Formativo)
+- **Topo:** Badge com ícone de sucesso e animação sutil de pulso, título da fase concluída;
+- **Centro:** Vetor resultante final consolidado com todos os elementos selados com badge `OK`;
+- **Grade Analítica (2 Colunas):**
+  - *Coluna Esquerda:* Cartão de Pontuação do Protocolo ($100 - 10 \times \text{erros} - 5 \times \text{dicas}$) e lista de métricas factuais da operação (comparações, trocas, erros, dicas, tempo decorrido formatado sem punição);
+  - *Coluna Direita:* Bloco canônico de pseudocódigo com complexidade assintótica teórica;
+- **Ações:** `[ ▶ VER EXECUÇÃO ]` (Replay), `[ ↺ REPETIR FASE ]` e `[ PRÓXIMA FASE → ]` ou `[ CONCLUIR PROTOCOLO ]`.
+
+### 7. Replay Screen (Inspeção Retrospectiva)
+- Modo somente-leitura derivado deterministicamente a partir de `initialArray` e `history` em memória RAM;
+- **Topo:** Barra superior com `[ ◀ VOLTAR AOS RESULTADOS ]`, badge do protocolo e número do quadro ($k / N$);
+- **Centro:** Esteira reconstituindo o estado exato das cargas naquele micro-passo;
+- **Painel de Pseudocódigo:** Destaque em ciano da instrução em execução com isolamento e exibição dos valores concretos das variáveis;
+- **Rodapé:** Barra de controle temporal completo: Quadro Inicial `[ |< ]`, Anterior `[ < ]`, Autoplay `[ ▶ / ⏸ ]`, Próximo `[ > ]`, Último `[ >| ]` e slider interativo.
+
+### 8. Campaign Complete Screen (Homologação da Estação)
+- Componente unificado consumindo os metadados do protocolo;
+- **Topo:** Badge de conclusão geral da central e título em gradiente de celebração;
+- **Centro:** 5 cartões com as métricas globais consolidadas da campanha:
+  1. Fases Concluídas ($3/3$);
+  2. Comparações Totais Acumuladas;
+  3. Trocas / Transferências Totais Acumuladas;
+  4. Decisões Incorretas (Erros Totais);
+  5. Tempo Total Acumulado;
+- **Ações:** `[ ↺ REPETIR PROTOCOLO ]` e `[ ◀ VOLTAR À CENTRAL ]`.
+
+---
+
+## 9. Hierarquia Visual e Semântica de Caixas (`BoxRole`)
+
+Para eliminar qualquer dependência exclusiva de cores (em conformidade com WCAG 2.1 AA), todo `NumberedBox` deve utilizar papéis semânticos explícitos:
+
+| Papel (`BoxRole`) | Borda e Efeito Visual | Badge Textual | Significado Pedagógico |
+| :--- | :--- | :--- | :--- |
+| `default` | Borda azul escuro, repouso | `PKG` | Carga não processada na partição desordenada |
+| `pair` | Borda ciano neon pulsante | `PAR` | Elemento sob inspeção ativa em algoritmos de adjacência (Bubble Sort) |
+| `target` | Borda âmbar industrial | `ALVO` | Posição que aguarda consolidação (Selection Sort) |
+| `min` | Borda roxo neon glow | `MÍN` | Menor carga identificada até o momento (Selection Sort) |
+| `target-min` | Borda âmbar com sombra | `ALVO • MÍN` | Carga que é simultaneamente o alvo da passada e o candidato mínimo |
+| `scan` | Borda ciano com pulso | `SCAN` | Carga sendo avaliada pelo scanner na varredura (Selection Sort) |
+| `scan-min` | Borda ciano/roxo composta | `MÍN • SCAN` | Carga examinada pelo scanner que acabou de se tornar o novo candidato mínimo |
+| `sorted` | Borda esmeralda com glow sutil | `OK` | Carga definitivamente consolidada em sua posição ordenada final (invariante fixa) |
+| `ordered` | Borda esmeralda tracejada/suave | `ORD` | Carga pertencente a partição ordenada provisória, ainda sujeita a deslocamentos (preparação Insertion Sort) |
+

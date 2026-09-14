@@ -243,3 +243,126 @@ Com base exclusivamente nos fatos implementados e no código auditado do reposit
    *Não podemos afirmar* que os usuários acharam a interface intuitiva, envolvente ou motivadora sem dados de escalas de usabilidade (como SUS — *System Usability Scale*) e entrevistas qualitativas.
 5. **Qualquer Conclusão Estatística ou P-Valor:**  
    É terminantemente vedado apresentar médias, desvios-padrão, testes t de Student ou valores de significância estatística ($p < 0.05$) antes da coleta empírica real de dados com turmas experimentais e grupos de controle.
+
+---
+
+## 5. Charter Educacional Oficial do Sorting Station (P2.1-G-A — ADR 0016)
+
+> **Declaração Canônica de Missão:**  
+> *"Sorting Station é um jogo educacional voltado ao ensino de algoritmos de ordenação, articulando visualização cinestésica, prática guiada, execução interativa e reflexão sobre o comportamento algorítmico."*
+
+### Pilares Pedagógicos Inegociáveis:
+1. **Abstração Concreta e Metáfora Coerente:** A memória é representada pelo espaço físico da esteira; os dados numéricos são cargas em trânsito; os algoritmos são protocolos técnicos de operação.
+2. **Fidelidade Mecânica Estrita:** Cada algoritmo deve possuir mecânica interativa própria que materialize suas operações primitivas fundamentais ($C(n)$ e $M(n)$). Proibido reaproveitar superficialmente a mecânica de Bubble Sort para outros algoritmos.
+3. **Ciclo Pedagógico em 6 Camadas:** Todo protocolo deve oferecer:
+   $$\text{Briefing Conceitual} \longrightarrow \text{Demonstração Visual} \longrightarrow \text{Tutorial Guiado} \longrightarrow \text{Gameplay Interativo} \longrightarrow \text{Resultado Factual} \longrightarrow \text{Replay/Reflexão}$$
+4. **Feedback Imediato, Formativo e Não Punitivo:** A tomada de decisão incorreta não causa encerramento prematuro nem reinício forçado; ela paralisa síncronamente a esteira e exibe uma explicação contextual detalhando por que a ação violou a invariante daquele algoritmo.
+5. **Métricas Factuais e Ética Avaliativa (Pontuação do Protocolo):** O desempenho do operador é mensurado oficialmente pela **Pontuação do Protocolo** ($\text{score} = \max(0, 100 - 10 \times \text{erros} - 5 \times \text{dicas})$). O termo "Precisão do Operador" não deve ser empregado como sinônimo de score, pois a utilização de dicas (`hintsUsed`) também o reduz; a métrica factual de decisões incorretas permanece sendo exclusivamente `errors`. Comparações e trocas/transferências são reportadas estritamente como fatos assintóticos inevitáveis daquele algoritmo. O tempo decorrido é puramente descritivo e possui peso zero.
+6. **Conexão Tríade Contínua:** Toda ação física na esteira é espelhada na representação visual dos dados e sincronizada à instrução formal correspondente no pseudocódigo.
+
+---
+
+## 6. Metáfora Central Diegética Congelada
+
+Fica formalmente congelado o universo analógico do Sorting Station no domínio da **Central Logística Espacial/Industrial**:
+
+| Entidade no Jogo | Equivalente em Computação | Regra de Representação |
+| :--- | :--- | :--- |
+| **Estação Logística / Central de Triagem** | Ambiente de Execução / Máquina | Cenário retrofuturista industrial escuro (`#060b1a`), scanlines e iluminação neon ciano/roxo/âmbar. |
+| **Operador de Triagem** | Estudante / Agente de Execução | O usuário que comanda as decisões lógicas nas botoeiras contextuais. |
+| **Carga / Caixa (`NumberedBox`)** | Elemento do Vetor ($A[k]$) | Módulo físico com valor inteiro visível, indicador semântico (`BoxRole`) e identificador ordinal `#k`. |
+| **Esteira de Roletes** | Memória Contígua / Vetor ($A$) | Trilho linear horizontal com roletes mecânicos e suporte a rolagem horizontal sem quebra de linhas. |
+| **Protocolo de Triagem** | Algoritmo de Ordenação | O procedimento matemático adotado (Bubble Sort, Selection Sort, Insertion Sort, etc.). |
+| **Passada da Esteira** | Iteração do Laço Externo | Ciclo completo de varredura ou posicionamento pela esteira. |
+| **Ciclo de Inspecção / Varredura** | Iteração do Laço Interno | Passo individual de comparação entre cargas. |
+| **Permuta / Troca (`SWAP`)** | Troca em Memória ($M(n)$) | Translação física entre duas posições do vetor (adjacente no Bubble; potencialmente de longa distância no Selection; nunca definida genericamente como restrita a vizinhos). |
+| **Manutenção (`KEEP`)** | Salto Condicional sem Troca | Confirmação de que as cargas já estão em ordem relativa, sem mover fisicamente caixas. |
+| **Consolidação Definitiva (`OK` / `FIXO`)** | Fixação da Invariante de Laço | Selo definitivo esmeralda na carga quando atinge sua posição final permanente no vetor ordenado. |
+| **Região Ordenada Provisória (`ORD`)** | Sublista Ordenada Móvel | Posição ordenada na partição atual, porém ainda sujeita a deslocamentos futuros (conceito que prepara formalmente o Insertion Sort). |
+| **Scanner ($j$)** | Ponteiro do Laço Interno | Sensor luminoso que varre a partição desordenada no Selection Sort. |
+| **Candidato Mínimo (`min`)** | Variável Auxiliar `minIndex` | Carga identificada como a menor até o momento na varredura do Selection Sort. |
+| **Alvo ($i$)** | Posição Inicial da Passada | Posição que receberá a menor carga ao término da varredura no Selection Sort. |
+| **Transferência Pontual** | Troca de Longa Distância | Deslocamento único por elevação no Selection Sort entre o alvo e o menor elemento. |
+
+*Regra de Estilo Diegética:* Fica estritamente vetado misturar metáforas concorrentes (jogos de cartas de baralho, estantes de livros, filas de banco ou arquivos de escritório).
+
+---
+
+## 7. Glossário Canônico Controlado de Terminologia
+
+Para erradicar divergências textuais entre telas, código e artigos científicos, estabelece-se a tabela canônica de termos obrigatórios:
+
+| Termo Canônico | Definição no Jogo | Mapeamento Técnico | O que NÃO Usar |
+| :--- | :--- | :--- | :--- |
+| **Protocolo** | Algoritmo de ordenação selecionado. | Algoritmo de Ordenação | Modo genérico, jogo, tipo |
+| **Fase** | Um lote específico de cargas da campanha (Fase 1, 2 ou 3). | Instância de Entrada / Array de Teste | Nível, estágio, mundo, mapa |
+| **Passada** | Uma iteração completa do laço externo pela esteira. | Iteração Externa (*Outer Loop Pass*) | Rodada, turno, corrida |
+| **Comparação** | O teste relacional formal entre dois elementos. | Operação $C(n)$ | Checagem, teste solto |
+| **Permuta / Troca** | Troca física entre duas posições do vetor (adjacente ou de longa distância). | Operação de Escrita $M(n)$ | Inversão, mexida, swap solto |
+| **Manutenção** | Confirmação de não-troca entre elementos avaliados. | Ramo condicional falso | Ignorar, pular, passar |
+| **Consolidação (`OK` / `FIXO`)** | Carga fixada com selo `OK` em sua posição definitiva segundo a invariante. | Invariante de Laço Fixa (*Sorted Boundary*) | Trancamento, congelamento |
+| **Região Ordenada (`ORD`)** | Carga em partição ordenada, mas sujeita a deslocamentos posteriores. | Sublista Ordenada Relativa | Ordenação definitiva |
+| **Carga / Caixa** | Caixa individual numerada na esteira. | Elemento $A[k]$ | Bloco, item, quadrado, ficha |
+| **Pontuação do Protocolo** | Avaliação oficial do desempenho ($100 - 10\times\text{erros} - 5\times\text{dicas}$). | Avaliação Formativa de Desempenho | Precisão do Operador, Score solto |
+| **Dica Pedagógica** | Auxílio contextual que explica a regra sem penalidade arbitrária. | Scaffolding Cognitivo Contextual | Trapaça, ajuda, macete |
+| **Modo Demonstração**| Visualização autônoma da execução com pseudocódigo. | Algorithmic Animation / Showcase | Modo automático, vídeo |
+
+---
+
+## 8. Elementos Educacionais Obrigatórios por Protocolo (Checklist Canônico)
+
+Para que qualquer algoritmo seja considerado formalmente completo no Sorting Station, ele deve cumprir o seguinte checklist de 6 artefatos:
+
+- [ ] **1. Briefing Conceitual:** Tela intermediária desacoplada com objetivo, 4 regras essenciais e destaques assintóticos teóricos;
+- [ ] **2. Modo Demonstração:** Visualização autônoma (autoplay) do algoritmo com animação e pseudocódigo sincronizado em tempo real;
+- [ ] **3. Tutorial Interativo:** Mini-treinamento com vetor curto ($n=3$), passos explicados, botões idênticos ao gameplay e persistência `hasCompletedTutorial`;
+- [ ] **4. Campanha Interativa (Gameplay):** Fases 1 a 3 procedurais crescentes ($n=4, 5, 6$), FSM estrita, botoeira contextual travada e barra de progresso contínua ($0\%$ a $100\%$);
+- [ ] **5. Resultado Factual:** Vetor ordenado com selos `OK`, Pontuação do Protocolo transparente e quadro de métricas operacionais factuais;
+- [ ] **6. Replay e Reflexão:** Modo somente-leitura com controle temporal completo e pseudocódigo estruturado em português sincronizado às variáveis concretas.
+
+---
+
+## 9. Política Canônica de Score, Métricas Factuais e Ética Avaliativa
+
+1. **Pontuação do Protocolo:**
+   $$\text{score} = \max(0, 100 - (\text{erros} \times 10) - (\text{dicas} \times 5))$$
+   - Nome oficial: **Pontuação do Protocolo**. Não usar "Precisão do Operador" como sinônimo de score, pois o uso de dicas (`hintsUsed`) também o reduz; `errors` permanece a métrica factual de decisões incorretas.
+   - Avalia o cumprimento rigoroso das regras do algoritmo, sem penalizar o usuário por comparações e trocas que o algoritmo matematicamente exige.
+2. **Métricas Assintóticas Factuais:**
+   - Comparações ($C(n)$), trocas ($M(n)$) e transferências são fatos computacionais do algoritmo, apresentados para reflexão analítica.
+3. **Tempo de Operação:**
+   - Medido monotonicamente e formatado de maneira neutra (`formatElapsedTime`), com peso estritamente **zero** no score e sem critério de desempate de recordes, prevenindo pressa e ansiedade cognitiva.
+
+---
+
+## 10. Auditoria de Inconsistências Atuais entre Bubble e Selection Sort
+
+| Dimensão Auditada | Bubble Sort (Estado Atual) | Selection Sort (Estado Atual) | Diagnóstico e Ação de Padronização |
+| :--- | :--- | :--- | :--- |
+| **Acesso na Home** | Botão primário "INICIAR TURNO" inicia Bubble sem nome explícito. | Botão secundário "SELECTION SORT" adicionado de forma assimétrica. | **Inconsistente:** Unificar a Home em um Seletor de Protocolos simétrico com cards para cada algoritmo. |
+| **Barra de Navegação do Tutorial** | Sem barra superior unificada; apenas cabeçalho com badges e H1. | Barra superior completa com botão `[ ◀ VOLTAR ]`, badge central e `[ ↺ REINICIAR ]`. | **Inconsistente:** Adicionar a mesma barra superior completa ao `TutorialScreen` do Bubble. |
+| **Semântica de Caixas (`NumberedBox`)** | Usa propriedades legadas `selected` e `sorted` (`BoxRole="pair"` ou `"default"`). | Usa papéis semânticos expressos `BoxRole`: `target`, `min`, `scan`, `sorted`, etc. | **Inconsistente:** Atualizar o Bubble para utilizar os mesmos papéis semânticos `BoxRole` em todas as telas. |
+| **Barra de Telemetria do Gameplay** | Badges textuais de passada e comparação; sem barra gráfica de progresso. | Subcabeçalho completo + Banner de expressão ($A[j] < A[\text{minIndex}]$) + Barra visual contínua 0..100%. | **Inconsistente:** Adicionar barra gráfica contínua de progresso percentual e banner de expressão ao Bubble. |
+| **Posicionamento de Feedback** | `InstructionPanel` posicionado *abaixo* dos botões de ação. | `InstructionPanel` posicionado *acima* dos botões de ação. | **Inconsistente:** Padronizar a ordem visual com o `InstructionPanel` sempre acima da botoeira contextual. |
+| **Telas de Conclusão de Campanha** | `CampaignCompleteScreen.tsx` dedicada. | `SelectionCampaignCompleteScreen.tsx` dedicada (JSX 90% duplicado). | **Duplicação:** Unificar em uma única tela `CampaignCompleteScreen` orientada aos metadados do protocolo. |
+
+---
+
+## 11. Proposta Arquitetural do Modo Demonstração (Showcase)
+
+Para atender ao 6º princípio pedagógico sem inflar o código com novas telas ou motores gráficos, o **Modo Demonstração** será implementado reutilizando a arquitetura estabelecida de **Replay e Pseudocódigo Sincronizado**:
+
+```mermaid
+flowchart TD
+    Home["Home Screen / Briefing Screen"] -->|Clique: 'MODO DEMONSTRAÇÃO'| InitDemo["Gerador de Demonstração"]
+    InitDemo -->|Vetor Curado Ex.: 5, 2, 4, 1| EngineRun["Sorting Engine Autônoma Pura"]
+    EngineRun -->|Gera Histórico Perfeito StepRecord[]| FrameDerivation["buildReplayFrames / buildSelectionReplayFrames"]
+    FrameDerivation -->|Deriva ReplayFrame[] Imutáveis| ReplayView["ReplayScreen / SelectionReplayScreen"]
+    ReplayView -->|Modo Autoplay Ativo + Pseudocódigo Sincronizado| StudentView["Estudante Visualiza o Algoritmo em Execução"]
+```
+
+**Benefícios da Arquitetura de Reuso:**
+- **Zero Linhas de Duplicação Gráfica:** A esteira de caixas, a barra de controle temporal e o painel de pseudocódigo sincronizado já estão prontos e validados com testes unitários;
+- **Controle Total pelo Aluno:** O estudante pode pausar, retroceder passo a passo ou acelerar a demonstração;
+- **Sincronia Absoluta:** O mesmo código que anima a esteira destaca a linha de pseudocódigo exata correspondente àquela ação.
+

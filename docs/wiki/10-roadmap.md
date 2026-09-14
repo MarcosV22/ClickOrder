@@ -247,6 +247,19 @@ O objetivo central do nível P0 é converter o atual "puzzle de trocas livres" e
 
 ---
 
+### P2.1-G. Auditoria, Padronização Educacional e Harmonização Transversal de Telas
+- **Objetivo:** Estabelecer a base canônica de padronização pedagógica, terminológica e visual do produto antes da expansão para novos algoritmos (Insertion Sort), assegurando que o Sorting Station seja formalmente governado como um Jogo Educacional.
+- **Sub-marcos:**
+  - `P2.1-G-A`: **Auditoria e Padronização Educacional** (Charter Educacional oficial, congelamento da metáfora logística, 6 elementos pedagógicos obrigatórios por protocolo, política ética de score e métricas factuais, padrão conceitual das 8 telas, glossário canônico controlado, auditoria comparativa de inconsistências Bubble vs Selection, proposta arquitetural do Modo Demonstração sem duplicação de componentes, plano incremental de refatoração e ADR 0016). `IMPLEMENTADO` (2026-09-14 via ADR 0016).
+  - `P2.1-G-B`: **Harmonização Visual e de Layout de Telas** (Alinhar tutorial e gameplay do Bubble com barra superior, barra de status, progresso contínuo 0..100%, banner de comparação relacional, unificar telas de encerramento da campanha). `PLANEJADO`.
+  - `P2.1-G-C`: **Hub Simétrico de Protocolos na Home Screen** (Cards simétricos para Bubble, Selection e Insertion [Em Breve], atalhos diretos para campanhas, tutoriais e demonstrações). `PLANEJADO`.
+  - `P2.1-G-D`: **Institucionalização do Modo Demonstração** (Conectar simulações autônomas ideais à esteira de Replay em modo autoplay a partir da Home e dos Briefings). `PLANEJADO`.
+- **Valor para o Aluno:** Coerência cognitiva e visual entre diferentes algoritmos, eliminação de atritos de interface e garantia de scaffolding didático completo em toda a plataforma.
+- **Dependências:** P2.1-F, ADR 0016.
+- **Status:** `EM ANDAMENTO` (`P2.1-G-A` concluído; `P2.1-G-B/C/D` planejados antes de P2.2).
+
+---
+
 ### P2.2. Protocolo Insertion Sort: "Desvio e Encaixe de Cargas"
 - **Objetivo:** Criar a engine e a tela do Insertion Sort. O jogador eleva uma carga da partição desordenada para um trilho superior e desloca os elementos maiores da partição já ordenada para abrir a vaga de inserção correta.
 - **Valor para o Aluno:** Assimilação táctil do conceito de subvetor incremental ordenado e deslocamento em cascata.

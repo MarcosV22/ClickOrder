@@ -89,7 +89,7 @@ export default function ResultScreen({
                   ? `PROTOCOLO SELECTION — FASE ${phase} CONCLUÍDA`
                   : isEarlyExit
                     ? `MODO DESAFIO — CENÁRIO ${phase} CONCLUÍDO`
-                    : `FASE ${phase} CONCLUÍDA`}
+                    : `PROTOCOLO BUBBLE — FASE ${phase} CONCLUÍDA`}
               </span>
             </div>
             <h2
@@ -135,9 +135,8 @@ export default function ResultScreen({
                   key={index}
                   value={value}
                   index={index}
-                  selected={false}
+                  role="sorted"
                   disabled={false}
-                  sorted={true}
                   onClick={() => {}}
                   size="md"
                 />
@@ -221,7 +220,11 @@ export default function ResultScreen({
                         color: "text-cyan-300",
                       },
                     ]),
-                { label: "Trocas", value: String(swaps), color: "text-purple-400" },
+                {
+                  label: isSelection ? "Transferências (Trocas)" : "Trocas",
+                  value: String(swaps),
+                  color: isSelection ? "text-purple-300" : "text-purple-400",
+                },
                 {
                   label: "Decisões Incorretas",
                   value: String(errors),
@@ -318,6 +321,17 @@ export default function ResultScreen({
                 </p>
                 <p className="text-[11px] text-white/60 leading-relaxed font-mono">
                   O algoritmo particiona a esteira: a sublista ordenada à esquerda e a desordenada à direita. O scanner inspeciona cada carga para localizar o menor item e, apenas no final da varredura, uma transferência pontual consolida a posição definitiva com o selo OK.
+                </p>
+              </div>
+            )}
+
+            {!isSelection && !isEarlyExit && (
+              <div className="p-3.5 rounded-lg bg-cyan-950/30 border border-cyan-500/20 flex flex-col gap-2 mt-1">
+                <p className="text-xs text-cyan-200/90 leading-relaxed font-mono font-bold">
+                  Bubble Sort propaga o maior elemento a cada passada por comparações adjacentes.
+                </p>
+                <p className="text-[11px] text-white/60 leading-relaxed font-mono">
+                  O algoritmo percorre a esteira comparando pares vizinhos: se o elemento da esquerda for maior, realiza uma troca física adjacente. Ao fim de cada passada, a maior carga da varredura atinge sua posição definitiva consolidada com o selo OK.
                 </p>
               </div>
             )}
