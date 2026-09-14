@@ -34,6 +34,7 @@ flowchart TD
         App -- "screen === 'selection-game'" --> SelectionGameScreen["src/screens/SelectionGameScreen.tsx"]
         App -- "screen === 'result'" --> ResultScreen["src/screens/ResultScreen.tsx"]
         App -- "screen === 'replay'" --> ReplayScreen["src/screens/ReplayScreen.tsx"]
+        App -- "screen === 'selection-replay'" --> SelectionReplayScreen["src/screens/SelectionReplayScreen.tsx"]
         App -- "screen === 'campaign-complete'" --> CampaignCompleteScreen["src/screens/CampaignCompleteScreen.tsx"]
         App -- "screen === 'selection-campaign-complete'" --> SelectionCampaignCompleteScreen["src/screens/SelectionCampaignCompleteScreen.tsx"]
     end
@@ -47,19 +48,21 @@ flowchart TD
         BriefingScreen -- "onStart() [selection-canonical (sem tutorial)]" --> AppSelectionTut["setScreen('selection-tutorial')"]
         BriefingScreen -- "onStart() [selection-canonical (com tutorial)]" --> AppSelectionGame["generateSelectionPhaseArray(1)\nsetScreen('selection-game')"]
         BriefingScreen -- "onBack()" --> AppHome["setScreen('home')"]
-        SelectionTutorialScreen -- "onComplete()" --> AppSelectionTutComplete["setHasCompletedSelectionTutorial(true)\ngenerateSelectionPhaseArray(1)\nsetScreen('selection-game')"]
+        SelectionTutorialScreen -- "onComplete()" --> AppSelectionTutComplete["recordTutorialCompletion(saveData, 'selection')\ngenerateSelectionPhaseArray(1)\nsetScreen('selection-game')"]
         SelectionTutorialScreen -- "onBack()" --> AppHome2["setScreen('home')"]
         TutorialScreen -- "onBack()" --> AppHome
         TutorialScreen -- "onUnderstood()" --> AppGame
         
-        GameScreen -- "onComplete(...)" --> AppResult["setResult({...})\nsetScreen('result')"]
-        SelectionGameScreen -- "onComplete(...)" --> AppResultSel["setResult({protocol: 'selection', ...})\nsetScreen('result')"]
+        GameScreen -- "onComplete(...)" --> AppResult["recordPhaseCompletion(saveData, 'bubble', ...)\nsetResult({...})\nsetScreen('result')"]
+        SelectionGameScreen -- "onComplete(...)" --> AppResultSel["recordPhaseCompletion(saveData, 'selection', ...)\nsetResult({protocol: 'selection', ...})\nsetScreen('result')"]
         ResultScreen -- "onRepeat() [Bubble]" --> AppRepeat["setResult(null)\nsetScreen('game')"]
         ResultScreen -- "onRepeat() [Selection]" --> AppRepeatSel["setResult(null)\nsetScreen('selection-game')"]
         ResultScreen -- "onNext() [Bubble]" --> AppNext["setPhase(min(phase+1, 3))\nsetResult(null)\nsetScreen('game')"]
         ResultScreen -- "onNext() [Selection]" --> AppNextSel["generateSelectionPhaseArray(phase+1)\nsetScreen('selection-game') | 'selection-campaign-complete'"]
-        ResultScreen -- "onViewReplay()" --> AppReplay["setScreen('replay')"]
+        ResultScreen -- "onViewReplay() [Bubble]" --> AppReplay["setScreen('replay')"]
+        ResultScreen -- "onViewReplay() [Selection]" --> AppReplaySel["setScreen('selection-replay')"]
         ReplayScreen -- "onBackToResult()" --> AppResultBack["setScreen('result')"]
+        SelectionReplayScreen -- "onBackToResult()" --> AppResultBackSel["setScreen('result')"]
         SelectionCampaignCompleteScreen -- "onReturnHome()" --> AppHome
         SelectionCampaignCompleteScreen -- "onRestartProtocol()" --> AppRestartSel["generateSelectionPhaseArray(1)\nsetScreen('selection-game')"]
     end
@@ -81,6 +84,9 @@ flowchart TD
         ReplayScreen --> NumberedBox
         ReplayScreen --> GameButton
         ReplayScreen --> BubbleSortPseudocodePanel["BubbleSortPseudocodePanel.tsx"]
+        SelectionReplayScreen --> NumberedBox
+        SelectionReplayScreen --> GameButton
+        SelectionReplayScreen --> SelectionSortPseudocodePanel["SelectionSortPseudocodePanel.tsx"]
     end
 ```
 

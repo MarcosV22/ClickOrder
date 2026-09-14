@@ -228,6 +228,12 @@ Usuários com sensibilidade vestibular devem ter animações de esteira e transl
 ### 9. Acessibilidade Cromática e Redundância Sensorial
 Nenhum estado crítico do sistema pode depender exclusivamente de variações de cor. Todo estado (selecionado, ordenado, erro) deve ser corroborado por um **ícone específico**, uma **etiqueta textual explícita** e uma **textura ou borda diferenciada**.
 
+### 10. Responsividade Desktop e Regra de Layout para Telas Longas
+Telas com conteúdo vertical extenso (como briefings de protocolo, tutoriais guiados, relatórios de resultado e homologações de campanha) devem ser projetadas prioritariamente para caber ou rolar naturalmente em resoluções de desktop (1366x768, 1600x900 e 1920x1080):
+- **Alinhamento ao Topo (`justify-start`):** O contêiner com rolagem deve alinhar seus itens ao topo (`justify-start`), nunca ao centro (`justify-center`) ou com margens automáticas verticais (`my-auto`). A centralização em contêineres de scroll que transbordam empurra a porção superior para coordenadas negativas ($y < 0$), tornando títulos e crachás permanentemente inalcançáveis pelo usuário;
+- **Buffer de Acessibilidade no Rodapé (`pb-16` / `pb-24`):** A área de ações com botões `VOLTAR` e CTA principal deve dispor de padding inferior estrutural amplo, assegurando que as ações fundamentais nunca fiquem coladas na margem do navegador ou cortadas pela base da janela;
+- **Densidade Visual Equilibrada:** Gaps verticais compactos (`gap-4 sm:gap-5`), tipografia proporcional e paddings internos comedidos preservam a estética e solenidade de terminal sci-fi sem esticar o layout além do necessário.
+
 ---
 
 ## 7. Vocabulário Padronizado da Interface

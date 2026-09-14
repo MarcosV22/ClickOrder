@@ -497,9 +497,45 @@ A engine é puramente funcional, imutável e desacoplada de React, DOM, estilos 
   - Resultados retidos exclusivamente na memória da sessão (`selectionResults`), sem violar ou alterar o Schema v2 no `localStorage`;
 - **Testes Automatizados:** 19 testes unitários e de integração em `selectionCampaign.test.ts`, totalizando 229 testes aprovados no Vitest.
 
-### 1.6. Próximos Passos: Replay e Persistência Schema v3 (P2.1-E e P2.1-F) `[PLANEJADOS]`
-- **P2.1-E (Replay & Pseudocódigo Sincronizado):** Mapeamento de quadros derivados de `SelectionStepRecord` e iluminação sincronizada das linhas do algoritmo Selection Sort;
-- **P2.1-F (Persistência Schema v3):** Evolução do schema no `localStorage` com suporte retrocompatível a recordes e fases desbloqueadas do Selection Sort.
+### 1.6. Replay e Pseudocódigo Sincronizado do Selection Sort — P2.1-E / ADR 0014 `[IMPLEMENTADO]`
+- **`selectionReplayModel.ts`:** Módulo funcional desacoplado para derivação pura e estritamente imutável de quadros de replay:
+  - Função pura `buildSelectionReplayFrames(initialArray, history)`: consome estritamente o `initialArray` e o `history: readonly SelectionStepRecord[]` registrado durante a partida, sem reexecutar o algoritmo de ordenação;
+  - **Invariante de Não-Proliferação:** Gera exatamente $1 + \text{history.length}$ quadros (`frames.length === history.length + 1`), sem introdução de frames fantasmas ou redundantes;
+  - **Quadro 0 (`INITIAL`):** Vetor original congelado antes da primeira intervenção do scanner;
+  - **Quadros de Inspeção (`INSPECTION`):** Mapeamento 1:1 de passos de varredura registrando $i$ (alvo), $j$ (scan), $minIndex$ (menor candidato), `isNewMin` (booleano de atualização), valores e comparação matemática formativa ($A[j] < A[minIndex]$);
+  - **Quadros de Confirmação (`COMMIT`):** Mapeamento 1:1 de consolidações procedimentais registrando `didSwap` ($minIndex \neq i$), valores pós-troca e ampliação da fronteira ordenada `sortedIndices`;
+- **`selectionReplayPseudocode.ts`:** Mapeamento determinístico de pseudocódigo canônico de 13 instruções estruturadas em português:
+  - Tabela canônica congelada `SELECTION_SORT_PSEUDOCODE`:
+    1. `procedimento selectionSort(A)`
+    2. `para i de 0 até n - 2 faça`
+    3. `minIndex ← i`
+    4. `para j de i + 1 até n - 1 faça`
+    5. `se A[j] < A[minIndex] então`
+    6. `minIndex ← j`
+    7. `fim se`
+    8. `fim para`
+    9. `se minIndex ≠ i então`
+    10. `trocar A[i] e A[minIndex]`
+    11. `fim se`
+    12. `fim para`
+    13. `fim procedimento`
+  - Função pura `getSelectionPseudocodeHighlight(frame)` com isolamento do `concreteContext`:
+    - `INIT_MIN`: ativa na primeira inspeção de cada passada ($j = i + 1$);
+    - `IF_CONDITION`: avaliada formalmente como `VERDADEIRO` ou `FALSO` em cada frame de inspeção;
+    - `UPDATE_MIN`: destaque primário luminoso (`bg-cyan-950/50 text-cyan-200`) quando `isNewMin: true`;
+    - `CHECK_SWAP`: avaliada no commit como `VERDADEIRO` ($minIndex \neq i$) ou `FALSO` ($minIndex = i$);
+    - `SWAP_STATEMENT`: destaque primário luminoso (`bg-purple-950/50 text-purple-200`) quando `didSwap: true`;
+- **Teste Canônico Obrigatório `[4, 1, 3]`:**
+  - Quadro 0: `INITIAL` `[4, 1, 3]`
+  - Quadro 1: `INSPECTION` `1 < 4: NOVO MÍNIMO` (alvo=0, scan=1, min=1)
+  - Quadro 2: `INSPECTION` `3 < 1: MANTER CANDIDATO` (alvo=0, scan=2, min=1)
+  - Quadro 3: `COMMIT` `TRANSFERÊNCIA (SWAP)` $\rightarrow$ `[1, 4, 3]` (ordenados=[0])
+  - Quadro 4: `INSPECTION` `3 < 4: NOVO MÍNIMO` (alvo=1, scan=2, min=2)
+  - Quadro 5: `COMMIT` `TRANSFERÊNCIA (SWAP)` $\rightarrow$ `[1, 3, 4]` (ordenados=[0, 1, 2])
+- **Testes Automatizados:** 17 novos testes unitários puros (`selectionReplayModel.test.ts` e `selectionReplayPseudocode.test.ts`), totalizando 246 testes aprovados no Vitest.
+
+### 1.7. Próximo Passo: Persistência Multi-Protocolo Schema v3 (P2.1-F) `[PLANEJADO]`
+- **P2.1-F (Persistência Schema v3):** Evolução do schema no `localStorage` com suporte retrocompatível a recordes e fases desbloqueadas do Selection Sort sem sobrescrever o histórico do Bubble Sort.
 
 ---
 

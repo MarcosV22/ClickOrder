@@ -5,6 +5,7 @@ import GameScreen from "./screens/GameScreen";
 import ResultScreen from "./screens/ResultScreen";
 import CampaignCompleteScreen from "./screens/CampaignCompleteScreen";
 import ReplayScreen from "./screens/ReplayScreen";
+import SelectionReplayScreen from "./screens/SelectionReplayScreen";
 import ProtocolModeBriefingScreen from "./screens/ProtocolModeBriefingScreen";
 import SelectionTutorialScreen from "./screens/SelectionTutorialScreen";
 import SelectionGameScreen, {
@@ -84,7 +85,7 @@ export type GameResult = BubbleGameResult | SelectionGameResult;
 
 export default function App() {
   const [saveData, setSaveData] = useState<GameSaveSchema>(() =>
-    loadGameProgress(undefined, TOTAL_PHASES)
+    loadGameProgress(undefined, TOTAL_PHASES, SELECTION_TOTAL_PHASES)
   );
   const [gameMode, setGameMode] = useState<GameMode>("CAMPAIGN");
   const [briefingModeId, setBriefingModeId] =
@@ -102,9 +103,7 @@ export default function App() {
   const [campaignSeed, setCampaignSeed] = useState<SeedInput>(() => "");
   const [phaseResults, setPhaseResults] = useState<PhaseResult[]>([]);
 
-  // Estado da Campanha Selection Sort (Em memória na sessão, preservando Schema v2 intacto)
-  const [hasCompletedSelectionTutorial, setHasCompletedSelectionTutorial] =
-    useState<boolean>(false);
+  // Estado da Campanha Selection Sort (Persistência multi-protocolo Schema v3)
   const [selectionPhase, setSelectionPhase] = useState<number>(1);
   const [selectionArray, setSelectionArray] = useState<readonly number[]>(() =>
     generateSelectionPhaseArray(1).values
@@ -137,6 +136,7 @@ export default function App() {
 
       const updated = recordPhaseCompletion(
         saveData,
+        "bubble",
         phase,
         TOTAL_PHASES,
         undefined,
@@ -154,7 +154,7 @@ export default function App() {
   };
 
   // --------------------------------------------------------------------------
-  // Conclusão de Fase do Selection Sort
+  // Conclusão de Fase do Selection Sort (Persistência Multi-Protocolo P2.1-F)
   // --------------------------------------------------------------------------
   const handleSelectionComplete = (data: SelectionPhaseCompleteData) => {
     setResult({
@@ -181,12 +181,28 @@ export default function App() {
       ].sort((a, b) => a.phase - b.phase);
     });
 
+    const updated = recordPhaseCompletion(
+      saveData,
+      "selection",
+      selectionPhase,
+      SELECTION_TOTAL_PHASES,
+      undefined,
+      {
+        score: data.score,
+        errors: data.errors,
+        hintsUsed: data.hintsUsed,
+        elapsedTimeMs: data.elapsedTimeMs,
+      }
+    );
+    setSaveData(updated);
+
     setScreen("result");
   };
 
   const handleTutorialUnderstood = () => {
     const updated = recordTutorialCompletion(
       saveData,
+      "bubble",
       undefined,
       TOTAL_PHASES
     );
@@ -201,7 +217,13 @@ export default function App() {
   };
 
   const handleSelectionTutorialComplete = () => {
-    setHasCompletedSelectionTutorial(true);
+    const updated = recordTutorialCompletion(
+      saveData,
+      "selection",
+      undefined,
+      SELECTION_TOTAL_PHASES
+    );
+    setSaveData(updated);
     const gen = generateSelectionPhaseArray(1);
     setSelectionArray(gen.values);
     setSelectionSeed(gen.seed);
@@ -210,6 +232,7 @@ export default function App() {
     setResult(null);
     setScreen("selection-game");
   };
+
 
   const handleNextPhase = () => {
     // Fluxo Selection Sort
@@ -293,7 +316,7 @@ export default function App() {
 
   const handleBriefingStart = () => {
     if (briefingModeId === "selection-canonical") {
-      if (!hasCompletedSelectionTutorial) {
+      if (!saveData.protocols.selection.hasCompletedTutorial) {
         setScreen("selection-tutorial");
       } else {
         const gen = generateSelectionPhaseArray(1);
@@ -449,24 +472,31 @@ export default function App() {
           protocol={result.protocol}
           onNext={handleNextPhase}
           onRepeat={handleRepeat}
-          onViewReplay={
-            result.protocol === "bubble" ? () => setScreen("replay") : undefined
-          }
+          onViewReplay={() => setScreen("replay")}
           variant={result.protocol === "bubble" ? (result.variant ?? activeVariant) : undefined}
           earlyExitTriggered={result.protocol === "bubble" ? result.earlyExitTriggered : undefined}
           terminationPass={result.protocol === "bubble" ? result.terminationPass : undefined}
           canonicalComparisons={canonicalComparisons}
         />
       )}
-      {screen === "replay" && result && result.protocol === "bubble" && (
-        <ReplayScreen
-          initialArray={result.initialArray}
-          history={result.history}
-          phase={currentPhase}
-          variant={result.variant ?? activeVariant}
-          earlyExitTriggered={result.earlyExitTriggered}
-          onBackToResult={() => setScreen("result")}
-        />
+      {screen === "replay" && result && (
+        result.protocol === "selection" ? (
+          <SelectionReplayScreen
+            initialArray={result.initialArray}
+            history={result.history}
+            phase={currentPhase}
+            onBackToResult={() => setScreen("result")}
+          />
+        ) : (
+          <ReplayScreen
+            initialArray={result.initialArray}
+            history={result.history}
+            phase={currentPhase}
+            variant={result.variant ?? activeVariant}
+            earlyExitTriggered={result.earlyExitTriggered}
+            onBackToResult={() => setScreen("result")}
+          />
+        )
       )}
       {screen === "campaign-complete" && (
         <CampaignCompleteScreen

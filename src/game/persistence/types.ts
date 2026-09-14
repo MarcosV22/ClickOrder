@@ -1,8 +1,17 @@
-import { CURRENT_SCHEMA_VERSION, DEFAULT_MAX_PHASES } from "./constants";
+import {
+  CURRENT_SCHEMA_VERSION,
+  DEFAULT_MAX_PHASES,
+  SELECTION_MAX_PHASES,
+} from "./constants";
+
+/**
+ * Protocolos de ordenação oficialmente suportados pela estação logística.
+ */
+export type SupportedProtocol = "bubble" | "selection";
 
 /**
  * Registro factual da conclusão de uma fase individual.
- * No schema v2, armazena opcionalmente os dados da execução de melhor pontuação.
+ * Armazena a conclusão factual e opcionalmente as métricas da rodada de melhor pontuação.
  */
 export interface PhaseRecord {
   readonly completed: boolean;
@@ -24,16 +33,23 @@ export interface PhaseScoreData {
 }
 
 /**
- * Progresso persistente de longo prazo da campanha.
+ * Progresso persistente factual por protocolo individual.
+ * Separação estrita: as fases 1, 2 e 3 do Bubble não colidem com as fases 1, 2 e 3 do Selection.
  */
-export interface CampaignSaveData {
+export interface ProtocolProgress {
   readonly unlockedPhases: number;
   readonly highestPhaseReached: number;
   readonly hasCompletedTutorial: boolean;
+  readonly records: Record<number, PhaseRecord>;
 }
 
 /**
- * Preferências locais do operador da estação.
+ * Alias de retrocompatibilidade para o formato legado de campanha.
+ */
+export type CampaignSaveData = ProtocolProgress;
+
+/**
+ * Preferências locais do operador da estação (globais entre todos os protocolos).
  */
 export interface PreferencesSaveData {
   readonly soundEnabled: boolean;
@@ -42,14 +58,21 @@ export interface PreferencesSaveData {
 }
 
 /**
- * Schema canônico e versionado do salvamento local (v2).
+ * Schema canônico e versionado do salvamento local (v3 Multi-Protocolo).
  */
 export interface GameSaveSchema {
   readonly schemaVersion: number;
   readonly lastUpdated: string;
-  readonly campaign: CampaignSaveData;
-  readonly records: Record<number, PhaseRecord>;
+  readonly protocols: {
+    readonly bubble: ProtocolProgress;
+    readonly selection: ProtocolProgress;
+  };
   readonly preferences: PreferencesSaveData;
+  /**
+   * @deprecated Aliases de conveniência apontando para protocols.bubble para retrocompatibilidade
+   */
+  readonly campaign: ProtocolProgress;
+  readonly records: Record<number, PhaseRecord>;
 }
 
 /**
@@ -72,22 +95,43 @@ export interface SaveOperationResult {
 }
 
 /**
- * Retorna o estado de salvamento padrão, imutável e válido para novas instalações.
+ * Retorna o progresso padrão inicial e imutável para um protocolo.
  */
-export function createDefaultSaveData(maxPhases: number = DEFAULT_MAX_PHASES): GameSaveSchema {
+export function createDefaultProtocolProgress(
+  maxPhases: number = DEFAULT_MAX_PHASES
+): ProtocolProgress {
+  return Object.freeze({
+    unlockedPhases: Math.min(1, maxPhases),
+    highestPhaseReached: Math.min(1, maxPhases),
+    hasCompletedTutorial: false,
+    records: Object.freeze({}),
+  });
+}
+
+/**
+ * Retorna o estado de salvamento padrão, imutável e válido para novas instalações (Schema v3).
+ */
+export function createDefaultSaveData(
+  bubbleMaxPhases: number = DEFAULT_MAX_PHASES,
+  selectionMaxPhases: number = SELECTION_MAX_PHASES
+): GameSaveSchema {
+  const bubble = createDefaultProtocolProgress(bubbleMaxPhases);
+  const selection = createDefaultProtocolProgress(selectionMaxPhases);
+
   return Object.freeze({
     schemaVersion: CURRENT_SCHEMA_VERSION,
     lastUpdated: new Date().toISOString(),
-    campaign: Object.freeze({
-      unlockedPhases: Math.min(1, maxPhases),
-      highestPhaseReached: Math.min(1, maxPhases),
-      hasCompletedTutorial: false,
+    protocols: Object.freeze({
+      bubble,
+      selection,
     }),
-    records: Object.freeze({}),
     preferences: Object.freeze({
       soundEnabled: true,
       reducedMotion: false,
       highContrast: false,
     }),
+    campaign: bubble,
+    records: bubble.records,
   });
 }
+

@@ -46,7 +46,7 @@ export default function HomeScreen({
   onStartSelection,
 }: HomeScreenProps) {
   return (
-    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start sm:justify-center py-8">
+    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-8 sm:pt-12 pb-16 sm:pb-20 px-4">
       {/* Animated belt CSS */}
       <style>{`
         @keyframes scroll-belt {
@@ -68,7 +68,7 @@ export default function HomeScreen({
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-500/5 rounded-full blur-[80px] pointer-events-none" />
 
       {/* Center card */}
-      <div className="relative z-10 flex flex-col items-center gap-8 max-w-xl w-full px-8">
+      <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8 max-w-xl w-full px-4 sm:px-8">
 
         {/* Top badge */}
         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-950/30">
@@ -84,7 +84,7 @@ export default function HomeScreen({
         {/* Title */}
         <div className="text-center">
           <h1
-            className="text-6xl font-black tracking-tighter text-white leading-none mb-2"
+            className="text-5xl sm:text-6xl font-black tracking-tighter text-white leading-none mb-2"
             style={{ fontFamily: "'Orbitron', sans-serif" }}
           >
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400"

@@ -36,8 +36,8 @@ export type PseudocodeLineId =
   | "BREAK_STATEMENT"
   | "END_IF_EXIT";
 
-export interface PseudocodeLine {
-  readonly id: PseudocodeLineId;
+export interface PseudocodeLine<T extends string = PseudocodeLineId> {
+  readonly id: T;
   readonly lineNumber: number;
   readonly indent: number;
   readonly text: string;

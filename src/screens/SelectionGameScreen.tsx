@@ -401,7 +401,7 @@ export default function SelectionGameScreen({
   };
 
   return (
-    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-between py-4 px-2 sm:px-6">
+    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-3 sm:pt-4 pb-12 sm:pb-16 px-2 sm:px-6">
       {/* Glow effects */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[250px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-60 h-60 bg-cyan-500/10 rounded-full blur-[90px] pointer-events-none" />
@@ -413,7 +413,7 @@ export default function SelectionGameScreen({
         totalPhases={totalPhases}
       />
 
-      <div className="relative z-10 flex flex-col items-center gap-4 max-w-4xl w-full my-auto py-2">
+      <div className="relative z-10 flex flex-col items-center gap-3 sm:gap-4 max-w-4xl w-full my-0 py-2">
         {/* Subheader: pass & comparison info */}
         <div className="w-full flex flex-wrap items-center justify-between gap-2 px-2">
           <div className="flex items-center gap-2">
@@ -689,7 +689,7 @@ export default function SelectionGameScreen({
       </div>
 
       {/* Bottom status & stats summary */}
-      <div className="w-full flex items-center justify-between px-2 pt-2 border-t border-white/5">
+      <div className="w-full max-w-4xl flex items-center justify-between px-2 pt-3 mt-4 border-t border-white/5 shrink-0">
         <StatsPanel
           comparisons={gameState.comparisons}
           swaps={gameState.swaps}

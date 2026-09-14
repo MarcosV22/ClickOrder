@@ -19,7 +19,7 @@ export default function SelectionCampaignCompleteScreen({
 
   return (
     <main
-      className="relative w-full h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start sm:justify-center p-4 sm:p-8"
+      className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-8 pb-16 sm:pb-24 px-4 sm:px-8"
       aria-label="Tela de Conclusão do Protocolo Selection Sort"
     >
       {/* Glow effects */}
@@ -27,7 +27,7 @@ export default function SelectionCampaignCompleteScreen({
       <div className="absolute bottom-1/4 left-1/4 w-72 h-72 bg-cyan-500/10 rounded-full blur-[90px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-emerald-500/10 rounded-full blur-[90px] pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col items-center gap-6 max-w-4xl w-full my-auto">
+      <div className="relative z-10 flex flex-col items-center gap-5 sm:gap-6 max-w-4xl w-full my-0">
         {/* Top status badge */}
         <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-purple-500/30 bg-purple-950/40">
           <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
@@ -255,7 +255,7 @@ export default function SelectionCampaignCompleteScreen({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 w-full pt-2 pb-2">
           <GameButton
             onClick={onReturnHome}
             variant="secondary"

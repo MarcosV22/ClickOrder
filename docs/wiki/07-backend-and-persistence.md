@@ -54,9 +54,9 @@ A arquitetura separa estritamente duas categorias de estado:
 
 ---
 
-# PARTE 2 — PERSISTÊNCIA LOCAL IMPLEMENTADA `[IMPLEMENTADO - P1.6]` (ADR 0006)
+# PARTE 2 — PERSISTÊNCIA LOCAL MULTI-PROTOCOLO IMPLEMENTADA `[IMPLEMENTADO - P2.1-F]` (ADR 0006, ADR 0007, ADR 0015)
 
-Conforme deliberado no [ADR 0006](../../docs/adr/0006-decoupled-local-storage-persistence.md), a persistência local opera com isolamento total dos componentes React, garantindo resiliência defensiva e conformidade pedagógica.
+Conforme deliberado nos [ADR 0006](../../docs/adr/0006-decoupled-local-storage-persistence.md), [ADR 0007](../../docs/adr/0007-protocol-score-and-descriptive-elapsed-time.md) e [ADR 0015](../../docs/adr/0015-multi-protocol-persistence-schema-v3.md), a persistência local opera com isolamento total dos componentes React, garantindo resiliência defensiva, suporte multi-protocolo e conformidade pedagógica.
 
 ---
 
@@ -64,31 +64,33 @@ Conforme deliberado no [ADR 0006](../../docs/adr/0006-decoupled-local-storage-pe
 
 | Categoria | Dado | Persistido? | Justificativa Arquitetural |
 | :--- | :--- | :---: | :--- |
-| **Campanha** | `unlockedPhases` | **SIM** | Registra o nível de fases desbloqueadas pelo operador para fins de progressão e futuros seletores. Limitado estritamente por `PHASES.length` (3). Não altera a fase inicial da sessão (novo turno sempre inicia na Fase 1). |
-| **Campanha** | `highestPhaseReached` | **SIM** | Registra a maior fase alcançada pelo operador na campanha histórica (progresso/desbloqueio). Não determina a fase ativa da sessão (uma nova sessão sempre inicia na Fase 1). |
-| **Campanha** | `hasCompletedTutorial` | **SIM** | Evita forçar a leitura do tutorial toda vez que o operador clica em "INICIAR TURNO". O tutorial permanece acessível a qualquer momento via "COMO JOGAR". |
-| **Recordes** | `records[phase].completed` | **SIM** | Registro factual booleano de conclusão da fase. |
-| **Recordes** | `records[phase].completedAt` | **SIM** | Timestamp ISO 8601 da conclusão mais recente. |
-| **Recordes (v2)** | `records[phase].bestScore` | **SIM** | Melhor pontuação obtida na fase (0 a 100), conforme fórmula do P1.7. |
-| **Recordes (v2)** | `records[phase].bestScoreErrors` | **SIM** | Decisões incorretas cometidas na execução da melhor pontuação. |
-| **Recordes (v2)** | `records[phase].bestScoreHintsUsed` | **SIM** | Dicas utilizadas na execução da melhor pontuação. |
-| **Recordes (v2)** | `records[phase].bestScoreElapsedTimeMs` | **SIM** | Duração factual da execução da melhor pontuação (não utilizado em desempate). |
-| **Preferências** | `soundEnabled`, `reducedMotion`, `highContrast` | **SIM** | Configurações de acessibilidade e áudio do operador. |
-| **Metadados** | `schemaVersion`, `lastUpdated` | **SIM** | Versionamento canônico (v2 em P1.7) e data da última alteração de estado. |
+| **Protocolo (Bubble/Selection)** | `unlockedPhases` | **SIM** | Registra o nível de fases desbloqueadas pelo operador no protocolo em questão (1 a 3). Não altera a fase inicial da sessão (novo turno sempre inicia na Fase 1). |
+| **Protocolo (Bubble/Selection)** | `highestPhaseReached` | **SIM** | Registra a maior fase alcançada pelo operador na campanha histórica daquele protocolo. Não determina a fase ativa da sessão. |
+| **Protocolo (Bubble/Selection)** | `hasCompletedTutorial` | **SIM** | Evita forçar a leitura do tutorial toda vez que o operador clica em "INICIAR TURNO". O tutorial permanece acessível a qualquer momento via "COMO JOGAR". Resiste a F5. |
+| **Recordes por Fase** | `records[phase].completed` | **SIM** | Registro factual booleano de conclusão da fase dentro do protocolo correspondente. |
+| **Recordes por Fase** | `records[phase].completedAt` | **SIM** | Timestamp ISO 8601 da conclusão mais recente. |
+| **Recordes por Fase** | `records[phase].bestScore` | **SIM** | Melhor pontuação obtida na fase (0 a 100), conforme fórmula do P1.7. |
+| **Recordes por Fase** | `records[phase].bestScoreErrors` | **SIM** | Decisões incorretas cometidas na execução da melhor pontuação. |
+| **Recordes por Fase** | `records[phase].bestScoreHintsUsed` | **SIM** | Dicas utilizadas na execução da melhor pontuação. |
+| **Recordes por Fase** | `records[phase].bestScoreElapsedTimeMs` | **SIM** | Duração factual da execução da melhor pontuação (não utilizado em desempate). |
+| **Preferências Globais** | `soundEnabled`, `reducedMotion`, `highContrast` | **SIM** | Configurações globais de acessibilidade e áudio do operador, compartilhadas entre protocolos. |
+| **Metadados** | `schemaVersion`, `lastUpdated` | **SIM** | Versionamento canônico (`schemaVersion: 3` em P2.1-F) e data ISO da última mutação de estado. |
 | **Sessão** | `phaseResults` (resumo global) | **NÃO** | As métricas da campanha corrente pertencem ao ciclo de jogo ativo e são resetadas ao reiniciar o protocolo. |
 | **Sessão** | `result` (fase corrente) | **NÃO** | Dados voláteis da última fase jogada na rodada em andamento. |
-| **Sessão** | `history: StepRecord[]` | **NÃO** | Histórico detalhado de micro-passos consumido apenas durante a tela de replay da sessão atual. |
+| **Sessão / Replay** | `history: StepRecord[]`, `SelectionStepRecord[]` | **NÃO** | Histórico detalhado de micro-passos e frames consumido apenas durante a tela de replay da sessão atual (100% volátil em RAM). |
 | **Pedagogia** | Estrelas, rankings, notas globais | **NÃO** | **Proibido inventar métricas arbitrárias.** O sistema adota a `Pontuação do Protocolo` por fase baseada em decisões incorretas e dicas, com tempo puramente descritivo (ADR 0007). |
 
 ---
 
-## 2.2. Schema Versionado Canônico (v2 — P1.7)
+## 2.2. Schema Versionado Canônico Multi-Protocolo (v3 — P2.1-F)
 
-- **Chave de Armazenamento:** `sorting_station_v1_save`
-- **Versão Atual:** `2` (migração transparente automática a partir de `schemaVersion: 1`)
+- **Chave de Armazenamento:** `sorting_station_v1_save` (preservada estritamente para manter compatibilidade)
+- **Versão Atual:** `3` (pipeline explícito e transparente a partir de `schemaVersion: 1` e `schemaVersion: 2`)
 
 ```typescript
 // src/game/persistence/types.ts
+export type SupportedProtocol = "bubble" | "selection";
+
 export interface PhaseRecord {
   readonly completed: boolean;
   readonly completedAt: string;
@@ -98,26 +100,41 @@ export interface PhaseRecord {
   readonly bestScoreElapsedTimeMs?: number;
 }
 
-export interface GameSaveSchema {
-  readonly schemaVersion: number; // 2
-  readonly lastUpdated: string;   // ISO 8601
-  readonly campaign: {
-    readonly unlockedPhases: number;      // 1 a 3 (clamped)
-    readonly highestPhaseReached: number;  // 1 a 3 (clamped)
-    readonly hasCompletedTutorial: boolean;
-  };
+export interface ProtocolProgress {
+  readonly unlockedPhases: number;      // 1 a 3 (clamped)
+  readonly highestPhaseReached: number;  // 1 a 3 (clamped)
+  readonly hasCompletedTutorial: boolean;
   readonly records: Record<number, PhaseRecord>;
+}
+
+export interface GameSaveSchema {
+  readonly schemaVersion: number; // 3
+  readonly lastUpdated: string;   // ISO 8601
+  readonly protocols: {
+    readonly bubble: ProtocolProgress;
+    readonly selection: ProtocolProgress;
+  };
   readonly preferences: {
     readonly soundEnabled: boolean;
     readonly reducedMotion: boolean;
     readonly highContrast: boolean;
   };
+
+  // Aliases de conveniência retrocompatíveis (apontam para protocols.bubble)
+  readonly campaign: ProtocolProgress;
+  readonly records: Record<number, PhaseRecord>;
 }
 ```
 
+### Isolamento Estrito de Namespaces
+- Fases 1, 2 e 3 do Bubble Sort residem em `protocols.bubble.records[1..3]`;
+- Fases 1, 2 e 3 do Selection Sort residem em `protocols.selection.records[1..3]`;
+- **Proibição de Números Mágicos:** Nenhum identificador artificial ou sintético (como `101`, `201`) é utilizado no sistema. Cada protocolo possui suas próprias fases numéricas naturais de 1 a 3 isoladas pelo namespace do protocolo;
+- Concluir fases no Selection Sort não afeta o progresso ou recordes do Bubble Sort, e vice-versa.
+
 ---
 
-## 2.3. Arquitetura Defensiva e Fallback em Memória
+## 2.3. Arquitetura Defensiva e Pipeline de Migração (ADR 0015)
 
 A camada de persistência reside em `src/game/persistence/` e implementa o padrão **Storage Adapter**:
 
@@ -127,17 +144,19 @@ A camada de persistência reside em `src/game/persistence/` e implementa o padr�
    - **`SecurityError`:** Lançado por navegadores em contextos de sandbox restritos ou modo anônimo severo;
    - **`QuotaExceededError`:** Lançado quando a cota do domínio é ultrapassada;
    - **Comportamento:** Ao capturar qualquer exceção, a operação é redirecionada de forma transparente para um `MemoryStorageAdapter` em memória, emitindo aviso em `console.warn` e **impedindo a quebra da aplicação**.
-4. **Validação Estrita e Migração (`validateAndMigrateSaveData`):**
+4. **Pipeline Explícito de Migração (`validateAndMigrateSaveData`):**
    - Não utiliza conversão cega (`as`) em dados externos;
    - Sanitiza tipos inválidos, descarta chaves espúrias e clampa valores numéricos;
-   - Migração explícita `v1 -> v2`: saves válidos de `schemaVersion: 1` têm todos os seus dados preservados (`unlockedPhases`, `highestPhaseReached`, `hasCompletedTutorial`, `records`, `preferences`), sendo promovidos com segurança para `schemaVersion: 2`;
-   - Caso o payload JSON esteja corrompido ou o `schemaVersion` seja desconhecido/inválido, descarta com segurança e restaura o estado padrão (`createDefaultSaveData`).
+   - **Migração v1 $\rightarrow$ v2:** Saves de `schemaVersion: 1` têm campanha, conclusões, preferências e timestamps migrados;
+   - **Migração v2 $\rightarrow$ v3:** O progresso e os recordes do Bubble existentes no save v2 são preservados e encapsulados em `protocols.bubble`, enquanto `protocols.selection` é inicializado com o padrão limpo;
+   - **Pipeline v1 $\rightarrow$ v2 $\rightarrow$ v3:** Saves legados v1 transitam deterministicamente por ambos os passos sem perda de dados;
+   - Caso o payload JSON esteja corrompido ou o `schemaVersion` seja superior/desconhecido, descarta com segurança e restaura o estado padrão (`createDefaultSaveData`).
 
 ---
 
-## 2.4. Regras de Atualização de Recordes de Fase (ADR 0007)
+## 2.4. Regras de Atualização de Recordes de Fase (ADR 0007 / ADR 0015)
 
-Ao concluir uma fase com novos dados de pontuação (`PhaseScoreData`), a função pura `recordPhaseCompletion` avalia a substituição do recorde existente:
+Ao concluir uma fase com novos dados de pontuação (`PhaseScoreData`), a função pura `recordPhaseCompletion` avalia a substituição do recorde existente de forma isolada no protocolo alvo:
 
 1. **Substituição por Pontuação Superior:**
    Se `newScore > bestScore`, os dados de pontuação (`bestScore`, `bestScoreErrors`, `bestScoreHintsUsed`, `bestScoreElapsedTimeMs`) são integralmente atualizados com a nova rodada;

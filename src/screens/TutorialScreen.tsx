@@ -1,4 +1,4 @@
-﻿import { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import GameButton from "../components/GameButton";
 import NumberedBox from "../components/NumberedBox";
 import InstructionPanel from "../components/InstructionPanel";
@@ -89,11 +89,11 @@ export default function TutorialScreen({ onUnderstood, onBack }: TutorialScreenP
   };
 
   return (
-    <div className="relative w-full h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center py-6 px-4">
+    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-4 sm:pt-6 pb-16 sm:pb-20 px-4">
       {/* Ambient glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[550px] h-72 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col items-center gap-6 max-w-2xl w-full">
+      <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-5 max-w-2xl w-full">
         {/* Top bar with back button */}
         <div className="w-full flex items-center justify-between">
           <button
@@ -135,7 +135,7 @@ export default function TutorialScreen({ onUnderstood, onBack }: TutorialScreenP
         </div>
 
         {/* Context / Prompt Card */}
-        <div className="w-full panel-border bg-[#0d1635]/70 rounded-xl p-5 text-center">
+        <div className="w-full panel-border bg-[#0d1635]/70 rounded-xl p-4 sm:p-5 text-center">
           <p
             className="text-white/80 text-sm leading-relaxed"
             style={{ fontFamily: "'Space Mono', monospace" }}

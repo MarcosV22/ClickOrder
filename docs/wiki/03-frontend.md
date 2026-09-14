@@ -128,6 +128,7 @@ flowchart TD
   - **Navegação Segura e Geração Tardia:**
     - Botão `[ ← VOLTAR ]`: Retorna à tela de seleção (`home` ou `campaign-complete`) sem gerar vetor, sem consumir sementes procedurais e sem mutação de progresso/storage;
     - Botão `[ ▶ ${briefing.startLabel} ]`: Botão de ação primário único que efetivamente dispara a geração procedural (`generateBubblePhaseArray(1)`) e inicia a rodada.
+  - **Responsividade Desktop e Overflow Vertical Seguro (Hotfix):** Contêiner estruturado com `min-h-full overflow-y-auto justify-start pt-6 sm:pt-8 pb-16 sm:pb-24 px-4 sm:px-6`, eliminando a armadilha de clipping vertical por `justify-center`/`my-auto` e garantindo que o rodapé com os botões `[ ← VOLTAR ]` e `[ ▶ ${briefing.startLabel} ]` permaneça 100% visível e acessível em resoluções desktop comuns (1366x768, 1600x900, 1920x1080).
 - **Callbacks e Props:** `briefing: ProtocolModeBriefing`, `onStart: () => void`, `onBack: () => void`.
 
 ### 3.4. `src/screens/TutorialScreen.tsx`
@@ -210,10 +211,10 @@ flowchart TD
 - **Destaques de Implementação:**
   - Renderiza o vetor final resultante consolidado com suporte a rolagem horizontal segura em mobile;
   - Apresenta contadores puramente factuais sob o título "MÉTRICAS DA FASE": Comparações (`comparisons`), Trocas (`swaps`), Decisões Incorretas (`errors`), Dicas Utilizadas (`hintsUsed`), Tempo de Operação e Pontuação do Protocolo;
-  - **Suporte Multi-Protocolo (P2.1-D / ADR 0013):**
+  - **Suporte Multi-Protocolo (P2.1-D / ADR 0013 e P2.1-E / ADR 0014):**
     - Recebe `protocol?: "bubble" | "selection"`;
-    - Para Bubble Sort: exibe badge ciano, pseudocódigo correspondente e botão `[ ▶ VER EXECUÇÃO ]`;
-    - Para Selection Sort: exibe badge âmbar `◈ PROTOCOLO SELECTION SORT`, substitui o bloco de pseudocódigo por um cartão didático comemorativo explicativo ("SELEÇÃO GULOSA DO MÍNIMO") e oculta o botão de Replay (reservado para P2.1-E);
+    - Para Bubble Sort: exibe badge ciano, pseudocódigo correspondente (canônico ou early exit) e botão `[ ▶ VER EXECUÇÃO ]`;
+    - Para Selection Sort: exibe badge âmbar `◈ PROTOCOLO SELECTION SORT`, renderiza o pseudocódigo canônico de 13 instruções estruturadas em português (`SELECTION_SORT_PSEUDOCODE`), exibe o princípio pedagógico da busca gulosa do menor e habilita o botão `[ ▶ VER EXECUÇÃO ]` para auditoria retrospectiva (P2.1-E);
   - **Painel Comparativo do Modo Desafio (P1.8):** No modo `EARLY_EXIT`, exibe Comparações Executadas, Comparações Máximas Canônicas de Referência ($n(n-1)/2$), Comparações Evitadas ($\max(0, \text{canônicas} - \text{executadas})$) e Status de Early Exit (SIM/NÃO com passada de término);
   - **Nota Pedagógica de Otimização:** Esclarece a economia de passos ou explica o motivo de não haver economia em casos de pior caso;
   - **Eliminação de Heurística:** Remoção definitiva da antiga métrica arbitrária de "Eficiência (%)", substituída integralmente pela telemetria factual descritiva (ADR 0003);
@@ -267,6 +268,22 @@ flowchart TD
     - `[ ⌂ VOLTAR AO INÍCIO ]`: reseta os resultados em memória da sessão e retorna à `HomeScreen`;
     - `[ ↺ REJOGAR SELECTION SORT ]`: direciona diretamente para o briefing do Selection Sort para novo ciclo.
 - **Callbacks:** `onReturnHome: () => void`, `onRestartSelection: () => void`.
+
+### 3.12. `src/screens/SelectionReplayScreen.tsx` (P2.1-E / ADR 0014)
+- **Responsabilidades:** Auditoria retrospectiva da execução do Selection Sort em qualquer fase concluída, com sincronização em tempo real de pseudocódigo canônico de 13 instruções estruturadas e semântica bimodal de esteira.
+- **Destaques de Implementação:**
+  - **Derivação Pura e Imutável:** Consome exclusivamente `buildSelectionReplayFrames(initialArray, history)`, sem reexecutar o algoritmo de ordenação e sem criar frames fantasmas (`frames.length === history.length + 1`);
+  - **Representação Tipificada de Quadros:**
+    - `INITIAL` (Quadro 0): exibe a carga original na esteira antes da primeira ação do scanner;
+    - `INSPECTION` (Quadros 1..N): exibe ALVO ($i$), SCAN ($j$), MÍN ($minIndex$), comparação concreta e manutenção ou atualização do candidato;
+    - `COMMIT` (Quadros 1..N): distingue com clareza troca física real (`TRANSFERÊNCIA (SWAP)`) de consolidação direta sem troca (`CONSOLIDAÇÃO DIRETA (SEM TROCA)`);
+  - **Resolução Semântica das Caixas:** Renderiza `NumberedBox` mapeando os papéis visuais `target`, `min`, `target-min`, `scan`, `scan-min`, `sorted` e `default`;
+  - **Esteira com Rolagem Horizontal Controlada:** Container com `overflow-x-auto py-1 min-w-max mx-auto px-2`, eliminando qualquer risco de quebra de linha de blocos;
+  - **Painel de Pseudocódigo Sincronizado:** Integração com `<SelectionSortPseudocodePanel frame={currentFrame} />`, destacando `INIT_MIN`, `IF_CONDITION`, `UPDATE_MIN`, `CHECK_SWAP` e `SWAP_STATEMENT`;
+  - **Controles Completos de Reprodução:** `[↺ REINICIAR]`, `[← ANTERIOR]`, `[▶ REPRODUZIR]` / `[⏸ PAUSAR]` (com autoplay a 1200ms e auto-stop no último frame) e `[PRÓXIMO →]`;
+  - **Preservação Absoluta de Métricas e Sessão:** O botão `[ ← VOLTAR AO RESULTADO ]` retorna para `ResultScreen` sem tocar em pontuação, erros, dicas, tempo ou progresso;
+  - **Responsividade Defensiva Desktop:** Estruturado com `min-h-full overflow-y-auto justify-start pt-4 sm:pt-6 pb-16 sm:pb-24 px-4 md:px-6 gap-4 sm:gap-6`, prevenindo cortes verticais de CTAs em qualquer resolução desktop.
+- **Props:** `initialArray: readonly number[]`, `history: readonly SelectionStepRecord[]`, `phase: number`, `onBackToResult: () => void`.
 
 ---
 
@@ -402,6 +419,26 @@ interface BubbleSortPseudocodePanelProps {
     - `SWAP`: Destaque na instrução `trocar A[j] e A[j + 1]` com badge `[⇄ EXECUTADO]` e indicação de condição `[VERDADEIRO]`;
   - Painel contextual inferior exibindo os valores concretos avaliados no frame ($A[j] = X, A[j+1] = Y$, $X > Y \rightarrow \text{VERDADEIRO/FALSO}$) preservando a formulação genérica do código.
 
+### 4.7. `SelectionSortPseudocodePanel` ([`src/components/SelectionSortPseudocodePanel.tsx`](../../src/components/SelectionSortPseudocodePanel.tsx))
+Painel de pseudocódigo canônico de Selection Sort com sincronização pura de 13 instruções estruturadas em português e contextualização isolada de valores concretos (P2.1-E, ADR 0014).
+
+```typescript
+interface SelectionSortPseudocodePanelProps {
+  frame: SelectionReplayFrame; // Quadro de replay corrente (fonte única e pura de verdade)
+  className?: string;          // Classes utilitárias opcionais de estilização
+}
+```
+
+- **Funcionalidades:**
+  - Renderiza a representação canônica imutável de 13 instruções do Selection Sort (`SELECTION_SORT_PSEUDOCODE`);
+  - Destaque primário e escopo ativo via `getSelectionPseudocodeHighlight(frame)`:
+    - `INITIAL`: Destaca o cabeçalho `procedimento selectionSort(A)`;
+    - `INSPECTION` (com novo mínimo): Destaca `UPDATE_MIN` (`minIndex ← j`) com badge `[★ NOVO MÍNIMO]` e avalia `IF_CONDITION` como `[VERDADEIRO]`;
+    - `INSPECTION` (mantendo candidato): Destaca `IF_CONDITION` (`se A[j] < A[minIndex] então`) como `[FALSO]`, mantendo `minIndex` inalterado;
+    - `COMMIT` (com permuta): Destaca `SWAP_STATEMENT` (`trocar A[i] e A[minIndex]`) com badge `[⇄ TRANSFERÊNCIA EXECUTADA]` e `CHECK_SWAP` como `[TROCA NECESSÁRIA (VERDADEIRO)]`;
+    - `COMMIT` (sem permuta): Destaca `CHECK_SWAP` como `[ELEMENTO NO DESTINO (FALSO)]` sem ativar `SWAP_STATEMENT`;
+  - Painel contextual inferior exibindo os valores concretos avaliados no frame (ALVO $A[i]$, SCAN $A[j]$, MÍN $A[minIndex]$, condição e texto explicativo da instrução executada).
+
 ---
 
 ## 5. Matriz de Componentes e Telas
@@ -414,13 +451,18 @@ interface BubbleSortPseudocodePanelProps {
 | **`TutorialScreen`** | [`src/screens/TutorialScreen.tsx`](../../src/screens/TutorialScreen.tsx) | Demonstração animada e regras do Bubble Sort | `onBack`, `onUnderstood` | [`src/App.tsx`](../../src/App.tsx) |
 | **`SelectionTutorialScreen`** | [`src/screens/SelectionTutorialScreen.tsx`](../../src/screens/SelectionTutorialScreen.tsx) | Tutorial interativo guiado com a engine real do Selection Sort | `onComplete`, `onBack` | [`src/App.tsx`](../../src/App.tsx) |
 | **`GameScreen`** | [`src/screens/GameScreen.tsx`](../../src/screens/GameScreen.tsx) | Gameplay interativo, seleção e lógica de ordenação | `initialArray`, `phase`, `onComplete` | [`src/App.tsx`](../../src/App.tsx) |
+| **`SelectionGameScreen`** | [`src/screens/SelectionGameScreen.tsx`](../../src/screens/SelectionGameScreen.tsx) | Gameplay interativo do Selection Sort em 3 fases procedurais | `initialArray`, `phase`, `onComplete` | [`src/App.tsx`](../../src/App.tsx) |
 | **`ResultScreen`** | [`src/screens/ResultScreen.tsx`](../../src/screens/ResultScreen.tsx) | Exibe métricas factuais (comparações, trocas, erros, dicas) e pseudocódigo | `finalArray`, `comparisons`, `swaps`, `errors`, `hintsUsed`, `phase`, `hasNextPhase`, `onRepeat`, `onNext`, `onViewReplay` | [`src/App.tsx`](../../src/App.tsx) |
-| **`ReplayScreen`** | [`src/screens/ReplayScreen.tsx`](../../src/screens/ReplayScreen.tsx) | Reprodução visual e temporal passo a passo dos registros do histórico | `initialArray`, `history`, `phase`, `onBackToResult` | [`src/App.tsx`](../../src/App.tsx) |
-| **`CampaignCompleteScreen`** | [`src/screens/CampaignCompleteScreen.tsx`](../../src/screens/CampaignCompleteScreen.tsx) | Encerramento da campanha e resumo factual global | `results`, `totalPhases`, `onReturnHome`, `onRestartProtocol` | [`src/App.tsx`](../../src/App.tsx) |
-| **`NumberedBox`** | [`src/components/NumberedBox.tsx`](../../src/components/NumberedBox.tsx) | Caixa de carga numerada com estados visuais, papéis semânticos e animações | `value`, `index`, `role`, `selected`, `sorted`, `animating`, `onClick` | `GameScreen`, `TutorialScreen`, `SelectionTutorialScreen`, `ResultScreen`, `ReplayScreen` |
-| **`GameButton`** | [`src/components/GameButton.tsx`](../../src/components/GameButton.tsx) | Botão sci-fi estilizado com 4 variantes visuais | `children`, `variant`, `size`, `disabled`, `onClick` | Todas as telas (`Home`, `Tutorial`, `Game`, `Result`, `CampaignComplete`) |
+| **`ReplayScreen`** | [`src/screens/ReplayScreen.tsx`](../../src/screens/ReplayScreen.tsx) | Reprodução visual e temporal passo a passo dos registros do Bubble Sort | `initialArray`, `history`, `phase`, `onBackToResult` | [`src/App.tsx`](../../src/App.tsx) |
+| **`SelectionReplayScreen`** | [`src/screens/SelectionReplayScreen.tsx`](../../src/screens/SelectionReplayScreen.tsx) | Reprodução visual e temporal passo a passo dos registros do Selection Sort | `initialArray`, `history`, `phase`, `onBackToResult` | [`src/App.tsx`](../../src/App.tsx) |
+| **`CampaignCompleteScreen`** | [`src/screens/CampaignCompleteScreen.tsx`](../../src/screens/CampaignCompleteScreen.tsx) | Encerramento da campanha Bubble e resumo factual global | `results`, `totalPhases`, `onReturnHome`, `onRestartProtocol` | [`src/App.tsx`](../../src/App.tsx) |
+| **`SelectionCampaignCompleteScreen`** | [`src/screens/SelectionCampaignCompleteScreen.tsx`](../../src/screens/SelectionCampaignCompleteScreen.tsx) | Encerramento da campanha Selection e resumo factual global | `results`, `totalPhases`, `onReturnHome`, `onRestartSelection` | [`src/App.tsx`](../../src/App.tsx) |
+| **`NumberedBox`** | [`src/components/NumberedBox.tsx`](../../src/components/NumberedBox.tsx) | Caixa de carga numerada com estados visuais, papéis semânticos e animações | `value`, `index`, `role`, `selected`, `sorted`, `animating`, `onClick` | `GameScreen`, `TutorialScreen`, `SelectionTutorialScreen`, `ResultScreen`, `ReplayScreen`, `SelectionReplayScreen` |
+| **`GameButton`** | [`src/components/GameButton.tsx`](../../src/components/GameButton.tsx) | Botão sci-fi estilizado com 4 variantes visuais | `children`, `variant`, `size`, `disabled`, `onClick` | Todas as telas |
 | **`InstructionPanel`**| [`src/components/InstructionPanel.tsx`](../../src/components/InstructionPanel.tsx) | Painel informativo com tipologia e ícones | `message`, `type` | `GameScreen`, `TutorialScreen` |
-| **`PhaseHeader`** | [`src/components/PhaseHeader.tsx`](../../src/components/PhaseHeader.tsx) | Barra de topo com protocolo, fase e status | `protocol`, `phase`, `totalPhases` | `GameScreen`, `ResultScreen` |
+| **`PhaseHeader`** | [`src/components/PhaseHeader.tsx`](../../src/components/PhaseHeader.tsx) | Barra de topo com protocolo, fase e status | `protocol`, `phase`, `totalPhases` | `GameScreen`, `SelectionGameScreen`, `ResultScreen` |
+| **`BubbleSortPseudocodePanel`** | [`src/components/BubbleSortPseudocodePanel.tsx`](../../src/components/BubbleSortPseudocodePanel.tsx) | Painel sincronizado de pseudocódigo do Bubble Sort | `frame`, `variant`, `className` | `ReplayScreen` |
+| **`SelectionSortPseudocodePanel`** | [`src/components/SelectionSortPseudocodePanel.tsx`](../../src/components/SelectionSortPseudocodePanel.tsx) | Painel sincronizado de pseudocódigo do Selection Sort | `frame`, `className` | `SelectionReplayScreen` |
 | **`StatsPanel`** | [`src/components/StatsPanel.tsx`](../../src/components/StatsPanel.tsx) | Painel numérico de comparações e trocas | `comparisons`, `swaps` | `GameScreen` |
 | **`BubbleSortPseudocodePanel`** | [`src/components/BubbleSortPseudocodePanel.tsx`](../../src/components/BubbleSortPseudocodePanel.tsx) | Painel de pseudocódigo sincronizado com destaque de linha e contexto concreto | `frame`, `className` | `ReplayScreen` |
 
@@ -610,3 +652,4 @@ export default function NovoComponente({ titulo, ativo = false }: NovoComponente
 4. ❌ **Acoplar Lógica Algorítmica em Manipuladores de Clique:** Novas regras ou algoritmos não devem ser escritos dentro de funções de clique do JSX; devem ser isolados em módulos ou funções puras.
 5. ❌ **Uso do Tipo `any` em TypeScript:** Mantenha a tipagem estrita com interfaces claras para todas as props e estados.
 6. ❌ **Manipulação Direta do DOM:** Nunca use `document.getElementById` ou `document.querySelector` dentro de componentes React; utilize refs ou o ciclo declarativo do React.
+7. ❌ **Centralização Vertical (`justify-center` / `my-auto`) em Scroll Containers:** Nunca combine `overflow-y-auto` com `justify-center` ou `my-auto` em contêineres cujos filhos possam exceder a altura útil da janela. Em CSS flexbox, a centralização de conteúdo que transborda empurra o topo para coordenadas negativas ($y < 0$) inalcançáveis pelo scroll e descarta o padding inferior ao rolar. Utilize sempre `justify-start` com `pt-6 sm:pt-8` e `pb-16 sm:pb-24`.

@@ -49,7 +49,7 @@ export default function ProtocolModeBriefingScreen({
 
   return (
     <main
-      className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start sm:justify-center p-4 sm:p-8"
+      className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-8 pb-16 sm:pb-24 px-4 sm:px-6"
       aria-label={`Briefing do Modo: ${briefing.modeName}`}
     >
       {/* Background ambient glows */}
@@ -65,7 +65,7 @@ export default function ProtocolModeBriefingScreen({
         </>
       )}
 
-      <div className="relative z-10 flex flex-col items-center gap-6 max-w-3xl w-full my-auto">
+      <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-5 max-w-3xl w-full my-0">
         {/* Top Status Capsule */}
         <div
           className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border ${currentBadgeStyle.border}`}
@@ -80,7 +80,7 @@ export default function ProtocolModeBriefingScreen({
         </div>
 
         {/* Header Titles */}
-        <header className="text-center flex flex-col items-center gap-2">
+        <header className="text-center flex flex-col items-center gap-1.5">
           <span
             className="text-xs sm:text-sm font-mono tracking-[0.25em] text-white/50 uppercase"
             style={{ fontFamily: "'Space Mono', monospace" }}
@@ -88,7 +88,7 @@ export default function ProtocolModeBriefingScreen({
             {briefing.protocolName}
           </span>
           <h1
-            className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight"
+            className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight"
             style={{
               fontFamily: "'Orbitron', sans-serif",
               textShadow: isAmber
@@ -107,7 +107,7 @@ export default function ProtocolModeBriefingScreen({
             </span>
           </h1>
           <p
-            className="text-sm sm:text-base text-white/70 max-w-xl text-center leading-relaxed"
+            className="text-xs sm:text-sm text-white/70 max-w-xl text-center leading-relaxed"
             style={{ fontFamily: "'Exo 2', sans-serif" }}
           >
             {briefing.subtitle}
@@ -115,13 +115,13 @@ export default function ProtocolModeBriefingScreen({
         </header>
 
         {/* Main Content Cards Container */}
-        <div className="w-full flex flex-col gap-4">
+        <div className="w-full flex flex-col gap-3 sm:gap-3.5">
           {/* Card 1: Objetivo */}
           <section
-            className="bg-[#0d1635]/90 border border-[#2a4a9e]/60 rounded-xl p-4 sm:p-5 shadow-lg"
+            className="bg-[#0d1635]/90 border border-[#2a4a9e]/60 rounded-xl p-3.5 sm:p-4 shadow-lg"
             aria-labelledby="briefing-objective-title"
           >
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-1.5">
               <span className={isAmber ? "text-amber-400" : "text-cyan-400"}>◈</span>
               <h2
                 id="briefing-objective-title"
@@ -132,7 +132,7 @@ export default function ProtocolModeBriefingScreen({
               </h2>
             </div>
             <p
-              className="text-sm sm:text-base text-white/90 leading-relaxed"
+              className="text-xs sm:text-sm text-white/90 leading-relaxed"
               style={{ fontFamily: "'Exo 2', sans-serif" }}
             >
               {briefing.objective}
@@ -141,7 +141,7 @@ export default function ProtocolModeBriefingScreen({
 
           {/* Card 2: Instruções / Como Operar (Grid 2x2) */}
           <section aria-labelledby="briefing-instructions-title">
-            <div className="flex items-center gap-2 mb-2 px-1">
+            <div className="flex items-center gap-2 mb-1.5 px-1">
               <span className={isAmber ? "text-amber-400" : "text-cyan-400"}>◈</span>
               <h2
                 id="briefing-instructions-title"
@@ -151,15 +151,15 @@ export default function ProtocolModeBriefingScreen({
                 Procedimento na Esteira
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
               {briefing.instructions.map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#0d1635]/70 border border-[#1e3570]/60 rounded-lg p-3.5 flex items-start gap-3 hover:border-cyan-500/40 transition-colors"
+                  className="bg-[#0d1635]/70 border border-[#1e3570]/60 rounded-lg p-3 sm:p-3.5 flex items-start gap-3 hover:border-cyan-500/40 transition-colors"
                 >
                   {item.icon && (
                     <div
-                      className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm bg-[#111e47] border ${
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded flex items-center justify-center font-bold text-xs sm:text-sm bg-[#111e47] border ${
                         isAmber
                           ? "border-amber-500/30 text-amber-300"
                           : "border-cyan-500/30 text-cyan-300"
@@ -178,7 +178,7 @@ export default function ProtocolModeBriefingScreen({
                       {item.title}
                     </h3>
                     <p
-                      className="text-xs text-white/70 leading-relaxed mt-1"
+                      className="text-[11px] sm:text-xs text-white/70 leading-relaxed mt-0.5"
                       style={{ fontFamily: "'Exo 2', sans-serif" }}
                     >
                       {item.description}
@@ -192,7 +192,7 @@ export default function ProtocolModeBriefingScreen({
           {/* Card 3: Particularidades do Modo (se houver) */}
           {briefing.particularities && briefing.particularities.length > 0 && (
             <section
-              className={`rounded-xl p-3.5 sm:p-4 border ${
+              className={`rounded-xl p-3 sm:p-3.5 border ${
                 isAmber
                   ? "bg-amber-950/20 border-amber-500/30 text-amber-200/90"
                   : "bg-cyan-950/20 border-cyan-500/30 text-cyan-200/90"
@@ -211,7 +211,7 @@ export default function ProtocolModeBriefingScreen({
                   Particularidades Deste Modo
                 </h2>
               </div>
-              <ul className="list-disc list-inside space-y-1 text-xs leading-relaxed opacity-90 pl-1">
+              <ul className="list-disc list-inside space-y-1 text-[11px] sm:text-xs leading-relaxed opacity-90 pl-1">
                 {briefing.particularities.map((rule, idx) => (
                   <li key={idx} style={{ fontFamily: "'Exo 2', sans-serif" }}>
                     {rule}
@@ -222,14 +222,14 @@ export default function ProtocolModeBriefingScreen({
           )}
 
           {/* Highlights Strip */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full">
+          <div className="grid grid-cols-3 gap-2 sm:gap-2.5 w-full">
             {briefing.highlights.map((item, idx) => {
               const valColor =
                 highlightColorClasses[item.variant ?? "cyan"] ?? "text-white";
               return (
                 <div
                   key={idx}
-                  className="bg-[#0d1635]/80 border border-[#1e3570]/60 rounded-lg p-2.5 sm:p-3 text-center flex flex-col justify-center"
+                  className="bg-[#0d1635]/80 border border-[#1e3570]/60 rounded-lg p-2 sm:p-2.5 text-center flex flex-col justify-center"
                 >
                   <span
                     className="text-[9px] sm:text-[10px] font-mono tracking-widest text-white/50 uppercase"
@@ -250,7 +250,7 @@ export default function ProtocolModeBriefingScreen({
         </div>
 
         {/* Footer Actions */}
-        <footer className="flex flex-col-reverse sm:flex-row items-center justify-center gap-4 w-full max-w-md mt-2">
+        <footer className="flex flex-col-reverse sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md pt-2 pb-2">
           <GameButton
             onClick={onBack}
             variant="secondary"

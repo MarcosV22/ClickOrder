@@ -13,6 +13,10 @@ import {
   validateAndMigrateSaveData,
   isChallengeModeUnlocked,
   getInitialSessionRoute,
+  getProtocolProgress,
+  migrateV1ToV2,
+  migrateV2ToV3,
+  SELECTION_MAX_PHASES,
   type StorageAdapter,
   type GameSaveSchema,
 } from "./index";
@@ -481,8 +485,8 @@ describe("Persistence Layer (P1.6)", () => {
 
       const loaded = loadGameProgress(storage, 3);
 
-      // Migração explícita para schema v2
-      expect(loaded.schemaVersion).toBe(2);
+      // Migração explícita para schema atualizado (v3)
+      expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
       expect(loaded.campaign.unlockedPhases).toBe(2);
       expect(loaded.campaign.highestPhaseReached).toBe(2);
       expect(loaded.campaign.hasCompletedTutorial).toBe(true);
@@ -498,10 +502,10 @@ describe("Persistence Layer (P1.6)", () => {
       expect(loaded.preferences.soundEnabled).toBe(false);
       expect(loaded.preferences.reducedMotion).toBe(true);
 
-      // Ao regravar, o save agora reside formalmente em v2 no storage
+      // Ao regravar, o save agora reside formalmente em v3 no storage
       saveGameProgress(loaded, storage, 3);
       const reloadedRaw = JSON.parse(storage.getItem(STORAGE_KEY)!);
-      expect(reloadedRaw.schemaVersion).toBe(2);
+      expect(reloadedRaw.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
       expect(reloadedRaw.campaign.unlockedPhases).toBe(2);
     });
 
@@ -536,7 +540,7 @@ describe("Persistence Layer (P1.6)", () => {
       });
 
       const loaded = loadGameProgress(storage, 3);
-      expect(loaded.schemaVersion).toBe(2);
+      expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
       expect(loaded.records[1].bestScore).toBe(90);
       expect(loaded.records[1].bestScoreErrors).toBe(1);
       expect(loaded.records[1].bestScoreHintsUsed).toBe(0);
@@ -841,6 +845,466 @@ describe("Persistence Layer (P1.6)", () => {
       expect(route.phase).toBe(1);
     });
   });
+
+  describe("13. Persistência Multi-Protocolo, Schema v3 e Selection Sort (P2.1-F)", () => {
+    describe("Estrutura do Schema v3 e Estado Padrão (Clean Install)", () => {
+      it("deve inicializar com schemaVersion 3 e subestruturas isoladas para bubble e selection", () => {
+        const state = createDefaultSaveData(3, SELECTION_MAX_PHASES);
+
+        expect(state.schemaVersion).toBe(3);
+        expect(state.protocols).toBeDefined();
+        expect(state.protocols.bubble).toBeDefined();
+        expect(state.protocols.selection).toBeDefined();
+
+        // Bubble progress
+        expect(state.protocols.bubble.unlockedPhases).toBe(1);
+        expect(state.protocols.bubble.highestPhaseReached).toBe(1);
+        expect(state.protocols.bubble.hasCompletedTutorial).toBe(false);
+        expect(state.protocols.bubble.records).toEqual({});
+
+        // Selection progress
+        expect(state.protocols.selection.unlockedPhases).toBe(1);
+        expect(state.protocols.selection.highestPhaseReached).toBe(1);
+        expect(state.protocols.selection.hasCompletedTutorial).toBe(false);
+        expect(state.protocols.selection.records).toEqual({});
+
+        // Retrocompatibilidade / aliases
+        expect(state.campaign).toEqual(state.protocols.bubble);
+        expect(state.records).toEqual(state.protocols.bubble.records);
+
+        // Preferências globais
+        expect(state.preferences.soundEnabled).toBe(true);
+        expect(state.preferences.reducedMotion).toBe(false);
+        expect(state.preferences.highContrast).toBe(false);
+      });
+
+      it("getProtocolProgress deve retornar a referência direta ao protocolo solicitado", () => {
+        const state = createDefaultSaveData(3, 3);
+        const bubbleProg = getProtocolProgress(state, "bubble");
+        const selectionProg = getProtocolProgress(state, "selection");
+
+        expect(bubbleProg).toBe(state.protocols.bubble);
+        expect(selectionProg).toBe(state.protocols.selection);
+      });
+    });
+
+    describe("Pipeline Explícito de Migração (v1 -> v2 -> v3 e v2 -> v3)", () => {
+      it("migrateV1ToV2 deve migrar dados v1 para formato v2 com schemaVersion 2", () => {
+        const v1Raw = {
+          schemaVersion: 1,
+          lastUpdated: "2026-09-10T12:00:00.000Z",
+          campaign: {
+            unlockedPhases: 2,
+            highestPhaseReached: 2,
+            hasCompletedTutorial: true,
+          },
+          records: {
+            "1": {
+              completed: true,
+              completedAt: "2026-09-10T12:05:00.000Z",
+            },
+          },
+          preferences: {
+            soundEnabled: false,
+            reducedMotion: true,
+            highContrast: false,
+          },
+        };
+
+        const v2 = migrateV1ToV2(v1Raw, 3);
+        expect(v2.schemaVersion).toBe(2);
+        expect(v2.campaign.unlockedPhases).toBe(2);
+        expect(v2.records[1].completed).toBe(true);
+        expect(v2.records[1].bestScore).toBeUndefined();
+      });
+
+      it("migrateV2ToV3 deve migrar dados v2 para formato v3 com protocolos isolados", () => {
+        const v2Raw = {
+          schemaVersion: 2,
+          lastUpdated: "2026-09-11T10:00:00.000Z",
+          campaign: {
+            unlockedPhases: 3,
+            highestPhaseReached: 3,
+            hasCompletedTutorial: true,
+          },
+          records: {
+            "1": {
+              completed: true,
+              completedAt: "2026-09-11T10:01:00.000Z",
+              bestScore: 100,
+              bestScoreErrors: 0,
+              bestScoreHintsUsed: 0,
+              bestScoreElapsedTimeMs: 15000,
+            },
+          },
+          preferences: {
+            soundEnabled: true,
+            reducedMotion: false,
+            highContrast: false,
+          },
+        };
+
+        const v3 = migrateV2ToV3(v2Raw, 3, 3);
+        expect(v3.schemaVersion).toBe(3);
+        // Bubble absorveu a campanha e os recordes v2
+        expect(v3.protocols.bubble.unlockedPhases).toBe(3);
+        expect(v3.protocols.bubble.highestPhaseReached).toBe(3);
+        expect(v3.protocols.bubble.hasCompletedTutorial).toBe(true);
+        expect(v3.protocols.bubble.records[1].bestScore).toBe(100);
+        // Selection foi inicializado com default limpo
+        expect(v3.protocols.selection.unlockedPhases).toBe(1);
+        expect(v3.protocols.selection.highestPhaseReached).toBe(1);
+        expect(v3.protocols.selection.hasCompletedTutorial).toBe(false);
+        expect(v3.protocols.selection.records).toEqual({});
+      });
+
+      it("pipeline completo: save v1 carregado do storage resulta em v3 preservando Bubble intacto", () => {
+        const v1Save = {
+          schemaVersion: 1,
+          lastUpdated: "2026-09-10T12:00:00.000Z",
+          campaign: {
+            unlockedPhases: 2,
+            highestPhaseReached: 2,
+            hasCompletedTutorial: true,
+          },
+          records: {
+            "1": {
+              completed: true,
+              completedAt: "2026-09-10T12:05:00.000Z",
+            },
+          },
+          preferences: {
+            soundEnabled: false,
+            reducedMotion: true,
+            highContrast: true,
+          },
+        };
+
+        const storage = createMemoryStorageAdapter({
+          [STORAGE_KEY]: JSON.stringify(v1Save),
+        });
+
+        const loaded = loadGameProgress(storage, 3, 3);
+        expect(loaded.schemaVersion).toBe(3);
+        expect(loaded.protocols.bubble.unlockedPhases).toBe(2);
+        expect(loaded.protocols.bubble.records[1].completed).toBe(true);
+        expect(loaded.protocols.selection.unlockedPhases).toBe(1);
+        expect(loaded.preferences.soundEnabled).toBe(false);
+        expect(loaded.preferences.highContrast).toBe(true);
+      });
+
+      it("save v2 carregado do storage resulta em v3 preservando scores e inicializando Selection", () => {
+        const v2Save = {
+          schemaVersion: 2,
+          lastUpdated: "2026-09-12T08:00:00.000Z",
+          campaign: {
+            unlockedPhases: 3,
+            highestPhaseReached: 3,
+            hasCompletedTutorial: true,
+          },
+          records: {
+            "1": {
+              completed: true,
+              completedAt: "2026-09-12T08:05:00.000Z",
+              bestScore: 90,
+              bestScoreErrors: 1,
+              bestScoreHintsUsed: 0,
+              bestScoreElapsedTimeMs: 25000,
+            },
+            "2": {
+              completed: true,
+              completedAt: "2026-09-12T08:10:00.000Z",
+              bestScore: 85,
+              bestScoreErrors: 1,
+              bestScoreHintsUsed: 1,
+              bestScoreElapsedTimeMs: 40000,
+            },
+          },
+          preferences: {
+            soundEnabled: true,
+            reducedMotion: false,
+            highContrast: false,
+          },
+        };
+
+        const storage = createMemoryStorageAdapter({
+          [STORAGE_KEY]: JSON.stringify(v2Save),
+        });
+
+        const loaded = loadGameProgress(storage, 3, 3);
+        expect(loaded.schemaVersion).toBe(3);
+        expect(loaded.protocols.bubble.records[1].bestScore).toBe(90);
+        expect(loaded.protocols.bubble.records[2].bestScore).toBe(85);
+        expect(loaded.protocols.selection.hasCompletedTutorial).toBe(false);
+        expect(loaded.protocols.selection.records).toEqual({});
+      });
+    });
+
+    describe("Isolamento Estrito entre Protocolos (Bubble vs Selection)", () => {
+      it("fases 1..3 de Bubble e 1..3 de Selection possuem namespaces independentes sem colisão", () => {
+        const storage = createMemoryStorageAdapter();
+        let state = createDefaultSaveData(3, 3);
+
+        // Bubble completa Fase 1 com 100 pontos
+        state = recordPhaseCompletion(state, "bubble", 1, 3, storage, {
+          score: 100,
+          errors: 0,
+          hintsUsed: 0,
+          elapsedTimeMs: 15000,
+        });
+
+        // Selection completa Fase 1 com 80 pontos
+        state = recordPhaseCompletion(state, "selection", 1, 3, storage, {
+          score: 80,
+          errors: 2,
+          hintsUsed: 0,
+          elapsedTimeMs: 35000,
+        });
+
+        // Verificação: nenhum sobrepôs o outro
+        expect(state.protocols.bubble.records[1].bestScore).toBe(100);
+        expect(state.protocols.bubble.records[1].bestScoreErrors).toBe(0);
+
+        expect(state.protocols.selection.records[1].bestScore).toBe(80);
+        expect(state.protocols.selection.records[1].bestScoreErrors).toBe(2);
+
+        // Desbloqueios isolados: Bubble desbloqueou fase 2, Selection desbloqueou fase 2
+        expect(state.protocols.bubble.unlockedPhases).toBe(2);
+        expect(state.protocols.selection.unlockedPhases).toBe(2);
+
+        // Bubble avança para Fase 2
+        state = recordPhaseCompletion(state, "bubble", 2, 3, storage, {
+          score: 95,
+          errors: 0,
+          hintsUsed: 1,
+          elapsedTimeMs: 25000,
+        });
+
+        // Selection permanece inalterado na Fase 2
+        expect(state.protocols.bubble.unlockedPhases).toBe(3);
+        expect(state.protocols.selection.unlockedPhases).toBe(2);
+        expect(state.protocols.selection.records[2]).toBeUndefined();
+      });
+
+      it("concluir tutorial do Selection não altera o tutorial do Bubble", () => {
+        let state = createDefaultSaveData(3, 3);
+        expect(state.protocols.bubble.hasCompletedTutorial).toBe(false);
+        expect(state.protocols.selection.hasCompletedTutorial).toBe(false);
+
+        state = recordTutorialCompletion(state, "selection");
+        expect(state.protocols.selection.hasCompletedTutorial).toBe(true);
+        expect(state.protocols.bubble.hasCompletedTutorial).toBe(false);
+      });
+    });
+
+    describe("Persistência do Selection Sort (Tutorial, Fases e Recordes)", () => {
+      it("tutorial do Selection resiste a recarregamento (F5) do storage", () => {
+        const storage = createMemoryStorageAdapter();
+        let state = createDefaultSaveData(3, 3);
+        state = recordTutorialCompletion(state, "selection", storage);
+
+        const reloaded = loadGameProgress(storage, 3, 3);
+        expect(reloaded.protocols.selection.hasCompletedTutorial).toBe(true);
+      });
+
+      it("pontuação inferior NÃO substitui recorde existente no Selection", () => {
+        let state = createDefaultSaveData(3, 3);
+        state = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+          score: 90,
+          errors: 1,
+          hintsUsed: 0,
+          elapsedTimeMs: 20000,
+        });
+
+        const updated = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+          score: 80,
+          errors: 2,
+          hintsUsed: 0,
+          elapsedTimeMs: 15000,
+        });
+
+        expect(updated.protocols.selection.records[1].bestScore).toBe(90);
+        expect(updated.protocols.selection.records[1].bestScoreErrors).toBe(1);
+        expect(updated.protocols.selection.records[1].bestScoreElapsedTimeMs).toBe(20000);
+      });
+
+      it("pontuação superior DEVE substituir recorde existente no Selection", () => {
+        let state = createDefaultSaveData(3, 3);
+        state = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+          score: 80,
+          errors: 2,
+          hintsUsed: 0,
+          elapsedTimeMs: 30000,
+        });
+
+        const updated = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+          score: 100,
+          errors: 0,
+          hintsUsed: 0,
+          elapsedTimeMs: 25000,
+        });
+
+        expect(updated.protocols.selection.records[1].bestScore).toBe(100);
+        expect(updated.protocols.selection.records[1].bestScoreErrors).toBe(0);
+        expect(updated.protocols.selection.records[1].bestScoreElapsedTimeMs).toBe(25000);
+      });
+
+      it("empate de score com MENOS erros DEVE substituir o recorde no Selection (desempate por precisão)", () => {
+        let state = createDefaultSaveData(3, 3);
+        state = recordPhaseCompletion(state, "selection", 2, 3, undefined, {
+          score: 90,
+          errors: 2,
+          hintsUsed: 0,
+          elapsedTimeMs: 40000,
+        });
+
+        const updated = recordPhaseCompletion(state, "selection", 2, 3, undefined, {
+          score: 90,
+          errors: 1,
+          hintsUsed: 0,
+          elapsedTimeMs: 45000,
+        });
+
+        expect(updated.protocols.selection.records[2].bestScore).toBe(90);
+        expect(updated.protocols.selection.records[2].bestScoreErrors).toBe(1);
+        expect(updated.protocols.selection.records[2].bestScoreElapsedTimeMs).toBe(45000);
+      });
+
+      it("tempo NUNCA desempata nem substitui recorde se score e erros forem iguais no Selection", () => {
+        let state = createDefaultSaveData(3, 3);
+        state = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+          score: 100,
+          errors: 0,
+          hintsUsed: 0,
+          elapsedTimeMs: 30000,
+        });
+
+        const updated = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+          score: 100,
+          errors: 0,
+          hintsUsed: 0,
+          elapsedTimeMs: 12000, // Tempo menor não deve substituir
+        });
+
+        expect(updated.protocols.selection.records[1].bestScoreElapsedTimeMs).toBe(30000);
+      });
+
+      it("rejogar fase anterior no Selection não causa regressão de progresso", () => {
+        let state = createDefaultSaveData(3, 3);
+        state = recordPhaseCompletion(state, "selection", 1, 3);
+        state = recordPhaseCompletion(state, "selection", 2, 3);
+        state = recordPhaseCompletion(state, "selection", 3, 3);
+
+        expect(state.protocols.selection.highestPhaseReached).toBe(3);
+        expect(state.protocols.selection.unlockedPhases).toBe(3);
+
+        const replayed = recordPhaseCompletion(state, "selection", 1, 3);
+        expect(replayed.protocols.selection.highestPhaseReached).toBe(3);
+        expect(replayed.protocols.selection.unlockedPhases).toBe(3);
+      });
+    });
+
+    describe("Semântica de Início de Sessão Multi-Protocolo (getInitialSessionRoute)", () => {
+      it("Selection sem tutorial direciona para selection-tutorial na fase 1", () => {
+        const state = createDefaultSaveData(3, 3);
+        const route = getInitialSessionRoute(state, "selection");
+        expect(route.screen).toBe("selection-tutorial");
+        expect(route.phase).toBe(1);
+      });
+
+      it("Selection com tutorial concluído direciona para selection-game na fase 1", () => {
+        let state = createDefaultSaveData(3, 3);
+        state = recordTutorialCompletion(state, "selection");
+        const route = getInitialSessionRoute(state, "selection");
+        expect(route.screen).toBe("selection-game");
+        expect(route.phase).toBe(1);
+      });
+
+      it("Selection com fases 1..3 desbloqueadas continua iniciando nova campanha na fase 1", () => {
+        let state = createDefaultSaveData(3, 3);
+        state = recordTutorialCompletion(state, "selection");
+        state = recordPhaseCompletion(state, "selection", 1, 3);
+        state = recordPhaseCompletion(state, "selection", 2, 3);
+        state = recordPhaseCompletion(state, "selection", 3, 3);
+
+        const route = getInitialSessionRoute(state, "selection");
+        expect(route.screen).toBe("selection-game");
+        expect(route.phase).toBe(1); // Sempre inicia na fase 1
+      });
+    });
+
+    describe("Preservação do Modo Desafio (Early Exit) do Bubble Sort", () => {
+      it("isChallengeModeUnlocked avalia estritamente Bubble e não é afetado pelo Selection", () => {
+        let state = createDefaultSaveData(3, 3);
+        expect(isChallengeModeUnlocked(state, 3)).toBe(false);
+
+        // Completa todas as fases do Selection
+        state = recordPhaseCompletion(state, "selection", 1, 3);
+        state = recordPhaseCompletion(state, "selection", 2, 3);
+        state = recordPhaseCompletion(state, "selection", 3, 3);
+
+        // Desafio do Bubble continua bloqueado
+        expect(isChallengeModeUnlocked(state, 3)).toBe(false);
+
+        // Completa fase 3 do Bubble
+        state = recordPhaseCompletion(state, "bubble", 3, 3);
+        expect(isChallengeModeUnlocked(state, 3)).toBe(true);
+      });
+    });
+
+    describe("Resiliência Defensiva e Volatilidade do Replay", () => {
+      it("storage com JSON corrompido em save v3 restaura default v3 seguro", () => {
+        const storage = createMemoryStorageAdapter({
+          [STORAGE_KEY]: "{ invalid json, missing braces ...",
+        });
+
+        const loaded = loadGameProgress(storage, 3, 3);
+        expect(loaded.schemaVersion).toBe(3);
+        expect(loaded.protocols.bubble.unlockedPhases).toBe(1);
+        expect(loaded.protocols.selection.unlockedPhases).toBe(1);
+      });
+
+      it("falha de storage em setItem (QuotaExceeded) reporta erro sem quebrar aplicação", () => {
+        const failingStorage: StorageAdapter = {
+          getItem: () => null,
+          setItem: () => {
+            throw new Error("QuotaExceededError");
+          },
+          removeItem: () => {},
+        };
+
+        const state = createDefaultSaveData(3, 3);
+        const result = saveGameProgress(state, failingStorage, 3, 3);
+
+        expect(result.success).toBe(false);
+        expect(result.fallbackUsed).toBe(true);
+        expect(result.error).toContain("QuotaExceededError");
+      });
+
+      it("o replay (SelectionStepRecord[]) permanece em memória e nunca é salvo no storage", () => {
+        const storage = createMemoryStorageAdapter();
+        let state = createDefaultSaveData(3, 3);
+
+        // Grava conclusão com métricas de resultado
+        state = recordPhaseCompletion(state, "selection", 1, 3, storage, {
+          score: 100,
+          errors: 0,
+          hintsUsed: 0,
+          elapsedTimeMs: 15000,
+        });
+
+        const storedRaw = storage.getItem(STORAGE_KEY);
+        expect(storedRaw).toBeDefined();
+        // Não contém chaves de replay ou steps
+        expect(storedRaw).not.toContain("history");
+        expect(storedRaw).not.toContain("initialArray");
+        expect(storedRaw).not.toContain("seed");
+        expect(storedRaw).not.toContain("frames");
+        expect(storedRaw).not.toContain("INSPECTION");
+      });
+    });
+  });
 });
+
 
 

@@ -1,37 +1,36 @@
 import { useState, useEffect, useMemo } from "react";
-import NumberedBox from "../components/NumberedBox";
+import NumberedBox, { type BoxRole } from "../components/NumberedBox";
 import GameButton from "../components/GameButton";
-import BubbleSortPseudocodePanel from "../components/BubbleSortPseudocodePanel";
-import { buildReplayFrames, getReplayFrame } from "../game/replay";
-import type { BubbleSortVariant, StepRecord } from "../game/sorting/types";
+import SelectionSortPseudocodePanel from "../components/SelectionSortPseudocodePanel";
+import {
+  buildSelectionReplayFrames,
+  getSelectionReplayFrame,
+} from "../game/replay";
+import type { SelectionStepRecord } from "../game/sorting/selection/types";
 
-interface ReplayScreenProps {
+interface SelectionReplayScreenProps {
   initialArray: readonly number[];
-  history: readonly StepRecord[];
+  history: readonly SelectionStepRecord[];
   phase: number;
-  variant?: BubbleSortVariant;
-  earlyExitTriggered?: boolean;
   onBackToResult: () => void;
 }
 
-export default function ReplayScreen({
+export default function SelectionReplayScreen({
   initialArray,
   history,
   phase,
-  variant = "CANONICAL",
-  earlyExitTriggered = false,
   onBackToResult,
-}: ReplayScreenProps) {
-  // Derivação pura e determinística de todos os quadros a partir do histórico real
+}: SelectionReplayScreenProps) {
+  // Derivação pura e imutável de todos os quadros a partir do histórico real
   const frames = useMemo(
-    () => buildReplayFrames(initialArray, history, { variant, earlyExitTriggered }),
-    [initialArray, history, variant, earlyExitTriggered]
+    () => buildSelectionReplayFrames(initialArray, history),
+    [initialArray, history]
   );
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const currentFrame = getReplayFrame(frames, currentIndex);
+  const currentFrame = getSelectionReplayFrame(frames, currentIndex);
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === frames.length - 1;
 
@@ -89,32 +88,49 @@ export default function ReplayScreen({
     (currentFrame.stepNumber / Math.max(1, currentFrame.totalSteps)) * 100
   );
 
+  // Resolução semântica do papel visual de cada caixa no quadro atual
+  const getBoxRole = (idx: number): BoxRole => {
+    if (currentFrame.sortedIndices.includes(idx)) {
+      return "sorted";
+    }
+
+    const isTarget = idx === currentFrame.targetIndex;
+    const isMin = idx === currentFrame.minIndex;
+    const isScan =
+      currentFrame.frameType === "INSPECTION" &&
+      idx === currentFrame.scanIndex;
+
+    if (isTarget && isMin) return "target-min";
+    if (isMin && isScan) return "scan-min";
+    if (isTarget) return "target";
+    if (isMin) return "min";
+    if (isScan) return "scan";
+
+    return "default";
+  };
+
   return (
     <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col justify-start pt-4 sm:pt-6 pb-16 sm:pb-24 px-4 md:px-6 gap-4 sm:gap-6">
       {/* Glow effects */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-500/5 rounded-full blur-[90px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-cyan-500/5 rounded-full blur-[90px] pointer-events-none" />
 
       {/* Top Header */}
       <div className="relative z-10 flex items-center justify-between panel-border bg-[#080f28]/80 rounded-xl px-6 py-3 shrink-0">
         <div className="flex items-center gap-4">
-          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse" />
           <div className="flex flex-col">
             <span
-              className="text-[10px] text-cyan-400 tracking-widest uppercase"
+              className="text-[10px] text-purple-400 tracking-widest uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              {variant === "EARLY_EXIT"
-                ? "AUDITORIA TÉCNICA // MODO DESAFIO (EARLY EXIT)"
-                : "AUDITORIA TÉCNICA // MODO REPLAY"}
+              AUDITORIA TÉCNICA // MODO REPLAY
             </span>
             <span
               className="text-lg font-black text-white tracking-tight"
               style={{ fontFamily: "'Orbitron', sans-serif" }}
             >
-              {variant === "EARLY_EXIT"
-                ? `CENÁRIO ${phase} — VARIANTE EARLY EXIT`
-                : `FASE ${phase} — PROTOCOLO BUBBLE`}
+              FASE {phase} — PROTOCOLO SELECTION
             </span>
           </div>
         </div>
@@ -136,43 +152,44 @@ export default function ReplayScreen({
               PASSO {currentFrame.stepNumber} / {currentFrame.totalSteps}
             </span>
 
-            {currentFrame.action === "INITIAL" && (
+            {currentFrame.frameType === "INITIAL" && (
               <span
-                className="text-xs font-bold text-cyan-300 tracking-wider px-3 py-1 rounded border border-cyan-500/30 bg-cyan-950/40"
+                className="text-xs font-bold text-purple-300 tracking-wider px-3 py-1 rounded border border-purple-500/30 bg-purple-950/40"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
                 ESTADO INICIAL
               </span>
             )}
-            {currentFrame.action === "SWAP" && (
+            {currentFrame.frameType === "INSPECTION" && (
               <span
-                className="text-xs font-bold text-purple-300 tracking-wider px-3 py-1 rounded border border-purple-500/30 bg-purple-950/40"
+                className={`text-xs font-bold tracking-wider px-3 py-1 rounded border ${
+                  currentFrame.isNewMin
+                    ? "border-cyan-500/40 bg-cyan-950/40 text-cyan-300 animate-pulse"
+                    : "border-amber-500/30 bg-amber-950/40 text-amber-300"
+                }`}
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                ⇄ TROCA REALIZADA (SWAP)
+                {currentFrame.actionLabel}
               </span>
             )}
-            {currentFrame.action === "KEEP" && (
+            {currentFrame.frameType === "COMMIT" && (
               <span
-                className="text-xs font-bold text-emerald-300 tracking-wider px-3 py-1 rounded border border-emerald-500/30 bg-emerald-950/40"
+                className={`text-xs font-bold tracking-wider px-3 py-1 rounded border ${
+                  currentFrame.didSwap
+                    ? "border-purple-500/40 bg-purple-950/50 text-purple-200"
+                    : "border-emerald-500/40 bg-emerald-950/50 text-emerald-300"
+                }`}
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                = ORDEM MANTIDA (KEEP)
-              </span>
-            )}
-            {currentFrame.earlyExitTriggered && (
-              <span
-                className="text-xs font-bold text-amber-300 tracking-wider px-3 py-1 rounded border border-amber-500/40 bg-amber-950/60 animate-pulse"
-                style={{ fontFamily: "'Space Mono', monospace" }}
-              >
-                ⚡ TÉRMINO ANTECIPADO (0 TROCAS)
+                {currentFrame.actionLabel}
               </span>
             )}
           </div>
 
-          {currentFrame.action !== "INITIAL" && (
+          {/* Subheader com dados da passada e comparação concreta */}
+          {currentFrame.frameType !== "INITIAL" && (
             <div
-              className="flex items-center gap-4 text-xs text-white/60 mt-1"
+              className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-white/60 mt-1"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
               <span>
@@ -180,23 +197,39 @@ export default function ReplayScreen({
               </span>
               <span>•</span>
               <span>
-                Comparação {currentFrame.comparisonNumber}/{currentFrame.totalComparisonsInPass}
+                <strong className="text-amber-300">ALVO</strong> #{((currentFrame.targetIndex ?? 0) + 1)} ({currentFrame.targetValue})
+              </span>
+              {currentFrame.scanIndex !== null && (
+                <>
+                  <span>•</span>
+                  <span>
+                    <strong className="text-cyan-300">SCAN</strong> #{currentFrame.scanIndex + 1} ({currentFrame.scanValue})
+                  </span>
+                </>
+              )}
+              <span>•</span>
+              <span>
+                <strong className="text-purple-300">MÍN</strong> #{((currentFrame.minIndex ?? 0) + 1)} ({currentFrame.minValue})
               </span>
               <span>•</span>
               <span className="text-white font-bold">
-                {currentFrame.leftValue} {currentFrame.action === "SWAP" ? ">" : "≤"} {currentFrame.rightValue}
+                {currentFrame.comparisonText}
               </span>
             </div>
           )}
         </div>
 
         {/* Conveyor Belt Display */}
-        <div className="w-full panel-border bg-[#080f28]/90 rounded-2xl p-6 flex flex-col items-center gap-4 shadow-2xl shadow-cyan-950/20">
+        <div className="w-full panel-border bg-[#080f28]/90 rounded-2xl p-6 flex flex-col items-center gap-4 shadow-2xl shadow-purple-950/20">
           {/* Conveyor Visual Indicators */}
-          <div className="w-full flex items-center justify-between text-[10px] text-white/30 tracking-widest px-2"
-            style={{ fontFamily: "'Space Mono', monospace" }}>
+          <div
+            className="w-full flex items-center justify-between text-[10px] text-white/30 tracking-widest px-2"
+            style={{ fontFamily: "'Space Mono', monospace" }}
+          >
             <span>◄ POSIÇÃO 1</span>
-            <span className="text-cyan-400/50">ESTEIRA DE TRIAGEM AUTOMATIZADA</span>
+            <span className="text-purple-400/50">
+              ESTEIRA DE TRIAGEM // PROTOCOLO SELECTION
+            </span>
             <span>POSIÇÃO {initialArray.length} ►</span>
           </div>
 
@@ -204,21 +237,15 @@ export default function ReplayScreen({
           <div className="w-full overflow-x-auto py-1">
             <div className="flex items-center justify-center gap-2.5 sm:gap-4 min-w-max mx-auto px-2">
               {currentFrame.values.map((value, index) => {
-                const isActive =
-                  currentFrame.activeIndices !== null &&
-                  (index === currentFrame.activeIndices[0] ||
-                    index === currentFrame.activeIndices[1]);
-
-                const isSorted = currentFrame.sortedIndices.includes(index);
+                const role = getBoxRole(index);
 
                 return (
                   <NumberedBox
                     key={index}
                     value={value}
                     index={index}
-                    selected={isActive}
+                    role={role}
                     disabled={false}
-                    sorted={isSorted}
                     onClick={() => {}}
                     size={boxSize}
                   />
@@ -238,10 +265,9 @@ export default function ReplayScreen({
           </div>
         </div>
 
-        {/* Synchronized Pseudocode Panel (P1.4 / P1.8) */}
-        <BubbleSortPseudocodePanel
+        {/* Synchronized Pseudocode Panel (P2.1-E) */}
+        <SelectionSortPseudocodePanel
           frame={currentFrame}
-          variant={variant}
           className="w-full"
         />
 
@@ -252,11 +278,11 @@ export default function ReplayScreen({
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             <span>PROGRESSO DA EXECUÇÃO</span>
-            <span className="text-cyan-400 font-bold">{progressPercent}%</span>
+            <span className="text-purple-400 font-bold">{progressPercent}%</span>
           </div>
           <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300"
+              className="h-full bg-gradient-to-r from-purple-500 via-cyan-500 to-emerald-500 transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>

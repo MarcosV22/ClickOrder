@@ -148,11 +148,11 @@ export default function SelectionTutorialScreen({
   };
 
   return (
-    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center py-6 px-4">
+    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-4 sm:pt-6 pb-16 sm:pb-20 px-4">
       {/* Ambient glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[550px] h-72 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col items-center gap-6 max-w-2xl w-full">
+      <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-5 max-w-2xl w-full">
         {/* Top bar */}
         <div className="w-full flex items-center justify-between">
           <button
@@ -235,7 +235,7 @@ export default function SelectionTutorialScreen({
         </div>
 
         {/* Conveyor track with boxes */}
-        <div className="w-full py-6 px-4 rounded-xl bg-[#0a1638]/40 border border-[#2a4a9e]/30 flex flex-col items-center gap-4">
+        <div className="w-full py-4 sm:py-5 px-3 sm:px-4 rounded-xl bg-[#0a1638]/40 border border-[#2a4a9e]/30 flex flex-col items-center gap-3">
           <div className="flex items-center justify-center gap-4">
             {gameState.currentValues.map((val, idx) => (
               <NumberedBox

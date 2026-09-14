@@ -378,7 +378,7 @@ export default function GameScreen({
       />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 py-4 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-start sm:justify-center gap-4 sm:gap-6 px-4 sm:px-6 py-4 pb-12 sm:pb-16 overflow-y-auto">
         {/* Ambient glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-64 bg-blue-600/4 rounded-full blur-[100px] pointer-events-none" />
 

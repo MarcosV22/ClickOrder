@@ -23,6 +23,7 @@ import {
   loadGameProgress,
   saveGameProgress,
   createMemoryStorageAdapter,
+  CURRENT_SCHEMA_VERSION,
   type GameSaveSchema,
 } from "../../persistence";
 
@@ -454,7 +455,7 @@ describe("Selection Sort Campaign & Gameplay (P2.1-D)", () => {
       const storage = createMemoryStorageAdapter();
       const initialSave = loadGameProgress(storage);
       saveGameProgress(initialSave, storage);
-      expect(initialSave.schemaVersion).toBe(2);
+      expect(initialSave.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
 
       // Simula uma fase inteira de Selection Sort em memória
       const selectionArray = generateSelectionPhaseArray(1).values;
@@ -466,7 +467,7 @@ describe("Selection Sort Campaign & Gameplay (P2.1-D)", () => {
       // O storage do save permanece rigorosamente intacto
       const afterSave = loadGameProgress(storage);
       expect(afterSave).toEqual(initialSave);
-      expect(afterSave.schemaVersion).toBe(2);
+      expect(afterSave.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
       expect(afterSave.campaign.unlockedPhases).toBe(initialSave.campaign.unlockedPhases);
       expect(afterSave.records).toEqual(initialSave.records);
     });
