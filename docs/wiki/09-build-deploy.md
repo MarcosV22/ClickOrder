@@ -35,12 +35,14 @@ flowchart LR
 Após a execução do build, a raiz `dist/` contém:
 ```text
 dist/
-├── index.html                  # Shell HTML com scripts e estilos injetados
+├── index.html                  # Shell HTML com scripts e estilos injetados (pt-BR e notranslate)
 ├── robots.txt                  # Instruções para rastreadores (quando gerado)
 └── assets/
     ├── index-[hash].css        # Folha de estilos combinada e minificada (~42 KB)
     └── index-[hash].js         # Bundle JavaScript do React e aplicação (~219 KB)
 ```
+
+> *Nota sobre Internacionalização e Tradução:* Sorting Station utiliza pt-BR como idioma canônico e desabilita tradução automática para preservar a terminologia pedagógica da interface (`<html lang="pt-BR" translate="no" class="notranslate">` e `<meta name="google" content="notranslate" />`).
 
 ### 2.3. Pré-visualização Local dos Artefatos Compilados (`vite preview`)
 - **Comando do `package.json`:** `"preview": "vite preview"` ([`package.json`](../../package.json)).

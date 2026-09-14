@@ -135,9 +135,10 @@ flowchart LR
 ```
 
 1. **Documento Shell ([`index.html`](../../index.html)):**
-   - Contém placeholders especiais comentados (`<!-- figma:lang -->`, `<!-- figma:head-start -->`, `<!-- figma:head-end -->`, `<!-- figma:body-start -->`, `<!-- figma:body-end -->`) que são processados em tempo de compilação pelo plugin `figmaSiteConfiguration` configurado em [`vite.config.ts`](../../vite.config.ts).
+   - Contém placeholders especiais comentados (`<!-- figma:head-start -->`, `<!-- figma:head-end -->`, `<!-- figma:body-start -->`, `<!-- figma:body-end -->`) que são processados em tempo de compilação pelo plugin `figmaSiteConfiguration` configurado em [`vite.config.ts`](../../vite.config.ts).
    - O elemento contêiner raiz é `<div id="root"></div>` ([`index.html`](../../index.html)).
    - O script principal é carregado como módulo: `<script type="module" src="/src/main.tsx"></script>` ([`index.html`](../../index.html)).
+   - Sorting Station utiliza pt-BR como idioma canônico e desabilita tradução automática para preservar a terminologia pedagógica da interface (`<html lang="pt-BR" translate="no" class="notranslate">` e `<meta name="google" content="notranslate" />`).
 
 2. **Ponto de Entrada React ([`src/main.tsx`](../../src/main.tsx)):**
    - Importa o estilo global: `import './index.css'` ([`src/main.tsx`](../../src/main.tsx)).
