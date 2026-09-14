@@ -18,6 +18,7 @@ interface NumberedBoxProps {
   badge?: string;
   onClick?: (index: number) => void;
   animating?: "left" | "right" | null;
+  swapDistance?: number;
   size?: "sm" | "md" | "lg";
 }
 
@@ -31,6 +32,7 @@ export default function NumberedBox({
   badge,
   onClick,
   animating = null,
+  swapDistance,
   size = "lg",
 }: NumberedBoxProps) {
   const sizeMap = {
@@ -146,12 +148,40 @@ export default function NumberedBox({
     }
   };
 
+  const getRoleDescription = (r: BoxRole): string => {
+    switch (r) {
+      case "target-min":
+        return "posição alvo e candidato mínimo";
+      case "target":
+        return "posição alvo (i)";
+      case "min":
+        return "candidato mínimo";
+      case "scan-min":
+        return "scanner ativo e candidato mínimo";
+      case "scan":
+        return "scanner ativo de inspeção (j)";
+      case "sorted":
+        return "consolidada na posição correta";
+      case "pair":
+        return "em comparação adjacente";
+      case "default":
+      default:
+        return "não consolidada";
+    }
+  };
+
   const roleStyles = getRoleClasses(resolvedRole);
   const displayBadge = badge ?? getRoleBadge(resolvedRole);
+  const roleDescription = getRoleDescription(resolvedRole);
 
   return (
     <div
-      className={`relative flex flex-col items-center gap-1 ${animClass}`}
+      className={`relative flex flex-col items-center gap-1 ${animClass} ${animClass ? "z-30" : "z-10"}`}
+      style={
+        swapDistance !== undefined && swapDistance > 1
+          ? ({ "--swap-distance": swapDistance } as React.CSSProperties)
+          : undefined
+      }
     >
       {/* Box number label above */}
       <span
@@ -164,7 +194,7 @@ export default function NumberedBox({
       <button
         onClick={() => !disabled && onClick?.(index)}
         disabled={disabled || !onClick}
-        aria-label={`Caixa #${index + 1}, valor ${value}, estado ${displayBadge}`}
+        aria-label={`Caixa #${index + 1}, valor ${value}, papel: ${roleDescription}, estado ${displayBadge}`}
         className={`
           relative ${s.box} rounded-lg flex flex-col items-center justify-center
           transition-all duration-200 cursor-pointer select-none

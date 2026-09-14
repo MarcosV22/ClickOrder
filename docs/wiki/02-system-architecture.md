@@ -31,9 +31,11 @@ flowchart TD
         App -- "screen === 'tutorial'" --> TutorialScreen["src/screens/TutorialScreen.tsx"]
         App -- "screen === 'selection-tutorial'" --> SelectionTutorialScreen["src/screens/SelectionTutorialScreen.tsx"]
         App -- "screen === 'game'" --> GameScreen["src/screens/GameScreen.tsx"]
+        App -- "screen === 'selection-game'" --> SelectionGameScreen["src/screens/SelectionGameScreen.tsx"]
         App -- "screen === 'result'" --> ResultScreen["src/screens/ResultScreen.tsx"]
         App -- "screen === 'replay'" --> ReplayScreen["src/screens/ReplayScreen.tsx"]
         App -- "screen === 'campaign-complete'" --> CampaignCompleteScreen["src/screens/CampaignCompleteScreen.tsx"]
+        App -- "screen === 'selection-campaign-complete'" --> SelectionCampaignCompleteScreen["src/screens/SelectionCampaignCompleteScreen.tsx"]
     end
 
     subgraph ScreenEvents ["3. Ações e Callbacks de Transição"]
@@ -42,17 +44,24 @@ flowchart TD
         HomeScreen -- "onStartSelection()" --> AppBriefingSelection["setBriefingModeId('selection-canonical')\nsetScreen('briefing')"]
         BriefingScreen -- "onStart() [bubble-canonical]" --> AppGame["setScreen('game')"]
         BriefingScreen -- "onStart() [bubble-early-exit]" --> AppGameEarly["setScreen('game')"]
-        BriefingScreen -- "onStart() [selection-canonical]" --> AppSelectionTut["setScreen('selection-tutorial')"]
+        BriefingScreen -- "onStart() [selection-canonical (sem tutorial)]" --> AppSelectionTut["setScreen('selection-tutorial')"]
+        BriefingScreen -- "onStart() [selection-canonical (com tutorial)]" --> AppSelectionGame["generateSelectionPhaseArray(1)\nsetScreen('selection-game')"]
         BriefingScreen -- "onBack()" --> AppHome["setScreen('home')"]
-        SelectionTutorialScreen -- "onComplete() / onBack()" --> AppHome2["setScreen('home')"]
+        SelectionTutorialScreen -- "onComplete()" --> AppSelectionTutComplete["setHasCompletedSelectionTutorial(true)\ngenerateSelectionPhaseArray(1)\nsetScreen('selection-game')"]
+        SelectionTutorialScreen -- "onBack()" --> AppHome2["setScreen('home')"]
         TutorialScreen -- "onBack()" --> AppHome
         TutorialScreen -- "onUnderstood()" --> AppGame
         
-        GameScreen -- "onComplete(comparisons, swaps, finalArray, ...)" --> AppResult["setResult({...})\nsetScreen('result')"]
-        ResultScreen -- "onRepeat()" --> AppRepeat["setResult(null)\nsetScreen('game')"]
-        ResultScreen -- "onNext()" --> AppNext["setPhase(min(phase+1, 3))\nsetResult(null)\nsetScreen('game')"]
+        GameScreen -- "onComplete(...)" --> AppResult["setResult({...})\nsetScreen('result')"]
+        SelectionGameScreen -- "onComplete(...)" --> AppResultSel["setResult({protocol: 'selection', ...})\nsetScreen('result')"]
+        ResultScreen -- "onRepeat() [Bubble]" --> AppRepeat["setResult(null)\nsetScreen('game')"]
+        ResultScreen -- "onRepeat() [Selection]" --> AppRepeatSel["setResult(null)\nsetScreen('selection-game')"]
+        ResultScreen -- "onNext() [Bubble]" --> AppNext["setPhase(min(phase+1, 3))\nsetResult(null)\nsetScreen('game')"]
+        ResultScreen -- "onNext() [Selection]" --> AppNextSel["generateSelectionPhaseArray(phase+1)\nsetScreen('selection-game') | 'selection-campaign-complete'"]
         ResultScreen -- "onViewReplay()" --> AppReplay["setScreen('replay')"]
         ReplayScreen -- "onBackToResult()" --> AppResultBack["setScreen('result')"]
+        SelectionCampaignCompleteScreen -- "onReturnHome()" --> AppHome
+        SelectionCampaignCompleteScreen -- "onRestartProtocol()" --> AppRestartSel["generateSelectionPhaseArray(1)\nsetScreen('selection-game')"]
     end
 
     subgraph ComponentsHierarchy ["4. Componentes Reutilizáveis"]
@@ -111,9 +120,11 @@ type Screen =
   | "tutorial"
   | "selection-tutorial"
   | "game"
+  | "selection-game"
   | "result"
   | "replay"
-  | "campaign-complete";
+  | "campaign-complete"
+  | "selection-campaign-complete";
 ```
 
 ### Mecânica de Transição
@@ -125,18 +136,25 @@ type Screen =
 | `HomeScreen` | `onStartChallenge` | `"briefing"` | Prepara briefing do Modo Desafio Early Exit (`briefingModeId = 'bubble-early-exit'`) |
 | `HomeScreen` | `onStartSelection` | `"briefing"` | Prepara briefing do Selection Sort (`briefingModeId = 'selection-canonical'`) |
 | `ProtocolModeBriefingScreen` | `onStart` (Bubble) | `"game"` | Dispara geração procedural da fase 1 e inicia o jogo |
-| `ProtocolModeBriefingScreen` | `onStart` (Selection) | `"selection-tutorial"` | Inicia o tutorial interativo do Selection Sort |
+| `ProtocolModeBriefingScreen` | `onStart` (Selection sem tutorial) | `"selection-tutorial"` | Inicia o tutorial interativo do Selection Sort |
+| `ProtocolModeBriefingScreen` | `onStart` (Selection com tutorial) | `"selection-game"` | Dispara geração procedural da fase 1 de Selection e inicia |
 | `ProtocolModeBriefingScreen` | `onBack` | `"home"` | Retorna à home sem efeitos colaterais |
-| `SelectionTutorialScreen` | `onBack` / `onComplete` | `"home"` | Retorna à home com segurança |
+| `SelectionTutorialScreen` | `onBack` | `"home"` | Retorna à home com segurança |
+| `SelectionTutorialScreen` | `onComplete` | `"selection-game"` | Registra tutorial concluído na sessão e inicia Fase 1 procedural |
 | `TutorialScreen` | `onBack` | `"home"` | Retorna para a tela inicial ([`src/App.tsx`](../../src/App.tsx)) |
 | `TutorialScreen` | `onUnderstood` | `"game"` | Inicia o jogo na fase atual ([`src/App.tsx`](../../src/App.tsx)) |
-| `GameScreen` | `onComplete` | `"result"` | Armazena métricas factuais em `result` e consolida em `phaseResults` |
-| `ResultScreen` | `onViewReplay` | `"replay"` | Transita para `ReplayScreen` preservando histórico em memória |
+| `GameScreen` | `onComplete` | `"result"` | Armazena métricas factuais em `result` (Bubble) |
+| `SelectionGameScreen` | `onComplete` | `"result"` | Armazena métricas factuais em `result` (Selection) |
+| `ResultScreen` | `onViewReplay` | `"replay"` | Transita para `ReplayScreen` preservando histórico em memória (Bubble) |
 | `ReplayScreen` | `onBackToResult` | `"result"` | Retorna para `ResultScreen` sem perdas |
-| `ResultScreen` | `onRepeat` | `"game"` | Reinicia com mesmo vetor e semente |
-| `ResultScreen` | `onNext` | `"game"` ou `"campaign-complete"` | Avança de fase ou encerra campanha |
+| `ResultScreen` | `onRepeat` (Bubble) | `"game"` | Reinicia com mesmo vetor e semente |
+| `ResultScreen` | `onRepeat` (Selection) | `"selection-game"` | Reinicia com mesmo vetor e semente da fase |
+| `ResultScreen` | `onNext` (Bubble) | `"game"` ou `"campaign-complete"` | Avança de fase ou encerra campanha Bubble |
+| `ResultScreen` | `onNext` (Selection) | `"selection-game"` ou `"selection-campaign-complete"` | Avança de fase procedural ou encerra campanha Selection |
 | `CampaignCompleteScreen` | `onReturnHome` | `"home"` | Reseta sessão e retorna à home |
-| `CampaignCompleteScreen` | `onRestartProtocol` | `"game"` | Reinicia nova campanha |
+| `CampaignCompleteScreen` | `onRestartProtocol` | `"game"` | Reinicia nova campanha Bubble |
+| `SelectionCampaignCompleteScreen` | `onReturnHome` | `"home"` | Reseta sessão e retorna à home |
+| `SelectionCampaignCompleteScreen` | `onRestartProtocol` | `"selection-game"` | Reinicia nova campanha Selection gerando novos vetores |
 
 ---
 

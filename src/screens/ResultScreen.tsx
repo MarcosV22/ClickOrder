@@ -17,6 +17,7 @@ interface ResultScreenProps {
   elapsedTimeMs?: number;
   phase: number;
   hasNextPhase?: boolean;
+  protocol?: "bubble" | "selection";
   variant?: BubbleSortVariant;
   earlyExitTriggered?: boolean;
   terminationPass?: number;
@@ -37,6 +38,7 @@ export default function ResultScreen({
   elapsedTimeMs,
   phase,
   hasNextPhase = true,
+  protocol = "bubble",
   variant = "CANONICAL",
   earlyExitTriggered = false,
   terminationPass,
@@ -46,7 +48,8 @@ export default function ResultScreen({
   onRepeat,
   onViewReplay,
 }: ResultScreenProps) {
-  const isEarlyExit = variant === "EARLY_EXIT";
+  const isSelection = protocol === "selection";
+  const isEarlyExit = variant === "EARLY_EXIT" && !isSelection;
   const effectiveAvoided =
     comparisonsAvoided ?? Math.max(0, canonicalComparisons - comparisons);
   const pseudocodeLines = isEarlyExit
@@ -74,9 +77,11 @@ export default function ResultScreen({
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-emerald-500/20 bg-emerald-950/20 mb-3">
               <span className="text-[10px] text-emerald-400 tracking-widest"
                 style={{ fontFamily: "'Space Mono', monospace" }}>
-                {isEarlyExit
-                  ? `MODO DESAFIO — CENÁRIO ${phase} CONCLUÍDO`
-                  : `FASE ${phase} CONCLUÍDA`}
+                {isSelection
+                  ? `PROTOCOLO SELECTION — FASE ${phase} CONCLUÍDA`
+                  : isEarlyExit
+                    ? `MODO DESAFIO — CENÁRIO ${phase} CONCLUÍDO`
+                    : `FASE ${phase} CONCLUÍDA`}
               </span>
             </div>
             <h2
@@ -252,42 +257,79 @@ export default function ResultScreen({
                   : "O elemento menor no final exigiu trocas em todas as passadas. O Early Exit não trouxe economia neste cenário (pior caso)."}
               </div>
             )}
+
+            {isSelection && (
+              <div className="mt-1 p-2.5 rounded-lg border border-purple-500/30 bg-purple-950/30 text-[11px] text-purple-200/90 leading-relaxed font-mono">
+                <span className="font-bold text-purple-300 uppercase block mb-1">
+                  Nota Pedagógica (Selection Sort):
+                </span>
+                Selection Sort realiza a varredura completa antes de efetuar no máximo uma troca por passada.
+              </div>
+            )}
           </div>
 
-          {/* Pseudocode */}
-          <div className="panel-border bg-[#080f28]/80 rounded-xl p-5 flex flex-col gap-3">
-            <span
-              className="text-[10px] text-white/30 tracking-widest uppercase"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              {isEarlyExit
-                ? "PSEUDOCÓDIGO — EARLY EXIT"
-                : "PSEUDOCÓDIGO — BUBBLE SORT"}
-            </span>
-            <div className="flex flex-col gap-0.5">
-              {pseudocodeLines.map((item) => (
-                <div
-                  key={item.id}
-                  className={`px-2 py-0.5 rounded text-[10px] leading-relaxed ${
-                    item.id === "SWAP_STATEMENT" || item.id === "BREAK_STATEMENT"
-                      ? "bg-cyan-950/40 text-cyan-300"
-                      : "text-white/40"
-                  }`}
-                  style={{
-                    fontFamily: "'Space Mono', monospace",
-                    paddingLeft: `${Math.max(8, item.indent * 12 + 8)}px`,
-                  }}
-                >
-                  {item.text}
+          {/* Pseudocode / Selection Panel */}
+          {isSelection ? (
+            <div className="panel-border bg-[#080f28]/80 rounded-xl p-5 flex flex-col gap-3">
+              <span
+                className="text-[10px] text-purple-300 tracking-widest uppercase font-mono"
+              >
+                PRINCÍPIO PEDAGÓGICO — SELECTION SORT
+              </span>
+              <div className="p-3.5 rounded-lg bg-purple-950/40 border border-purple-500/20 flex flex-col gap-2">
+                <p className="text-xs text-purple-200/90 leading-relaxed font-mono font-bold">
+                  Selection Sort realiza a varredura completa antes de efetuar no máximo uma troca por passada.
+                </p>
+                <p className="text-[11px] text-white/60 leading-relaxed font-mono">
+                  O algoritmo particiona a esteira: a sublista ordenada à esquerda e a desordenada à direita. O scanner inspeciona cada carga para localizar o menor item e, apenas no final da varredura, uma transferência pontual consolida a posição definitiva com o selo OK.
+                </p>
+              </div>
+              <div className="flex flex-col gap-1.5 pt-2 border-t border-white/5 text-[10px] font-mono text-white/50">
+                <div className="flex justify-between">
+                  <span>Varredura de Inspeção:</span>
+                  <span className="text-cyan-300 font-bold">Busca Completa na Partição</span>
                 </div>
-              ))}
+                <div className="flex justify-between">
+                  <span>Transferência Física:</span>
+                  <span className="text-purple-300 font-bold">No Máximo 1 por Passada</span>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="panel-border bg-[#080f28]/80 rounded-xl p-5 flex flex-col gap-3">
+              <span
+                className="text-[10px] text-white/30 tracking-widest uppercase"
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                {isEarlyExit
+                  ? "PSEUDOCÓDIGO — EARLY EXIT"
+                  : "PSEUDOCÓDIGO — BUBBLE SORT"}
+              </span>
+              <div className="flex flex-col gap-0.5">
+                {pseudocodeLines.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`px-2 py-0.5 rounded text-[10px] leading-relaxed ${
+                      item.id === "SWAP_STATEMENT" || item.id === "BREAK_STATEMENT"
+                        ? "bg-cyan-950/40 text-cyan-300"
+                        : "text-white/40"
+                    }`}
+                    style={{
+                      fontFamily: "'Space Mono', monospace",
+                      paddingLeft: `${Math.max(8, item.indent * 12 + 8)}px`,
+                    }}
+                  >
+                    {item.text}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Action buttons */}
         <div className="flex flex-wrap items-center justify-center gap-4">
-          {onViewReplay && (
+          {onViewReplay && !isSelection && (
             <GameButton onClick={onViewReplay} variant="secondary" size="md">
               ▶ VER EXECUÇÃO
             </GameButton>

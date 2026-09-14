@@ -243,7 +243,7 @@ O objetivo central do nível P0 é converter o atual "puzzle de trocas livres" e
 - **Dependências:** P0.1, [`02-system-architecture.md`](./02-system-architecture.md), [`docs/adr/0011-selection-sort-engine-and-fsm.md`](../adr/0011-selection-sort-engine-and-fsm.md), [`docs/adr/0012-selection-sort-pedagogical-layer-and-interactive-tutorial.md`](../adr/0012-selection-sort-pedagogical-layer-and-interactive-tutorial.md).
 - **Risco:** Reutilização indevida de componentes do Bubble Sort que quebrem a metáfora do scanner ou precipitação na exposição de campanha sem persistência.
 - **Critério de Aceite:** A interface impede trocas adjacentes; FSM bimodal `INSPECT` / `COMMIT` com engine pura e imutável; constraints procedurais desacopladas com predicados puros para fases de 4, 5 e 6 elementos; briefing oficial no catálogo sem duplicação de JSX; tutorial interativo com engine real sobre `[4, 1, 3]`; navegação segura na HomeScreen; 210 testes Vitest passando 100% verde.
-- **Status:** `EM ANDAMENTO` (Design pedagógico concluído em P2.1-A; Domínio puro e FSM concluídos em P2.1-B via ADR 0011; Constraints procedurais, briefing e tutorial interativo concluídos em P2.1-C via ADR 0012; Próximo passo: P2.1-D com campanha de 3 fases, persistência Schema v3 e telas finais de Selection).
+- **Status:** `EM ANDAMENTO` (Design pedagógico concluído em P2.1-A; Domínio puro e FSM concluídos em P2.1-B via ADR 0011; Constraints procedurais, briefing e tutorial interativo concluídos em P2.1-C via ADR 0012; Gameplay cinestésico e campanha procedural de 3 fases concluídos em P2.1-D via ADR 0013 com 229 testes Vitest passando 100% verde; Próximos passos: P2.1-E Replay e Pseudocódigo sincronizado de Selection Sort, e P2.1-F Persistência Schema v3).
 
 ---
 

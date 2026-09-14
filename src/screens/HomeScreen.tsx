@@ -141,7 +141,7 @@ export default function HomeScreen({
               size="md"
               className="w-full border-purple-500/50 text-purple-300 hover:border-purple-400 shadow-lg shadow-purple-950/30"
             >
-              🔍 &nbsp; SELECTION SORT (PREVIEW)
+              ◈ &nbsp; SELECTION SORT
             </GameButton>
           )}
 

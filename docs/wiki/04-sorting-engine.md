@@ -443,7 +443,7 @@ Conforme estabelecido no **ADR 0009**, o motor de ordenação é rigorosamente d
 
 ---
 
-## 1. Selection Sort (Protocolo Selection): Domínio Puro, Constraints e Tutorial `[NÚCLEO P2.1-B; PEDAGOGIA P2.1-C IMPLEMENTADOS; CAMPANHA P2.1-D PLANEJADA]`
+## 1. Selection Sort (Protocolo Selection): Domínio Puro, Constraints, Tutorial e Campanha `[NÚCLEO P2.1-B; PEDAGOGIA P2.1-C; GAMEPLAY E CAMPANHA P2.1-D IMPLEMENTADOS; REPLAY/PSEUDOCÓDIGO P2.1-E E PERSISTÊNCIA P2.1-F PLANEJADOS]`
 
 ### 1.1. Fundamento Algorítmico e Pedagógico
 O Selection Sort opera dividindo o vetor em duas partições: uma **sublista já ordenada** à esquerda ($0 \dots i-1$) e uma **sublista não ordenada** à direita ($i \dots n-1$). Em cada passada $i$, o algoritmo varre toda a partição não ordenada ($j = i+1 \dots n-1$) para localizar o menor elemento (*minimum element* no índice `minIndex`) e, ao final da varredura, realiza **no máximo uma única troca pontual** com o primeiro elemento da partição não ordenada ($A[i] \leftrightarrow A[minIndex]$). Caso o menor elemento já esteja na posição $i$ (`minIndex === i`), nenhuma troca física é realizada ($swaps$ permanece inalterado).
@@ -480,11 +480,26 @@ A engine é puramente funcional, imutável e desacoplada de React, DOM, estilos 
   - Para entradas aleatórias distintas distribuídas uniformemente, o Bubble Sort nas três fases da campanha (4, 5 e 6 elementos) possui número máximo total de 31 trocas ($6 + 10 + 15$) no pior caso e valor esperado teórico de 15,5 inversões/trocas ($3 + 5 + 7,5$), sem tratar isso como alegação empírica;
   - O Selection Sort, por sua vez, realiza no máximo 12 trocas nas três fases ($3 + 4 + 5 = 12$) e frequentemente menos devido a passadas onde o menor elemento já ocupa a posição correta.
 
-### 1.5. Próximo Passo: Campanha Principal e Persistência (P2.1-D)
-- Implementação de `SelectionGameScreen.tsx` consumindo `generateSelectionPhaseArray` para as 3 fases;
-- Evolução da persistência em `src/game/persistence/` para o Schema v3 registrando recordes de Selection Sort;
-- Replay com pseudocódigo sincronizado de Selection Sort;
-- Integração da campanha à navegação e telas de conclusão.
+### 1.5. Gameplay Cinestésico e Campanha de 3 Fases — P2.1-D / ADR 0013 `[IMPLEMENTADO]`
+- **`SelectionGameScreen.tsx`:** Tela dedicada consumindo `createSelectionSortState` como única fonte de verdade:
+  - FSM bimodal estrita: fase `INSPECT` oferece botões `[ ✦ NOVO MÍNIMO ]` e `[ = MANTER CANDIDATO ]`; fase `COMMIT` oferece `[ ⇄ TRANSFERIR MENOR CARGA ]` (quando $minIndex \neq i$) ou `[ ✓ CONSOLIDAR POSIÇÃO ]` (quando $minIndex === i$);
+  - Guarda síncrona `isActionLockedRef` eliminando condições de corrida por cliques rápidos e travando ações durante animações;
+  - Animação de troca com span variável: calcula a distância real $|i - minIndex|$ e injeta `--swap-distance` nas keyframes com elevação $z$-index (`z-30`);
+  - Banner informativo com fórmula matemática contextualizada ($A[j] < A[minIndex]$);
+  - Feedback formativo imediato não punitivo em decisões incorretas;
+  - Dicas pedagógicas (`handleHint`) contabilizadas isoladamente na sessão;
+  - Pontuação do protocolo: $\max(0, 100 - \text{errors} \times 10 - \text{hintsUsed} \times 5)$ (ADR 0007);
+- **Progressão da Campanha Procedural:**
+  - Fases 1 ($n=4$), 2 ($n=5$) e 3 ($n=6$) geradas por `generateSelectionPhaseArray(phase)` com valores 1..99 e sem duplicados;
+  - `ResultScreen` multi-protocolo exibindo badge âmbar e síntese pedagógica para o Selection Sort;
+  - `SelectionCampaignCompleteScreen.tsx` com 5 métricas consolidadas factuais, relatório discriminado por fase e opções de retorno ou repetição do protocolo;
+- **Isolamento de Persistência:**
+  - Resultados retidos exclusivamente na memória da sessão (`selectionResults`), sem violar ou alterar o Schema v2 no `localStorage`;
+- **Testes Automatizados:** 19 testes unitários e de integração em `selectionCampaign.test.ts`, totalizando 229 testes aprovados no Vitest.
+
+### 1.6. Próximos Passos: Replay e Persistência Schema v3 (P2.1-E e P2.1-F) `[PLANEJADOS]`
+- **P2.1-E (Replay & Pseudocódigo Sincronizado):** Mapeamento de quadros derivados de `SelectionStepRecord` e iluminação sincronizada das linhas do algoritmo Selection Sort;
+- **P2.1-F (Persistência Schema v3):** Evolução do schema no `localStorage` com suporte retrocompatível a recordes e fases desbloqueadas do Selection Sort.
 
 ---
 
