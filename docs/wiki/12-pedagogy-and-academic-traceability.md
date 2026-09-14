@@ -311,14 +311,32 @@ Para erradicar divergências textuais entre telas, código e artigos científico
 
 ## 8. Elementos Educacionais Obrigatórios por Protocolo (Checklist Canônico)
 
-Para que qualquer algoritmo seja considerado formalmente completo no Sorting Station, ele deve cumprir o seguinte checklist de 6 artefatos:
+Para que qualquer algoritmo seja considerado formalmente completo no Sorting Station, ele deve cumprir o seguinte checklist de 6 artefatos pedagógicos estruturais:
 
-- [ ] **1. Briefing Conceitual:** Tela intermediária desacoplada com objetivo, 4 regras essenciais e destaques assintóticos teóricos;
-- [ ] **2. Modo Demonstração:** Visualização autônoma (autoplay) do algoritmo com animação e pseudocódigo sincronizado em tempo real;
-- [ ] **3. Tutorial Interativo:** Mini-treinamento com vetor curto ($n=3$), passos explicados, botões idênticos ao gameplay e persistência `hasCompletedTutorial`;
-- [ ] **4. Campanha Interativa (Gameplay):** Fases 1 a 3 procedurais crescentes ($n=4, 5, 6$), FSM estrita, botoeira contextual travada e barra de progresso contínua ($0\%$ a $100\%$);
-- [ ] **5. Resultado Factual:** Vetor ordenado com selos `OK`, Pontuação do Protocolo transparente e quadro de métricas operacionais factuais;
-- [ ] **6. Replay e Reflexão:** Modo somente-leitura com controle temporal completo e pseudocódigo estruturado em português sincronizado às variáveis concretas.
+| Camada Pedagógica | Propósito Educacional | Bubble Sort | Selection Sort | Insertion Sort (P2.2) |
+| :--- | :--- | :---: | :---: | :---: |
+| **1. Briefing Conceitual** | Objetivos, regras e complexidade teórica antes da ação | [x] Concluído | [x] Concluído | [ ] Previsto |
+| **2. Modo Demonstração** | Observação passiva da execução canônica ideal com pseudocódigo (ADR 0017) | [x] Concluído | [x] Concluído | [ ] Previsto |
+| **3. Tutorial Interativo** | Prática guiada formativa com vetor curto e feedback explicativo | [x] Concluído | [x] Concluído | [ ] Previsto |
+| **4. Campanha Interativa** | Gameplay em 3 fases procedurais crescentes ($n=4, 5, 6$) com FSM estrita | [x] Concluído | [x] Concluído | [ ] Previsto |
+| **5. Resultado Factual** | Avaliação não punitiva via Pontuação do Protocolo e métricas factuais | [x] Concluído | [x] Concluído | [ ] Previsto |
+| **6. Replay e Reflexão** | Auditoria retrospectiva pós-fase com pseudocódigo sincronizado | [x] Concluído | [x] Concluído | [ ] Previsto |
+
+### Distinção Conceitual Rigorosa: Modo Demonstração vs. Modo Replay
+
+Fica estabelecida a separação epistemológica e funcional inegociável entre os dois modos:
+
+1. **Modo Demonstração (Execução Canônica / Pré-Prática):**
+   - **Objetivo:** Aprendizado observacional ("ver antes de fazer"). O estudante acompanha o comportamento exemplar do algoritmo operando sobre vetores curados fixos (`[5, 2, 4, 1]` no Bubble Sort e `[4, 1, 3]` no Selection Sort).
+   - **Fonte de Verdade:** A engine pura do algoritmo (`BubbleSortEngine` e `SelectionSortEngine`) executa autonomamente as regras formais sem intervenção humana.
+   - **Métricas:** Zero pontuação, zero erros, zero penalidades de dica. Exibe exclusivamente telemetria factual matemática (passo atual, comparações, trocas/transferências e passada).
+   - **Persistência:** 100% volátil na memória da sessão. Não escreve no `localStorage` nem altera o Schema v3.
+
+2. **Modo Replay (Reconstituição Histórica / Pós-Prática):**
+   - **Objetivo:** Reflexão metacognitiva sobre a própria ação ("o que eu fiz e por quê"). O estudante audita retrospectivamente cada decisão tomada durante a partida real da campanha.
+   - **Fonte de Verdade:** O vetor `history` gravado durante a interação efetiva do usuário.
+   - **Métricas:** Vinculado aos dados consolidados da partida jogada (Pontuação do Protocolo alcançada, tempo decorrido, erros cometidos e dicas solicitadas).
+   - **Persistência:** Histórico mantido em memória para revisão enquanto durar a sessão da fase concluída.
 
 ---
 

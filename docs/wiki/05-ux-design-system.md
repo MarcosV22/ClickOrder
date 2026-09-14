@@ -284,12 +284,15 @@ O Sorting Station adota um padrão arquitetural estrito para cada uma de suas 8 
   - Card de particularidades teóricas e analíticas;
 - **Ações:** Botão `[ ◀ VOLTAR ]` e CTA primário `[ INICIAR PROTOCOLO ]`.
 
-### 3. Modo Demonstração (Automated Showcase)
-- Instanciação de reprodução autônoma (reaproveitando a arquitetura do Replay);
-- **Topo:** Barra superior com botão `[ ◀ SAIR DA DEMONSTRAÇÃO ]` e badge `MODO DEMONSTRAÇÃO • AUTOPLAY`;
-- **Centro Superior:** Esteira com caixas animadas e rótulos semânticos (`BoxRole`);
-- **Centro Inferior:** Bloco de pseudocódigo em português com iluminação dinâmica da linha em execução em tempo real;
-- **Rodapé:** Barra de controles temporais (Pausar/Play, Velocidade 1x/2x, Próximo passo, Reiniciar).
+### 3. Modo Demonstração (Automated Showcase — P2.1-G-D / ADR 0017)
+- Instanciação de reprodução autônoma gerada deterministicamente pelas engines reais (`BubbleSortEngine` e `SelectionSortEngine`) sobre vetores curados fixos (`[5, 2, 4, 1]` e `[4, 1, 3]`);
+- **Topo:** Barra superior com botão contextual `[ ◀ VOLTAR ]` (com retorno fiel à tela de origem: Home ou Briefing) e badge `MODO DEMONSTRAÇÃO // EXECUÇÃO CANÔNICA`;
+- **Centro Superior:** Esteira com caixas animadas e rótulos semânticos (`BoxRole`), acompanhada de telemetria descritiva (passo atual, comparações, trocas/transferências e passada);
+- **Centro Inferior:** Bloco de pseudocódigo formal em português com iluminação dinâmica e sincronizada da linha em execução e dos valores concretos em tempo real;
+- **Rodapé:** Barra de controles temporais:
+  - Seletor de velocidade dinâmica: `0.5x`, `1x` (padrão) e `2x`;
+  - Botoeira de transporte: `[ ↺ REINICIAR ]`, `[ ← ANTERIOR ]`, `[ ▶ / ⏸ REPRODUZIR / PAUSAR ]`, `[ PRÓXIMO → ]`;
+  - CTA opcional de transição pedagógica: `[ ▶ INICIAR TREINAMENTO ]`.
 
 ### 4. Tutorial Interativo (Guided Hands-on)
 - Baseado em vetor curto curado e determinístico ($n=3$);

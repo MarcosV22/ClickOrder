@@ -12,6 +12,8 @@ import SelectionGameScreen, {
   type SelectionPhaseCompleteData,
 } from "./screens/SelectionGameScreen";
 import SelectionCampaignCompleteScreen from "./screens/SelectionCampaignCompleteScreen";
+import DemonstrationScreen from "./screens/DemonstrationScreen";
+import type { ProtocolId } from "./screens/protocolCatalog";
 import { PhaseResult } from "./game/campaign/campaignSummary";
 import {
   loadGameProgress,
@@ -47,6 +49,7 @@ type Screen =
   | "selection-game"
   | "result"
   | "replay"
+  | "demonstration"
   | "campaign-complete"
   | "selection-campaign-complete";
 
@@ -94,6 +97,12 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
   const [briefingReturnScreen, setBriefingReturnScreen] =
     useState<"home" | "campaign-complete">("home");
+
+  // Estado do Modo Demonstração Educacional (P2.1-G-D)
+  const [demonstrationProtocol, setDemonstrationProtocol] =
+    useState<"bubble" | "selection">("bubble");
+  const [demonstrationReturnScreen, setDemonstrationReturnScreen] =
+    useState<"home" | "briefing">("home");
 
   // Estado da Campanha Bubble Sort
   const [phase, setPhase] = useState<number>(1);
@@ -375,6 +384,28 @@ export default function App() {
     setScreen("selection-game");
   };
 
+  const handleOpenDemonstration = (
+    protocolId: ProtocolId,
+    origin: "home" | "briefing"
+  ) => {
+    if (protocolId === "insertion") return;
+    setDemonstrationProtocol(protocolId);
+    setDemonstrationReturnScreen(origin);
+    setScreen("demonstration");
+  };
+
+  const handleDemonstrationBack = () => {
+    setScreen(demonstrationReturnScreen);
+  };
+
+  const handleDemonstrationStartTraining = () => {
+    if (demonstrationProtocol === "bubble") {
+      handleSelectCampaign();
+    } else if (demonstrationProtocol === "selection") {
+      handleSelectSelection();
+    }
+  };
+
   const activeScenario = CHALLENGE_SCENARIOS[challengeScenarioIndex];
   const currentArray =
     gameMode === "CHALLENGE"
@@ -407,10 +438,28 @@ export default function App() {
     <div className="w-full h-full overflow-hidden">
       {screen === "home" && (
         <HomeScreen
-          onStart={handleSelectCampaign}
-          onHowToPlay={() => setScreen("tutorial")}
+          saveData={saveData}
+          onStartProtocol={(protocolId) => {
+            if (protocolId === "bubble") {
+              handleSelectCampaign();
+            } else if (protocolId === "selection") {
+              handleSelectSelection();
+            }
+          }}
+          onOpenTutorial={(protocolId) => {
+            if (protocolId === "bubble") {
+              setScreen("tutorial");
+            } else if (protocolId === "selection") {
+              setScreen("selection-tutorial");
+            }
+          }}
+          onOpenDemonstration={(protocolId) =>
+            handleOpenDemonstration(protocolId, "home")
+          }
           isChallengeUnlocked={isChallengeUnlocked}
           onStartChallenge={() => handleSelectChallenge("home")}
+          onStart={handleSelectCampaign}
+          onHowToPlay={() => setScreen("tutorial")}
           onStartSelection={handleSelectSelection}
         />
       )}
@@ -419,6 +468,12 @@ export default function App() {
           briefing={getBriefingForMode(briefingModeId)}
           onStart={handleBriefingStart}
           onBack={() => setScreen(briefingReturnScreen)}
+          onOpenDemonstration={() =>
+            handleOpenDemonstration(
+              briefingModeId === "selection-canonical" ? "selection" : "bubble",
+              "briefing"
+            )
+          }
         />
       )}
       {screen === "tutorial" && (
@@ -497,6 +552,13 @@ export default function App() {
             onBackToResult={() => setScreen("result")}
           />
         )
+      )}
+      {screen === "demonstration" && (
+        <DemonstrationScreen
+          protocol={demonstrationProtocol}
+          onBack={handleDemonstrationBack}
+          onStartTraining={handleDemonstrationStartTraining}
+        />
       )}
       {screen === "campaign-complete" && (
         <CampaignCompleteScreen

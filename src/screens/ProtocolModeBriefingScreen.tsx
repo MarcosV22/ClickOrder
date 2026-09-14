@@ -5,12 +5,14 @@ interface ProtocolModeBriefingScreenProps {
   briefing: ProtocolModeBriefing;
   onStart: () => void;
   onBack: () => void;
+  onOpenDemonstration?: () => void;
 }
 
 export default function ProtocolModeBriefingScreen({
   briefing,
   onStart,
   onBack,
+  onOpenDemonstration,
 }: ProtocolModeBriefingScreenProps) {
   const isAmber = briefing.badgeVariant === "amber";
 
@@ -250,22 +252,34 @@ export default function ProtocolModeBriefingScreen({
         </div>
 
         {/* Footer Actions */}
-        <footer className="flex flex-col-reverse sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md pt-2 pb-2">
+        <footer className="flex flex-col-reverse sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-xl pt-2 pb-2">
           <GameButton
             onClick={onBack}
             variant="secondary"
             size="lg"
-            className="w-full sm:w-1/2"
+            className="w-full sm:w-auto px-5"
             aria-label="Voltar para a tela anterior"
           >
             ← &nbsp; VOLTAR
           </GameButton>
 
+          {onOpenDemonstration && (
+            <GameButton
+              onClick={onOpenDemonstration}
+              variant="ghost"
+              size="lg"
+              className="w-full sm:w-auto px-5 border-cyan-500/40 text-cyan-300 hover:border-cyan-400"
+              aria-label="Ver demonstração do algoritmo"
+            >
+              👁 &nbsp; VER DEMONSTRAÇÃO
+            </GameButton>
+          )}
+
           <GameButton
             onClick={onStart}
             variant={briefing.startVariant ?? "primary"}
             size="lg"
-            className={`w-full sm:w-1/2 ${
+            className={`w-full sm:flex-1 ${
               isAmber
                 ? "border-amber-500/50 text-amber-300 hover:border-amber-400 shadow-lg shadow-amber-950/30"
                 : ""

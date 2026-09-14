@@ -8,19 +8,23 @@ import type { BubbleSortVariant, StepRecord } from "../game/sorting/types";
 interface ReplayScreenProps {
   initialArray: readonly number[];
   history: readonly StepRecord[];
-  phase: number;
+  phase?: number;
   variant?: BubbleSortVariant;
   earlyExitTriggered?: boolean;
+  mode?: "replay" | "demonstration";
   onBackToResult: () => void;
+  onStartTraining?: () => void;
 }
 
 export default function ReplayScreen({
   initialArray,
   history,
-  phase,
+  phase = 1,
   variant = "CANONICAL",
   earlyExitTriggered = false,
+  mode = "replay",
   onBackToResult,
+  onStartTraining,
 }: ReplayScreenProps) {
   // Derivação pura e determinística de todos os quadros a partir do histórico real
   const frames = useMemo(
@@ -29,7 +33,8 @@ export default function ReplayScreen({
   );
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(mode === "demonstration");
+  const [playbackSpeed, setPlaybackSpeed] = useState<0.5 | 1 | 2>(1);
 
   const currentFrame = getReplayFrame(frames, currentIndex);
   const isFirst = currentIndex === 0;
@@ -39,6 +44,7 @@ export default function ReplayScreen({
   useEffect(() => {
     if (!isPlaying) return;
 
+    const intervalMs = Math.round(1200 / playbackSpeed);
     const timer = window.setInterval(() => {
       setCurrentIndex((prev) => {
         if (prev < frames.length - 1) {
@@ -48,10 +54,10 @@ export default function ReplayScreen({
           return prev;
         }
       });
-    }, 1200);
+    }, intervalMs);
 
     return () => window.clearInterval(timer);
-  }, [isPlaying, frames.length]);
+  }, [isPlaying, frames.length, playbackSpeed]);
 
   const handlePrevious = () => {
     setIsPlaying(false);
@@ -101,26 +107,35 @@ export default function ReplayScreen({
           <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
           <div className="flex flex-col">
             <span
-              className="text-[10px] text-cyan-400 tracking-widest uppercase"
+              className="text-[10px] text-cyan-400 tracking-widest uppercase font-mono"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              {variant === "EARLY_EXIT"
-                ? "AUDITORIA TÉCNICA // MODO DESAFIO (EARLY EXIT)"
-                : "AUDITORIA TÉCNICA // MODO REPLAY"}
+              {mode === "demonstration"
+                ? "MODO DEMONSTRAÇÃO // EXECUÇÃO CANÔNICA"
+                : variant === "EARLY_EXIT"
+                  ? "AUDITORIA TÉCNICA // MODO DESAFIO (EARLY EXIT)"
+                  : "AUDITORIA TÉCNICA // MODO REPLAY"}
             </span>
             <span
               className="text-lg font-black text-white tracking-tight"
               style={{ fontFamily: "'Orbitron', sans-serif" }}
             >
-              {variant === "EARLY_EXIT"
-                ? `CENÁRIO ${phase} — VARIANTE EARLY EXIT`
-                : `FASE ${phase} — PROTOCOLO BUBBLE`}
+              {mode === "demonstration"
+                ? "PROTOCOLO BUBBLE SORT"
+                : variant === "EARLY_EXIT"
+                  ? `CENÁRIO ${phase} — VARIANTE EARLY EXIT`
+                  : `FASE ${phase} — PROTOCOLO BUBBLE`}
             </span>
           </div>
         </div>
 
-        <GameButton onClick={onBackToResult} variant="secondary" size="sm">
-          ← VOLTAR AO RESULTADO
+        <GameButton
+          onClick={onBackToResult}
+          variant="secondary"
+          size="sm"
+          aria-label={mode === "demonstration" ? "Voltar da demonstração" : "Voltar ao resultado"}
+        >
+          {mode === "demonstration" ? "← VOLTAR" : "← VOLTAR AO RESULTADO"}
         </GameButton>
       </div>
 
@@ -264,7 +279,7 @@ export default function ReplayScreen({
       </div>
 
       {/* Bottom Controls Bar */}
-      <div className="relative z-10 flex flex-wrap items-center justify-center gap-4 panel-border bg-[#080f28]/90 rounded-xl px-6 py-4 max-w-2xl w-full mx-auto shrink-0">
+      <div className="relative z-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4 panel-border bg-[#080f28]/90 rounded-xl px-4 sm:px-6 py-4 max-w-3xl w-full mx-auto shrink-0">
         <GameButton onClick={handleResetReplay} variant="secondary" size="sm">
           ↺ REINICIAR
         </GameButton>
@@ -294,6 +309,43 @@ export default function ReplayScreen({
         >
           PRÓXIMO →
         </GameButton>
+
+        {/* Speed Selector (0.5x, 1x, 2x) */}
+        <div
+          className="flex items-center gap-1 bg-[#060b1a] border border-white/10 rounded-lg p-1"
+          role="group"
+          aria-label="Velocidade da reprodução"
+        >
+          {([0.5, 1, 2] as const).map((spd) => (
+            <button
+              key={spd}
+              type="button"
+              onClick={() => setPlaybackSpeed(spd)}
+              className={`px-2 py-1 text-xs font-mono rounded transition-colors ${
+                playbackSpeed === spd
+                  ? "bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40"
+                  : "text-white/40 hover:text-white"
+              }`}
+              style={{ fontFamily: "'Space Mono', monospace" }}
+              aria-pressed={playbackSpeed === spd}
+              aria-label={`Velocidade ${spd}x`}
+            >
+              {spd}x
+            </button>
+          ))}
+        </div>
+
+        {/* Optional Demonstration Training CTA */}
+        {mode === "demonstration" && onStartTraining && (
+          <GameButton
+            onClick={onStartTraining}
+            variant="primary"
+            size="md"
+            className="border-cyan-400 bg-cyan-600/30 text-cyan-200 hover:bg-cyan-500/40"
+          >
+            ▶ INICIAR TREINAMENTO
+          </GameButton>
+        )}
       </div>
     </div>
   );

@@ -25,25 +25,30 @@ O front-end do **Sorting Station** opera como uma Single Page Application (SPA) 
 ```text
 src/
 ├── main.tsx             # Ponto de entrada React (createRoot, StrictMode e importação de index.css)
-├── App.tsx              # Componente raiz: gerencia telas (screen), fases (phase) e resultado
+├── App.tsx              # Componente raiz: gerencia telas (screen), fases (phase), resultado e demonstração
 ├── index.css            # Folha de estilo global: fontes web, Tailwind v4, tokens @theme e animações
 ├── vite-env.d.ts        # Declarações de tipos do cliente Vite
 ├── screens/             # Telas completas da aplicação (orquestradas por App.tsx)
-│   ├── HomeScreen.tsx   # Tela de boas-vindas e apresentação temática da Central Logística
-│   ├── ProtocolModeBriefingScreen.tsx # Briefing intermediário orientado a dados (Canônico / Desafio / Selection)
+│   ├── HomeScreen.tsx   # Hub Educacional Simétrico de Protocolos (Bubble, Selection, Insertion)
+│   ├── ProtocolCard.tsx # Componente simétrico de cartão de protocolo para o Hub da Home
+│   ├── protocolCatalog.ts # Catálogo desacoplado de metadados dos protocolos
+│   ├── ProtocolModeBriefingScreen.tsx # Briefing intermediário orientado a dados com ação de demonstração
 │   ├── TutorialScreen.tsx # Tutorial explicativo com demonstração cíclica animada (Bubble)
 │   ├── SelectionTutorialScreen.tsx # Tutorial interativo com engine real sobre [4, 1, 3] (Selection)
 │   ├── GameScreen.tsx   # Tela de jogo interativa: Bubble Sort esteira e lógica de ordenação
 │   ├── SelectionGameScreen.tsx # Tela de jogo interativa: Selection Sort esteira, scanner e commits (P2.1-D / ADR 0013)
 │   ├── ResultScreen.tsx # Relatório de término de fase: estatísticas e pseudocódigo (Bubble e Selection)
-│   ├── ReplayScreen.tsx # Reprodução retrospectiva passo a passo com pseudocódigo sincronizado
+│   ├── ReplayScreen.tsx # Reprodução retrospectiva passo a passo com suporte a replay e demonstração
+│   ├── SelectionReplayScreen.tsx # Reprodução retrospectiva Selection com pseudocódigo sincronizado e demonstração
+│   ├── DemonstrationScreen.tsx # Modo Demonstração Educacional canônico puro (P2.1-G-D / ADR 0017)
 │   ├── CampaignCompleteScreen.tsx # Relatório final de homologação do Protocolo Bubble Sort
 │   └── SelectionCampaignCompleteScreen.tsx # Relatório final de homologação do Protocolo Selection Sort (P2.1-D / ADR 0013)
 ├── game/
 │   ├── briefing/        # Catálogo e tipos de dados para briefings orientados a dados (P1.10 / ADR 0010)
 │   ├── campaign/        # Agregação pura de métricas da campanha (PhaseResult, calculateCampaignSummary)
+│   ├── demonstration/   # Geração autônoma de demonstração via engines reais (P2.1-G-D / ADR 0017)
 │   ├── generation/      # Geração procedural global e determinística de vetores (P1.9 / ADR 0009)
-│   ├── persistence/     # Armazenamento local via localStorage (Schema v2 / ADR 0006 e 0007)
+│   ├── persistence/     # Armazenamento local via localStorage (Schema v3 / ADR 0006, 0007 e 0015)
 │   ├── replay/          # Modelo de quadros de replay e sincronização de pseudocódigo
 │   ├── session/         # Métricas de telemetria descritiva e pontuação do protocolo
 │   ├── sorting/         # Engines pedagógicas puras (Bubble Sort e Selection Sort FSM)
@@ -60,20 +65,25 @@ src/
 
 ## 3. Arquitetura de Telas e Navegação
 
-A navegação da aplicação não utiliza rotas de URL, mas sim uma máquina de telas baseada no estado `screen` mantido em [`src/App.tsx`](../../src/App.tsx) (`"home" | "briefing" | "tutorial" | "selection-tutorial" | "game" | "selection-game" | "result" | "replay" | "campaign-complete" | "selection-campaign-complete"`).
+A navegação da aplicação não utiliza rotas de URL, mas sim uma máquina de telas baseada no estado `screen` mantido em [`src/App.tsx`](../../src/App.tsx) (`"home" | "briefing" | "tutorial" | "selection-tutorial" | "game" | "selection-game" | "result" | "replay" | "selection-replay" | "demonstration" | "campaign-complete" | "selection-campaign-complete"`).
 
 ```mermaid
 flowchart TD
-    Home["HomeScreen\n(Seleção de Modo)"] -->|"onStart (Bubble)"| Briefing["ProtocolModeBriefingScreen\n(Briefing Canônico, Desafio ou Selection)"]
+    Home["HomeScreen\n(Hub de Protocolos)"] -->|"onStart (Bubble)"| Briefing["ProtocolModeBriefingScreen\n(Briefing Canônico, Desafio ou Selection)"]
     Home -->|"onStartChallenge"| Briefing
     Home -->|"onStartSelection"| Briefing
     Home -->|"onHowToPlay"| Tutorial["TutorialScreen\n(Treinamento Guiado Bubble)"]
+    Home -->|"onOpenDemonstration"| Demo["DemonstrationScreen\n(Modo Demonstração Canônico)"]
+    Briefing -->|"onOpenDemonstration"| Demo
     Briefing -->|"onBack"| Home
     Briefing -->|"onStart (Bubble / sem tutorial)"| Tutorial
     Briefing -->|"onStart (Bubble / com tutorial)"| Game["GameScreen\n(Ordenação Ativa Bubble)"]
     Briefing -->|"onStart (Bubble Desafio)"| Game
     Briefing -->|"onStart (Selection / sem tutorial)"| SelectionTut["SelectionTutorialScreen\n(Tutorial Guiado Selection)"]
     Briefing -->|"onStart (Selection / com tutorial)"| SelGame["SelectionGameScreen\n(Ordenação Ativa Selection)"]
+    Demo -->|"onBack (origem Home)"| Home
+    Demo -->|"onBack (origem Briefing)"| Briefing
+    Demo -->|"onStartTraining"| Briefing
     SelectionTut -->|"onBack"| Home
     SelectionTut -->|"onComplete"| SelGame
     Tutorial -->|"onBack"| Home
@@ -96,8 +106,9 @@ flowchart TD
 
 ### 3.1. `src/App.tsx` (Componente Raiz)
 - **Responsabilidades:**
-  - Armazenar o estado global de navegação (`screen`: `"home" | "briefing" | "tutorial" | "selection-tutorial" | "game" | "selection-game" | "result" | "replay" | "campaign-complete" | "selection-campaign-complete"`) ([`src/App.tsx`](../../src/App.tsx));
+  - Armazenar o estado global de navegação (`screen`: `"home" | "briefing" | "tutorial" | "selection-tutorial" | "game" | "selection-game" | "result" | "replay" | "selection-replay" | "demonstration" | "campaign-complete" | "selection-campaign-complete"`) ([`src/App.tsx`](../../src/App.tsx));
   - Armazenar o identificador ativo de briefing (`briefingModeId`: `"bubble-canonical" | "bubble-early-exit" | "selection-canonical"`);
+  - Armazenar o contexto do Modo Demonstração (`demonstrationProtocol`: `"bubble" | "selection"` e `demonstrationReturnScreen`: `"home" | "briefing"`);
   - Armazenar o número da fase ativa (`phase`: `1 | 2 | 3`) ([`src/App.tsx`](../../src/App.tsx));
   - Armazenar o último resultado recebido (`result`: `GameResult | null`, união discriminada por `protocol: "bubble" | "selection"`) ([`src/App.tsx`](../../src/App.tsx));
   - Armazenar em memória os resultados acumulados de cada fase concluída (`phaseResults`: `PhaseResult[]` para Bubble e `selectionResults`: `SelectionGameResult[]` para Selection);
@@ -107,14 +118,24 @@ flowchart TD
   - Orquestrar a transição para `CampaignCompleteScreen` (Bubble) ou `SelectionCampaignCompleteScreen` (Selection) ao finalizar a fase 3;
   - Forçar a remontagem de `GameScreen` através da prop `key={'game-phase-${phase}'}` ([`src/App.tsx`](../../src/App.tsx)).
 
-### 3.2. `src/screens/HomeScreen.tsx`
-- **Responsabilidades:** Recepção do jogador, ambientação narrativa na "Central Logística v2.0" e pontos de entrada para o treinamento regular e para o Modo Desafio.
+### 3.2. `src/screens/HomeScreen.tsx`, `ProtocolCard.tsx` e `protocolCatalog.ts`
+- **Responsabilidades:** Hub Educacional Simétrico de Protocolos, ambientação narrativa na "Central Logística v2.0" e seleção curricular de algoritmos de ordenação (P2.1-G-C / ADR 0016). A Home deixa de tratar o Bubble Sort como jogo único e adota o Sorting Station como plataforma transversal de aprendizagem.
 - **Destaques de Implementação:**
-  - Exibe duas esteiras animadas decorativas de fundo com caixas em movimento contínuo (`conveyor-track`);
-  - Botão "INICIAR TURNO" inicia um novo turno da campanha sempre na Fase 1 (ou direciona para o tutorial caso o operador ainda não o tenha concluído); o botão "COMO JOGAR" abre o tutorial interativo a qualquer momento;
-  - **Ponto de Acesso ao Modo Desafio (P1.8):** Exibe o botão destacado `[ ⚡ MODO DESAFIO (EARLY EXIT) ]` quando `isChallengeUnlocked === true`, ou o badge informativo com cadeado e requisito (`BLOQUEADO — CONCLUA AS 3 FASES CANÔNICAS`) quando bloqueado;
-  - Rodapé com tags de status dos protocolos: `BUBBLE SORT` (verde ativo), `INSERTION SORT` e `SELECTION SORT` (cinza inativo).
-- **Callbacks e Props:** `onStart: () => void`, `onHowToPlay: () => void`, `isChallengeUnlocked?: boolean`, `onStartChallenge?: () => void`.
+  - **Hierarquia Visual Principal:**
+    - Cabeçalho: Badge `CENTRAL LOGÍSTICA V2.0` com pulso de telemetria;
+    - Título: `SORTING STATION`;
+    - Subtítulo Curricular: `CENTRAL DE TREINAMENTO DE ALGORITMOS DE ORDENAÇÃO`;
+    - Diretiva Operacional: `ESCOLHA UM PROTOCOLO`.
+  - **Catálogo Desacoplado (`src/screens/protocolCatalog.ts`):** Metadados puros de produto declarando id, nome, metáfora diegética, descrição pedagógica concisa, itens de "O que você vai praticar", status operacional (`available` vs `coming_soon`), temas visuais de destaque e fases totais. O catálogo é puramente estático e desacoplado de engines;
+  - **Resumo Factual de Progresso (`getProtocolProgressSummary`):** Função pura que combina o catálogo com o `GameSaveSchema` (v3) para computar de forma isolada fases concluídas ($X/3$), status do tutorial (`CONCLUÍDO` / `PENDENTE`), melhor pontuação registrada e destravamento do Modo Desafio;
+  - **Componente Reutilizável de Card (`src/screens/ProtocolCard.tsx`):**
+    - Simetria visual estrita de largura, tipografia e organização de ações entre Bubble Sort e Selection Sort;
+    - **Card Bubble Sort:** Metáfora "Pares Vizinhos / Esteira de Comparação", botões `[ ▶ INICIAR TREINAMENTO ]`, `[ ? TUTORIAL ]`, botão desabilitado de Demonstração e slot para `[ ⚡ MODO DESAFIO (EARLY EXIT) ]` quando desbloqueado factual ou aviso com requisito;
+    - **Card Selection Sort:** Metáfora "Scanner de Carga Mínima", botões simétricos de treinamento e tutorial interativo guiado;
+    - **Card Insertion Sort:** Placeholder curricular com status "EM BREVE", visualmente desabilitado, sem rota ativa quebrada, comunicando a progressão para o Marco P2.2;
+    - **Modo Demonstração Institucionalizado:** Botões `[ DEMO (EM BREVE) ]` presentes em todos os cards, com `disabled` e `aria-disabled="true"`, preparando a estrutura de 6 camadas para o marco P2.1-G-D;
+  - **Responsividade e Acessibilidade:** Grid responsivo (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`), scroll vertical natural com `pb-16 sm:pb-24`, botões semânticos reais com `focus-visible`, e ausência de dependência de cores para transmissão de status.
+- **Callbacks e Props:** `saveData?: GameSaveSchema`, `onStartProtocol?: (id: ProtocolId) => void`, `onOpenTutorial?: (id: ProtocolId) => void`, `isChallengeUnlocked?: boolean`, `onStartChallenge?: () => void`. Mantém retrocompatibilidade com `onStart`, `onHowToPlay` e `onStartSelection`.
 
 ### 3.3. `src/screens/ProtocolModeBriefingScreen.tsx`
 - **Responsabilidades:** Tela intermediária orientada a dados e 100% agnóstica a motores específicos, responsável pelo alinhamento pedagógico prévio e preparação cognitiva do operador antes de qualquer interação motora na esteira.

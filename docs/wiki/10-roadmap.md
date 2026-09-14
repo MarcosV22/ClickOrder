@@ -251,12 +251,12 @@ O objetivo central do nível P0 é converter o atual "puzzle de trocas livres" e
 - **Objetivo:** Estabelecer a base canônica de padronização pedagógica, terminológica e visual do produto antes da expansão para novos algoritmos (Insertion Sort), assegurando que o Sorting Station seja formalmente governado como um Jogo Educacional.
 - **Sub-marcos:**
   - `P2.1-G-A`: **Auditoria e Padronização Educacional** (Charter Educacional oficial, congelamento da metáfora logística, 6 elementos pedagógicos obrigatórios por protocolo, política ética de score e métricas factuais, padrão conceitual das 8 telas, glossário canônico controlado, auditoria comparativa de inconsistências Bubble vs Selection, proposta arquitetural do Modo Demonstração sem duplicação de componentes, plano incremental de refatoração e ADR 0016). `IMPLEMENTADO` (2026-09-14 via ADR 0016).
-  - `P2.1-G-B`: **Harmonização Visual e de Layout de Telas** (Alinhar tutorial e gameplay do Bubble com barra superior, barra de status, progresso contínuo 0..100%, banner de comparação relacional, unificar telas de encerramento da campanha). `PLANEJADO`.
-  - `P2.1-G-C`: **Hub Simétrico de Protocolos na Home Screen** (Cards simétricos para Bubble, Selection e Insertion [Em Breve], atalhos diretos para campanhas, tutoriais e demonstrações). `PLANEJADO`.
-  - `P2.1-G-D`: **Institucionalização do Modo Demonstração** (Conectar simulações autônomas ideais à esteira de Replay em modo autoplay a partir da Home e dos Briefings). `PLANEJADO`.
-- **Valor para o Aluno:** Coerência cognitiva e visual entre diferentes algoritmos, eliminação de atritos de interface e garantia de scaffolding didático completo em toda a plataforma.
-- **Dependências:** P2.1-F, ADR 0016.
-- **Status:** `EM ANDAMENTO` (`P2.1-G-A` concluído; `P2.1-G-B/C/D` planejados antes de P2.2).
+  - `P2.1-G-B`: **Harmonização Visual e de Layout de Telas** (Alinhar tutorial e gameplay do Bubble com barra superior, telemetria, progresso contínuo 0..100%, banner de comparação relacional, unificar telas de encerramento da campanha via `campaignCompleteConfig.ts` e notas pedagógicas no resultado). `IMPLEMENTADO` (2026-09-14).
+  - `P2.1-G-C`: **Hub Simétrico de Protocolos na Home Screen** (Transformação da HomeScreen em Hub Educacional de Protocolos com `protocolCatalog.ts`, componente reutilizável `ProtocolCard.tsx`, simetria Bubble/Selection, placeholder curricular de Insertion Sort [Em Breve], atalhos diretos e isolamento de progresso v3). `IMPLEMENTADO` (2026-09-14).
+  - `P2.1-G-D`: **Institucionalização do Modo Demonstração** (Camada pura `src/game/demonstration/` consumindo engines reais, vetores curados fixos `[5, 2, 4, 1]` e `[4, 1, 3]`, autoplay com velocidade ajustável `0.5x`, `1x`, `2x`, navegação contextualizada da Home e Briefing, tela orquestradora `DemonstrationScreen`, preservação de não-mutabilidade do storage e ADR 0017). `IMPLEMENTADO` (2026-09-14 via ADR 0017).
+- **Valor para o Aluno:** Coerência cognitiva e visual entre diferentes algoritmos, eliminação de atritos de interface, garantia de observação canônica antes da prática interativa e scaffolding didático completo em toda a plataforma.
+- **Dependências:** P2.1-F, ADR 0016, ADR 0017.
+- **Status:** `IMPLEMENTADO` (2026-09-14; sub-marcos `P2.1-G-A`, `P2.1-G-B`, `P2.1-G-C` e `P2.1-G-D` integralmente concluídos com 303 testes unitários aprovados).
 
 ---
 

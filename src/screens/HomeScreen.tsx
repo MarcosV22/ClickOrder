@@ -1,10 +1,21 @@
-import GameButton from "../components/GameButton";
+import type { GameSaveSchema } from "../game/persistence/types";
+import {
+  PROTOCOL_CATALOG,
+  getProtocolProgressSummary,
+  type ProtocolId,
+} from "./protocolCatalog";
+import ProtocolCard from "./ProtocolCard";
 
-interface HomeScreenProps {
-  onStart: () => void;
-  onHowToPlay: () => void;
+export interface HomeScreenProps {
+  saveData?: GameSaveSchema;
+  onStartProtocol?: (id: ProtocolId) => void;
+  onOpenTutorial?: (id: ProtocolId) => void;
+  onOpenDemonstration?: (id: ProtocolId) => void;
   isChallengeUnlocked?: boolean;
   onStartChallenge?: () => void;
+  // Props mantidas para retrocompatibilidade
+  onStart?: () => void;
+  onHowToPlay?: () => void;
   onStartSelection?: () => void;
 }
 
@@ -12,11 +23,10 @@ function ConveyorBelt({ y, speed }: { y: number; speed: number }) {
   const boxes = [2, 7, 1, 9, 4, 6, 3, 8, 5];
   return (
     <div
-      className="absolute w-full overflow-hidden"
-      style={{ top: `${y}%`, opacity: 0.35 }}
+      className="absolute w-full overflow-hidden pointer-events-none"
+      style={{ top: `${y}%`, opacity: 0.22 }}
     >
-      {/* Track */}
-      <div className="conveyor-track h-14 flex items-center">
+      <div className="conveyor-track h-12 flex items-center">
         <div
           className="flex gap-3 items-center"
           style={{
@@ -26,10 +36,10 @@ function ConveyorBelt({ y, speed }: { y: number; speed: number }) {
           {[...boxes, ...boxes, ...boxes].map((n, i) => (
             <div
               key={i}
-              className="flex-shrink-0 w-11 h-10 rounded flex items-center justify-center bg-[#0f1e4a] border border-[#2a4a9e]/60"
+              className="flex-shrink-0 w-10 h-9 rounded flex items-center justify-center bg-[#0f1e4a] border border-[#2a4a9e]/50"
               style={{ fontFamily: "'Orbitron', sans-serif" }}
             >
-              <span className="text-sm font-bold text-cyan-300/80">{n}</span>
+              <span className="text-xs font-bold text-cyan-300/70">{n}</span>
             </div>
           ))}
         </div>
@@ -39,14 +49,36 @@ function ConveyorBelt({ y, speed }: { y: number; speed: number }) {
 }
 
 export default function HomeScreen({
+  saveData,
+  onStartProtocol,
+  onOpenTutorial,
+  onOpenDemonstration,
+  isChallengeUnlocked,
+  onStartChallenge,
   onStart,
   onHowToPlay,
-  isChallengeUnlocked = false,
-  onStartChallenge,
   onStartSelection,
 }: HomeScreenProps) {
+  const handleStartTraining = (id: ProtocolId) => {
+    if (onStartProtocol) {
+      onStartProtocol(id);
+    } else if (id === "bubble" && onStart) {
+      onStart();
+    } else if (id === "selection" && onStartSelection) {
+      onStartSelection();
+    }
+  };
+
+  const handleOpenTutorial = (id: ProtocolId) => {
+    if (onOpenTutorial) {
+      onOpenTutorial(id);
+    } else if (id === "bubble" && onHowToPlay) {
+      onHowToPlay();
+    }
+  };
+
   return (
-    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-8 sm:pt-12 pb-16 sm:pb-20 px-4">
+    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-10 pb-16 sm:pb-24 px-4">
       {/* Animated belt CSS */}
       <style>{`
         @keyframes scroll-belt {
@@ -56,123 +88,109 @@ export default function HomeScreen({
       `}</style>
 
       {/* Background conveyor belts */}
-      <ConveyorBelt y={18} speed={14} />
-      <ConveyorBelt y={60} speed={20} />
-      <ConveyorBelt y={82} speed={11} />
+      <ConveyorBelt y={10} speed={16} />
+      <ConveyorBelt y={45} speed={22} />
+      <ConveyorBelt y={85} speed={13} />
 
       {/* Vignette overlay */}
-      <div className="absolute inset-0 bg-radial-[ellipse_at_center] from-transparent via-transparent to-[#060b1a]/90 pointer-events-none" />
+      <div className="absolute inset-0 bg-radial-[ellipse_at_center] from-transparent via-[#060b1a]/60 to-[#060b1a]/95 pointer-events-none" />
 
       {/* Ambient glow blobs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/5 rounded-full blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-500/5 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/5 rounded-full blur-[90px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-[90px] pointer-events-none" />
 
-      {/* Center card */}
-      <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8 max-w-xl w-full px-4 sm:px-8">
-
+      {/* Main Hub Container */}
+      <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8 max-w-6xl w-full px-2 sm:px-4">
         {/* Top badge */}
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-950/30">
+        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-950/40">
           <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
           <span
-            className="text-xs text-cyan-400/80 tracking-[0.3em] uppercase"
+            className="text-xs text-cyan-400/90 tracking-[0.25em] uppercase font-bold"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             Central Logística v2.0
           </span>
         </div>
 
-        {/* Title */}
-        <div className="text-center">
+        {/* Title and Educational Subtitle */}
+        <div className="text-center flex flex-col items-center">
           <h1
-            className="text-5xl sm:text-6xl font-black tracking-tighter text-white leading-none mb-2"
+            className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-white leading-none mb-3"
             style={{ fontFamily: "'Orbitron', sans-serif" }}
           >
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400"
-              style={{ filter: "drop-shadow(0 0 20px rgba(0,245,255,0.3))" }}>
+            <span
+              className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400"
+              style={{ filter: "drop-shadow(0 0 25px rgba(0,245,255,0.35))" }}
+            >
               SORTING
-            </span>
-            <br />
-            <span className="text-white" style={{ textShadow: "0 0 40px rgba(139,92,246,0.4)" }}>
+            </span>{" "}
+            <span
+              className="text-white"
+              style={{ textShadow: "0 0 40px rgba(139,92,246,0.35)" }}
+            >
               STATION
             </span>
           </h1>
-        </div>
 
-        {/* Subtitle */}
-        <p
-          className="text-center text-white/50 text-base tracking-wide"
-          style={{ fontFamily: "'Space Mono', monospace" }}
-        >
-          "Alguma coisa está fora de ordem..."
-        </p>
+          <p
+            className="text-sm sm:text-base text-cyan-200/80 tracking-widest uppercase font-semibold text-center max-w-2xl"
+            style={{ fontFamily: "'Space Mono', monospace" }}
+          >
+            Central de Treinamento de Algoritmos de Ordenação
+          </p>
 
-        {/* Decorative divider */}
-        <div className="flex items-center gap-3 w-full">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent to-cyan-500/30" />
-          <div className="flex gap-1">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="w-1 h-1 rounded-full bg-cyan-500/40" />
-            ))}
-          </div>
-          <div className="flex-1 h-px bg-gradient-to-l from-transparent to-cyan-500/30" />
-        </div>
-
-        {/* Buttons */}
-        <div className="flex flex-col items-center gap-3 w-full max-w-xs">
-          <GameButton onClick={onStart} variant="primary" size="lg" className="w-full">
-            ▶ &nbsp; INICIAR TURNO
-          </GameButton>
-
-          {isChallengeUnlocked && onStartChallenge && (
-            <GameButton
-              onClick={onStartChallenge}
-              variant="primary"
-              size="md"
-              className="w-full border-amber-500/50 text-amber-300 hover:border-amber-400 shadow-lg shadow-amber-950/30"
-            >
-              ⚡ &nbsp; MODO DESAFIO (EARLY EXIT)
-            </GameButton>
-          )}
-
-          {onStartSelection && (
-            <GameButton
-              onClick={onStartSelection}
-              variant="secondary"
-              size="md"
-              className="w-full border-purple-500/50 text-purple-300 hover:border-purple-400 shadow-lg shadow-purple-950/30"
-            >
-              ◈ &nbsp; SELECTION SORT
-            </GameButton>
-          )}
-
-          <GameButton onClick={onHowToPlay} variant="secondary" size="md" className="w-full">
-            ? &nbsp; COMO JOGAR
-          </GameButton>
-
-          {!isChallengeUnlocked && (
-            <div className="text-[10px] text-white/30 tracking-widest font-mono text-center mt-1">
-              🔒 DESAFIO: COMPLETE O PROTOCOLO BUBBLE
-            </div>
-          )}
-        </div>
-
-        {/* Bottom status strip */}
-        <div className="flex items-center justify-center gap-6 mt-2">
-          {["BUBBLE SORT", "INSERTION SORT", "SELECTION SORT"].map((algo, i) => (
+          {/* Directive / Instruction */}
+          <div className="mt-4 flex items-center gap-3">
+            <div className="w-8 sm:w-16 h-px bg-gradient-to-r from-transparent to-cyan-500/50" />
             <span
-              key={algo}
-              className={`text-[10px] tracking-widest ${
-                i === 0
-                  ? "text-cyan-400"
-                  : i === 2
-                    ? "text-purple-400"
-                    : "text-white/20"
-              }`}
+              className="text-xs sm:text-sm text-white/70 font-mono tracking-[0.2em] uppercase font-bold"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              {i === 0 ? "◉" : i === 2 ? "◈" : "○"} {algo}
+              ESCOLHA UM PROTOCOLO
             </span>
-          ))}
+            <div className="w-8 sm:w-16 h-px bg-gradient-to-l from-transparent to-cyan-500/50" />
+          </div>
+        </div>
+
+        {/* Protocols Grid (3 symmetric cards) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full mt-2">
+          {PROTOCOL_CATALOG.map((metadata) => {
+            const summary = getProtocolProgressSummary(metadata.id, saveData);
+            return (
+              <ProtocolCard
+                key={metadata.id}
+                metadata={metadata}
+                summary={{
+                  ...summary,
+                  isChallengeUnlocked:
+                    metadata.id === "bubble"
+                      ? (isChallengeUnlocked ?? summary.isChallengeUnlocked)
+                      : undefined,
+                }}
+                onStartTraining={handleStartTraining}
+                onOpenTutorial={handleOpenTutorial}
+                onOpenDemonstration={onOpenDemonstration}
+                onStartChallenge={onStartChallenge}
+              />
+            );
+          })}
+        </div>
+
+        {/* Platform footer telemetry */}
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-4 pt-6 border-t border-white/5 w-full text-center">
+          <span
+            className="text-[11px] font-mono text-white/40 tracking-wider uppercase"
+            style={{ fontFamily: "'Space Mono', monospace" }}
+          >
+            TERMINAL DE ENSINO INTERATIVO DE ALGORITMOS
+          </span>
+          <span className="text-white/20 hidden sm:inline">•</span>
+          <span
+            className="text-[11px] font-mono text-cyan-400/60 tracking-wider uppercase"
+            style={{ fontFamily: "'Space Mono', monospace" }}
+          >
+            METÁFORA FÍSICA CINÉTICA & SINCRONIZAÇÃO DE INVARIANTES
+          </span>
         </div>
       </div>
     </div>
