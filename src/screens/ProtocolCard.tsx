@@ -180,19 +180,21 @@ export default function ProtocolCard({
             onClick={() => onStartTraining(metadata.id)}
             variant="primary"
             size="md"
+            icon="▶"
             className="w-full"
           >
-            ▶ INICIAR TREINAMENTO
+            INICIAR TREINAMENTO
           </GameButton>
         ) : (
           <button
             type="button"
             disabled
             aria-disabled="true"
-            className="w-full py-3 px-4 rounded font-mono text-xs uppercase tracking-widest bg-white/5 border border-white/10 text-white/30 cursor-not-allowed select-none font-bold"
+            className="w-full min-h-[44px] py-2.5 px-4 rounded-lg font-mono text-xs uppercase tracking-wider bg-white/5 border border-white/10 text-white/30 cursor-not-allowed select-none font-bold inline-flex items-center justify-center gap-2"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            ○ PROTOCOLO EM BREVE
+            <span aria-hidden="true">○</span>
+            <span>PROTOCOLO EM BREVE</span>
           </button>
         )}
 
@@ -204,19 +206,21 @@ export default function ProtocolCard({
               onClick={() => onOpenTutorial(metadata.id)}
               variant="secondary"
               size="sm"
+              icon="?"
               className="w-full text-center"
             >
-              ? TUTORIAL
+              TUTORIAL
             </GameButton>
           ) : (
             <button
               type="button"
               disabled
               aria-disabled="true"
-              className="w-full py-2 px-2 rounded font-mono text-[11px] uppercase tracking-wider bg-white/5 border border-white/5 text-white/20 cursor-not-allowed select-none"
+              className="w-full min-h-[36px] py-1.5 px-2 rounded-lg font-mono text-[11px] uppercase tracking-wider bg-white/5 border border-white/5 text-white/20 cursor-not-allowed select-none inline-flex items-center justify-center gap-2"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              ? TUTORIAL
+              <span aria-hidden="true">?</span>
+              <span>TUTORIAL</span>
             </button>
           )}
 
@@ -226,10 +230,11 @@ export default function ProtocolCard({
               onClick={() => onOpenDemonstration?.(metadata.id)}
               variant="ghost"
               size="sm"
+              icon="👁"
               className="w-full text-center"
               aria-label={`Ver modo demonstração do protocolo ${metadata.name}`}
             >
-              👁 {metadata.demonstrationLabel}
+              {metadata.demonstrationLabel}
             </GameButton>
           ) : (
             <button
@@ -237,7 +242,7 @@ export default function ProtocolCard({
               disabled
               aria-disabled="true"
               title="Modo Demonstração em preparação"
-              className="w-full py-2 px-2 rounded font-mono text-[11px] uppercase tracking-wider bg-white/5 border border-white/10 text-white/30 cursor-not-allowed select-none flex items-center justify-center gap-1"
+              className="w-full min-h-[36px] py-1.5 px-2 rounded-lg font-mono text-[11px] uppercase tracking-wider bg-white/5 border border-white/10 text-white/30 cursor-not-allowed select-none inline-flex items-center justify-center gap-2"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
               <span>{metadata.demonstrationLabel}</span>
@@ -253,9 +258,10 @@ export default function ProtocolCard({
                 onClick={onStartChallenge}
                 variant="primary"
                 size="sm"
+                icon="⚡"
                 className="w-full border-amber-500/50 text-amber-300 hover:border-amber-400 shadow-md shadow-amber-950/20"
               >
-                ⚡ MODO DESAFIO (EARLY EXIT)
+                MODO DESAFIO (EARLY EXIT)
               </GameButton>
             ) : (
               <div

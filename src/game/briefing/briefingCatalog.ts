@@ -192,10 +192,77 @@ export const SELECTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
   startVariant: "primary",
 };
 
+/**
+ * Briefing oficial para o protocolo Insertion Sort ("Desvio e Encaixe de Cargas").
+ * Foco na construção da partição ordenada relativa à esquerda, elevação de chave ao trilho aéreo,
+ * deslocamento unilateral regressivo (SHIFT) e encaixe na vaga aberta (INSERT).
+ */
+export const INSERTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
+  id: "insertion-canonical",
+  protocolName: "MÓDULO: INSERTION SORT",
+  modeName: "DESVIO E ENCAIXE DE CARGAS",
+  badgeText: "PLATAFORMA EDUCACIONAL • MÓDULO 03",
+  badgeVariant: "amber",
+  subtitle:
+    "Construção incremental de partição ordenada através de chave suspensa e deslocamento de cargas.",
+  objective:
+    "Construir progressivamente uma região ordenada à esquerda (ORD): em cada passada, a carga A[i] vira a chave suspensa no trilho aéreo, cargas maiores deslizam para a direita abrindo vaga e a chave é encaixada na posição exata.",
+  instructions: [
+    {
+      icon: "📌",
+      title: "O Que Você Vai Aprender",
+      description:
+        "Região ordenada incremental (ORD), elevação de chave ao trilho aéreo, inspeção regressiva (A[j] > chave), deslocamentos sucessivos e a distinção fundamental: SHIFT ≠ TROCA (SWAP).",
+    },
+    {
+      icon: "⚙",
+      title: "O Que Você Vai Praticar",
+      description:
+        "Observar A[j] e a chave suspensa, comandar DESLOCAR CARGA (shift) quando A[j] > chave, reconhecer a condição de parada (A[j] ≤ chave ou início da esteira) e ENCAIXAR CHAVE na vaga.",
+    },
+    {
+      icon: "🛤",
+      title: "Como Funciona o Ciclo",
+      description:
+        "1. A[i] vira CHAVE e sobe ao trilho aéreo; 2. Uma VAGA é aberta na esteira; 3. O scanner percorre a região ORD da direita para a esquerda; 4. Cargas maiores são deslocadas à direita; 5. A chave encaixa na vaga; 6. A região ORD expande.",
+    },
+    {
+      icon: "⚠️",
+      title: "Avisos Conceituais Vitais",
+      description:
+        "SHIFT ≠ TROCA: apenas uma caixa desliza para a vaga vazia. ORD ≠ POSIÇÃO DEFINITIVA: elementos na região ordenada podem deslizar novamente para a direita em passadas futuras.",
+    },
+  ],
+  highlights: [
+    {
+      label: "MÉTODO",
+      value: "Deslocamento e Encaixe",
+      variant: "amber",
+    },
+    {
+      label: "COMPARAÇÕES",
+      value: "Adaptativo O(n + d)",
+      variant: "cyan",
+    },
+    {
+      label: "MEMÓRIA",
+      value: "O(1) Trilho Suspenso",
+      variant: "emerald",
+    },
+  ],
+  particularities: [
+    "A vaga na esteira é temporária e física: a chave só é encaixada quando todos os elementos maiores tiverem sido deslocados.",
+    "A região ORD representa ordenação relativa entre os elementos processados, não indicando posições fixas finais.",
+  ],
+  startLabel: "INICIAR TUTORIAL GUIADO",
+  startVariant: "primary",
+};
+
 export const BRIEFING_CATALOG: Record<BriefingModeId, ProtocolModeBriefing> = {
   "bubble-canonical": BUBBLE_CANONICAL_BRIEFING,
   "bubble-early-exit": BUBBLE_EARLY_EXIT_BRIEFING,
   "selection-canonical": SELECTION_CANONICAL_BRIEFING,
+  "insertion-canonical": INSERTION_CANONICAL_BRIEFING,
 };
 
 /**

@@ -1,9 +1,9 @@
 # Módulo 03 — Insertion Sort
 
 > **Documento canônico do módulo curricular:** Especificação integral de design pedagógico, mecânico e computacional do Módulo de Insertion Sort da plataforma **Sorting Station**.  
-> **Status de Implementação:** `PLANEJADO` (Marco P2.2; metadados e placeholder curricular na Home; design pedagógico aprovado em P2.2-A).  
-> **Data de Atualização:** 15/09/2026 (Marco P2.2-A)  
-> **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md), [`05-ux-design-system.md`](../05-ux-design-system.md), [`10-roadmap.md`](../10-roadmap.md), [`12-pedagogy-and-academic-traceability.md`](../12-pedagogy-and-academic-traceability.md).
+> **Status de Implementação:** `EM ANDAMENTO` (Marco P2.2; P2.2-A, P2.2-B e P2.2-C concluídos — Constraints, Briefing, Tutorial Interativo e Driver Puro de Demonstração 100% Verdes).  
+> **Data de Atualização:** 15/09/2026 (Marco P2.2-C / ADR 0019)  
+> **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`ADR 0019`](../../adr/0019-insertion-sort-pedagogical-layer-and-interactive-tutorial.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md), [`05-ux-design-system.md`](../05-ux-design-system.md), [`10-roadmap.md`](../10-roadmap.md), [`12-pedagogy-and-academic-traceability.md`](../12-pedagogy-and-academic-traceability.md).
 
 ---
 
@@ -13,7 +13,7 @@
 - **Identificador de Sistema (`moduleId`):** `insertion`
 - **Rótulo Diegético na Interface:** `PROTOCOLO: INSERTION SORT // DESVIO E ENCAIXE DE CARGAS`
 - **Subtítulo Diegético:** *Desvio e Encaixe de Cargas*
-- **Status Factual:** `PLANEJADO` (Próximo marco de implementação de código: P2.2-B)
+- **Status Factual:** `EM ANDAMENTO` (Engine pura, constraints, briefing, tutorial guiado e driver de demonstração implementados; P2.2-C concluído; próximo sub-marco: P2.2-D — Gameplay procedural e campanha)
 - **Classificação Curricular:** Algoritmo Elementar de Inserção com Subvetor Ordenado Crescente
 - **Complexidade Temporal:**
   - **Melhor Caso (Vetor Já Ordenado):** $\Omega(n)$ comparações, $0$ deslocamentos físicos
@@ -195,16 +195,18 @@ Fica aprovada a **Proposta A Refinada**, com as seguintes diretrizes ergonômica
 
 ## 10. Tipos de Exercícios Suportados (Taxonomia do Módulo)
 
-| Tipo de Exercício | Suporte | Artefato Previsto |
-| :--- | :---: | :--- |
-| **A. Introdução / Conceito** | `OBRIGATÓRIO` | `ProtocolModeBriefingScreen.tsx` com preset `insertion-canonical` |
-| **B. Demonstração** | `OBRIGATÓRIO` | `DemonstrationScreen.tsx` consumindo `insertionDemonstration.ts` |
-| **C. Tutorial Guiado** | `OBRIGATÓRIO` | `InsertionTutorialScreen.tsx` sobre vetor `[4, 2, 3]` |
-| **D. Prática Básica** | `OBRIGATÓRIO` | `InsertionGameScreen.tsx` com lote de 4 cargas procedurais |
-| **E. Prática Progressiva** | `OBRIGATÓRIO` | `InsertionGameScreen.tsx` com lotes de 5 e 6 cargas procedurais |
-| **F. Casos do Algoritmo** | `OBRIGATÓRIO` | Bateria de 8 casos curados fixos (melhor caso, pior caso, estabilidade) |
-| **G. Desafio** | `OPCIONAL` | Modo "Fluxo Contínuo / Inserção Online" (cargas chegam dinamicamente) |
-| **H. Prática Livre (Sandbox)**| `OPCIONAL` | Montagem livre de vetor e inspeção aberta |
+| Tipo de Exercício | Suporte | ID Canônico | Artefato Implementado / Status |
+| :--- | :---: | :---: | :--- |
+| **A. Introdução / Conceito** | `OBRIGATÓRIO` | `insertion-canonical` | `ProtocolModeBriefingScreen.tsx` (`IMPLEMENTADO`, P2.2-C) |
+| **B. Demonstração** | `OBRIGATÓRIO` | `insertion-demo` | `insertionDemonstration.ts` puro (`IMPLEMENTADO`, P2.2-C; visual em P2.2-E) |
+| **C. Tutorial Guiado** | `OBRIGATÓRIO` | `insertion-tutorial` | `InsertionTutorialScreen.tsx` sobre vetor `[4, 2, 3]` (`IMPLEMENTADO`, P2.2-C) |
+| **D. Prática Básica** | `OBRIGATÓRIO` | `insertion.practice.basic` | `InsertionGameScreen.tsx` com lote de 4 cargas (`IMPLEMENTADO`, P2.2-D) |
+| **E. Prática Intermediária** | `OBRIGATÓRIO` | `insertion.practice.intermediate` | `InsertionGameScreen.tsx` com lote de 5 cargas (`IMPLEMENTADO`, P2.2-D) |
+| **E. Prática Avançada** | `OBRIGATÓRIO` | `insertion.practice.advanced` | `InsertionGameScreen.tsx` com lote de 6 cargas (`IMPLEMENTADO`, P2.2-D) |
+| **Encerramento do Conjunto** | `OBRIGATÓRIO` | `insertion.practice.set-complete` | `PracticeSetCompleteScreen.tsx` (`IMPLEMENTADO`, P2.2-D) |
+| **F. Casos do Algoritmo** | `OBRIGATÓRIO` | `insertion.cases.*` | Bateria de 8 casos curados fixos (planejado para P2.2-E/F) |
+| **G. Desafio** | `OPCIONAL` | `insertion.challenge` | Modo "Fluxo Contínuo / Inserção Online" (futuro) |
+| **H. Prática Livre (Sandbox)**| `OPCIONAL` | `insertion.sandbox` | Montagem livre de vetor e inspeção aberta (futuro) |
 
 ---
 

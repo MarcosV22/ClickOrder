@@ -275,27 +275,31 @@ export default function CampaignCompleteScreen({
             <GameButton
               onClick={onStartChallenge}
               variant="primary"
-              size="lg"
+              size="md"
+              icon="⚡"
               className="min-w-[240px] border-amber-500/50 text-amber-300 hover:border-amber-400 shadow-lg shadow-amber-950/40"
             >
-              ⚡ &nbsp; EXPERIMENTAR MODO DESAFIO: EARLY EXIT →
+              <span>EXPERIMENTAR MODO DESAFIO: EARLY EXIT</span>
+              <span className="shrink-0" aria-hidden="true">→</span>
             </GameButton>
           )}
 
           <GameButton
             onClick={onReturnHome}
             variant="secondary"
-            size="lg"
+            size="md"
+            icon="⌂"
             className="min-w-[180px]"
           >
-            ⌂ &nbsp; VOLTAR AO INÍCIO
+            VOLTAR AO INÍCIO
           </GameButton>
 
           {onRestartProtocol && (
             <GameButton
               onClick={onRestartProtocol}
               variant={protocol === "selection" ? "primary" : "secondary"}
-              size="lg"
+              size="md"
+              icon="↺"
               className={config.restartButtonClass}
             >
               {config.restartButtonLabel}

@@ -308,6 +308,34 @@ flowchart TD
 
 ## 4. Catálogo de Componentes Reutilizáveis (`src/components/`)
 
+### 3.13. `src/screens/InsertionGameScreen.tsx` (P2.2-D)
+- **Responsabilidades:** Interface interativa de prática guiada do Insertion Sort, orientada a exercícios práticos (`basic`, `intermediate`, `advanced`) sem a linguagem legada de fases ou campanhas.
+- **Destaques de Implementação:**
+  - **Engine como Única Fonte de Verdade:** Utiliza exclusivamente `insertionSortEngine.ts` para todas as transições de estado, cálculos de progresso factual (`calculateInsertionSortProgress`) e detecção de encerramento;
+  - **Trilho Aéreo Suspenso:** Quando `state.key !== null`, renderiza a chave suspensa acima da esteira com badge `CHAVE`, halo âmbar e indicação visual inequívoca de desacoplamento do vetor;
+  - **Modelo de Vaga Única:** Renderiza `InsertionHoleSlot.tsx` exclusivamente na posição `state.holeIndex` (`null` na esteira). `NumberedBox` nunca recebe `null`;
+  - **Regra Rígida de ORD:** Elementos em posições $\le \text{orderedBoundary}$ com valor não nulo recebem papel `sorted` com badge `ORD`. A vaga nunca recebe `ORD`;
+  - **Papel Combinado `ordered-scan`:** Quando o scanner $j$ aponta para uma posição dentro da região ordenada, `NumberedBox` renderiza o papel `"ordered-scan"` com badge `ORD • SCAN`, fundo verde e borda ciano pulsante;
+  - **Expressão Relacional Formal:** Exibe $A[j] (X) > \text{CHAVE} (K) ?$ durante `COMPARE_AND_SHIFT` sem antecipar a resposta, e $j < 0 \text{ CABECEIRA ALCANÇADA}$ em `INSERT_READY`;
+  - **Botoeira Canônica `GameButton`:**
+    - `[ ➔ DESLOCAR CARGA ]`: aciona `SHIFT_RIGHT` (desabilitado em `INSERT_READY`);
+    - `[ ⇣ ENCAIXAR CHAVE ]`: aciona `INSERT_KEY`;
+    - `[ ? DICA ]`: exibe dica contextual sem emoji de sistema no ícone;
+    - `[ ↺ REINICIAR EXERCÍCIO ]`: reinicia mantendo estritamente o MESMO vetor;
+  - **Telemetria e Ações:** Action locks síncronos com `isActionLockedRef`, telemetria com Comparações, Deslocamentos, Inserções, Erros e Dicas (zero menção a trocas).
+
+### 3.14. `src/screens/PracticeSetCompleteScreen.tsx` (P2.2-D)
+- **Responsabilidades:** Tela neutra orientada à plataforma educacional para celebração da conclusão do conjunto regular de práticas (`basic` + `intermediate` + `advanced`).
+- **Destaques de Implementação:**
+  - Substitui o conceito legado de campanha por "CONJUNTO DE PRÁTICAS CONCLUÍDO";
+  - Exibe resumo estatístico agregado de todas as práticas (Comparações, Deslocamentos, Inserções, Erros, Dicas e Tempo);
+  - Cartões de desempenho individual para Prática Básica, Prática Intermediária e Prática Avançada com o vetor final ordenado em caixas verdes;
+  - Ações de repetição ou retorno à Central Logística (Home).
+
+---
+
+## 4. Componentes Compartilhados (`src/components/`)
+
 ### 4.1. `NumberedBox` ([`src/components/NumberedBox.tsx`](../../src/components/NumberedBox.tsx))
 Representação visual das caixas transportadas pela esteira.
 
@@ -318,6 +346,7 @@ export type BoxRole =
   | "target-min"
   | "scan"
   | "scan-min"
+  | "ordered-scan"
   | "sorted"
   | "pair"
   | "default";
@@ -328,7 +357,7 @@ interface NumberedBoxProps {
   selected?: boolean;             // Compatibilidade retroativa (mapeia para role "pair")
   disabled?: boolean;             // Reduz opacidade e remove cursor pointer
   sorted?: boolean;               // Compatibilidade retroativa (mapeia para role "sorted")
-  role?: BoxRole;                 // Papel semântico multi-algoritmo (P2.1-C / ADR 0012)
+  role?: BoxRole;                 // Papel semântico multi-algoritmo (P2.1-C / ADR 0012 / P2.2-D)
   badge?: string;                 // Etiqueta personalizada opcional
   onClick?: (index: number) => void; // Callback de interação
   animating?: "left" | "right" | null; // Dispara animate-swap-left ou animate-swap-right
@@ -337,13 +366,14 @@ interface NumberedBoxProps {
 }
 ```
 
-- **Classes visuais e papéis semânticos aplicados dinamicamente (P2.1-C / ADR 0012):**
+- **Classes visuais e papéis semânticos aplicados dinamicamente (P2.1-C / ADR 0012 / P2.2-D):**
   - `target` (posição alvo $i$): borda âmbar, fundo âmbar escuro, badge `ALVO`;
   - `min` (candidato $minIndex$): borda púrpura, fundo púrpura escuro, badge `MÍN`;
   - `target-min` (alvo coincide com candidato): borda âmbar destacada com anel púrpura, badge `ALVO • MÍN`;
   - `scan` (scanner em inspeção $j$): borda ciano com pulso, badge `SCAN`;
   - `scan-min` (scanner no momento da seleção de novo mínimo): borda ciano/púrpura com pulso, badge `MÍN • SCAN`;
-  - `sorted` (elemento consolidado): borda esmeralda, badge `OK`;
+  - `ordered-scan` (scanner em inspeção sobre elemento ordenado no Insertion Sort): borda ciano vibrante com pulso e fundo verde translúcido, badge `ORD • SCAN`;
+  - `sorted` (elemento consolidado): borda esmeralda, badge `OK` ou `ORD`;
   - `pair` (par ativo do Bubble Sort): borda ciano com pulso, badge `PAR`;
   - `default` (neutro/inativo): borda azul escuro padrão, badge `PKG`.
 - **Animações de Troca e Distância Variável (P2.1-D / ADR 0013):**

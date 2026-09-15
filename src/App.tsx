@@ -8,10 +8,15 @@ import ReplayScreen from "./screens/ReplayScreen";
 import SelectionReplayScreen from "./screens/SelectionReplayScreen";
 import ProtocolModeBriefingScreen from "./screens/ProtocolModeBriefingScreen";
 import SelectionTutorialScreen from "./screens/SelectionTutorialScreen";
+import InsertionTutorialScreen from "./screens/InsertionTutorialScreen";
 import SelectionGameScreen, {
   type SelectionPhaseCompleteData,
 } from "./screens/SelectionGameScreen";
 import SelectionCampaignCompleteScreen from "./screens/SelectionCampaignCompleteScreen";
+import InsertionGameScreen, {
+  type InsertionPracticeCompleteData,
+} from "./screens/InsertionGameScreen";
+import PracticeSetCompleteScreen from "./screens/PracticeSetCompleteScreen";
 import DemonstrationScreen from "./screens/DemonstrationScreen";
 import type { ProtocolId } from "./screens/protocolCatalog";
 import { PhaseResult } from "./game/campaign/campaignSummary";
@@ -36,6 +41,13 @@ import {
   generateSelectionPhaseArray,
   type SelectionStepRecord,
 } from "./game/sorting/selection";
+import {
+  generateInsertionPracticeArray,
+  getNextInsertionPracticeLevel,
+  type InsertionPracticeDefinition,
+  type InsertionPracticeLevel,
+  type InsertionStepRecord,
+} from "./game/sorting/insertion";
 import { getBriefingForMode, type BriefingModeId } from "./game/briefing";
 import type { PhaseCompleteData } from "./screens/GameScreen";
 import type { StepRecord } from "./game/sorting/types";
@@ -44,16 +56,19 @@ type Screen =
   | "home"
   | "tutorial"
   | "selection-tutorial"
+  | "insertion-tutorial"
   | "briefing"
   | "game"
   | "selection-game"
+  | "insertion-practice"
   | "result"
   | "replay"
   | "demonstration"
   | "campaign-complete"
-  | "selection-campaign-complete";
+  | "selection-campaign-complete"
+  | "insertion-practice-complete";
 
-type GameMode = "CAMPAIGN" | "CHALLENGE" | "SELECTION";
+type GameMode = "CAMPAIGN" | "CHALLENGE" | "SELECTION" | "INSERTION";
 
 const TOTAL_PHASES = BUBBLE_CAMPAIGN_PHASE_LENGTHS.length;
 const SELECTION_TOTAL_PHASES = 3;
@@ -84,7 +99,20 @@ export interface SelectionGameResult extends BaseGameResult {
   history: readonly SelectionStepRecord[];
 }
 
-export type GameResult = BubbleGameResult | SelectionGameResult;
+export interface InsertionGameResult extends BaseGameResult {
+  protocol: "insertion";
+  level: InsertionPracticeLevel;
+  shifts: number;
+  insertions: number;
+  history: readonly InsertionStepRecord[];
+  practiceDefinition: InsertionPracticeDefinition;
+}
+
+export type GameResult =
+  | BubbleGameResult
+  | SelectionGameResult
+  | InsertionGameResult;
+
 
 export default function App() {
   const [saveData, setSaveData] = useState<GameSaveSchema>(() =>
@@ -119,6 +147,17 @@ export default function App() {
   );
   const [selectionSeed, setSelectionSeed] = useState<SeedInput>(() => "");
   const [selectionPhaseResults, setSelectionPhaseResults] = useState<PhaseResult[]>([]);
+
+  // Estado da Prática do Insertion Sort (Sessão pura em memória, Schema v3 intocado)
+  const [insertionLevel, setInsertionLevel] =
+    useState<InsertionPracticeLevel>("basic");
+  const [insertionArray, setInsertionArray] = useState<readonly number[]>(() =>
+    generateInsertionPracticeArray("basic").values
+  );
+  const [insertionSeed, setInsertionSeed] = useState<SeedInput>(() => "");
+  const [insertionPracticeResults, setInsertionPracticeResults] = useState<
+    InsertionPracticeCompleteData[]
+  >([]);
 
   // Resultado unificado
   const [result, setResult] = useState<GameResult | null>(null);
@@ -243,7 +282,75 @@ export default function App() {
   };
 
 
+  // --------------------------------------------------------------------------
+  // Conclusão e Navegação de Práticas do Insertion Sort (Sessão Pura)
+  // --------------------------------------------------------------------------
+  const handleStartInsertionPractice = (lvl: InsertionPracticeLevel = "basic") => {
+    const gen = generateInsertionPracticeArray(lvl);
+    setInsertionArray(gen.values);
+    setInsertionSeed(gen.seed);
+    setInsertionLevel(lvl);
+    setResult(null);
+    setScreen("insertion-practice");
+  };
+
+  const handleSelectInsertion = () => {
+    setGameMode("INSERTION");
+    setBriefingModeId("insertion-canonical");
+    setBriefingReturnScreen("home");
+    setScreen("briefing");
+  };
+
+  const handleInsertionComplete = (data: InsertionPracticeCompleteData) => {
+    setResult({
+      protocol: "insertion",
+      level: data.level,
+      comparisons: data.comparisons,
+      shifts: data.shifts,
+      insertions: data.insertions,
+      swaps: 0,
+      errors: data.errors,
+      hintsUsed: data.hintsUsed,
+      finalArray: data.finalArray,
+      initialArray: data.initialArray,
+      score: data.score,
+      elapsedTimeMs: data.elapsedTimeMs,
+      history: data.history,
+      practiceDefinition: data.practiceDefinition,
+      seed: data.seed,
+    });
+
+    setInsertionPracticeResults((prev) => {
+      const idx = prev.findIndex((p) => p.level === data.level);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = data;
+        return copy;
+      }
+      return [...prev, data];
+    });
+
+    setScreen("result");
+  };
+
   const handleNextPhase = () => {
+    // Fluxo Insertion Sort
+    if (result?.protocol === "insertion") {
+      const nextLevel = getNextInsertionPracticeLevel(result.level);
+      if (nextLevel !== null) {
+        const gen = generateInsertionPracticeArray(nextLevel);
+        setInsertionArray(gen.values);
+        setInsertionSeed(gen.seed);
+        setInsertionLevel(nextLevel);
+        setResult(null);
+        setScreen("insertion-practice");
+      } else {
+        setResult(null);
+        setScreen("insertion-practice-complete");
+      }
+      return;
+    }
+
     // Fluxo Selection Sort
     if (result?.protocol === "selection") {
       if (selectionPhase < SELECTION_TOTAL_PHASES) {
@@ -291,6 +398,12 @@ export default function App() {
 
   const handleRepeat = () => {
     // Mantém estritamente o MESMO vetor e a MESMA seed da rodada
+    if (result?.protocol === "insertion") {
+      setResult(null);
+      setScreen("insertion-practice");
+      return;
+    }
+
     if (result?.protocol === "selection") {
       setResult(null);
       setScreen("selection-game");
@@ -324,6 +437,11 @@ export default function App() {
   };
 
   const handleBriefingStart = () => {
+    if (briefingModeId === "insertion-canonical") {
+      setScreen("insertion-tutorial");
+      return;
+    }
+
     if (briefingModeId === "selection-canonical") {
       if (!saveData.protocols.selection.hasCompletedTutorial) {
         setScreen("selection-tutorial");
@@ -362,9 +480,11 @@ export default function App() {
     setScreen("home");
     setPhase(1);
     setSelectionPhase(1);
+    setInsertionLevel("basic");
     setResult(null);
     setPhaseResults([]);
     setSelectionPhaseResults([]);
+    setInsertionPracticeResults([]);
   };
 
   const handleRestartProtocol = () => {
@@ -424,11 +544,13 @@ export default function App() {
         ? CHALLENGE_SCENARIOS.length
         : TOTAL_PHASES;
   const hasNextPhase =
-    result?.protocol === "selection"
-      ? selectionPhase < SELECTION_TOTAL_PHASES
-      : gameMode === "CHALLENGE"
-        ? challengeScenarioIndex < CHALLENGE_SCENARIOS.length - 1
-        : phase < TOTAL_PHASES;
+    result?.protocol === "insertion"
+      ? getNextInsertionPracticeLevel(result.level) !== null
+      : result?.protocol === "selection"
+        ? selectionPhase < SELECTION_TOTAL_PHASES
+        : gameMode === "CHALLENGE"
+          ? challengeScenarioIndex < CHALLENGE_SCENARIOS.length - 1
+          : phase < TOTAL_PHASES;
   const canonicalComparisons =
     (currentArray.length * (currentArray.length - 1)) / 2;
   const activeVariant: BubbleSortVariant =
@@ -444,6 +566,8 @@ export default function App() {
               handleSelectCampaign();
             } else if (protocolId === "selection") {
               handleSelectSelection();
+            } else if (protocolId === "insertion") {
+              handleSelectInsertion();
             }
           }}
           onOpenTutorial={(protocolId) => {
@@ -451,6 +575,8 @@ export default function App() {
               setScreen("tutorial");
             } else if (protocolId === "selection") {
               setScreen("selection-tutorial");
+            } else if (protocolId === "insertion") {
+              setScreen("insertion-tutorial");
             }
           }}
           onOpenDemonstration={(protocolId) =>
@@ -488,6 +614,12 @@ export default function App() {
           onBack={() => setScreen("home")}
         />
       )}
+      {screen === "insertion-tutorial" && (
+        <InsertionTutorialScreen
+          onComplete={() => handleStartInsertionPractice("basic")}
+          onBack={() => setScreen("home")}
+        />
+      )}
       {screen === "selection-game" && (
         <SelectionGameScreen
           key={`selection-phase-${selectionPhase}-${selectionSeed}`}
@@ -496,6 +628,17 @@ export default function App() {
           totalPhases={SELECTION_TOTAL_PHASES}
           seed={selectionSeed}
           onComplete={handleSelectionComplete}
+        />
+      )}
+      {screen === "insertion-practice" && (
+        <InsertionGameScreen
+          key={`insertion-practice-${insertionLevel}-${insertionSeed}`}
+          level={insertionLevel}
+          initialArray={insertionArray}
+          seed={insertionSeed}
+          onComplete={handleInsertionComplete}
+          onResetPractice={() => {}}
+          onBackToHub={handleReturnHome}
         />
       )}
       {screen === "game" && (
@@ -518,6 +661,13 @@ export default function App() {
           finalArray={result.finalArray}
           comparisons={result.comparisons}
           swaps={result.swaps}
+          shifts={result.protocol === "insertion" ? result.shifts : undefined}
+          insertions={result.protocol === "insertion" ? result.insertions : undefined}
+          practiceTitle={
+            result.protocol === "insertion"
+              ? result.practiceDefinition.title
+              : undefined
+          }
           errors={result.errors}
           hintsUsed={result.hintsUsed}
           score={result.score}
@@ -527,7 +677,9 @@ export default function App() {
           protocol={result.protocol}
           onNext={handleNextPhase}
           onRepeat={handleRepeat}
-          onViewReplay={() => setScreen("replay")}
+          onViewReplay={
+            result.protocol !== "insertion" ? () => setScreen("replay") : undefined
+          }
           variant={result.protocol === "bubble" ? (result.variant ?? activeVariant) : undefined}
           earlyExitTriggered={result.protocol === "bubble" ? result.earlyExitTriggered : undefined}
           terminationPass={result.protocol === "bubble" ? result.terminationPass : undefined}
@@ -542,7 +694,7 @@ export default function App() {
             phase={currentPhase}
             onBackToResult={() => setScreen("result")}
           />
-        ) : (
+        ) : result.protocol === "bubble" ? (
           <ReplayScreen
             initialArray={result.initialArray}
             history={result.history}
@@ -551,7 +703,7 @@ export default function App() {
             earlyExitTriggered={result.earlyExitTriggered}
             onBackToResult={() => setScreen("result")}
           />
-        )
+        ) : null
       )}
       {screen === "demonstration" && (
         <DemonstrationScreen
@@ -575,6 +727,16 @@ export default function App() {
           totalPhases={SELECTION_TOTAL_PHASES}
           onReturnHome={handleReturnHome}
           onRestartProtocol={handleRestartSelection}
+        />
+      )}
+      {screen === "insertion-practice-complete" && (
+        <PracticeSetCompleteScreen
+          practiceResults={insertionPracticeResults}
+          onRepeatPractices={() => {
+            setInsertionPracticeResults([]);
+            handleStartInsertionPractice("basic");
+          }}
+          onReturnHome={handleReturnHome}
         />
       )}
     </div>

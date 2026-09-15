@@ -156,11 +156,13 @@ export default function SelectionTutorialScreen({
         {/* Top bar */}
         <div className="w-full flex items-center justify-between">
           <button
+            type="button"
             onClick={onBack}
             className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors cursor-pointer"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            ◀ &nbsp; VOLTAR
+            <span>◀</span>
+            <span>VOLTAR</span>
           </button>
 
           <div className="flex items-center gap-2">
@@ -306,23 +308,25 @@ export default function SelectionTutorialScreen({
               <GameButton
                 onClick={onComplete}
                 variant="primary"
-                size="lg"
+                size="md"
+                icon="✓"
                 className="w-full"
               >
-                ✓ &nbsp; CONCLUIR TUTORIAL
+                CONCLUIR TUTORIAL
               </GameButton>
             </div>
           ) : gameState.phase === "INSPECT" ? (
             <div className="flex flex-col items-center gap-3 w-full">
-              <div className="flex items-center justify-center gap-3 w-full max-w-md">
+              <div className="flex items-center justify-center gap-3 sm:gap-4 w-full max-w-md">
                 <GameButton
                   onClick={() => handleInspectionDecision("SELECT_NEW_MIN")}
                   variant="primary"
                   size="md"
                   disabled={isAnimating}
+                  icon="✦"
                   className="flex-1 border-purple-500/50 text-purple-300 hover:border-purple-400 shadow-lg shadow-purple-950/40"
                 >
-                  ✦ &nbsp; NOVO MÍNIMO
+                  NOVO MÍNIMO
                 </GameButton>
 
                 <GameButton
@@ -330,15 +334,17 @@ export default function SelectionTutorialScreen({
                   variant="secondary"
                   size="md"
                   disabled={isAnimating}
+                  icon="="
                   className="flex-1"
                 >
-                  = &nbsp; MANTER CANDIDATO
+                  MANTER CANDIDATO
                 </GameButton>
               </div>
 
               <button
+                type="button"
                 onClick={handleToggleHint}
-                className="text-xs text-cyan-400/80 hover:text-cyan-300 transition-colors font-mono cursor-pointer flex items-center gap-1 mt-1"
+                className="text-xs text-cyan-400/80 hover:text-cyan-300 transition-colors font-mono cursor-pointer flex items-center gap-1.5 mt-1"
               >
                 <span>{showHint ? "▲ OCULTAR DICA" : "💡 PRECISA DE UMA DICA?"}</span>
                 {hintsUsed > 0 && <span className="text-white/30">({hintsUsed})</span>}
@@ -350,18 +356,24 @@ export default function SelectionTutorialScreen({
               <GameButton
                 onClick={handleCommitPass}
                 variant="primary"
-                size="lg"
+                size="md"
                 disabled={isAnimating}
-                className="w-full border-amber-500/60 text-amber-300 hover:border-amber-400 shadow-lg shadow-amber-950/40"
+                icon={stepInfo.canSwapOnCommit ? "⇄" : "✓"}
+                className={`w-full ${
+                  stepInfo.canSwapOnCommit
+                    ? "border-amber-500/60 bg-amber-950/30 text-amber-300 hover:border-amber-400 hover:bg-amber-900/40 shadow-lg shadow-amber-950/40"
+                    : "border-emerald-500/60 bg-emerald-950/30 text-emerald-300 hover:border-emerald-400 hover:bg-emerald-900/40 shadow-lg shadow-emerald-950/40"
+                }`}
               >
                 {stepInfo.canSwapOnCommit
-                  ? "⇄ &nbsp; TRANSFERIR MENOR CARGA"
-                  : "✓ &nbsp; CONSOLIDAR POSIÇÃO"}
+                  ? "TRANSFERIR MENOR CARGA"
+                  : "CONSOLIDAR POSIÇÃO"}
               </GameButton>
 
               <button
+                type="button"
                 onClick={handleToggleHint}
-                className="text-xs text-cyan-400/80 hover:text-cyan-300 transition-colors font-mono cursor-pointer flex items-center gap-1"
+                className="text-xs text-cyan-400/80 hover:text-cyan-300 transition-colors font-mono cursor-pointer flex items-center gap-1.5"
               >
                 <span>{showHint ? "▲ OCULTAR DICA" : "💡 EXPLICAR CONSOLIDAÇÃO"}</span>
               </button>

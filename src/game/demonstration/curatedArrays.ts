@@ -33,3 +33,19 @@ export const CURATED_BUBBLE_DEMO_ARRAY: readonly number[] = Object.freeze([
 export const CURATED_SELECTION_DEMO_ARRAY: readonly number[] = Object.freeze([
   4, 1, 3,
 ]);
+
+/**
+ * Vetor curado para a demonstração canônica do Insertion Sort.
+ *
+ * Características pedagógicas obrigatórias (n = 5 elementos: [6, 3, 5, 2, 7]):
+ * - Passada i=1 (chave 3): 6 > 3 -> shift simples -> HEAD_REACHED (j = -1);
+ * - Passada i=2 (chave 5): 6 > 5 -> shift -> 3 <= 5 -> CONDITION_FALSE;
+ * - Passada i=3 (chave 2): 6, 5, 3 > 2 -> múltiplos shifts sucessivos -> HEAD_REACHED;
+ * - Passada i=4 (chave 7): 6 <= 7 -> parada imediata sem deslocamentos (zero shifts).
+ *
+ * Abrange: shift simples, parada por condição falsa, múltiplos shifts,
+ * chegada à cabeceira da esteira e passada com inserção direta.
+ */
+export const CURATED_INSERTION_DEMO_ARRAY: readonly number[] = Object.freeze([
+  6, 3, 5, 2, 7,
+]);

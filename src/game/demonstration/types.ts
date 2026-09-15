@@ -6,8 +6,9 @@
 
 import type { StepRecord } from "../sorting/types";
 import type { SelectionStepRecord } from "../sorting/selection/types";
+import type { InsertionStepRecord } from "../sorting/insertion/types";
 
-export type DemonstrationProtocol = "bubble" | "selection";
+export type DemonstrationProtocol = "bubble" | "selection" | "insertion";
 
 export interface BubbleDemonstrationExecution {
   readonly protocol: "bubble";
@@ -31,6 +32,19 @@ export interface SelectionDemonstrationExecution {
   readonly completed: boolean;
 }
 
+export interface InsertionDemonstrationExecution {
+  readonly protocol: "insertion";
+  readonly initialArray: readonly number[];
+  readonly finalValues: readonly number[];
+  readonly history: readonly InsertionStepRecord[];
+  readonly comparisons: number;
+  readonly shifts: number;
+  readonly insertions: number;
+  readonly totalPasses: number;
+  readonly completed: boolean;
+}
+
 export type DemonstrationExecution =
   | BubbleDemonstrationExecution
-  | SelectionDemonstrationExecution;
+  | SelectionDemonstrationExecution
+  | InsertionDemonstrationExecution;

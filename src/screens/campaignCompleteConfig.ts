@@ -83,7 +83,7 @@ export const CAMPAIGN_COMPLETE_CONFIG: Record<ProtocolCompleteType, ProtocolComp
       vectorBorder: "border-emerald-500/40",
       vectorText: "text-emerald-300",
     },
-    restartButtonLabel: "↺ \u00a0 REJOGAR PROTOCOLO",
+    restartButtonLabel: "REJOGAR PROTOCOLO",
     restartButtonClass: "min-w-[180px]",
     footerNote:
       "OPERAÇÃO HOMOLOGADA • BUBBLE SORT V2.0 • SETORES SELECTION E INSERTION EM DESENVOLVIMENTO",
@@ -132,7 +132,7 @@ export const CAMPAIGN_COMPLETE_CONFIG: Record<ProtocolCompleteType, ProtocolComp
       textClasses: "text-purple-200/90",
       titleColor: "text-purple-300",
     },
-    restartButtonLabel: "↺ \u00a0 REJOGAR SELECTION SORT",
+    restartButtonLabel: "REJOGAR SELECTION SORT",
     restartButtonClass:
       "min-w-[220px] border-purple-500/50 text-purple-300 hover:border-purple-400 shadow-lg shadow-purple-950/40",
     footerNote:

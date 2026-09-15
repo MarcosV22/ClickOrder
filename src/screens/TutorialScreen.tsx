@@ -97,11 +97,13 @@ export default function TutorialScreen({ onUnderstood, onBack }: TutorialScreenP
         {/* Top bar */}
         <div className="w-full flex items-center justify-between">
           <button
+            type="button"
             onClick={onBack}
             className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors cursor-pointer"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            ◀ &nbsp; VOLTAR
+            <span>◀</span>
+            <span>VOLTAR</span>
           </button>
 
           <div className="flex items-center gap-2">
@@ -364,18 +366,20 @@ export default function TutorialScreen({ onUnderstood, onBack }: TutorialScreenP
               <GameButton
                 onClick={onUnderstood}
                 variant="primary"
-                size="lg"
-                className="min-w-[240px] shadow-[0_0_20px_rgba(0,245,255,0.4)]"
+                size="md"
+                className="min-w-[200px] shadow-[0_0_20px_rgba(0,245,255,0.4)]"
               >
-                INICIAR FASE 1 →
+                <span>INICIAR FASE 1</span>
+                <span className="shrink-0" aria-hidden="true">→</span>
               </GameButton>
 
               <GameButton
                 onClick={handleResetTutorial}
                 variant="ghost"
                 size="md"
+                icon="↺"
               >
-                ↺ REPETIR TREINAMENTO
+                REPETIR TREINAMENTO
               </GameButton>
             </div>
           </div>

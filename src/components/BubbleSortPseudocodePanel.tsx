@@ -54,8 +54,10 @@ export default function BubbleSortPseudocodePanel({
           {frame.action === "INITIAL" ? (
             <span className="text-cyan-400/80">INÍCIO DO ALGORITMO</span>
           ) : (
-            <span className="text-white/70">
-              i = {ctx.i ?? 0} &nbsp;|&nbsp; j = {ctx.j ?? 0}
+            <span className="text-white/70 inline-flex items-center gap-2">
+              <span>i = {ctx.i ?? 0}</span>
+              <span className="text-white/30" aria-hidden="true">|</span>
+              <span>j = {ctx.j ?? 0}</span>
             </span>
           )}
         </div>

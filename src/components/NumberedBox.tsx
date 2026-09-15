@@ -6,7 +6,9 @@ export type BoxRole =
   | "scan-min"
   | "sorted"
   | "ordered"
+  | "ordered-scan"
   | "pair"
+  | "key"
   | "default";
 
 interface NumberedBoxProps {
@@ -71,8 +73,12 @@ export default function NumberedBox({
         return "OK";
       case "ordered":
         return "ORD";
+      case "ordered-scan":
+        return "ORD • SCAN";
       case "pair":
         return "PAR";
+      case "key":
+        return "CHAVE";
       case "default":
       default:
         return "PKG";
@@ -81,6 +87,14 @@ export default function NumberedBox({
 
   const getRoleClasses = (r: BoxRole) => {
     switch (r) {
+      case "key":
+        return {
+          bg: "bg-amber-950/80 shadow-lg shadow-amber-900/50",
+          border: "2px solid #f59e0b",
+          text: "text-amber-200",
+          badgeColor: "text-amber-300 font-bold",
+          pulse: true,
+        };
       case "target-min":
         return {
           bg: "bg-amber-950/70 shadow-lg shadow-amber-900/30",
@@ -119,6 +133,14 @@ export default function NumberedBox({
           border: "2px solid #00f5ff",
           text: "text-cyan-300 glow-cyan",
           badgeColor: "text-cyan-400 font-bold",
+          pulse: true,
+        };
+      case "ordered-scan":
+        return {
+          bg: "bg-emerald-950/60 animate-pulse-border shadow-lg shadow-cyan-900/30",
+          border: "2px solid #00f5ff",
+          text: "text-cyan-200 glow-cyan",
+          badgeColor: "text-cyan-300 font-bold",
           pulse: true,
         };
       case "sorted":
@@ -171,6 +193,12 @@ export default function NumberedBox({
         return "scanner ativo e candidato mínimo";
       case "scan":
         return "scanner ativo de inspeção (j)";
+      case "ordered-scan":
+        return "carga na partição ordenada sob inspeção (j)";
+      case "ordered":
+        return "na partição relativamente ordenada";
+      case "key":
+        return "chave suspensa no trilho aéreo";
       case "sorted":
         return "consolidada na posição correta";
       case "pair":

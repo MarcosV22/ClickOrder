@@ -159,18 +159,38 @@ Fundo âmbar translúcido   Fundo púrpura translúcido Fundo ciano translúcido
 5. **Alvo Coincidente com Mínimo (`role="target-min"`):** Quando $minIndex = i$. Borda âmbar destacada com anel púrpura, badge `ALVO • MÍN`.
 6. **Scanner em Inspeção (`role="scan"`):** Elemento sob escrutínio da varredura ($j$). Borda ciano com pulso (`border-cyan-400 animate-pulse`), badge `SCAN`.
 7. **Scanner no Novo Mínimo (`role="scan-min"`):** Momento em que o scanner coincide com a atualização de candidato. Borda ciano/púrpura com pulso duplo, badge `MÍN • SCAN`.
-8. **Estado Ordenado/Definitivo (`role="sorted"` ou `sorted={true}`):** Borda esmeralda (`border-emerald-500/30`), fundo `bg-emerald-950`, badge `OK` com texto verde luminoso.
-9. **Estado Desabilitado (`disabled={true}`):** Redução de opacidade (`opacity-40`) e cursor `not-allowed`.
-10. **Estado em Animação (`animating="left" | "right"`):** Aplicação de `animate-swap-left` ou `animate-swap-right` com elevação na camada (`z-20`). Executada no Bubble Sort durante a varredura e no Selection Sort estritamente na confirmação da transferência final.
+8. **Scanner sobre Região Ordenada (`role="ordered-scan"`):** No Insertion Sort, quando o scanner $j$ examina uma carga já pertencente ao prefixo ordenado. Borda ciano vibrante pulsante com fundo verde translúcido, badge textual composto `ORD • SCAN`.
+9. **Chave no Trilho Aéreo (`role="key"`):** Carga suspensa fora da esteira. Borda âmbar brilhante, halo de sustentação magnética e badge `CHAVE`.
+10. **Estado Ordenado/Definitivo (`role="sorted"` ou `sorted={true}`):** Borda esmeralda (`border-emerald-500/30`), fundo `bg-emerald-950`, badge `OK` ou `ORD`.
+11. **Estado Desabilitado (`disabled={true}`):** Redução de opacidade (`opacity-40`) e cursor `not-allowed`.
+12. **Estado em Animação (`animating="left" | "right"`):** Aplicação de `animate-swap-left` ou `animate-swap-right` com elevação na camada (`z-20`). Executada no Bubble Sort durante a varredura e no Selection Sort estritamente na confirmação da transferência final.
 
 ### 5.2. `GameButton` ([`src/components/GameButton.tsx`](../../src/components/GameButton.tsx))
 
+O componente central de interação e CTAs da plataforma foi padronizado para eliminar distorções de inchaço visual ("botões gordos/pesados"), garantir alturas mínimas consistentes, erradicar o uso de entidades HTML literais (`&nbsp;`) e banir emojis de sistema (como 💡) em favor de símbolos tipográficos (`?`, `✦`) ou ícones SVG da stack:
+
+#### Padrão Estrutural e Ergonômico:
+- **Layout:** `inline-flex items-center justify-center gap-2 select-none cursor-pointer text-center uppercase rounded-lg border transition-all duration-200`;
+- **Ícones e Textos:** Ícones desacoplados via prop `icon` ou spans filhos independentes com espaçamento nativo flex (`gap-2`), proibindo terminantemente entidades HTML literais em strings JSX;
+- **Estado Disabled:** `disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none`, preservando a métrica tipográfica sem deformações;
+- **Acessibilidade:** Suporte a `aria-label`, anel de foco visível `focus-visible:ring-2 focus-visible:ring-cyan-400`.
+
+#### Tabela de Tamanhos Padronizados:
+
+| Tamanho (`size`) | Altura Mínima (`min-h`) | Padding Interno | Tipografia (`Space Mono`) | Uso Recomendado |
+| :--- | :--- | :--- | :--- | :--- |
+| **`sm`** | $36\text{px}$ (`min-h-[36px]`) | `px-3.5 py-1.5` | `text-xs font-bold tracking-wider leading-tight` | Ações auxiliares compactas (Dica, Reiniciar, Seletores de velocidade) |
+| **`md`** | $44\text{px}$ (`min-h-[44px]`) | `px-5 py-2.5` | `text-xs sm:text-sm font-bold tracking-wider leading-tight` | **Padrão da plataforma**: Ações de fase (`TROCAR`, `MANTER`, `NOVO MÍNIMO`, `TRANSFERIR MENOR CARGA`, `VER DEMONSTRAÇÃO`, `INICIAR PROTOCOLO`) |
+| **`lg`** | $46\text{px}$ (`min-h-[46px]`) | `px-6 py-2.5` | `text-xs sm:text-sm font-bold tracking-wider leading-tight` | CTAs épicos de conclusão ou heróis com grande ênfase visual sem inchaço |
+
+#### Tabela de Variantes:
+
 | Variante | Aparência Normal | Efeito Hover / Foco | Uso Recomendado |
 | :--- | :--- | :--- | :--- |
-| **`primary`** | Fundo ciano `#00f5ff`, texto `#060b1a` escuro, peso bold | Sombra difusa ciano intensa (`shadow-[0_0_20px_#00f5ff]`), leve brilho | Avançar de tela, confirmar ação positiva principal |
-| **`secondary`** | Borda roxa `#8b5cf6`, fundo roxo translúcido, texto `#c4b5fd` | Borda roxa iluminada, fundo roxo mais opaco | Ações secundárias, regras, dicas da esteira |
-| **`danger`** | Borda vermelha `#ef4444`, fundo vermelho translúcido | Borda vermelha vibrante, sombra avermelhada | Reiniciar fase, abortar turno |
-| **`ghost`** | Fundo transparente, borda translúcida sutil | Borda ciano/branca nítida, fundo ciano/10 | Navegação para trás ("← VOLTAR") |
+| **`primary`** | `.btn-primary`: Gradiente ciano/azul/púrpura, texto branco, borda `border-cyan-400/30` | Iluminação difusa (`shadow-[0_0_20px_rgba(0,245,255,0.3)]`), elevação sutil | Avançar de fase, confirmar decisão principal, iniciar protocolo |
+| **`secondary`** | `.btn-secondary`: Borda `border-cyan-500/30`, texto ciano `#00f5ff` luminoso | Fundo ciano/08, borda ciano/60, brilho ciano suave | Ações secundárias equilibradas (`MANTER`, `VOLTAR`, `REPETIR FASE`) |
+| **`danger`** | Fundo avermelhado translúcido, borda `border-red-500/40`, texto `#f87171` | Borda vermelha/70, fundo vermelho/15, texto vermelho vívido | Reiniciar fase, pausar execução |
+| **`ghost`** | Fundo transparente, borda translúcida suave `border-white/10`, texto `#e2e8f0` | Borda ciano/branca nítida, fundo branco/5 | Demonstração observacional (`VER DEMONSTRAÇÃO`), repetições secundárias |
 
 ### 5.3. `InstructionPanel` ([`src/components/InstructionPanel.tsx`](../../src/components/InstructionPanel.tsx))
 

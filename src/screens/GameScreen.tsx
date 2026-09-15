@@ -615,9 +615,10 @@ export default function GameScreen({
                 disabled={isAnimating || gameState.completed}
                 variant="primary"
                 size="md"
+                icon="⇄"
                 className="min-w-[150px] shadow-[0_0_15px_rgba(0,245,255,0.25)]"
               >
-                ⇄ TROCAR
+                TROCAR
               </GameButton>
 
               <GameButton
@@ -625,9 +626,10 @@ export default function GameScreen({
                 disabled={isAnimating || gameState.completed}
                 variant="secondary"
                 size="md"
+                icon="="
                 className="min-w-[150px]"
               >
-                = MANTER
+                MANTER
               </GameButton>
             </div>
           ) : (
@@ -655,16 +657,18 @@ export default function GameScreen({
               variant="secondary"
               size="sm"
               disabled={showHint || isAnimating || gameState.completed}
+              icon="?"
             >
-              ? DICA
+              DICA
             </GameButton>
             <GameButton
               onClick={handleReset}
               variant="danger"
               size="sm"
               disabled={isAnimating}
+              icon="↺"
             >
-              ↺ REINICIAR
+              REINICIAR
             </GameButton>
           </div>
         </div>

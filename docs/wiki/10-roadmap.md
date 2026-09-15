@@ -70,11 +70,11 @@ flowchart LR
 - **Objetivo:** Implementar o 3º módulo curricular da plataforma: *"Desvio e Encaixe de Cargas"*.
 - **Sub-Marcos de Engenharia:**
   1. **P2.2-A:** Design Pedagógico, Mecânico e Curricular do Módulo (`CONCLUÍDO` em [`modules/insertion-sort.md`](./modules/insertion-sort.md));
-  2. **P2.2-B:** Engine pura de Insertion Sort em `src/game/sorting/insertion/` + suíte completa de testes unitários com Vitest cobrindo invariantes, shifts e estabilidade;
-  3. **P2.2-C:** Restrições procedurais (`insertionConstraints.ts`), briefing oficial, tutorial interativo (`[4, 2, 3]`) e demonstração autônoma canônica (`[6, 3, 5, 2]`);
-  4. **P2.2-D:** Interface de prática interativa (`InsertionGameScreen.tsx`) com trilho suspenso para chave elevada, botoeira contextual e tela final de módulo;
-  5. **P2.2-E:** Replay retrospectivo com derivação pura de quadros e pseudocódigo sincronizado de 11 instruções (`InsertionSortPseudocodePanel.tsx`);
-  6. **P2.2-F:** Persistência Schema v3 multi-protocolo (ativação de `insertion` em `protocols`) e validação de regressão dos 303 testes unitários.
+  2. **P2.2-B:** Engine pura de Insertion Sort por deslocamentos em `src/game/sorting/insertion/` + suíte completa de testes unitários com Vitest (`CONCLUÍDO`, ADR 0018);
+  3. **P2.2-C:** Restrições procedurais (`insertionConstraints.ts`), briefing oficial, tutorial interativo (`[4, 2, 3]`) e driver puro de demonstração canônica (`[6, 3, 5, 2]`) (`CONCLUÍDO`, ADR 0019);
+  4. **P2.2-D:** Interface de prática interativa (`InsertionGameScreen.tsx`) com trilho suspenso para chave elevada, esteira com vaga única (`InsertionHoleSlot`), role `"ordered-scan"`, catálogo de práticas sem fases (`basic`, `intermediate`, `advanced`), resultado de exercício e tela de conclusão do conjunto (`PracticeSetCompleteScreen.tsx`) (`CONCLUÍDO`, 368 testes verdes);
+  5. **P2.2-E:** Replay retrospectivo com derivação pura de quadros e pseudocódigo sincronizado de 11 instruções (`InsertionSortPseudocodePanel.tsx`) + conexão visual da demonstração (`PRÓXIMO MARCO`);
+  6. **P2.2-F:** Persistência Schema v4 multi-protocolo orientada a exercícios/módulos e homologação final do Insertion Sort no catálogo.
 - **Critério de Aceite:** 100% dos testes unitários verdes e zero regressão nos testes existentes.
 
 ---
@@ -163,14 +163,12 @@ Esta seção preserva o registro histórico indelével de engenharia dos marcos 
 
 ## 5. Próxima Ação Imediata de Desenvolvimento
 
-Com a conclusão do marco **PLATFORM-R0** e aprovação do design pedagógico em **P2.2-A**, a próxima prioridade de implementação de código no Sorting Station é:
+Com a conclusão do marco **P2.2-D** (práticas interativas, interface de exercício e conclusão do conjunto), a próxima prioridade de implementação de código no Sorting Station é:
 
-$$\mathbf{M\acute{O}DULO\ INSERTION\ SORT\ -\ ENGINE\ PURA\ E\ TESTES\ (Marco\ P2.2-B)}$$
+$$\mathbf{M\acute{O}DULO\ INSERTION\ SORT\ -\ REPLAY,\ PSEUDOC\acute{O}DIGO\ E\ DEMONSTRA\C{C}\tilde{A}O\ VISUAL\ (Marco\ P2.2-E)}$$
 
 Seguindo estritamente o ciclo de governança:
-1. Criação do ADR específico do Insertion Sort;
-2. Implementação da engine pura (`src/game/sorting/insertion/insertionSortEngine.ts`);
-3. Testes unitários com Vitest;
-4. Demonstração autônoma e tutorial;
-5. Interface de gameplay com mecânica de chave elevada;
-6. Replay com pseudocódigo de 11 instruções.
+1. Derivação pura de quadros de replay (`insertionReplayModel.ts`) a partir de `InsertionStepRecord[]`;
+2. Painel de pseudocódigo sincronizado de 11 linhas (`InsertionSortPseudocodePanel.tsx`);
+3. Tela de Replay interativo (`InsertionReplayScreen.tsx`);
+4. Conexão visual do Modo Demonstração para Insertion Sort em `DemonstrationScreen.tsx` consumindo `insertionDemonstration.ts`.

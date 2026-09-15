@@ -30,7 +30,7 @@ A plataforma divide seus motores de ordenação em 6 módulos curriculares canô
 | :--- | :--- | :--- | :---: | :--- |
 | **01. Bubble Sort** | `src/game/sorting/bubbleSortEngine.ts` | FSM sequencial estrita de pares adjacentes $[j, j+1]$ e passada externa $i$ | `IMPLEMENTADO` | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |
 | **02. Selection Sort** | `src/game/sorting/selection/selectionSortEngine.ts` | FSM bimodal estrita `INSPECT` (scanner) e `COMMIT` (transferência) | `IMPLEMENTADO` | [`modules/selection-sort.md`](./modules/selection-sort.md) |
-| **03. Insertion Sort** | `src/game/sorting/insertion/` (Planejado P2.2) | FSM de elevação de chave (`LIFT`), deslocamento (`SHIFT`) e inserção (`DROP`) | `PLANEJADO` | [`modules/insertion-sort.md`](./modules/insertion-sort.md) |
+| **03. Insertion Sort** | `src/game/sorting/insertion/insertionSortEngine.ts` | FSM de deslocamentos (`COMPARE_AND_SHIFT`, `INSERT_READY`, `COMPLETED`) com vaga física | `EM IMPLEMENTAÇÃO (P2.2-B)` | [`modules/insertion-sort.md`](./modules/insertion-sort.md) |
 | **04. Merge Sort** | `src/game/sorting/merge/` (Futuro P3.1) | FSM de divisão binária em sub-esteiras e intercalação ordenada com dois ponteiros | `FUTURO` | [`modules/merge-sort.md`](./modules/merge-sort.md) |
 | **05. Quick Sort** | `src/game/sorting/quick/` (Futuro P3.2) | FSM de seleção de pivô e particionamento bilateral Lomuto/Hoare | `FUTURO` | [`modules/quick-sort.md`](./modules/quick-sort.md) |
 | **06. Heap Sort** | `src/game/sorting/heap/` (Futuro P3.3) | FSM de construção de max-heap, afundamento (*sift-down*) e extração da raiz | `FUTURO` | [`modules/heap-sort.md`](./modules/heap-sort.md) |
@@ -84,10 +84,46 @@ export interface SelectionSortState {
 
 ---
 
-## 5. Requisitos de Conformidade para Novas Engines (Module Standard)
+## 5. A Engine de Insertion Sort (`src/game/sorting/insertion/insertionSortEngine.ts`)
 
-Qualquer nova engine algorítmica a ser implementada na plataforma (a começar pelo Insertion Sort no Marco P2.2) deve obedecer aos seguintes critérios:
+Implementada no marco **P2.2-B**, modela a ordenação por deslocamentos sucessivos (*shifts*) e encaixe pontual de chave (*insert*) com conservação estrita de massa e sem permutas bilaterais (*swaps*):
+
+### 5.1. Estrutura de Estado Imutável
+```typescript
+export interface InsertionSortState {
+  readonly initialValues: readonly number[];
+  readonly currentValues: readonly (number | null)[]; // null representa a vaga física
+  readonly arrayLength: number;
+  readonly i: number;                 // Passada externa atual (1 .. n-1)
+  readonly j: number;                 // Posição de inspeção regressiva (i-1 .. -1)
+  readonly key: number | null;        // Chave suspensa no trilho aéreo
+  readonly holeIndex: number | null;  // Índice da vaga física na esteira
+  readonly phase: InsertionPhase;     // "COMPARE_AND_SHIFT" | "INSERT_READY" | "COMPLETED"
+  readonly comparisons: number;       // Comparações relacionais reais entre A[j] e key
+  readonly shifts: number;            // Movimentações de carga sobre a esteira (A[j+1] <- A[j])
+  readonly insertions: number;        // Inserções da chave na vaga (n - 1 para n >= 2)
+  readonly errors: number;            // Total de decisões incorretas do operador
+  readonly orderedBoundary: number;   // Limite do subvetor ORD relativo A[0..orderedBoundary]
+  readonly history: readonly InsertionStepRecord[];
+  readonly completed: boolean;
+  readonly status: InsertionStatus;
+}
+```
+
+### 5.2. Funções Puras Principais
+- `createInsertionSortState(initialValues)`: Instancia a sessão imutável. Para $n \ge 2$, dispara automaticamente o *auto-lift* determinístico da chave $A[1]$ para o trilho aéreo, abrindo a vaga no índice 1 e apontando $j$ para 0;
+- `getExpectedInsertionStep(state)`: Retorna os metadados contextuais da ação esperada (`SHIFT_RIGHT` vs `INSERT_KEY`), a comparação relacional $A[j] > \text{key}$ e a explicação pedagógica;
+- `executeInsertionStep(state, decision)`: Executa a decisão do operador diferenciando rigorosamente **erros pedagógicos** (`errors += 1`, estado retido) de **ações inválidas por fase/integração** (`errors` inalterado);
+- `getInsertionOrderedIndices(state)`: Retorna os índices `[0 .. orderedBoundary]` que compõem o subvetor ordenado relativo `ORD`;
+- `isInsertionSortComplete(state)`: Indica se todas as passadas externas foram finalizadas;
+- `calculateInsertionSortProgress(state)`: Calcula a porcentagem real de progresso (0 a 100%).
+
+---
+
+## 6. Requisitos de Conformidade para Novas Engines (Module Standard)
+
+Qualquer nova engine algorítmica a ser implementada na plataforma deve obedecer aos seguintes critérios:
 1. **Zero Acoplamento com React:** Arquivos localizados em `src/game/sorting/<algoritmo>/` contendo exclusivamente TypeScript puro sem JSX ou hooks;
-2. **Histórico Auditável (`history`):** Cada operação atômica deve produzir um registro com metadados suficientes para reconstrução determinística de quadros de replay;
-3. **Invariantes Explícitas:** Funções públicas que retornam explicitamente elementos já consolidados (`getSortedIndices`) e expectativas do passo corrente;
+2. **Histórico Auditável (`history`):** Cada operação atômica deve produzir um registro discriminado com metadados suficientes para reconstrução determinística de quadros de replay;
+3. **Invariantes Explícitas:** Funções públicas que retornam explicitamente elementos já consolidados (`getSortedIndices` / `getInsertionOrderedIndices`) e expectativas do passo corrente;
 4. **Cobertura de Testes com Vitest:** Mínimo de 15 cenários de teste unitário, incluindo vetores vazios, unitários, ordenados, decrescentes e com valores duplicados.

@@ -212,4 +212,49 @@ describe("Protocol Mode Briefing System (src/game/briefing/)", () => {
       expect(getBriefingForMode("selection-canonical").id).toBe("selection-canonical");
     });
   });
+
+  describe("INSERTION_CANONICAL_BRIEFING (P2.2-C)", () => {
+    it("deve conter campos fundamentais e metadados obrigatórios do Insertion Sort", () => {
+      const briefing = getBriefingForMode("insertion-canonical");
+      expect(briefing.id).toBe("insertion-canonical");
+      expect(briefing.protocolName).toContain("INSERTION SORT");
+      expect(briefing.modeName).toBe("DESVIO E ENCAIXE DE CARGAS");
+      expect(briefing.badgeVariant).toBe("amber");
+      expect(briefing.startLabel).toBe("INICIAR TUTORIAL GUIADO");
+      expect(briefing.instructions.length).toBeGreaterThanOrEqual(4);
+      expect(briefing.highlights.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it("deve conter conceitos fundamentais: região ordenada (ORD), chave suspensa, shift vs troca e encaixe", () => {
+      const briefing = getBriefingForMode("insertion-canonical");
+      const allText = [
+        briefing.subtitle,
+        briefing.objective,
+        ...briefing.instructions.map((i) => `${i.title} ${i.description}`),
+        ...(briefing.particularities ?? []),
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      expect(allText).toMatch(/chave|trilho/);
+      expect(allText).toMatch(/vaga/);
+      expect(allText).toMatch(/ord|ordenad/);
+      expect(allText).toMatch(/desloca|shift/);
+      expect(allText).toMatch(/encaix|insert/);
+      expect(allText).toMatch(/shift ≠ troca|troca/);
+    });
+
+    it("não deve misturar mecânicas de pares adjacentes do Bubble nem scanner de mínimo do Selection", () => {
+      const briefing = getBriefingForMode("insertion-canonical");
+      const allText = JSON.stringify(briefing).toLowerCase();
+      expect(allText).not.toContain("pares vizinhos");
+      expect(allText).not.toContain("scanner de carga mínima");
+      expect(allText).not.toContain("early exit");
+    });
+
+    it("deve estar registrado no catálogo global de briefings", () => {
+      expect(Object.keys(BRIEFING_CATALOG)).toContain("insertion-canonical");
+      expect(getBriefingForMode("insertion-canonical").id).toBe("insertion-canonical");
+    });
+  });
 });

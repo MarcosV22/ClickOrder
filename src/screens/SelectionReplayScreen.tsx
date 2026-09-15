@@ -306,8 +306,8 @@ export default function SelectionReplayScreen({
 
       {/* Bottom Controls Bar */}
       <div className="relative z-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4 panel-border bg-[#080f28]/90 rounded-xl px-4 sm:px-6 py-4 max-w-3xl w-full mx-auto shrink-0">
-        <GameButton onClick={handleResetReplay} variant="secondary" size="sm">
-          ↺ REINICIAR
+        <GameButton onClick={handleResetReplay} variant="secondary" size="sm" icon="↺">
+          REINICIAR
         </GameButton>
 
         <GameButton
@@ -315,16 +315,18 @@ export default function SelectionReplayScreen({
           variant="secondary"
           size="md"
           disabled={isFirst}
+          icon="←"
         >
-          ← ANTERIOR
+          ANTERIOR
         </GameButton>
 
         <GameButton
           onClick={handleTogglePlay}
           variant={isPlaying ? "danger" : "primary"}
           size="md"
+          icon={isPlaying ? "⏸" : "▶"}
         >
-          {isPlaying ? "⏸ PAUSAR" : "▶ REPRODUZIR"}
+          {isPlaying ? "PAUSAR" : "REPRODUZIR"}
         </GameButton>
 
         <GameButton
@@ -332,8 +334,10 @@ export default function SelectionReplayScreen({
           variant="secondary"
           size="md"
           disabled={isLast}
+          icon="→"
+          iconPosition="right"
         >
-          PRÓXIMO →
+          PRÓXIMO
         </GameButton>
 
         {/* Speed Selector (0.5x, 1x, 2x) */}
@@ -367,9 +371,10 @@ export default function SelectionReplayScreen({
             onClick={onStartTraining}
             variant="primary"
             size="md"
+            icon="▶"
             className="border-purple-400 bg-purple-600/30 text-purple-200 hover:bg-purple-500/40"
           >
-            ▶ INICIAR TREINAMENTO
+            INICIAR TREINAMENTO
           </GameButton>
         )}
       </div>

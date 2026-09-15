@@ -35,4 +35,5 @@ export interface ProtocolModeBriefing {
 export type BriefingModeId =
   | "bubble-canonical"
   | "bubble-early-exit"
-  | "selection-canonical";
+  | "selection-canonical"
+  | "insertion-canonical";

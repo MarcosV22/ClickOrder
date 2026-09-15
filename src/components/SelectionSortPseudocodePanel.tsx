@@ -42,10 +42,12 @@ export default function SelectionSortPseudocodePanel({
           {frame.frameType === "INITIAL" ? (
             <span className="text-purple-400/80">INÍCIO DO ALGORITMO</span>
           ) : (
-            <span className="text-white/70">
-              ALVO (i) = {ctx.i ?? 0} &nbsp;|&nbsp; SCAN (j) ={" "}
-              {ctx.j !== null ? ctx.j : "—"} &nbsp;|&nbsp; MÍN ={" "}
-              {ctx.minIndex ?? 0}
+            <span className="text-white/70 inline-flex items-center gap-2">
+              <span>ALVO (i) = {ctx.i ?? 0}</span>
+              <span className="text-white/30" aria-hidden="true">|</span>
+              <span>SCAN (j) = {ctx.j !== null ? ctx.j : "—"}</span>
+              <span className="text-white/30" aria-hidden="true">|</span>
+              <span>MÍN = {ctx.minIndex ?? 0}</span>
             </span>
           )}
         </div>

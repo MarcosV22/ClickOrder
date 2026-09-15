@@ -256,37 +256,40 @@ export default function ProtocolModeBriefingScreen({
           <GameButton
             onClick={onBack}
             variant="secondary"
-            size="lg"
+            size="md"
             className="w-full sm:w-auto px-5"
             aria-label="Voltar para a tela anterior"
+            icon="←"
           >
-            ← &nbsp; VOLTAR
+            VOLTAR
           </GameButton>
 
           {onOpenDemonstration && (
             <GameButton
               onClick={onOpenDemonstration}
               variant="ghost"
-              size="lg"
-              className="w-full sm:w-auto px-5 border-cyan-500/40 text-cyan-300 hover:border-cyan-400"
+              size="md"
+              className="w-full sm:w-auto px-5 border-cyan-500/40 text-cyan-300 hover:border-cyan-400 hover:bg-cyan-950/30"
               aria-label="Ver demonstração do algoritmo"
+              icon="👁"
             >
-              👁 &nbsp; VER DEMONSTRAÇÃO
+              VER DEMONSTRAÇÃO
             </GameButton>
           )}
 
           <GameButton
             onClick={onStart}
             variant={briefing.startVariant ?? "primary"}
-            size="lg"
+            size="md"
             className={`w-full sm:flex-1 ${
               isAmber
-                ? "border-amber-500/50 text-amber-300 hover:border-amber-400 shadow-lg shadow-amber-950/30"
+                ? "border-amber-500/60 bg-amber-950/40 text-amber-300 hover:border-amber-400 hover:bg-amber-900/50 shadow-lg shadow-amber-950/30"
                 : ""
             }`}
             aria-label={briefing.startLabel}
+            icon="▶"
           >
-            ▶ &nbsp; {briefing.startLabel}
+            {briefing.startLabel}
           </GameButton>
         </footer>
       </div>
