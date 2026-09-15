@@ -1,205 +1,95 @@
-# 01 — Visão de Produto e Escopo
+# 01 — Visão de Produto e Escopo da Plataforma
 
-> **Documento canônico:** Visão de produto, proposta pedagógica, princípios de design e delimitação de escopo do **Sorting Station**.  
-> **Status:** Ativo / Base de Verdade da Wiki  
-> **Data:** 08/09/2026  
-> **Dependências:** [`AGENTS.md`](../../AGENTS.md), [`CLAUDE.md`](../../CLAUDE.md), [`docs/wiki/00-repository-inventory.md`](./00-repository-inventory.md).
-
----
-
-## 1. Visão Geral do Produto
-
-O **Sorting Station** é um jogo educacional *point-and-click* para navegadores web concebido para transformar o ensino e a aprendizagem de algoritmos de ordenação em uma experiência ativa, interativa e visualmente intuitiva. 
-
-Ambientado em uma central logística futurista de alta tecnologia ([`src/screens/HomeScreen.tsx`](../../src/screens/HomeScreen.tsx)), o jogo coloca o estudante no papel de um operador de triagem de cargas. O desafio proposto não é apenas "colocar números em ordem", mas sim **executar passo a passo o comportamento rigoroso do algoritmo ensinado**, integrando em tempo real:
-
-$$\text{Ação do Jogador} \longrightarrow \text{Representação Visual} \longrightarrow \text{Execução do Algoritmo} \longrightarrow \text{Pseudocódigo Formal} \longrightarrow \text{Feedback Explicativo}$$
+> **Documento canônico:** Visão oficial do produto, proposta pedagógica, princípios de design, delimitação curricular e governança do **Sorting Station**.  
+> **Status:** Ativo / Base de Verdade da Plataforma  
+> **Data de Atualização:** 15/09/2026 (Marco PLATFORM-R0)  
+> **Dependências:** [`AGENTS.md`](../../AGENTS.md), [`ADR 0018`](../adr/0018-game-to-educational-platform-transition.md), [`modules/README.md`](./modules/README.md), [`10-roadmap.md`](./10-roadmap.md).
 
 ---
 
-## 2. O Problema Educacional
+## 1. Visão Geral e Redefinição Oficial do Produto
 
-O aprendizado de algoritmos fundamentais de ordenação (como Bubble Sort, Selection Sort e Insertion Sort) em cursos de Computação e Engenharia frequentemente enfrenta barreiras didáticas conhecidas:
+O **Sorting Station** é oficialmente definido como:
 
-1. **Abstração Excessiva e Desconexão Prática:** Estudantes novatos frequentemente têm dificuldade em traduzir laços aninhados (`for/while`), índices de ponteiros (`i`, `j`, `j+1`) e operações de permuta (*swap*) em transformações espaciais concretas sobre os dados.
-2. **Passividade dos Visualizadores Tradicionais:** Ferramentas clássicas de visualização de algoritmos costumam ser puramente demonstrativas: o aluno pressiona um botão de "Play" e assiste a barras coloridas se movendo automaticamente. Isso gera uma **ilusão de competência** (*illusion of explanatory depth*), onde o aluno acredita compreender o algoritmo enquanto o assiste passivamente, mas fracassa ao ter que reproduzir ou rastrear seus passos manualmente.
-3. **Desconexão com a Sintaxe Formal:** Muitas abordagens isolam a teoria (análise assintótica e pseudocódigo em slides) da prática (depuração em código real), deixando uma lacuna conceitual sobre o papel de cada linha do algoritmo durante a execução.
-4. **Ansiedade e Frustração com Sintaxe de Programação:** Alunos em estágios iniciais muitas vezes gastam mais energia lutando contra erros de sintaxe de compiladores do que compreendendo a lógica conceitual dos passos do algoritmo.
+> **"Plataforma educacional interativa e gamificada para aprendizagem, prática e visualização de algoritmos de ordenação."**
+
+O produto **NÃO** é arquitetado primordialmente como um simples jogo de fases soltas. Sua missão central é constituir um ambiente didático de alta fidelidade para o ensino superior e técnico de Ciência da Computação, estruturado em torno de **Módulos Curriculares de Algoritmos**.
+
+A identidade visual de **Central Logística Espacial/Industrial** permanece como a metáfora visual e a camada de gamificação do produto, transformando a manipulação abstrata de vetores matemáticos em uma experiência cinestésica tátil e imersiva:
+
+$$\text{Ação do Estudante} \longrightarrow \text{Metáfora da Esteira} \longrightarrow \text{Engine do Algoritmo} \longrightarrow \text{Pseudocódigo Sincronizado} \longrightarrow \text{Feedback Formativo}$$
 
 ---
 
-## 3. Proposta de Valor e Modelo Pedagógico
+## 2. O Problema Educacional Abordado
 
-A proposta central do **Sorting Station** é a **aprendizagem ativa por manipulação direta**:
+O ensino de algoritmos de ordenação em cursos de graduação e tecnologia depara-se sistematicamente com desafios epistemológicos:
 
-- **Agência com Andaime Pedagógico (*Scaffolding*):** Em vez de apenas assistir à ordenação, o aluno toma as decisões operacionais (qual par comparar, se deve ou não trocar, qual elemento selecionar). O sistema valida a decisão conforme o protocolo do algoritmo em estudo.
-- **Rastreamento Cognitivo em Múltiplas Camadas:** A interface conecta simultaneamente o objeto manipulado (caixa numerada na esteira), a métrica operacional (número de comparações e trocas), a instrução formal (linha correspondente no pseudocódigo) e a justificativa lógica (ex.: *"5 > 2 — troca necessária"*).
-- **Sem Atrito de Sintaxe:** O formato *point-and-click* elimina barreiras de digitação, permitindo foco cognitivo 100% voltado à lógica do algoritmo e à sua invariante de laço.
+1. **Abstração Excessiva e Desconexão Tátil:** Estudantes novatos enfrentam barreiras cognitivas para traduzir laços aninhados (`for/while`), índices de ponteiros (`i`, `j`, `minIndex`) e operações de memória em transformações espaciais sobre os dados.
+2. **Passividade dos Visualizadores Tradicionais:** Simuladores baseados em apertar "Play" e assistir a animações automáticas geram a chamada **ilusão de profundidade explanatória** (*illusion of explanatory depth*): o aluno assiste ao algoritmo rodando e crê que o domina, mas fracassa na hora de rastreá-lo ou reproduzir suas invariantes.
+3. **Desconexão com a Sintaxe Formal:** Materiais expositivos costumam isolar a teoria assintótica e o pseudocódigo em slides estáticos, sem mostrar qual instrução específica está sendo executada a cada micro-passo.
+4. **Ansiedade com Sintaxe de Programação:** Alunos iniciantes frequentemente desviam sua atenção cognitiva para resolver erros de compilação ou sintaxe de linguagens específicas, perdendo o foco na lógica relacional do algoritmo.
+
+---
+
+## 3. Proposta de Valor e Modelo Pedagógico da Plataforma
+
+A proposta central do **Sorting Station** é a **aprendizagem ativa por manipulação direta com andaime cognitivo (*scaffolding*)**:
+
+- **Agência com Validação Rigorosa:** O estudante assume o controle ativo das decisões operacionais (eleger pares, decidir se permuta ou mantém, identificar o menor elemento, suspender chaves ou particionar em torno de pivôs). A engine algorítmica valida a ação contra o modelo matemático formal.
+- **Rastreamento Cognitivo em Camadas Sincronizadas:** A interface conecta em tempo real o objeto físico manipulado (caixa na esteira), a métrica descritiva (comparações e trocas), o pseudocódigo formal sincronizado e a justificativa formativa do passo.
+- **Sem Atrito de Sintaxe:** O formato de manipulação direta via navegador elimina barreiras de digitação, concentrando o esforço mental na compreensão da lógica do algoritmo.
+- **Modos Observacional e Prático Integrados:** A plataforma oferece tanto a observação autônoma da execução perfeita ([`Modo Demonstração`](./03-frontend.md)) quanto a prática assistida ([`Tutorial`](./modules/README.md)), a prática progressiva e a reflexão retrospectiva ([`Replay`](./03-frontend.md)).
 
 > [!NOTE]
-> **Ressalva Metodológica Obrigatória:** O impacto educacional do jogo é tratado aqui como **objetivo pedagógico e proposta de design**. O repositório não registra resultados de validação empírica ou testes de eficácia com turmas de alunos, os quais constituem planos futuros de pesquisa acadêmica.
+> **Ressalva Metodológica Obrigatória:** O repositório trata o ganho de aprendizagem como **hipótese pedagógica de design**. Em estrito respeito ao rigor acadêmico, não se registram alegações empíricas prévias sem a realização de ensaios formais com estudantes reais.
 
 ---
 
-## 4. Público-Alvo Inicial
+## 4. A Unidade Curricular Canônica: Módulo de Algoritmo
 
-O produto é projetado prioritariamente para:
-
-1. **Estudantes de Cursos de Graduação:** Alunos de Ciência da Computação, Engenharia de Software, Sistemas de Informação e áreas afins, matriculados em disciplinas introdutórias como Algoritmos, Estruturas de Dados e Introdução à Programação.
-2. **Estudantes de Cursos Técnicos e Tecnológicos:** Alunos de cursos técnicos de desenvolvimento de sistemas e programação web.
-3. **Autodidatas e Entusiastas:** Desenvolvedores em transição de carreira ou estudantes independentes que buscam reforçar a base conceitual de ciência da computação.
-4. **Professores e Educadores:** Docentes que buscam uma ferramenta web leve, gratuita e interativa para ilustrar aulas práticas e atividades guiadas de laboratório sem necessidade de instalação de ambientes complexos.
-
----
-
-## 5. Fantasia e Narrativa: A Central Logística Futurista
-
-Para afastar a experiência da aridez de exercícios em folha de papel ou de dashboards corporativos despersonalizados, o jogo constrói uma narrativa temática coerente:
-
-- **O Cenário ("Central Logística v2.0"):** Uma estação espacial/industrial automatizada de roteamento de pacotes energéticos (`HomeScreen.tsx:L70-L73`).
-- **Os Dados (Cargas / Pacotes):** Vetores de números inteiros são representados como caixas tecnológicas de transporte com identificadores e chaves de prioridade (`NumberedBox.tsx`).
-- **O Meio de Transporte (Esteira Transportadora):** O vetor é disposto sobre uma esteira com trilhos energizados (`.conveyor-track` em `src/index.css:L114-L124` e `src/screens/GameScreen.tsx:L181`), reforçando a ideia de fluxo, adjacência espacial e fronteira de ordenação.
-- **Os Algoritmos como "Protocolos de Operação":** Cada algoritmo de ordenação é apresentado como um protocolo operacional homologado da central:
-  - *Protocolo Bubble* (Bubble Sort) — Foco em varredura adjacente e flutuação.
-  - *Protocolo Selection* (Selection Sort) — Foco em escaneamento da carga mínima.
-  - *Protocolo Insertion* (Insertion Sort) — Foco em encaixe posicional em lote já ordenado.
-- **Identidade Audiovisual:** Paleta escura com brilhos neon em ciano (`#00f5ff`) e roxo (`#8b5cf6`), efeito de linhas de varredura CRT (`.scanlines`), malha de fundo (`.bg-grid`) e tipografia temática dividida entre exibição industrial (*Orbitron*) e terminal de telemetria (*Space Mono*).
+A plataforma abandona a terminologia de "níveis de jogo" como unidade primária e adota a arquitetura de **Módulos Curriculares**.  
+O currículo do Sorting Station é congelado em **6 Módulos Oficiais**:
+1. **Bubble Sort:** Trocas locais de pares vizinhos e flutuação gradual do maior. (`IMPLEMENTADO`)
+2. **Selection Sort:** Scanner de menor carga da partição e permuta única de consolidação. (`IMPLEMENTADO`)
+3. **Insertion Sort:** Trilho suspenso com chave elevada, deslocamento regressivo e encaixe na lacuna. (`PLANEJADO` — P2.2)
+4. **Merge Sort:** Divisão em sub-esteiras paralelas e intercalação ordenada com dois ponteiros. (`FUTURO` — P3.1)
+5. **Quick Sort:** Eleição de pivô luminoso e particionamento bilateral in-place. (`FUTURO` — P3.2)
+6. **Heap Sort:** Pirâmide hierárquica (max-heap) e extração sucessiva da raiz. (`FUTURO` — P3.3)
 
 ---
 
-## 6. A Natureza *Point-and-Click*
+## 5. Reposicionamento da Gamificação e Camada Narrativa
 
-O produto adota intencionalmente a mecânica *point-and-click* pelas seguintes razões fundamentais:
+Para assegurar foco acadêmico e evitar ruído lúdico excessivo:
 
-- **Baixa Carga Cognitiva Estranha:** Não há comandos de terminal, editores de texto ou linguagens de programação envolvidos. O estudante interage diretamente com o mouse ou toque sobre os elementos visuais.
-- **Transparência de Ação:** O clique em uma caixa representa a intenção imediata de foco; o clique na segunda caixa indica a intenção de comparação; botões de confirmação acionam decisões inequívocas.
-- **Acessibilidade Universal via Navegador:** Uma Single Page Application leve em React/Vite pode ser executada instantaneamente em qualquer navegador moderno, inclusive em computadores modestos de laboratórios escolares, sem necessidade de login prévio ou instalação de dependências.
+- **Gamificação Central (Preservada e Essencial):** A metáfora da esteira transportadora, as caixas tecnológicas iluminadas por neon, os controles táteis, as translações animadas e o cálculo da **Pontuação do Protocolo** constituem a camada de engajamento primária, mantendo o ambiente estimulante e cinestésico.
+- **Camada Narrativa (Movida para Backlog Opcional de Gamificação):** Enredos diegéticos secundários (histórias de supervisores robóticos, ordens de serviço corporativas e diálogos de personagens) são formally dissociados da arquitetura curricular. Sua implementação é estritamente opcional e submetida à prioridade dos módulos educacionais e do laboratório comparativo.
+- **Nomenclatura Diegética na UI:** Termos como *"Protocolo Bubble"* ou *"Terminal de Triagem"* são autorizados na interface do usuário (UI) para fins de imersão estilizada, mas a arquitetura interna e a documentação utilizam a terminologia canônica: **Plataforma, Módulo, Exercício e Caso**.
 
 ---
 
-## 7. Diferenciação Fundamental: "Ordenar Números" vs. "Executar um Algoritmo"
+## 6. Diferenciação Fundamental: "Ordenar Números" vs. "Executar um Algoritmo"
 
-Esta é a distinção conceitual mais crítica de todo o projeto **Sorting Station**:
-
-| Critério | "Ordenar Números" (Quebra-Cabeça Comum) | "Executar um Algoritmo de Ordenação" (Sorting Station) |
+| Critério | Quebra-Cabeça Comum de Ordenação | Plataforma Educacional Sorting Station |
 | :--- | :--- | :--- |
-| **Objetivo do Jogador** | Fazer o vetor ficar crescente a qualquer custo. | Compreender e reproduzir o procedimento formal e sistemático daquele algoritmo. |
-| **Ordem de Ações** | Livre, caótica ou baseada em intuição visual arbitrária (trocar qualquer par desordenado que chamar a atenção). | Determinística e estruturada (respeita a passada atual, o ponteiro de comparação e a invariante de laço). |
-| **Consciência das Passadas** | O jogador não sabe em qual passada está nem quando um elemento atingiu sua posição definitiva. | O sistema evidencia o início e fim de cada passada (`PASSADA X/Y`) e fixa visualmente elementos definitivamente posicionados. |
-| **Custo Operacional** | Comparações e trocas supérfluas não importam desde que o resultado final esteja certo. | O jogador compreende que comparações desnecessárias ou fora de ordem violam a complexidade teórica do algoritmo. |
-| **Valor Pedagógico** | Baixo (apenas exercita reconhecimento de ordem numérica). | Alto (ensina pensamento algorítmico, invariantes e análise de fluxo de controle). |
-
-> [!IMPORTANT]
-> **Dívida Técnica do Protótipo Atual vs. Direção Futura:**  
-> Como registrado no inventário técnico ([`docs/wiki/00-repository-inventory.md`](./00-repository-inventory.md)), o protótipo atual de [`src/screens/GameScreen.tsx`](../../src/screens/GameScreen.tsx) ainda permite clicar em **qualquer par adjacente em qualquer ordem**.  
-> A prioridade máxima planejada (**P0**) do projeto é substituir essa liberdade irrestrita por uma **máquina de estados pedagógica** que force o fluxo formal do Bubble Sort (passo a passo da esquerda para a direita).
+| **Objetivo do Estudante** | Deixar os números em ordem crescente de forma livre. | Compreender e executar fielmente o procedimento formal daquele algoritmo específico. |
+| **Ordem de Ações** | Livre, arbitrária ou intuitiva (trocar qualquer par que chamar a atenção). | Determinística e estruturada (governada pela FSM da engine, respeitando passada, ponteiros e invariantes). |
+| **Consciência de Passadas** | O usuário não sabe em qual ciclo está nem quando uma vaga é final. | A interface exibe a passada atual e sela visualmente caixas consolidadas com a blindagem `OK`. |
+| **Custo Computacional** | Trocas supérfluas são irrelevantes se o vetor ficar ordenado. | A plataforma evidencia o custo de cada comparação e troca, registrando telemetria descritiva. |
+| **Valor Pedagógico** | Mínimo (apenas memorização de ordem numérica). | Alto (assimilação de invariantes de laço, complexidade assintótica e fluxo de controle). |
 
 ---
 
-## 8. Princípios de Gameplay
+## 7. Princípios de Produto da Plataforma
 
-1. **Agência com Guia Rigoroso:** O jogador toma a decisão operacional, mas a máquina do jogo assegura que a decisão seja avaliada contra as regras estritas do algoritmo em foco.
-2. **Causa e Efeito Imediatos:** Toda ação do jogador produz feedback textual e visual instantâneo (inferior a 500ms), explicitando a relação de ordem (`>` ou `≤`) e o impacto sobre o vetor.
-3. **Ritmo Controlado pelo Estudante:** No aprendizado inicial, não deve haver cronômetros agressivos ou contagens regressivas que induzam ao pânico. O foco é a precisão do raciocínio e a compreensão dos passos.
-4. **Erro como Oportunidade Diagnóstica:** Errar uma decisão de troca não deve punir o estudante com "Game Over" ou perda de progresso catastrófica. O jogo deve pausar, explicar o motivo pedagógico do erro e permitir a retificação imediata.
-5. **Transparência de Estado e Limites:** A esteira deve evidenciar claramente:
-   - Qual par está atualmente sob escrutínio;
-   - Quais elementos já estão definitivamente ordenados (fronteira de ordenação);
-   - Quais elementos ainda pertencem à sublista não ordenada.
+Qualquer alteração, componente, tela ou módulo adicionado ao Sorting Station deve respeitar rigorosamente os **8 Princípios de Produto**:
 
----
-
-## 9. Objetivo Pedagógico do MVP (Bubble Sort)
-
-O MVP foca especificamente no **Bubble Sort** com os seguintes objetivos de aprendizagem:
-
-1. **Compreender a Comparação Adjacente Local:** Entender que o algoritmo opera exclusivamente sobre pares vizinhos imediatos ($A[j]$ e $A[j+1]$), sem visão holística global do vetor.
-2. **Visualizar a "Flutuação" dos Maiores Elementos:** Observar empiricamente como, a cada passada completa de comparações, o maior elemento remanescente do subvetor é empurrado de forma determinística para o final da esteira.
-3. **Sentir o Custo das Comparações:** Perceber que o algoritmo realiza comparações mesmo quando os elementos já estão na ordem correta ($A[j] \le A[j+1]$), consolidando a intuição sobre o número quadrático ($O(n^2)$) de verificações no pior e caso médio.
-
----
-
-## 10. Escopo do MVP (Estado Implementado Atual)
-
-Em conformidade com a base factual verificada em [`docs/wiki/00-repository-inventory.md`](./00-repository-inventory.md):
-
-- **Telas:** Fluxo linear funcional `HomeScreen` → `TutorialScreen` → `GameScreen` → `ResultScreen` ([`src/App.tsx`](../../src/App.tsx)).
-- **Algoritmo:** Exclusivamente Bubble Sort ("Protocolo Bubble").
-- **Fases:** Três fases com configurações fixas de vetor:
-  - Fase 1: `[5, 2, 4, 1]` (4 elementos)
-  - Fase 2: `[6, 3, 8, 2, 5]` (5 elementos)
-  - Fase 3: `[9, 1, 7, 4, 3, 6]` (6 elementos)
-- **Interação:** Seleção de caixas vizinhas por clique, com contagem em tempo real de comparações e trocas ([`src/screens/GameScreen.tsx`](../../src/screens/GameScreen.tsx)).
-- **Feedback:** Painel contextual com 4 tipologias visuais de instrução (`InstructionPanel.tsx`).
-- **Recursos de Apoio:** Sistema de dica local (`findNextSwap`) e reinício de fase ([`src/screens/GameScreen.tsx`](../../src/screens/GameScreen.tsx)).
-- **Encerramento:** Relatório de desempenho de fase com contadores, barra de eficiência e pseudocódigo com linha em destaque ([`src/screens/ResultScreen.tsx`](../../src/screens/ResultScreen.tsx)).
-
----
-
-## 11. Não-Objetivos do MVP
-
-Para proteger o foco do projeto e evitar escopo inflado sem fundamentação, os seguintes itens são explicitamente **não-objetivos** do MVP:
-
-- ❌ **Sem Backend ou Banco de Dados:** Não há armazenamento em nuvem, contas de usuário ou autenticação.
-- ❌ **Sem Competição por Tempo / Speedrun:** O MVP não inclui cronômetros de pressão ou rankings de velocidade.
-- ❌ **Sem Editor de Código Embutido:** O jogador não digita código fonte em JavaScript, Python ou C.
-- ❌ **Sem Múltiplos Algoritmos no MVP:** Selection Sort e Insertion Sort são direções futuras planejadas, não partes do escopo inicial.
-- ❌ **Sem Gerador Aleatório Ilimitado de Fases:** O MVP utiliza vetores didáticos controlados para garantir reproducibilidade e valor demonstrativo.
-- ❌ **Sem Alegações de Eficácia Estatística:** O MVP não reivindica comprovação empírica de melhora pedagógica até a realização de estudos acadêmicos estruturados.
-
----
-
-## 12. Critérios de Sucesso
-
-### Critérios Técnicos
-- **Integridade de Build:** Compilação limpa via Vite 8 sem erros de bundle ou avisos de tipagem TypeScript em modo estrito (`strict: true`).
-- **Desempenho de Renderização:** Taxa de quadros estável (60 FPS) nas animações CSS de troca e esteira, sem vazamentos de memória em `setInterval` ou `setTimeout`.
-- **Zero Dependência Externa de Backend:** Aplicação 100% funcional offline ou servida como SPA estática.
-
-### Critérios de Experiência e Usabilidade
-- **Compreensão Imediata:** Um estudante deve entender a regra de comparação adjacente em menos de 1 minuto após navegar pelo tutorial.
-- **Feedback Sem Ambiguidade:** Toda ação (troca necessária, nenhuma troca necessária, seleção inválida) deve ser comunicada por texto claro e cor inequívoca em menos de 300ms.
-- **Sensação de Conquista:** A transição para a tela de resultado deve validar a conclusão da ordenação de forma satisfatória e relacionar claramente a pontuação com as ações realizadas.
-
----
-
-## 13. Relação com a Pesquisa Acadêmica Futura
-
-O desenvolvimento do **Sorting Station** está diretamente associado à elaboração de um **artigo científico sobre métodos ativos no ensino de computação**:
-
-- **Alimentação da Metodologia:** As decisões de design da interface, o desdobramento diegético da central logística e a arquitetura da máquina de estados servirão de base para a seção de desenvolvimento e metodologia do artigo.
-- **Protocolo de Avaliação Futura (Planejado):** Pretende-se estruturar um estudo empírico com estudantes de graduação, combinando:
-  - Pré-teste e pós-teste conceituais sobre rastreamento de Bubble Sort;
-  - Questionário de avaliação de usabilidade baseado na escala SUS (*System Usability Scale*);
-  - Instrumento de avaliação de percepção de engajamento e clareza conceitual em escala Likert.
-- **Compromisso de Rastreabilidade:** Nenhuma hipótese será apresentada no artigo ou na Wiki como fato consumado sem a devida coleta e análise estatística prévia dos dados dos participantes.
-
----
-
-## 14. Princípios de Produto (Diretrizes Inegociáveis de Design)
-
-Qualquer futura funcionalidade, tela, componente ou algoritmo adicionado ao **Sorting Station** deve obrigatoriamente respeitar os **8 Princípios de Produto** abaixo:
-
-1. **Ação Precede a Abstração:**  
-   O jogador deve interagir com os elementos e vivenciar a mecânica física antes de ser confrontado com a notação matemática formal ou o pseudocódigo estrito.
-
-2. **O Algoritmo Governa o Jogo, Não a Intuição Arbitrária:**  
-   A mecânica de jogo deve espelhar com fidelidade matemática as invariantes de laço e as regras formais do algoritmo em estudo. O jogo não deve permitir atalhos que descaracterizem o algoritmo apenas para "facilitar" o puzzle.
-
-3. **O Erro é Diagnóstico e Pedagógico, Nunca Punitivo:**  
-   Erros de ordenação devem interromper o fluxo para fornecer esclarecimento conceitual sobre *por que* aquela ação contraria o protocolo, sem humilhar ou penalizar o aluno com telas punitivas de derrota.
-
-4. **Feedback Explicativo em Vez de Validação Binária:**  
-   O sistema nunca deve limitar-se a dizer "Certo" ou "Errado". Ele deve sempre expor o fundamento lógico subjacente (ex.: *"Elemento 8 > 3: na passada do Bubble Sort, o maior deve avançar para a direita"*).
-
-5. **O Jogo Deve Parecer um Jogo, Não um Dashboard Corporativo:**  
-   A narrativa da central logística, o feedback audiovisual sci-fi, as animações de esteira e a paleta neon devem ser preservados para garantir engajamento lúdico e imersão emocional.
-
-6. **Foco Cognitivo na Lógica, Eliminando Atrito de Interface:**  
-   Toda a interação fundamental deve ocorrer via *point-and-click* imediato. Decisões de design não devem exigir que o aluno decore atalhos complexos ou enfrente atritos ergonômicos para expressar sua intenção lógica.
-
-7. **Cada Algoritmo Possui Mecânica Própria (Proibição de *Skins* Genéricas):**  
-   Quando Selection Sort e Insertion Sort forem implementados, eles não devem ser meras cópias da esteira do Bubble Sort com nomes trocados. Cada algoritmo deve ter mecânicas de interação que materializem sua lógica singular (busca do menor na partição não ordenada; inserção posicional na partição ordenada).
-
-8. **Honestidade Acadêmica e Rigor Metodológico:**  
-   Não prometer milagres pedagógicos nem divulgar métricas de aprendizagem sem avaliação científica documentada e revisada por pares. O código e a Wiki devem sempre refletir a realidade mensurável do projeto.
+1. **Ação Precede a Abstração:** O estudante deve manipular os elementos e vivenciar o comportamento físico antes de ser submetido à notação matemática formal.
+2. **O Algoritmo Governa o Sistema, Não a Intuição Arbitrária:** A mecânica de interação deve espelhar fielmente a invariante de laço daquele algoritmo. Não são permitidos atalhos que descaracterizem o método.
+3. **O Erro é Diagnóstico e Formativo, Nunca Punitivo:** Erros de ordenação interrompem o avanço com mensagens conceituais explicativas, permitindo a retificação imediata sem penalidades catastróficas.
+4. **Feedback Explicativo em Vez de Validação Binária:** O sistema nunca se limita a dizer "Certo" ou "Errado"; ele expõe a regra lógica violada ou confirmada.
+5. **Estética Sci-Fi como Facilitadora Cognitiva:** A ambientação industrial e a iluminação neon são projetadas para diferenciar estados operacionais com clareza e manter o engajamento sem sobrecarga visual.
+6. **Manipulação Tátil Direta Sem Atrito de Sintaxe:** Toda a interação fundamental ocorre via clique/toque ou navegação por teclado acessível, eliminando barreiras de compilação.
+7. **Cada Algoritmo Possui Mecânica Singular (Proibição de *Skins* Genéricas):** Novos algoritmos devem apresentar controles e metáforas adaptados à sua operação real (scanner para Selection, trilho suspenso para Insertion, confluência para Merge, farol para Quick, pirâmide para Heap).
+8. **Honestidade Acadêmica e Rigor Metodológico:** A documentação e o código devem reportar estritamente o estado real do software e das avaliações pedagógicas, abstendo-se de alegar eficácia empírica não comprovada.

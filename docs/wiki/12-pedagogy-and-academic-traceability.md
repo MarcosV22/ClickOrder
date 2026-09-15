@@ -353,34 +353,49 @@ Fica estabelecida a separação epistemológica e funcional inegociável entre o
 
 ---
 
-## 10. Auditoria de Inconsistências Atuais entre Bubble e Selection Sort
+## 10. Auditoria de Inconsistências Transversais e Resolução em P2.1-G
 
-| Dimensão Auditada | Bubble Sort (Estado Atual) | Selection Sort (Estado Atual) | Diagnóstico e Ação de Padronização |
-| :--- | :--- | :--- | :--- |
-| **Acesso na Home** | Botão primário "INICIAR TURNO" inicia Bubble sem nome explícito. | Botão secundário "SELECTION SORT" adicionado de forma assimétrica. | **Inconsistente:** Unificar a Home em um Seletor de Protocolos simétrico com cards para cada algoritmo. |
-| **Barra de Navegação do Tutorial** | Sem barra superior unificada; apenas cabeçalho com badges e H1. | Barra superior completa com botão `[ ◀ VOLTAR ]`, badge central e `[ ↺ REINICIAR ]`. | **Inconsistente:** Adicionar a mesma barra superior completa ao `TutorialScreen` do Bubble. |
-| **Semântica de Caixas (`NumberedBox`)** | Usa propriedades legadas `selected` e `sorted` (`BoxRole="pair"` ou `"default"`). | Usa papéis semânticos expressos `BoxRole`: `target`, `min`, `scan`, `sorted`, etc. | **Inconsistente:** Atualizar o Bubble para utilizar os mesmos papéis semânticos `BoxRole` em todas as telas. |
-| **Barra de Telemetria do Gameplay** | Badges textuais de passada e comparação; sem barra gráfica de progresso. | Subcabeçalho completo + Banner de expressão ($A[j] < A[\text{minIndex}]$) + Barra visual contínua 0..100%. | **Inconsistente:** Adicionar barra gráfica contínua de progresso percentual e banner de expressão ao Bubble. |
-| **Posicionamento de Feedback** | `InstructionPanel` posicionado *abaixo* dos botões de ação. | `InstructionPanel` posicionado *acima* dos botões de ação. | **Inconsistente:** Padronizar a ordem visual com o `InstructionPanel` sempre acima da botoeira contextual. |
-| **Telas de Conclusão de Campanha** | `CampaignCompleteScreen.tsx` dedicada. | `SelectionCampaignCompleteScreen.tsx` dedicada (JSX 90% duplicado). | **Duplicação:** Unificar em uma única tela `CampaignCompleteScreen` orientada aos metadados do protocolo. |
+As assimetrias identificadas na auditoria inicial entre Bubble Sort e Selection Sort foram formalmente sanadas durante o marco **P2.1-G** ([`ADR 0016`](../adr/0016-educational-charter-and-cross-protocol-standardization.md) e [`ADR 0017`](../adr/0017-canonical-demonstration-mode.md)):
+1. **Hub Simétrico na Home:** Implementado via `protocolCatalog.ts` e componente reutilizável `ProtocolCard.tsx`;
+2. **Barra Superior Unificada:** Tutorial e GameScreen utilizam cabeçalhos padronizados;
+3. **Semântica `BoxRole`:** Caixas utilizam papéis semânticos acessíveis em todos os módulos;
+4. **Telemetria Harmonizada:** Barra de progresso contínuo 0..100% e banner de expressão relacional integrados;
+5. **Modo Demonstração Canônico:** Homologado via `DemonstrationScreen.tsx` e geradores em `src/game/demonstration/`.
 
 ---
 
-## 11. Proposta Arquitetural do Modo Demonstração (Showcase)
+## 11. O Modo Demonstração Educacional Canônico (ADR 0017)
 
-Para atender ao 6º princípio pedagógico sem inflar o código com novas telas ou motores gráficos, o **Modo Demonstração** será implementado reutilizando a arquitetura estabelecida de **Replay e Pseudocódigo Sincronizado**:
+O **Modo Demonstração** foi institucionalizado como recurso transversal de observação autônoma antes da prática:
+- **Vetores Curados Fixos:** `[5, 2, 4, 1]` (Bubble Sort) e `[4, 1, 3]` (Selection Sort);
+- **Execução Autônoma:** Consome as engines puras sem intervenção humana e sem alterar pontuações ou storage;
+- **Pseudocódigo Sincronizado:** Destaque em tempo real da linha exata em execução.
 
-```mermaid
-flowchart TD
-    Home["Home Screen / Briefing Screen"] -->|Clique: 'MODO DEMONSTRAÇÃO'| InitDemo["Gerador de Demonstração"]
-    InitDemo -->|Vetor Curado Ex.: 5, 2, 4, 1| EngineRun["Sorting Engine Autônoma Pura"]
-    EngineRun -->|Gera Histórico Perfeito StepRecord[]| FrameDerivation["buildReplayFrames / buildSelectionReplayFrames"]
-    FrameDerivation -->|Deriva ReplayFrame[] Imutáveis| ReplayView["ReplayScreen / SelectionReplayScreen"]
-    ReplayView -->|Modo Autoplay Ativo + Pseudocódigo Sincronizado| StudentView["Estudante Visualiza o Algoritmo em Execução"]
-```
+---
 
-**Benefícios da Arquitetura de Reuso:**
-- **Zero Linhas de Duplicação Gráfica:** A esteira de caixas, a barra de controle temporal e o painel de pseudocódigo sincronizado já estão prontos e validados com testes unitários;
-- **Controle Total pelo Aluno:** O estudante pode pausar, retroceder passo a passo ou acelerar a demonstração;
-- **Sincronia Absoluta:** O mesmo código que anima a esteira destaca a linha de pseudocódigo exata correspondente àquela ação.
+## 12. Diretrizes e Mapeamento para Atualização Futura do Artigo Acadêmico
+
+> [!IMPORTANT]
+> **Ressalva Metodológica de Escopo em PLATFORM-R0:**  
+> O manuscrito do artigo acadêmico **NÃO É MODIFICADO NESTA TAREFA**.  
+> Esta seção registra exclusivamente o inventário das seções futuras do artigo que deverão ser atualizadas em momento oportuno para refletir a redefinição da plataforma e os novos módulos curriculares.
+
+### 12.1. Inventário de Seções do Artigo a Serem Atualizadas
+
+1. **Título do Artigo:**
+   - *Ajuste Necessário:* Migrar da formulação estrita de "jogo sério ponta-a-ponta" para **"Plataforma Educacional Interativa e Gamificada para o Ensino de Algoritmos de Ordenação"**.
+2. **Resumo / Abstract:**
+   - *Ajuste Necessário:* Redefinir o escopo pedagógico, englobando os 6 módulos curriculares (Bubble, Selection, Insertion, Merge, Quick e Heap), o ciclo didático em camadas (Demonstração observacional $\rightarrow$ Tutorial guiado $\rightarrow$ Prática procedural $\rightarrow$ Replay retrospectivo) e a perspectiva do Laboratório Comparativo.
+3. **Introdução:**
+   - *Ajuste Necessário:* Fundamentar pedagogicamente a transição de visualizadores puramente passivos para um ambiente modular integrado que articula manipulação direta cinestésica, andaimes cognitivos e ancoragem formal em pseudocódigo sincronizado.
+4. **Questão de Pesquisa (Research Question):**
+   - *Ajuste Necessário:* Refinar a pergunta central de investigação para avaliar em que medida a transição entre observação canônica (Demonstração), prática ativa (Exercícios) e síntese comparativa (Laboratório) mitiga a *ilusão de profundidade explanatória* em comparação a abordagens expositivas tradicionais.
+5. **Hipóteses Científicas:**
+   - *Ajuste Necessário:* Formular formalmente as hipóteses:
+     - $H_1$: A manipulação direta governada por FSM reduz a taxa de erros conceituais na identificação de invariantes de laço;
+     - $H_2$: A dissociação entre métricas de tempo de usuário e complexidade assintótica melhora a compreensão do custo real de algoritmos $O(n^2)$ vs. $O(n \log n)$.
+6. **Metodologia:**
+   - *Ajuste Necessário:* Alinhar o desenho experimental com a nova taxonomia de módulos e exercícios da plataforma, detalhando o protocolo de aplicação com pré-teste, intervenção na plataforma e pós-teste, acrescido de avaliação de usabilidade via SUS (*System Usability Scale*).
+7. **Resultados e Discussão (Seção Futura Condicionada):**
+   - *Diretriz Mandatória:* A seção de resultados deve permanecer explicitamente em aberto até a efetiva realização dos testes empíricos com turmas reais de graduação, vedada qualquer inserção de dados estatísticos simulados ou antecipados.
 

@@ -171,6 +171,58 @@ Ao concluir uma fase com novos dados de pontuação (`PhaseScoreData`), a funç�
 
 ---
 
+## 2.5. Diagnóstico do Schema v3 e Especificação Conceitual do Schema v4 (ADR 0018)
+
+### 2.5.1. Diagnóstico das Limitações do Schema v3 Atual
+Embora o Schema v3 atual atenda perfeitamente à operação independente de Bubble e Selection Sort em suas campanhas de 3 fases, a transição do produto para **Plataforma Educacional** expõe limitações estruturais:
+1. **Chaves Estáticas de Protocolo:** A interface `SaveData` fixa os protocolos como propriedades rígidas (`protocols: { bubble: ProtocolProgress; selection: ProtocolProgress }`). A inclusão dos outros 4 módulos (Insertion, Merge, Quick e Heap) exigiria quebrar a tipagem estática raiz;
+2. **Indexação Numérica Rígida por Fases:** Os recordes são indexados por inteiros (`Record<number, PhaseRecord>`), refletindo a mentalidade legada de "fases de jogo lineares" (1, 2, 3);
+3. **Falta de Suporte à Taxonomia de Exercícios:** O Schema v3 não suporta nativamente a classificação transversal de 8 tipos de exercícios (Introdução, Demonstração, Tutorial Guiado, Prática Básica, Prática Progressiva, Casos, Desafio e Prática Livre).
+4. **Risco de Proliferação com Seeds Procedurais:** Persistir cada seed procedural como exercício distinto poluiria o storage. O progresso deve ser agregado por conjunto de exercícios (`moduleId + exerciseSetId`).
+
+### 2.5.2. Especificação Conceitual do Schema v4 (Projetado)
+
+> [!NOTE]
+> **Diretriz Mandatória de Não-Alteração de Código em PLATFORM-R0:**  
+> A especificação abaixo constitui um **desenho arquitetural puramente conceitual**. O código em `src/game/persistence/` e os saves existentes de usuários reais no navegador permanecem **100% inalterados no Schema v3** durante esta tarefa documental.
+
+No futuro, a migração para o Schema v4 adotará um modelo dinâmico e extensível:
+
+```typescript
+// Especificação Conceitual do Schema v4 (Projeção para Futura Migração)
+export interface SaveDataV4 {
+  readonly schemaVersion: 4;
+  readonly lastUpdated: string;
+  readonly preferences: GlobalPreferences;
+  readonly modules: Record<string, ModuleProgressV4>; // indexado por moduleId ('bubble', 'selection', etc.)
+}
+
+export interface ModuleProgressV4 {
+  readonly moduleId: string;
+  readonly completed: boolean;
+  readonly completedTutorial: boolean;
+  readonly unlockedExercises: readonly string[];
+  readonly exercises: Record<string, ExerciseRecordV4>; // indexado por exerciseId ('basic', 'cases-nearly-sorted', etc.)
+}
+
+export interface ExerciseRecordV4 {
+  readonly exerciseId: string;
+  readonly exerciseType: ExerciseTypeId;
+  readonly completed: boolean;
+  readonly completedAt: string;
+  readonly bestScore?: number;
+  readonly bestScoreErrors?: number;
+  readonly bestScoreHintsUsed?: number;
+  readonly bestScoreElapsedTimeMs?: number;
+}
+```
+
+**Pipeline de Migração Projetado (v3 $\rightarrow$ v4):**
+- O migrador converterá as chaves `protocols.bubble.records[1]`, `[2]`, `[3]` em `modules.bubble.exercises["basic"]`, `["intermediate"]`, `["advanced"]`;
+- As preferências globais (`soundEnabled`, `reducedMotion`, `highContrast`) serão preservadas sem qualquer perda.
+
+---
+
 # PARTE 3 — GATILHOS PARA CRIAÇÃO DE BACKEND
 
 > [!IMPORTANT]

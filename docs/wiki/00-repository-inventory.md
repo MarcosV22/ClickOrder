@@ -9,16 +9,15 @@
 
 ## 1. Visão Geral
 
-O **Click&Order** é um jogo educacional *point-and-click* para navegadores web cujo objetivo pedagógico é ensinar algoritmos de ordenação por meio de manipulação direta de dados. A ambientação narrativa é uma central logística futurista de alta tecnologia: caixas numeradas representam elementos de um vetor desordenado sobre esteiras transportadoras, e o jogador realiza comparações e trocas para organizar a carga.
+O **Sorting Station** (registrado como `"Click&Order"` em [`package.json`](../../package.json)) é uma plataforma educacional interativa e gamificada voltada ao ensino, prática e visualização de algoritmos de ordenação por meio de manipulação direta de dados. A ambientação narrativa é uma central logística futurista de alta tecnologia: caixas numeradas representam elementos de um vetor desordenado sobre esteiras transportadoras, e o usuário realiza operações algorítmicas canônicas para organizar a carga.
 
 O projeto foi inicializado e é executado sobre a plataforma **Figma Make** ([`AGENTS.md`](../../AGENTS.md), [`vite.config.ts`](../../vite.config.ts)), constituindo uma Single Page Application (SPA) client-side construída com React 19, TypeScript e Tailwind CSS v4.
 
-Figma Make é usado para prototipação visual e experimentação de interface. O código-fonte do repositório é a fonte oficial de verdade do projeto.
+No estado factual atual do repositório:
+- **Módulos Implementados:** **Bubble Sort** e **Selection Sort**, ambos dotados de engines puras com FSMs estritas, briefings oficiais, tutoriais guiados, modos de demonstração autônomos com pseudocódigo sincronizado, práticas procedurais e modos de replay retrospectivo.
+- **Persistência Local Desacoplada:** Operacional via `localStorage` com o **Schema v3** multi-protocolo ([`ADR 0015`](../adr/0015-multi-protocol-persistence-schema-v3.md)), fallback transparente em memória e pipeline de migração retrocompatível.
+- **Testes Automatizados:** Suíte de **303 testes unitários automatizados** em 19 arquivos de teste executados nativamente com **Vitest**, mantendo 100% de aprovação.
 
-No estado atual do código:
-- O algoritmo implementado é o **Bubble Sort** (denominado "Protocolo Bubble"), dividido em 3 fases com vetores fixos ([`src/App.tsx`](../../src/App.tsx)).
-- A aplicação é puramente executada no navegador do usuário, **sem backend, sem banco de dados, sem chamadas a APIs e sem persistência local**.
-- O repositório **não possui testes automatizados** configurados.
 
 ---
 

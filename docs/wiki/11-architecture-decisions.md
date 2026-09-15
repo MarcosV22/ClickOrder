@@ -170,8 +170,18 @@ O modelo oficial de deliberação está versionado em [`docs/adr/TEMPLATE.md`](.
 
 ### [ADR 0016: Charter Educacional, Padronização Transversal de Telas e Glossário Canônico do Sorting Station](../../docs/adr/0016-educational-charter-and-cross-protocol-standardization.md)
 - **Status:** `Aceito` (2026-09-14)
-- **Contexto:** Resolve formalmente o marco P2.1-G-A. Estabelece o Charter Educacional oficial do produto ("Sorting Station é um jogo educacional voltado ao ensino de algoritmos de ordenação, articulando visualização cinestésica, prática guiada, execução interativa e reflexão sobre o comportamento algorítmico"), congela a metáfora diegética exclusivamente em torno da Central Logística Espacial/Industrial (vetor = esteira, caixas = cargas numeradas, algoritmo = protocolo, etc.), formaliza os 6 elementos pedagógicos obrigatórios por protocolo (Briefing $\rightarrow$ Demonstração $\rightarrow$ Tutorial $\rightarrow$ Gameplay $\rightarrow$ Resultado $\rightarrow$ Replay/Reflexão), unifica a política de métricas e pontuação (score transparente $100 - 10 \times \text{erros} - 5 \times \text{dicas}$ e métricas factuais assintóticas descritivas com peso zero no score), define o padrão conceitual unificado para as 8 telas, congela o Glossário Canônico de termos controlados, audita assimetrias existentes entre Bubble e Selection Sort, institucionaliza o Modo Demonstração reutilizando os componentes de Replay e pseudocódigo sem duplicação de arquitetura, e projeta o plano de refatoração incremental antes da introdução do Insertion Sort (P2.2).
-- **Impacto:** Conclusão de P2.1-G-A e criação da base canônica de padronização educacional e de interface para os próximos marcos do roadmap.
+- **Contexto:** Resolve formalmente o marco P2.1-G-A. Estabelece o Charter Educacional oficial do produto, congela a metáfora diegética exclusivamente em torno da Central Logística Espacial/Industrial, formaliza os 6 elementos pedagógicos obrigatórios por protocolo, unifica a política de métricas e pontuação (score transparente $100 - 10 \times \text{erros} - 5 \times \text{dicas}$ e métricas factuais assintóticas descritivas com peso zero no score), define o padrão conceitual unificado para as 8 telas, congela o Glossário Canônico de termos controlados e audita assimetrias existentes entre Bubble e Selection Sort.
+- **Impacto:** Conclusão de P2.1-G-A.
+
+### [ADR 0017: Modo Demonstração Educacional Canônico](../../docs/adr/0017-canonical-demonstration-mode.md)
+- **Status:** `Aceito` (2026-09-14)
+- **Contexto:** Institucionaliza o Modo Demonstração Educacional Canônico (Marco P2.1-G-D) como recurso transversal de observação autônoma anterior à prática. Reutiliza as engines puras de ordenação e os componentes de visualização (`NumberedBox`, painéis de pseudocódigo formal) sem duplicar código; introduz geradores de histórico canônico determinístico em `src/game/demonstration/` sobre vetores curados (`[5, 2, 4, 1]` para Bubble e `[4, 1, 3]` para Selection); implementa controles de reprodução autônoma (Play, Pause, Reset, Velocidades 0.5x, 1x, 2x) com desacoplamento estrito de persistência (armazenamento 100% somente-leitura); e disponibiliza pontos de entrada contextuais na HomeScreen e no Briefing de protocolo.
+- **Impacto:** Conclusão de P2.1-G-D com 303 testes unitários aprovados.
+
+### [ADR 0018: Transição de Jogo para Plataforma Educacional de Algoritmos](../../docs/adr/0018-game-to-educational-platform-transition.md)
+- **Status:** `Aceito` (2026-09-15)
+- **Contexto:** Formaliza a redefinição oficial do Sorting Station como "Plataforma educacional interativa e gamificada para aprendizagem, prática e visualização de algoritmos de ordenação" (Marco PLATFORM-R0). Congela os 6 módulos curriculares oficiais (Bubble, Selection, Insertion, Merge, Quick, Heap); estabelece o Module Standard transversal de 20 seções; define a taxonomia transversal de 8 tipos de exercícios (A a H); documenta a migração conceitual de fases para exercícios (Prática Básica, Intermediária e Avançada) sem alteração de código ou persistência; bloqueia o Laboratório Comparativo até a homologação dos 6 módulos; projeta a especificação conceitual do Schema v4 de persistência; e reposiciona a camada narrativa secundária para backlog opcional de gamificação.
+- **Impacto:** Fundação institucional do Marco PLATFORM-R0 e remodelagem completa da arquitetura da Wiki.
 
 ---
 
@@ -197,35 +207,29 @@ As seguintes propostas de evolução estrutural permanecem documentadas como **c
 ---
 
 ### Candidato 5 — Seleção de Framework de Testes Automatizados
-- **Contexto:** O repositório possui atualmente 0 frameworks e 0 arquivos de teste automatizado ([`08-testing-and-quality.md`](./08-testing-and-quality.md)).
-- **Proposta sob Avaliação:** Adotar o **Vitest** como executor nativo de testes integrado ao pipeline do Vite, em conjunto com `@testing-library/react`.
-- **Alternativas a Ponderar:** Vitest vs. Jest (overhead de configuração com Vite e ESM) vs. Cypress/Playwright para testes ponta a ponta exclusivos.
-- **Impacto:** Médio. Essencial para garantir não regressão da FSM e dos cálculos de complexidade.
-- **Status:** `CANDIDATO PROPOSTO (P1)`.
+- **Status:** `ACEITO E IMPLEMENTADO (2026-09-10)` — Adotado o **Vitest** nativo via `vitest.config.ts`.
+- **Resolução:** Suíte integralmente operacional com **303 testes unitários automatizados em 19 arquivos de teste**, executando 100% verde com cobertura sobre engines puras, máquinas de estados, geração procedural PRNG, constraints, persistência e demonstração.
 
 ---
 
 ### Candidato 6 — Arquitetura de Roteamento Client-Side
-- **Contexto:** A navegação atual é controlada por uma variável de estado em [`src/App.tsx`](../../src/App.tsx) (`screen: "home" | "tutorial" | "game" | "result"`), sem URLs navegáveis pelo histórico do navegador (botão "Voltar").
+- **Contexto:** A navegação atual é controlada por uma máquina de telas em [`src/App.tsx`](../../src/App.tsx) (`screen: "home" | "briefing" | "demonstration" | "tutorial" | ...`), sem URLs navegáveis pelo histórico do navegador (botão "Voltar").
 - **Proposta sob Avaliação:** Avaliar se a máquina de telas em `App.tsx` continua sendo a abordagem mais limpa ou se deve ser introduzido um roteador hash (`react-router-dom` ou similar).
-- **Alternativas a Ponderar:** Manter `screen` em `useState` vs. Hash Router (`#/game/1`) vs. Browser History API (risco de 404 em sandboxes do Figma Make).
+- **Alternativas a Ponderar:** Manter `screen` em `useState` vs. Hash Router (`#/module/bubble/exercise/1`) vs. Browser History API (risco de 404 em sandboxes do Figma Make).
 - **Impacto:** Baixo/Médio. Deve garantir total compatibilidade com o iframe e CDN do Figma Make.
 - **Status:** `CANDIDATO PROPOSTO (P2)`.
 
 ---
 
 ### Candidato 7 — Estratégia Arquitetural para Novos Algoritmos (Selection e Insertion)
-- **Contexto:** Garantir que novos algoritmos não sejam implementados apenas como renomeação de rótulos visuais, mas com mecânicas interativas exclusivas ([`04-sorting-engine.md`](./04-sorting-engine.md)).
-- **Proposta sob Avaliação:** Adotar o padrão de projeto **Strategy**, no qual cada protocolo de ordenação encapsula sua própria FSM, regras de par/mínimo, representação visual da esteira e pseudocódigo.
-- **Alternativas a Ponderar:** Componentes de tela inteiramente separados (`SelectionGameScreen.tsx`) vs. Tela genérica parametrizada por um Strategy Object.
-- **Impacto:** Alto. Define a escalabilidade do produto para suportar até 6 algoritmos diferentes no futuro.
-- **Status:** `CANDIDATO PROPOSTO (P2)`.
+- **Status:** `PARCIALMENTE ACEITO E IMPLEMENTADO (Selection via ADRs 0011 a 0015; Insertion planejado P2.2)`.
+- **Resolução:** O padrão de engines puras isoladas em `src/game/sorting/` com FSMs específicas e telas dedicadas (`GameScreen`, `SelectionGameScreen`, e futura `InsertionGameScreen`) foi validado e padronizado pelo Module Standard ([`modules/README.md`](./modules/README.md)).
 
 ---
 
 ### Candidato 8 — Telemetria Acadêmica, Anonimização e Privacidade de Dados
 - **Contexto:** O projeto visa embasar um artigo científico com dados empíricos de aprendizagem e usabilidade.
-- **Proposta sob Avaliação:** Especificar formalmente a taxonomia de eventos de telemetria (tempo de resposta, erros cometidos, padrão de busca), com anonimização mandatória desde a coleta (sem vincular nomes civis ou endereços IP aos registros de jogo).
+- **Proposta sob Avaliação:** Especificar formalmente a taxonomia de eventos de telemetria (tempo de resposta, erros cometidos, padrão de busca), com anonimização mandatória desde a coleta (sem vincular nomes civis ou endereços IP aos registros da plataforma).
 - **Alternativas a Ponderar:** Coleta via beacon HTTP anônimo vs. exportação manual de arquivo JSON pelo próprio estudante ao final da aula.
 - **Impacto:** Alto. Decisivo para a aprovação ética e legal da pesquisa perante comitês universitários.
 - **Status:** `CANDIDATO PROPOSTO (P3)`.
