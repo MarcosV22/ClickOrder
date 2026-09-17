@@ -12,7 +12,7 @@
 Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Insertion Sort e Schema v4)**, a infraestrutura de testes automatizados do projeto cobre 100% da lógica pura de domínio, FSMs de ordenação (Bubble, Selection e Insertion Sort), tutoriais, conjuntos de prática progressiva, agregação de resultados, geração procedural Mulberry32, briefing, telemetria de sessão, replay da execução, pseudocódigo sincronizado, modo demonstração e persistência Schema v4:
 
 - **Framework de Testes Implementado:** **Vitest** (`vitest ^5.0.0`) instalado como dependência de desenvolvimento canônica via `pnpm add -D vitest`.
-- **Arquivos de Teste Ativos (27 arquivos, 376 testes automatizados aprovados 100% verde):**
+- **Arquivos de Teste Ativos (27 arquivos, 390 testes automatizados aprovados 100% verde):**
   1. `src/game/sorting/selection/selectionSortEngine.test.ts` (18 testes)
   2. `src/game/sorting/insertion/insertionSortEngine.test.ts` (18 testes)
   3. `src/game/replay/selectionReplayPseudocode.test.ts` (9 testes)
@@ -20,7 +20,7 @@ Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Ins
   5. `src/game/briefing/briefing.test.ts` (20 testes)
   6. `src/screens/protocolCatalog.test.ts` (15 testes)
   7. `src/game/generation/arrayGenerator.test.ts` (31 testes)
-  8. `src/game/persistence/persistence.test.ts` (46 testes)
+  8. `src/game/persistence/persistence.test.ts` (60 testes)
   9. `src/game/sorting/bubbleSortEngine.test.ts` (39 testes)
   10. `src/game/replay/replayModel.test.ts` (11 testes)
   11. `src/game/sorting/selection/selectionCampaign.test.ts` (19 testes)
@@ -54,7 +54,7 @@ A Pirâmide de Qualidade do Sorting Station possui seus dois primeiros níveis t
 graph TD
     subgraph Piramide_Qualidade ["Pirâmide de Garantia da Qualidade"]
         N1["Nível 1: Checagem Estática & Tipagem\n(tsc, vite build, oxfmt) [ATIVO HOJE]"]
-        N2["Nível 2: Testes Unitários de Domínio & Persistência\n(Vitest: 376 testes em 27 arquivos) [ATIVO HOJE]"]
+        N2["Nível 2: Testes Unitários de Domínio & Persistência\n(Vitest: 390 testes em 27 arquivos) [ATIVO HOJE]"]
         N3["Nível 3: Testes de Integração de FSM & Telas\n(Transições de estado, callbacks, fluxos) [PLANEJADO]"]
         N4["Nível 4: Acessibilidade, Responsividade & E2E\n(Teclado, reduced-motion, telas) [PLANEJADO]"]
 

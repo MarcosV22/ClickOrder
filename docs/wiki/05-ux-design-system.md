@@ -403,7 +403,11 @@ Toda tela com conteúdo potencialmente superior ao viewport **DEVE**:
 6. **Scrollbars Acessíveis e Temáticas:**
    - É proibido ocultar globalmente barras de rolagem funcionais com `display: none` ou `scrollbar-width: none`.
    - A plataforma adota uma estilização sci-fi acessível (`scrollbar-width: thin; scrollbar-color: rgba(0, 245, 255, 0.3) rgba(6, 11, 26, 0.7)` e seletores `::-webkit-scrollbar`), fornecendo affordance visual clara de navegação para usuários de mouse/desktop.
-7. **Revelação Suave de Conclusão (Smooth Auto-Scroll):**
-   - Ao concluir fluxos de etapas ou tutoriais interativos que geram cards adicionais na parte inferior da tela, o componente deve disparar `scrollIntoView({ behavior: "smooth", block: "nearest" })` para garantir que o card de sucesso e seu CTA fiquem imediatamente visíveis sem sobressaltos.
+7. **Revelação Suave de Conclusão com Acessibilidade (Smooth Auto-Scroll e Reduced Motion):**
+   - Ao concluir fluxos de etapas ou tutoriais interativos que geram cards adicionais na parte inferior da tela, o componente deve disparar `scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "nearest" })`.
+   - É obrigatório consultar `window.matchMedia("(prefers-reduced-motion: reduce)")` para desativar movimentações automáticas em conformidade com as diretrizes de acessibilidade WCAG 2.1 (Critério 2.3.3 - Animation from Interactions).
+8. **Dono Único do Scroll Vertical (Single Scroll Owner):**
+   - Cada tela deve possuir um único ancestral responsável pela rolagem vertical (`overflow-y-auto overflow-x-hidden`), padronizado diretamente no nó raiz da tela.
+   - É estritamente proibido criar múltiplos containers com `overflow-y-auto` concorrentes na mesma tela ou aninhar containers com `overflow-hidden` rígidos que compitam com o scroll da aplicação.
 
 

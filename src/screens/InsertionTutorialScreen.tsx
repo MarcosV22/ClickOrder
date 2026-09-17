@@ -92,7 +92,13 @@ export default function InsertionTutorialScreen({
 
   useEffect(() => {
     if (gameState.completed) {
-      completionRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      const prefersReducedMotion =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+      completionRef.current?.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "nearest",
+      });
     }
   }, [gameState.completed]);
 

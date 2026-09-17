@@ -298,6 +298,44 @@ describe("Persistence Layer (P1.6 - P2.2-F)", () => {
         highContrast: false,
       });
     });
+
+    it("deve clampar unlockedPhases e highestPhaseReached que excedam maxPhases na migração v1->v4", () => {
+      const maliciousSave = {
+        schemaVersion: 1,
+        campaign: {
+          unlockedPhases: 9999,
+          highestPhaseReached: 8888,
+          hasCompletedTutorial: true,
+        },
+      };
+      const storage = createMemoryStorageAdapter({
+        [STORAGE_KEY]: JSON.stringify(maliciousSave),
+      });
+
+      const loaded = loadGameProgress(storage, 3);
+      expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+      expect(loaded.modules.bubble?.completedTutorial).toBe(true);
+      expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBeLessThanOrEqual(3);
+      expect(getProtocolProgress(loaded, "bubble").highestPhaseReached).toBeLessThanOrEqual(3);
+    });
+
+    it("deve clampar unlockedPhases e highestPhaseReached negativos ou decimais na migração v1->v4", () => {
+      const weirdSave = {
+        schemaVersion: 1,
+        campaign: {
+          unlockedPhases: -10,
+          highestPhaseReached: 2.7,
+        },
+      };
+      const storage = createMemoryStorageAdapter({
+        [STORAGE_KEY]: JSON.stringify(weirdSave),
+      });
+
+      const loaded = loadGameProgress(storage, 3);
+      expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+      expect(loaded.modules.bubble).toBeDefined();
+      expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBeGreaterThanOrEqual(1);
+    });
   });
 
   describe("6. Resiliência do Adaptador contra Exceções de Storage", () => {
@@ -1061,6 +1099,197 @@ describe("Persistence Layer (P1.6 - P2.2-F)", () => {
         { score: 100, errors: 0, hintsUsed: 0 }
       );
       expect(isModuleRegularPracticeCompleted(state, "insertion")).toBe(true);
+    });
+  });
+
+  describe("17. Persistência, Progressão e Semântica do Módulo Selection Sort (P2.1 / P2.2-F)", () => {
+    it("concluir tutorial do Selection não altera o tutorial do Bubble nem de outros módulos", () => {
+      let state = createDefaultSaveData();
+      expect(state.modules.bubble?.completedTutorial).toBe(false);
+      expect(state.modules.selection?.completedTutorial).toBe(false);
+      expect(state.modules.insertion?.completedTutorial).toBe(false);
+
+      state = recordTutorialCompletion(state, "selection");
+      expect(state.modules.selection?.completedTutorial).toBe(true);
+      expect(state.modules.bubble?.completedTutorial).toBe(false);
+      expect(state.modules.insertion?.completedTutorial).toBe(false);
+    });
+
+    it("tutorial do Selection resiste a recarregamento (F5) do storage", () => {
+      const storage = createMemoryStorageAdapter();
+      let state = createDefaultSaveData();
+      state = recordTutorialCompletion(state, "selection", storage);
+
+      const reloaded = loadGameProgress(storage);
+      expect(reloaded.modules.selection?.completedTutorial).toBe(true);
+    });
+
+    it("pontuação inferior NÃO substitui recorde existente no Selection", () => {
+      let state = createDefaultSaveData();
+      state = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+        score: 90,
+        errors: 1,
+        hintsUsed: 0,
+        elapsedTimeMs: 20000,
+      });
+
+      const set1 = state.modules.selection?.exerciseSets[SELECTION_EXERCISE_SETS.BASIC];
+      expect(set1?.bestRecord?.bestScore).toBe(90);
+
+      const replayed = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+        score: 70,
+        errors: 3,
+        hintsUsed: 1,
+        elapsedTimeMs: 15000,
+      });
+
+      const set1Replayed = replayed.modules.selection?.exerciseSets[SELECTION_EXERCISE_SETS.BASIC];
+      expect(set1Replayed?.bestRecord?.bestScore).toBe(90);
+      expect(set1Replayed?.bestRecord?.bestScoreErrors).toBe(1);
+    });
+
+    it("pontuação superior DEVE substituir recorde existente no Selection", () => {
+      let state = createDefaultSaveData();
+      state = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+        score: 80,
+        errors: 2,
+        hintsUsed: 0,
+        elapsedTimeMs: 30000,
+      });
+
+      const updated = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+        score: 95,
+        errors: 1,
+        hintsUsed: 0,
+        elapsedTimeMs: 25000,
+      });
+
+      const set = updated.modules.selection?.exerciseSets[SELECTION_EXERCISE_SETS.BASIC];
+      expect(set?.bestRecord?.bestScore).toBe(95);
+      expect(set?.bestRecord?.bestScoreErrors).toBe(1);
+    });
+
+    it("empate de score com MENOS erros DEVE substituir o recorde no Selection (desempate por precisão)", () => {
+      let state = createDefaultSaveData();
+      state = recordPhaseCompletion(state, "selection", 2, 3, undefined, {
+        score: 90,
+        errors: 2,
+        hintsUsed: 0,
+        elapsedTimeMs: 40000,
+      });
+
+      const updated = recordPhaseCompletion(state, "selection", 2, 3, undefined, {
+        score: 90,
+        errors: 0,
+        hintsUsed: 0,
+        elapsedTimeMs: 45000,
+      });
+
+      const set = updated.modules.selection?.exerciseSets[SELECTION_EXERCISE_SETS.INTERMEDIATE];
+      expect(set?.bestRecord?.bestScore).toBe(90);
+      expect(set?.bestRecord?.bestScoreErrors).toBe(0);
+    });
+
+    it("tempo NUNCA desempata nem substitui recorde se score e erros forem iguais no Selection", () => {
+      let state = createDefaultSaveData();
+      state = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+        score: 100,
+        errors: 0,
+        hintsUsed: 0,
+        elapsedTimeMs: 30000,
+      });
+
+      const setBefore = state.modules.selection?.exerciseSets[SELECTION_EXERCISE_SETS.BASIC];
+      const originalTimestamp = setBefore?.bestRecord?.completedAt;
+
+      const fasterAttempt = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
+        score: 100,
+        errors: 0,
+        hintsUsed: 0,
+        elapsedTimeMs: 15000,
+      });
+
+      const setAfter = fasterAttempt.modules.selection?.exerciseSets[SELECTION_EXERCISE_SETS.BASIC];
+      expect(setAfter?.bestRecord?.bestScoreElapsedTimeMs).toBe(30000);
+      expect(setAfter?.bestRecord?.completedAt).toBe(originalTimestamp);
+    });
+
+    it("rejogar fase anterior no Selection não causa regressão de progresso", () => {
+      let state = createDefaultSaveData();
+      state = recordPhaseCompletion(state, "selection", 1, 3);
+      state = recordPhaseCompletion(state, "selection", 2, 3);
+      state = recordPhaseCompletion(state, "selection", 3, 3);
+
+      const mod = state.modules.selection!;
+      expect(mod.exerciseSets[SELECTION_EXERCISE_SETS.BASIC]?.completed).toBe(true);
+      expect(mod.exerciseSets[SELECTION_EXERCISE_SETS.INTERMEDIATE]?.completed).toBe(true);
+      expect(mod.exerciseSets[SELECTION_EXERCISE_SETS.ADVANCED]?.completed).toBe(true);
+
+      const replayed = recordPhaseCompletion(state, "selection", 1, 3);
+      expect(replayed.modules.selection?.exerciseSets[SELECTION_EXERCISE_SETS.ADVANCED]?.completed).toBe(true);
+    });
+
+    it("Selection sem tutorial direciona para selection-tutorial na fase 1", () => {
+      const state = createDefaultSaveData();
+      const route = getInitialSessionRoute(state, "selection");
+      expect(route.screen).toBe("selection-tutorial");
+      expect(route.phase).toBe(1);
+    });
+
+    it("Selection com tutorial concluído direciona para selection-game na fase 1", () => {
+      let state = createDefaultSaveData();
+      state = recordTutorialCompletion(state, "selection");
+      const route = getInitialSessionRoute(state, "selection");
+      expect(route.screen).toBe("selection-game");
+      expect(route.phase).toBe(1);
+    });
+
+    it("Selection com fases 1..3 desbloqueadas continua iniciando nova campanha na fase 1", () => {
+      let state = createDefaultSaveData();
+      state = recordTutorialCompletion(state, "selection");
+      state = recordPhaseCompletion(state, "selection", 1, 3);
+      state = recordPhaseCompletion(state, "selection", 2, 3);
+      state = recordPhaseCompletion(state, "selection", 3, 3);
+
+      const route = getInitialSessionRoute(state, "selection");
+      expect(route.screen).toBe("selection-game");
+      expect(route.phase).toBe(1);
+    });
+
+    it("isChallengeModeUnlocked avalia estritamente Bubble e não é afetado pelo Selection", () => {
+      let state = createDefaultSaveData();
+      expect(isChallengeModeUnlocked(state, 3)).toBe(false);
+
+      state = recordPhaseCompletion(state, "selection", 1, 3);
+      state = recordPhaseCompletion(state, "selection", 2, 3);
+      state = recordPhaseCompletion(state, "selection", 3, 3);
+
+      expect(isChallengeModeUnlocked(state, 3)).toBe(false);
+
+      state = recordPhaseCompletion(state, "bubble", 3, 3);
+      expect(isChallengeModeUnlocked(state, 3)).toBe(true);
+    });
+
+    it("o replay (SelectionStepRecord[]) permanece em memória e nunca é salvo no storage", () => {
+      const storage = createMemoryStorageAdapter();
+      let state = createDefaultSaveData();
+
+      state = recordPhaseCompletion(state, "selection", 1, 3, storage, {
+        score: 100,
+        errors: 0,
+        hintsUsed: 0,
+        elapsedTimeMs: 15000,
+      });
+
+      const rawInStorage = storage.getItem(STORAGE_KEY);
+      expect(rawInStorage).not.toBeNull();
+      const parsed = JSON.parse(rawInStorage!);
+      expect(parsed.history).toBeUndefined();
+      expect(parsed.stepRecords).toBeUndefined();
+      expect(parsed.replay).toBeUndefined();
+      expect(
+        parsed.modules.selection.exerciseSets[SELECTION_EXERCISE_SETS.BASIC].history
+      ).toBeUndefined();
     });
   });
 });
