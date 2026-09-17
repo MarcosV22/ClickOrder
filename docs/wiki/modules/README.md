@@ -24,7 +24,7 @@ O currículo oficial do Sorting Station é formalmente delimitado e congelado no
 | :-: | :--- | :--- | :---: | :--- | :---: |
 | **01** | **Bubble Sort** | [`bubble-sort.md`](./bubble-sort.md) | $O(n^2) / O(n^2)$ | Janela deslizante de pares vizinhos $[j, j+1]$ com decisões explícitas TROCAR vs MANTER | `IMPLEMENTADO` (Adaptação conceitual fases $\rightarrow$ exercícios) |
 | **02** | **Selection Sort** | [`selection-sort.md`](./selection-sort.md) | $O(n^2) / O(n^2)$ | Scanner linear de menor carga na região desordenada e transferência única no commit | `IMPLEMENTADO` (Adaptação conceitual fases $\rightarrow$ exercícios) |
-| **03** | **Insertion Sort** | [`insertion-sort.md`](./insertion-sort.md) | $O(n^2) / O(n^2)$ | Elevação de chave (*lift*), deslocamento regressivo na partição ordenada e inserção na lacuna | `EM ANDAMENTO` (Marco P2.2: P2.2-A, B e C concluídos) |
+| **03** | **Insertion Sort** | [`insertion-sort.md`](./insertion-sort.md) | $O(n^2) / O(n^2)$ | Elevação de chave (*lift*), deslocamento regressivo na partição ordenada e inserção na lacuna | `IMPLEMENTADO E ATIVADO` (Marco P2.2 Concluído com Schema v4) |
 | **04** | **Merge Sort** | [`merge-sort.md`](./merge-sort.md) | $O(n \log n) / O(n \log n)$ | Divisão em sub-esteiras paralelas e intercalação ordenada com dois ponteiros | `FUTURO` (Marco P3) |
 | **05** | **Quick Sort** | [`quick-sort.md`](./quick-sort.md) | $O(n \log n) / O(n^2)$ | Eleição de carga pivô e particionamento bilateral em esteiras de menores e maiores | `FUTURO` (Marco P3) |
 | **06** | **Heap Sort** | [`heap-sort.md`](./heap-sort.md) | $O(n \log n) / O(n \log n)$ | Transformação da esteira em max-heap, afundamento (*sift-down*) e extração da raiz | `FUTURO` (Marco P3) |

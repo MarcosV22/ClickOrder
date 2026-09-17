@@ -35,7 +35,14 @@ export default function ProtocolCard({
       {isAvailable && (
         <div
           className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-20"
-          style={{ backgroundColor: metadata.theme.primaryColor === "cyan" ? "#00f5ff" : "#8b5cf6" }}
+          style={{
+            backgroundColor:
+              metadata.theme.primaryColor === "cyan"
+                ? "#00f5ff"
+                : metadata.theme.primaryColor === "amber"
+                  ? "#f59e0b"
+                  : "#8b5cf6",
+          }}
         />
       )}
 
@@ -74,7 +81,7 @@ export default function ProtocolCard({
             className={`text-2xl sm:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r ${metadata.theme.titleGradientClass}`}
             style={{
               fontFamily: "'Orbitron', sans-serif",
-              filter: isAvailable ? "drop-shadow(0 0 16px rgba(0,245,255,0.15))" : "none",
+              filter: isAvailable ? `drop-shadow(0 0 16px ${metadata.theme.accentGlow})` : "none",
             }}
           >
             {metadata.name}
@@ -286,14 +293,14 @@ export default function ProtocolCard({
           </div>
         )}
 
-        {/* Insertion slot placeholder to maintain strict vertical symmetry */}
+        {/* Insertion badge slot to maintain strict vertical symmetry */}
         {metadata.id === "insertion" && (
           <div className="pt-1">
             <div
-              className="w-full text-[10px] text-zinc-500 font-mono text-center py-1.5 px-2 rounded bg-zinc-950/30 border border-white/5"
+              className="w-full text-[10px] text-amber-400/60 font-mono text-center py-1.5 px-2 rounded bg-amber-950/20 border border-amber-500/15"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              ○ INSERÇÃO: REGISTRO PLANEJADO
+              ◈ INSERTION SORT: TRILHO PROGRESSIVO
             </div>
           </div>
         )}

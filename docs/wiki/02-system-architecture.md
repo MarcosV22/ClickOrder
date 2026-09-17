@@ -28,16 +28,18 @@ flowchart TD
     subgraph StateRouter ["2. Máquina de Telas (useState<Screen>)"]
         App -- "'home'" --> HomeScreen["HomeScreen.tsx\n(Hub de Módulos Curriculares)"]
         App -- "'briefing'" --> BriefingScreen["ProtocolModeBriefingScreen.tsx\n(Briefing de Módulo Orientado a Dados)"]
-        App -- "'demonstration'" --> DemonstrationScreen["DemonstrationScreen.tsx\n(Showcase Autônomo com Pseudocódigo)"]
+        App -- "'demonstration'" --> DemonstrationScreen["DemonstrationScreen.tsx\n(Showcase Autônomo Bubble, Selection, Insertion)"]
         App -- "'tutorial'" --> TutorialScreen["TutorialScreen.tsx\n(Tutorial Guiado Bubble)"]
         App -- "'selection-tutorial'" --> SelectionTutorialScreen["SelectionTutorialScreen.tsx\n(Tutorial Guiado Selection)"]
+        App -- "'insertion-tutorial'" --> InsertionTutorialScreen["InsertionTutorialScreen.tsx\n(Tutorial Guiado Insertion)"]
         App -- "'game'" --> GameScreen["GameScreen.tsx\n(Prática de Bubble Sort)"]
         App -- "'selection-game'" --> SelectionGameScreen["SelectionGameScreen.tsx\n(Prática de Selection Sort)"]
+        App -- "'insertion-game'" --> InsertionGameScreen["InsertionGameScreen.tsx\n(Práticas Procedurais Insertion)"]
         App -- "'result'" --> ResultScreen["ResultScreen.tsx\n(Síntese Factual pós-exercício)"]
-        App -- "'replay'" --> ReplayScreen["ReplayScreen.tsx\n(Inspeção Retrospectiva Bubble)"]
-        App -- "'selection-replay'" --> SelectionReplayScreen["SelectionReplayScreen.tsx\n(Inspeção Retrospectiva Selection)"]
+        App -- "'replay'" --> ReplayDispatcher["Roteador Polimórfico de Replay\n(ReplayScreen | SelectionReplayScreen | InsertionReplayScreen)"]
         App -- "'campaign-complete'" --> CampaignCompleteScreen["CampaignCompleteScreen.tsx\n(Homologação do Módulo Bubble)"]
         App -- "'selection-campaign-complete'" --> SelectionCampaignCompleteScreen["SelectionCampaignCompleteScreen.tsx\n(Homologação do Módulo Selection)"]
+        App -- "'insertion-practice-complete'" --> PracticeSetCompleteScreen["PracticeSetCompleteScreen.tsx\n(Homologação das Práticas Insertion)"]
     end
 ```
 
@@ -54,13 +56,15 @@ O estado `screen` em [`src/App.tsx`](../../src/App.tsx) controla a tela ativa na
 | `demonstration` | `DemonstrationScreen.tsx` | Execução canônica perfeita e autônoma ([`ADR 0017`](../adr/0017-canonical-demonstration-mode.md)) | `[ 👁 DEMONSTRAÇÃO ]` na Home ou no Briefing | Voltar para origem (`home` ou `briefing`) ou Iniciar Treinamento |
 | `tutorial` | `TutorialScreen.tsx` | Tutorial guiado passo a passo para o Módulo Bubble Sort | `[ COMO JOGAR ]` na Home | Concluir tutorial (vai para `game`) ou Voltar |
 | `selection-tutorial`| `SelectionTutorialScreen.tsx` | Tutorial interativo bimodal para o Módulo Selection Sort | Início do módulo Selection sem tutorial prévio | Concluir tutorial (vai para `selection-game`) ou Voltar |
+| `insertion-tutorial`| `InsertionTutorialScreen.tsx` | Tutorial interativo de elevação e deslocamentos para Insertion Sort | Início do módulo Insertion ou CTA da Demonstração | Concluir tutorial (vai para `insertion-game`) ou Voltar |
 | `game` | `GameScreen.tsx` | Ambiente interativo de prática do Módulo Bubble Sort | Iniciar prática do Bubble Sort | Conclusão da esteira (vai para `result`) |
 | `selection-game` | `SelectionGameScreen.tsx` | Ambiente interativo de prática do Módulo Selection Sort | Iniciar prática do Selection Sort | Conclusão da esteira (vai para `result`) |
+| `insertion-game` | `InsertionGameScreen.tsx` | Ambiente interativo de prática do Módulo Insertion Sort (básico, intermediário, avançado) | Iniciar práticas de Insertion Sort | Conclusão de cada nível (vai para `result`) |
 | `result` | `ResultScreen.tsx` | Relatório factual pós-exercício com score, métricas e pseudocódigo | Disparo de `onComplete` na esteira | `[ VER EXECUÇÃO ]` (vai para replay), `[ REPETIR ]` ou `[ PRÓXIMO ]` |
-| `replay` | `ReplayScreen.tsx` | Inspeção retrospectiva quadro a quadro do Bubble Sort | `[ VER EXECUÇÃO ]` em `ResultScreen` | `← VOLTAR AO RESULTADO` (retorna para `result`) |
-| `selection-replay`| `SelectionReplayScreen.tsx` | Inspeção retrospectiva quadro a quadro do Selection Sort | `[ VER EXECUÇÃO ]` em `ResultScreen` | `← VOLTAR AO RESULTADO` (retorna para `result`) |
+| `replay` | `ReplayScreen.tsx` / `SelectionReplayScreen.tsx` / `InsertionReplayScreen.tsx` | Inspeção retrospectiva quadro a quadro polimórfica pelo protocolo | `[ VER EXECUÇÃO ]` em `ResultScreen` | `← VOLTAR AO RESULTADO` (retorna para `result`) |
 | `campaign-complete`| `CampaignCompleteScreen.tsx` | Relatório consolidado de conclusão do conjunto de práticas Bubble | Conclusão do último exercício do Bubble | `[ RETORNAR AO HUB ]` ou `[ REINICIAR MÓDULO ]` |
 | `selection-campaign-complete`| `SelectionCampaignCompleteScreen.tsx`| Relatório consolidado de conclusão do conjunto de práticas Selection | Conclusão do último exercício do Selection | `[ RETORNAR AO HUB ]` ou `[ REINICIAR MÓDULO ]` |
+| `insertion-practice-complete`| `PracticeSetCompleteScreen.tsx`| Relatório consolidado de conclusão do conjunto de práticas Insertion | Conclusão da última prática do Insertion | `[ RETORNAR AO HUB ]` ou `[ REPETIR PRÁTICAS ]` |
 
 ---
 
@@ -87,7 +91,7 @@ src/
     ├── sorting/             # Engines algorítmicas e FSMs estritas (Bubble, Selection)
     ├── demonstration/       # Geradores de execução canônica para demonstração
     ├── generation/          # Geração procedural determinística universal (Mulberry32)
-    ├── persistence/         # Adaptador desacoplado de armazenamento (Schema v3)
+    ├── persistence/         # Adaptador desacoplado de armazenamento (Schema v4 - ADR 0021)
     ├── replay/              # Derivação funcional de quadros e sincronização de pseudocódigo
     ├── session/             # Cálculo puro da Pontuação do Protocolo e métricas
     ├── campaign/            # Agregação de resultados do conjunto de exercícios
@@ -133,7 +137,6 @@ O **Laboratório Comparativo** ([`comparison-lab.md`](./comparison-lab.md)) oper
 
 ---
 
-## 6. Evolução da Persistência: Schema v4
+## 6. Persistência da Plataforma Educacional: Schema v4 (ADR 0021)
 
-O Schema v3 atual atende perfeitamente aos módulos Bubble e Selection Sort em suas práticas básicas.  
-Para acomodar os 6 módulos e os 8 tipos de exercícios da taxonomia transversal sem quebras de tipo, o sistema migrará no futuro para o **Schema v4 Conceitual** ([`07-backend-and-persistence.md`](./07-backend-and-persistence.md)), baseado em `moduleId` e `exerciseId` dinâmicos.
+O **Schema v4** ([`07-backend-and-persistence.md`](./07-backend-and-persistence.md)) está integralmente implementado e ativo no storage local (`sorting_station_save`), indexado por `moduleId` (`bubble`, `selection`, `insertion`, `merge`, `quick`, `heap`) e `exerciseSetId` (`basic`, `intermediate`, `advanced`). O pipeline idempotente de migração assegura retrocompatibilidade automática para saves legados v1, v2 e v3 sem perda de métricas ou quebra de tipos.

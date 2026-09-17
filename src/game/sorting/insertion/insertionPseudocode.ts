@@ -4,8 +4,21 @@
  * Representação em 11 instruções estruturadas conforme a especificação pedagógica do projeto.
  */
 
+export type InsertionPseudocodeLineId =
+  | "PROCEDURE"
+  | "OUTER_LOOP"
+  | "LIFT_KEY"
+  | "INIT_J"
+  | "WHILE_CONDITION"
+  | "SHIFT_RIGHT"
+  | "DECREMENT_J"
+  | "END_WHILE"
+  | "INSERT_KEY"
+  | "END_OUTER"
+  | "END_PROCEDURE";
+
 export interface InsertionPseudocodeLine {
-  readonly id: string;
+  readonly id: InsertionPseudocodeLineId;
   readonly lineNumber: number;
   readonly indent: number;
   readonly text: string;
@@ -38,7 +51,7 @@ export const INSERTION_SORT_PSEUDOCODE: readonly InsertionPseudocodeLine[] =
       text: "j ← i - 1",
     }),
     Object.freeze({
-      id: "WHILE_LOOP",
+      id: "WHILE_CONDITION",
       lineNumber: 5,
       indent: 2,
       text: "enquanto j ≥ 0 e A[j] > chave faça",
@@ -50,7 +63,7 @@ export const INSERTION_SORT_PSEUDOCODE: readonly InsertionPseudocodeLine[] =
       text: "A[j + 1] ← A[j]",
     }),
     Object.freeze({
-      id: "DECR_J",
+      id: "DECREMENT_J",
       lineNumber: 7,
       indent: 3,
       text: "j ← j - 1",
@@ -68,7 +81,7 @@ export const INSERTION_SORT_PSEUDOCODE: readonly InsertionPseudocodeLine[] =
       text: "A[j + 1] ← chave",
     }),
     Object.freeze({
-      id: "END_FOR",
+      id: "END_OUTER",
       lineNumber: 10,
       indent: 1,
       text: "fim para",

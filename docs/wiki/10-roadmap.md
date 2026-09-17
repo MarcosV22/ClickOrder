@@ -20,7 +20,7 @@ flowchart LR
     subgraph Elementares ["2. Módulos Elementares (O(n²))"]
         M1["Módulo Bubble Sort\n[IMPLEMENTADO]"]
         M2["Módulo Selection Sort\n[IMPLEMENTADO]"]
-        M3["Módulo Insertion Sort (P2.2)\n[PLANEJADO - PRÓXIMO]"]
+        M3["Módulo Insertion Sort (P2.2)\n[P2.2-E CONCLUÍDO]"]
     end
 
     subgraph Avancados ["3. Módulos Avançados (O(n log n))"]
@@ -43,9 +43,9 @@ flowchart LR
 
 | Módulo | Arquivo de Especificação | Complexidade | Status Factual | Próximo Passo |
 | :--- | :--- | :---: | :---: | :--- |
-| **01. Bubble Sort** | [`modules/bubble-sort.md`](./modules/bubble-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO` | Adaptação conceitual de fases para exercícios |
-| **02. Selection Sort** | [`modules/selection-sort.md`](./modules/selection-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO` | Adaptação conceitual de fases para exercícios |
-| **03. Insertion Sort** | [`modules/insertion-sort.md`](./modules/insertion-sort.md) | $\Theta(n^2)$ | `PLANEJADO` (P2.2) | Implementação da engine pura e elevação de chave |
+| **01. Bubble Sort** | [`modules/bubble-sort.md`](./modules/bubble-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO` | Persistido em Schema v4 (`bubble.practice.*`) |
+| **02. Selection Sort** | [`modules/selection-sort.md`](./modules/selection-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO` | Persistido em Schema v4 (`selection.practice.*`) |
+| **03. Insertion Sort** | [`modules/insertion-sort.md`](./modules/insertion-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO E ATIVADO` | P2.2 integralmente concluído com Schema v4 |
 | **04. Merge Sort** | [`modules/merge-sort.md`](./modules/merge-sort.md) | $\Theta(n \log n)$ | `FUTURO` (P3.1) | Arquitetura de sub-esteiras e intercalação |
 | **05. Quick Sort** | [`modules/quick-sort.md`](./modules/quick-sort.md) | $\Theta(n \log n)$ | `FUTURO` (P3.2) | Particionamento bilateral e seleção de pivô |
 | **06. Heap Sort** | [`modules/heap-sort.md`](./modules/heap-sort.md) | $\Theta(n \log n)$ | `FUTURO` (P3.3) | Estrutura de max-heap e afundamento (*sift-down*) |
@@ -66,20 +66,20 @@ flowchart LR
 
 ---
 
-### Marco 1: MÓDULO INSERTION SORT (P2.2) — `EM PROGRESSO` (DESIGN APROVADO EM P2.2-A)
+### Marco 1: MÓDULO INSERTION SORT (P2.2) — `CONCLUÍDO`
 - **Objetivo:** Implementar o 3º módulo curricular da plataforma: *"Desvio e Encaixe de Cargas"*.
-- **Sub-Marcos de Engenharia:**
+- **Sub-Marcos de Engenharia Concluídos:**
   1. **P2.2-A:** Design Pedagógico, Mecânico e Curricular do Módulo (`CONCLUÍDO` em [`modules/insertion-sort.md`](./modules/insertion-sort.md));
   2. **P2.2-B:** Engine pura de Insertion Sort por deslocamentos em `src/game/sorting/insertion/` + suíte completa de testes unitários com Vitest (`CONCLUÍDO`, ADR 0018);
-  3. **P2.2-C:** Restrições procedurais (`insertionConstraints.ts`), briefing oficial, tutorial interativo (`[4, 2, 3]`) e driver puro de demonstração canônica (`[6, 3, 5, 2]`) (`CONCLUÍDO`, ADR 0019);
-  4. **P2.2-D:** Interface de prática interativa (`InsertionGameScreen.tsx`) com trilho suspenso para chave elevada, esteira com vaga única (`InsertionHoleSlot`), role `"ordered-scan"`, catálogo de práticas sem fases (`basic`, `intermediate`, `advanced`), resultado de exercício e tela de conclusão do conjunto (`PracticeSetCompleteScreen.tsx`) (`CONCLUÍDO`, 368 testes verdes);
-  5. **P2.2-E:** Replay retrospectivo com derivação pura de quadros e pseudocódigo sincronizado de 11 instruções (`InsertionSortPseudocodePanel.tsx`) + conexão visual da demonstração (`PRÓXIMO MARCO`);
-  6. **P2.2-F:** Persistência Schema v4 multi-protocolo orientada a exercícios/módulos e homologação final do Insertion Sort no catálogo.
-- **Critério de Aceite:** 100% dos testes unitários verdes e zero regressão nos testes existentes.
+  3. **P2.2-C:** Restrições procedurais (`insertionConstraints.ts`), briefing oficial, tutorial interativo (`[4, 2, 3]`) e driver puro de demonstração canônica (`[6, 3, 5, 2, 7]`) (`CONCLUÍDO`, ADR 0019);
+  4. **P2.2-D:** Interface de prática interativa (`InsertionGameScreen.tsx`) com trilho suspenso para chave elevada, esteira com vaga única (`InsertionHoleSlot`), role `"ordered-scan"`, catálogo de práticas sem fases (`basic`, `intermediate`, `advanced`), resultado de exercício e tela de conclusão do conjunto (`PracticeSetCompleteScreen.tsx`) (`CONCLUÍDO`, ADR 0020);
+  5. **P2.2-E:** Replay retrospectivo com derivação pura de quadros e pseudocódigo sincronizado de 11 instruções (`InsertionSortPseudocodePanel.tsx`) + conexão visual da demonstração (`CONCLUÍDO`);
+  6. **P2.2-F:** Persistência Schema v4 orientada a exercícios/módulos, migração determinística v1/v2/v3->v4, estabilização de storage key e homologação pública do Insertion Sort no catálogo como `available` (`CONCLUÍDO`, ADR 0021).
+- **Critério de Aceite Atingido:** 100% dos testes unitários verdes (376 testes) e zero regressão.
 
 ---
 
-### Marco 2: MÓDULO MERGE SORT (P3.1) — `FUTURO`
+### Marco 2: MÓDULO MERGE SORT (P3.1) — `FUTURO (PRÓXIMO MARCO)`
 - **Objetivo:** Primeiro módulo log-linear da plataforma, demonstrando Divisão e Conquista.
 - **Entregáveis:**
   1. Visualização de sub-esteiras paralelas bifurcadas;

@@ -37,26 +37,33 @@ src/
 │   ├── SelectionTutorialScreen.tsx # Tutorial interativo com engine real sobre [4, 1, 3] (Selection)
 │   ├── GameScreen.tsx   # Tela de jogo interativa: Bubble Sort esteira e lógica de ordenação
 │   ├── SelectionGameScreen.tsx # Tela de jogo interativa: Selection Sort esteira, scanner e commits (P2.1-D / ADR 0013)
-│   ├── ResultScreen.tsx # Relatório de término de fase: estatísticas e pseudocódigo (Bubble e Selection)
-│   ├── ReplayScreen.tsx # Reprodução retrospectiva passo a passo com suporte a replay e demonstração
+│   ├── ResultScreen.tsx # Relatório de término de fase/prática: estatísticas e pseudocódigo (Bubble, Selection e Insertion)
+│   ├── ReplayScreen.tsx # Reprodução retrospectiva passo a passo com suporte a replay e demonstração Bubble
 │   ├── SelectionReplayScreen.tsx # Reprodução retrospectiva Selection com pseudocódigo sincronizado e demonstração
-│   ├── DemonstrationScreen.tsx # Modo Demonstração Educacional canônico puro (P2.1-G-D / ADR 0017)
+│   ├── InsertionReplayScreen.tsx # Reprodução retrospectiva Insertion com pseudocódigo de 11 linhas e demonstração
+│   ├── DemonstrationScreen.tsx # Modo Demonstração Educacional canônico puro (Bubble, Selection e Insertion)
 │   ├── CampaignCompleteScreen.tsx # Relatório final de homologação do Protocolo Bubble Sort
-│   └── SelectionCampaignCompleteScreen.tsx # Relatório final de homologação do Protocolo Selection Sort (P2.1-D / ADR 0013)
+│   ├── SelectionCampaignCompleteScreen.tsx # Relatório final de homologação do Protocolo Selection Sort
+│   ├── InsertionGameScreen.tsx # Ambiente de prática do Insertion Sort (básico, intermediário, avançado)
+│   ├── InsertionTutorialScreen.tsx # Tutorial guiado do Insertion Sort
+│   └── PracticeSetCompleteScreen.tsx # Relatório final de conclusão do conjunto de práticas de Insertion Sort
 ├── game/
 │   ├── briefing/        # Catálogo e tipos de dados para briefings orientados a dados (P1.10 / ADR 0010)
 │   ├── campaign/        # Agregação pura de métricas da campanha (PhaseResult, calculateCampaignSummary)
-│   ├── demonstration/   # Geração autônoma de demonstração via engines reais (P2.1-G-D / ADR 0017)
+│   ├── demonstration/   # Geração autônoma de demonstração via engines reais (Bubble, Selection, Insertion)
 │   ├── generation/      # Geração procedural global e determinística de vetores (P1.9 / ADR 0009)
-│   ├── persistence/     # Armazenamento local via localStorage (Schema v3 / ADR 0006, 0007 e 0015)
+│   ├── persistence/     # Armazenamento local via localStorage (Schema v4 / ADR 0006, 0007, 0015 e 0021)
 │   ├── replay/          # Modelo de quadros de replay e sincronização de pseudocódigo
 │   ├── session/         # Métricas de telemetria descritiva e pontuação do protocolo
-│   ├── sorting/         # Engines pedagógicas puras (Bubble Sort e Selection Sort FSM)
+│   ├── sorting/         # Engines pedagógicas puras (Bubble, Selection, Insertion FSM)
 │   └── tutorial/        # Guia pedagógico e definições dos tutoriais interativos
 └── components/          # Componentes visuais atômicos e reutilizáveis
     ├── GameButton.tsx   # Botão estilizado com variantes sci-fi (primary, secondary, danger, ghost)
     ├── InstructionPanel.tsx # Faixa de feedback ao usuário com 4 tipos de severidade
     ├── NumberedBox.tsx  # Caixa de transporte com valor, etiquetas, papéis e animações de troca
+    ├── InsertionHoleSlot.tsx # Vaga física aberta na esteira para encaixe de chave no Insertion Sort
+    ├── InsertionSortPseudocodePanel.tsx # Painel de pseudocódigo sincronizado de 11 instruções do Insertion Sort
+    ├── SelectionSortPseudocodePanel.tsx # Painel de pseudocódigo sincronizado do Selection Sort
     ├── PhaseHeader.tsx  # Cabeçalho fixo com protocolo, pílulas de fase e status do sistema
     └── StatsPanel.tsx   # Mostrador numérico duplo para comparações e trocas
 ```
@@ -65,7 +72,7 @@ src/
 
 ## 3. Arquitetura de Telas e Navegação
 
-A navegação da aplicação não utiliza rotas de URL, mas sim uma máquina de telas baseada no estado `screen` mantido em [`src/App.tsx`](../../src/App.tsx) (`"home" | "briefing" | "tutorial" | "selection-tutorial" | "game" | "selection-game" | "result" | "replay" | "selection-replay" | "demonstration" | "campaign-complete" | "selection-campaign-complete"`).
+A navegação da aplicação não utiliza rotas de URL, mas sim uma máquina de telas baseada no estado `screen` mantido em [`src/App.tsx`](../../src/App.tsx) (`"home" | "briefing" | "tutorial" | "selection-tutorial" | "insertion-tutorial" | "game" | "selection-game" | "insertion-game" | "result" | "replay" | "demonstration" | "campaign-complete" | "selection-campaign-complete" | "insertion-practice-complete"`).
 
 ```mermaid
 flowchart TD

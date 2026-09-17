@@ -5,14 +5,88 @@ import {
 } from "./constants";
 
 /**
- * Protocolos de ordenação oficialmente suportados pela estação logística.
+ * Módulos curriculares previstos pela arquitetura da plataforma educacional.
  */
-export type SupportedProtocol = "bubble" | "selection";
+export type ModuleId =
+  | "bubble"
+  | "selection"
+  | "insertion"
+  | "merge"
+  | "quick"
+  | "heap";
+
+export const SUPPORTED_MODULE_IDS: readonly ModuleId[] = Object.freeze([
+  "bubble",
+  "selection",
+  "insertion",
+  "merge",
+  "quick",
+  "heap",
+]);
 
 /**
- * Registro factual da conclusão de uma fase individual.
- * Armazena a conclusão factual e opcionalmente as métricas da rodada de melhor pontuação.
+ * Registro factual da melhor execução de um conjunto de exercícios no Schema v4.
+ * Baseado estritamente nas regras canônicas de pontuação e métricas de desempenho.
  */
+export interface ExerciseRecordV4 {
+  readonly completedAt: string; // ISO 8601
+  readonly bestScore: number; // 0..100 clamped
+  readonly bestScoreErrors: number; // >= 0
+  readonly bestScoreHintsUsed: number; // >= 0
+  readonly bestScoreElapsedTimeMs?: number; // >= 0 (descritivo, não desempata)
+}
+
+/**
+ * Progresso persistente de um conjunto específico de exercícios (ExerciseSet).
+ * Não persiste status de desbloqueio (desbloqueios são derivados deterministicamente).
+ */
+export interface ExerciseSetProgressV4 {
+  readonly completed: boolean;
+  readonly bestRecord?: ExerciseRecordV4;
+}
+
+/**
+ * Progresso persistente de um módulo educacional completo no Schema v4.
+ * O tutorial é uma flag de módulo; exercícios são indexados por exerciseSetId canônico.
+ */
+export interface ModuleProgressV4 {
+  readonly completedTutorial: boolean;
+  readonly exerciseSets: Record<string, ExerciseSetProgressV4>;
+}
+
+/**
+ * Preferências locais globais compartilhadas entre todos os módulos.
+ */
+export interface GlobalPreferences {
+  readonly soundEnabled: boolean;
+  readonly reducedMotion: boolean;
+  readonly highContrast: boolean;
+}
+
+export type PreferencesSaveData = GlobalPreferences;
+
+/**
+ * Schema canônico e versionado do salvamento local orientado a módulos (Schema v4).
+ * Uma única fonte de verdade: `modules`. Sem aliases redundantes no top-level.
+ */
+export interface GameSaveSchemaV4 {
+  readonly schemaVersion: 4;
+  readonly lastUpdated: string;
+  readonly preferences: GlobalPreferences;
+  readonly modules: Partial<Record<ModuleId, ModuleProgressV4>>;
+}
+
+/**
+ * Alias canônico para o schema corrente da aplicação.
+ */
+export type GameSaveSchema = GameSaveSchemaV4;
+
+// ============================================================================
+// Tipos de Retrocompatibilidade e Migração (v1 / v2 / v3)
+// ============================================================================
+
+export type SupportedProtocol = "bubble" | "selection";
+
 export interface PhaseRecord {
   readonly completed: boolean;
   readonly completedAt: string;
@@ -22,9 +96,6 @@ export interface PhaseRecord {
   readonly bestScoreElapsedTimeMs?: number;
 }
 
-/**
- * Dados de desempenho de uma rodada para avaliação de recorde.
- */
 export interface PhaseScoreData {
   readonly score: number;
   readonly errors: number;
@@ -32,10 +103,6 @@ export interface PhaseScoreData {
   readonly elapsedTimeMs?: number;
 }
 
-/**
- * Progresso persistente factual por protocolo individual.
- * Separação estrita: as fases 1, 2 e 3 do Bubble não colidem com as fases 1, 2 e 3 do Selection.
- */
 export interface ProtocolProgress {
   readonly unlockedPhases: number;
   readonly highestPhaseReached: number;
@@ -43,41 +110,25 @@ export interface ProtocolProgress {
   readonly records: Record<number, PhaseRecord>;
 }
 
-/**
- * Alias de retrocompatibilidade para o formato legado de campanha.
- */
 export type CampaignSaveData = ProtocolProgress;
 
 /**
- * Preferências locais do operador da estação (globais entre todos os protocolos).
+ * Estrutura histórica do Schema v3 Multi-Protocolo (para migração e testes).
  */
-export interface PreferencesSaveData {
-  readonly soundEnabled: boolean;
-  readonly reducedMotion: boolean;
-  readonly highContrast: boolean;
-}
-
-/**
- * Schema canônico e versionado do salvamento local (v3 Multi-Protocolo).
- */
-export interface GameSaveSchema {
-  readonly schemaVersion: number;
+export interface GameSaveSchemaV3 {
+  readonly schemaVersion: 3;
   readonly lastUpdated: string;
   readonly protocols: {
     readonly bubble: ProtocolProgress;
     readonly selection: ProtocolProgress;
   };
   readonly preferences: PreferencesSaveData;
-  /**
-   * @deprecated Aliases de conveniência apontando para protocols.bubble para retrocompatibilidade
-   */
-  readonly campaign: ProtocolProgress;
-  readonly records: Record<number, PhaseRecord>;
+  readonly campaign?: ProtocolProgress;
+  readonly records?: Record<number, PhaseRecord>;
 }
 
 /**
- * Contrato mínimo abstrato de armazenamento chave-valor.
- * Permite isolamento completo de localStorage e injeção de adaptadores de teste em memória.
+ * Contrato de armazenamento chave-valor (compatível com localStorage e mocks em memória).
  */
 export interface StorageAdapter {
   getItem(key: string): string | null;
@@ -86,7 +137,7 @@ export interface StorageAdapter {
 }
 
 /**
- * Resultado descritivo de uma tentativa de gravação em storage.
+ * Resultado descritivo de gravação em storage.
  */
 export interface SaveOperationResult {
   readonly success: boolean;
@@ -94,8 +145,22 @@ export interface SaveOperationResult {
   readonly error?: string;
 }
 
+// ============================================================================
+// Funções Construtoras Padrão (Pure Creators)
+// ============================================================================
+
 /**
- * Retorna o progresso padrão inicial e imutável para um protocolo.
+ * Cria o estado inicial padrão de um módulo no Schema v4.
+ */
+export function createDefaultModuleProgress(): ModuleProgressV4 {
+  return Object.freeze({
+    completedTutorial: false,
+    exerciseSets: Object.freeze({}),
+  });
+}
+
+/**
+ * Retorna o progresso padrão inicial legado para um protocolo (v3).
  */
 export function createDefaultProtocolProgress(
   maxPhases: number = DEFAULT_MAX_PHASES
@@ -109,17 +174,42 @@ export function createDefaultProtocolProgress(
 }
 
 /**
- * Retorna o estado de salvamento padrão, imutável e válido para novas instalações (Schema v3).
+ * Retorna o estado padrão canônico do Schema v4 para novas instalações limpas.
+ * Inicializa apenas os módulos concebidos e ativos (bubble, selection, insertion).
+ * Não gera registros vazios para módulos não liberados.
  */
 export function createDefaultSaveData(
+  _bubbleMaxPhases?: number,
+  _selectionMaxPhases?: number
+): GameSaveSchemaV4 {
+  return Object.freeze({
+    schemaVersion: 4 as const,
+    lastUpdated: new Date().toISOString(),
+    preferences: Object.freeze({
+      soundEnabled: true,
+      reducedMotion: false,
+      highContrast: false,
+    }),
+    modules: Object.freeze({
+      bubble: createDefaultModuleProgress(),
+      selection: createDefaultModuleProgress(),
+      insertion: createDefaultModuleProgress(),
+    }),
+  });
+}
+
+/**
+ * Retorna estado padrão no formato histórico v3 (para uso em testes de migração).
+ */
+export function createDefaultSaveDataV3(
   bubbleMaxPhases: number = DEFAULT_MAX_PHASES,
   selectionMaxPhases: number = SELECTION_MAX_PHASES
-): GameSaveSchema {
+): GameSaveSchemaV3 {
   const bubble = createDefaultProtocolProgress(bubbleMaxPhases);
   const selection = createDefaultProtocolProgress(selectionMaxPhases);
 
   return Object.freeze({
-    schemaVersion: CURRENT_SCHEMA_VERSION,
+    schemaVersion: 3 as const,
     lastUpdated: new Date().toISOString(),
     protocols: Object.freeze({
       bubble,
@@ -134,4 +224,3 @@ export function createDefaultSaveData(
     records: bubble.records,
   });
 }
-

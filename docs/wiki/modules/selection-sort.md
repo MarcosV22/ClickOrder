@@ -221,11 +221,13 @@ Após $j = n-1$, $minIndex$ aponta para o menor elemento de todo o subvetor $[i 
 
 ---
 
-## 17. Persistência e Progresso
+## 17. Persistência e Progresso (Schema v4 - ADR 0021)
 
-- **Schema Atual:** Schema v3 (`protocols.selection` em `sorting_station_v1_save`).
-- **Namespace Isolado:** O progresso do Selection Sort não afeta e não é afetado pelo progresso do Bubble Sort.
-- **Migração Futura (Schema v4):** Mapeamento para IDs genéricos `selection-basic`, `selection-intermediate`, `selection-advanced`.
+- **Schema Atual:** Schema v4 (`modules.selection` em `sorting_station_save`, com fallback de leitura da chave legada `sorting_station_v1_save`).
+- **Namespace Isolado:** O progresso do Selection Sort reside em `modules.selection` de forma totalmente estanque em relação aos demais módulos.
+- **Identificadores Canônicos de Exercícios:** `exerciseSets["selection.practice.basic"]`, `exerciseSets["selection.practice.intermediate"]` e `exerciseSets["selection.practice.advanced"]`.
+- **Desbloqueios Derivados:** Prática básica sempre desbloqueada; intermediária liberada ao concluir básica; avançada liberada ao concluir intermediária.
+- **Retrocompatibilidade:** Projeção sob demanda para componentes legados via `getProtocolProgress(saveData, "selection")`.
 
 ---
 

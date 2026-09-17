@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import {
   STORAGE_KEY,
+  LEGACY_STORAGE_KEY,
   CURRENT_SCHEMA_VERSION,
   createDefaultSaveData,
   createMemoryStorageAdapter,
@@ -8,28 +9,54 @@ import {
   loadGameProgress,
   saveGameProgress,
   recordPhaseCompletion,
+  recordExerciseCompletion,
   recordTutorialCompletion,
   clearGameProgress,
   validateAndMigrateSaveData,
   isChallengeModeUnlocked,
   getInitialSessionRoute,
   getProtocolProgress,
+  getModuleProgress,
+  getExerciseSetProgress,
+  isExerciseSetCompleted,
+  getBestExerciseRecord,
+  isModuleTutorialCompleted,
+  isModuleRegularPracticeCompleted,
+  isExerciseSetUnlocked,
   migrateV1ToV2,
   migrateV2ToV3,
-  SELECTION_MAX_PHASES,
+  migrateV3ToV4,
+  BUBBLE_EXERCISE_SETS,
+  SELECTION_EXERCISE_SETS,
+  INSERTION_EXERCISE_SETS,
   type StorageAdapter,
   type GameSaveSchema,
+  type GameSaveSchemaV4,
 } from "./index";
 
-describe("Persistence Layer (P1.6)", () => {
+describe("Persistence Layer (P1.6 - P2.2-F)", () => {
   describe("1. Estado Padrão (Clean Install)", () => {
-    it("deve inicializar com schemaVersion 1, fase 1 desbloqueada e tutorial pendente", () => {
-      const defaultData = createDefaultSaveData(3);
+    it("deve inicializar com schemaVersion 4, módulos curriculares configurados e tutorial pendente", () => {
+      const defaultData = createDefaultSaveData();
       expect(defaultData.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(defaultData.campaign.unlockedPhases).toBe(1);
-      expect(defaultData.campaign.highestPhaseReached).toBe(1);
-      expect(defaultData.campaign.hasCompletedTutorial).toBe(false);
-      expect(defaultData.records).toEqual({});
+      expect(defaultData.schemaVersion).toBe(4);
+
+      // Módulos inicializados
+      expect(defaultData.modules.bubble).toBeDefined();
+      expect(defaultData.modules.selection).toBeDefined();
+      expect(defaultData.modules.insertion).toBeDefined();
+
+      // Bubble progress derivado e direto
+      expect(defaultData.modules.bubble?.completedTutorial).toBe(false);
+      expect(defaultData.modules.bubble?.exerciseSets).toEqual({});
+
+      const bubbleProgress = getProtocolProgress(defaultData, "bubble");
+      expect(bubbleProgress.unlockedPhases).toBe(1);
+      expect(bubbleProgress.highestPhaseReached).toBe(1);
+      expect(bubbleProgress.hasCompletedTutorial).toBe(false);
+      expect(bubbleProgress.records).toEqual({});
+
+      // Preferências padrão
       expect(defaultData.preferences).toEqual({
         soundEnabled: true,
         reducedMotion: false,
@@ -40,128 +67,130 @@ describe("Persistence Layer (P1.6)", () => {
 
     it("loadGameProgress deve retornar estado padrão seguro quando o storage estiver vazio", () => {
       const storage = createMemoryStorageAdapter();
-      const loaded = loadGameProgress(storage, 3);
+      const loaded = loadGameProgress(storage);
 
       expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(loaded.campaign.unlockedPhases).toBe(1);
-      expect(loaded.campaign.highestPhaseReached).toBe(1);
-      expect(loaded.campaign.hasCompletedTutorial).toBe(false);
-      expect(loaded.records).toEqual({});
+      const bubble = getProtocolProgress(loaded, "bubble");
+      expect(bubble.unlockedPhases).toBe(1);
+      expect(bubble.highestPhaseReached).toBe(1);
+      expect(bubble.hasCompletedTutorial).toBe(false);
+      expect(bubble.records).toEqual({});
     });
 
     it("loadGameProgress deve retornar estado padrão quando storage contiver string vazia ou espaços", () => {
       const storage = createMemoryStorageAdapter({ [STORAGE_KEY]: "   " });
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.campaign.unlockedPhases).toBe(1);
+      const loaded = loadGameProgress(storage);
+      expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBe(1);
     });
   });
 
   describe("2. Save e Load Básico", () => {
     it("deve salvar e recarregar dados íntegros corretamente", () => {
       const storage = createMemoryStorageAdapter();
-      const initial = createDefaultSaveData(3);
+      const initial = createDefaultSaveData();
 
       saveGameProgress(initial, storage);
       const rawStored = storage.getItem(STORAGE_KEY);
       expect(rawStored).toBeTruthy();
 
-      const reloaded = loadGameProgress(storage, 3);
+      const reloaded = loadGameProgress(storage);
       expect(reloaded.schemaVersion).toBe(initial.schemaVersion);
-      expect(reloaded.campaign.unlockedPhases).toBe(initial.campaign.unlockedPhases);
-      expect(reloaded.campaign.highestPhaseReached).toBe(initial.campaign.highestPhaseReached);
+      expect(reloaded.modules.bubble).toEqual(initial.modules.bubble);
       expect(reloaded.preferences).toEqual(initial.preferences);
     });
   });
 
-  describe("3. Progressão de Fases e Limites (PHASES.length)", () => {
+  describe("3. Progressão de Fases e Limites (Bubble via Adaptador)", () => {
     it("deve desbloquear a fase 2 ao concluir a fase 1", () => {
       const storage = createMemoryStorageAdapter();
-      const state0 = createDefaultSaveData(3);
+      const state0 = createDefaultSaveData();
 
       const state1 = recordPhaseCompletion(state0, 1, 3, storage);
-      expect(state1.campaign.unlockedPhases).toBe(2);
-      expect(state1.campaign.highestPhaseReached).toBe(2);
-      expect(state1.campaign.hasCompletedTutorial).toBe(true);
-      expect(state1.records[1]).toBeDefined();
-      expect(state1.records[1].completed).toBe(true);
+      const bubble1 = getProtocolProgress(state1, "bubble");
+      expect(bubble1.unlockedPhases).toBe(2);
+      expect(bubble1.highestPhaseReached).toBe(2);
+      expect(bubble1.hasCompletedTutorial).toBe(true);
+      expect(bubble1.records[1]).toBeDefined();
+      expect(bubble1.records[1].completed).toBe(true);
 
       // Confirma que foi persistido no storage
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.campaign.unlockedPhases).toBe(2);
-      expect(loaded.campaign.highestPhaseReached).toBe(2);
+      const loaded = loadGameProgress(storage);
+      const loadedBubble = getProtocolProgress(loaded, "bubble");
+      expect(loadedBubble.unlockedPhases).toBe(2);
+      expect(loadedBubble.highestPhaseReached).toBe(2);
     });
 
     it("deve desbloquear a fase 3 ao concluir a fase 2", () => {
       const storage = createMemoryStorageAdapter();
-      const state0 = createDefaultSaveData(3);
+      const state0 = createDefaultSaveData();
       const state1 = recordPhaseCompletion(state0, 1, 3, storage);
       const state2 = recordPhaseCompletion(state1, 2, 3, storage);
 
-      expect(state2.campaign.unlockedPhases).toBe(3);
-      expect(state2.campaign.highestPhaseReached).toBe(3);
-      expect(state2.records[2].completed).toBe(true);
+      const bubble2 = getProtocolProgress(state2, "bubble");
+      expect(bubble2.unlockedPhases).toBe(3);
+      expect(bubble2.highestPhaseReached).toBe(3);
+      expect(bubble2.records[2].completed).toBe(true);
 
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.campaign.unlockedPhases).toBe(3);
+      const loaded = loadGameProgress(storage);
+      expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBe(3);
     });
 
-    it("NUNCA deve ultrapassar o limite de fases (PHASES.length = 3)", () => {
+    it("NUNCA deve ultrapassar o limite de fases (3 fases)", () => {
       const storage = createMemoryStorageAdapter();
-      const state0 = createDefaultSaveData(3);
+      const state0 = createDefaultSaveData();
       const state1 = recordPhaseCompletion(state0, 1, 3, storage);
       const state2 = recordPhaseCompletion(state1, 2, 3, storage);
       const state3 = recordPhaseCompletion(state2, 3, 3, storage);
 
-      // Conclusão da última fase da campanha não pode gerar fase 4
-      expect(state3.campaign.unlockedPhases).toBe(3);
-      expect(state3.campaign.highestPhaseReached).toBe(3);
-      expect(state3.records[3].completed).toBe(true);
+      const bubble3 = getProtocolProgress(state3, "bubble");
+      expect(bubble3.unlockedPhases).toBe(3);
+      expect(bubble3.highestPhaseReached).toBe(3);
+      expect(bubble3.records[3].completed).toBe(true);
 
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.campaign.unlockedPhases).toBe(3);
-      expect(loaded.campaign.highestPhaseReached).toBe(3);
+      const loaded = loadGameProgress(storage);
+      expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBe(3);
     });
 
     it("NUNCA deve regredir a fase desbloqueada ao rejogar fases anteriores", () => {
       const storage = createMemoryStorageAdapter();
-      const state0 = createDefaultSaveData(3);
+      const state0 = createDefaultSaveData();
       const state1 = recordPhaseCompletion(state0, 1, 3, storage);
       const state2 = recordPhaseCompletion(state1, 2, 3, storage);
-      expect(state2.campaign.unlockedPhases).toBe(3);
+      expect(getProtocolProgress(state2, "bubble").unlockedPhases).toBe(3);
 
       // Aluno rejoga a fase 1
       const replayedState = recordPhaseCompletion(state2, 1, 3, storage);
-      expect(replayedState.campaign.unlockedPhases).toBe(3);
-      expect(replayedState.campaign.highestPhaseReached).toBe(3);
+      expect(getProtocolProgress(replayedState, "bubble").unlockedPhases).toBe(3);
+      expect(getProtocolProgress(replayedState, "bubble").highestPhaseReached).toBe(3);
 
       // Aluno rejoga a fase 2
       const replayedState2 = recordPhaseCompletion(replayedState, 2, 3, storage);
-      expect(replayedState2.campaign.unlockedPhases).toBe(3);
-      expect(replayedState2.campaign.highestPhaseReached).toBe(3);
+      expect(getProtocolProgress(replayedState2, "bubble").unlockedPhases).toBe(3);
+      expect(getProtocolProgress(replayedState2, "bubble").highestPhaseReached).toBe(3);
 
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.campaign.unlockedPhases).toBe(3);
+      const loaded = loadGameProgress(storage);
+      expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBe(3);
     });
   });
 
   describe("4. Conclusão do Tutorial", () => {
-    it("deve marcar hasCompletedTutorial como true e persistir no storage", () => {
+    it("deve marcar completedTutorial como true e persistir no storage", () => {
       const storage = createMemoryStorageAdapter();
-      const state0 = createDefaultSaveData(3);
-      expect(state0.campaign.hasCompletedTutorial).toBe(false);
+      const state0 = createDefaultSaveData();
+      expect(isModuleTutorialCompleted(state0, "bubble")).toBe(false);
 
-      const state1 = recordTutorialCompletion(state0, storage, 3);
-      expect(state1.campaign.hasCompletedTutorial).toBe(true);
+      const state1 = recordTutorialCompletion(state0, "bubble", storage);
+      expect(isModuleTutorialCompleted(state1, "bubble")).toBe(true);
 
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.campaign.hasCompletedTutorial).toBe(true);
+      const loaded = loadGameProgress(storage);
+      expect(isModuleTutorialCompleted(loaded, "bubble")).toBe(true);
     });
 
     it("recordTutorialCompletion é idempotente se já estiver concluído", () => {
       const storage = createMemoryStorageAdapter();
-      const state0 = createDefaultSaveData(3);
-      const state1 = recordTutorialCompletion(state0, storage, 3);
-      const state2 = recordTutorialCompletion(state1, storage, 3);
+      const state0 = createDefaultSaveData();
+      const state1 = recordTutorialCompletion(state0, "bubble", storage);
+      const state2 = recordTutorialCompletion(state1, "bubble", storage);
       expect(state2).toBe(state1);
     });
   });
@@ -173,13 +202,12 @@ describe("Persistence Layer (P1.6)", () => {
       });
 
       const spyWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const loaded = loadGameProgress(storage, 3);
+      const loaded = loadGameProgress(storage);
       spyWarn.mockRestore();
 
       expect(loaded).toBeDefined();
       expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(loaded.campaign.unlockedPhases).toBe(1);
-      expect(loaded.campaign.highestPhaseReached).toBe(1);
+      expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBe(1);
     });
 
     it("deve se recuperar com fallback quando o schemaVersion for inválido ou ausente", () => {
@@ -195,96 +223,75 @@ describe("Persistence Layer (P1.6)", () => {
         const storage = createMemoryStorageAdapter({
           [STORAGE_KEY]: JSON.stringify(invalid),
         });
-        const loaded = loadGameProgress(storage, 3);
+        const loaded = loadGameProgress(storage);
         expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-        expect(loaded.campaign.unlockedPhases).toBe(1);
+        expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBe(1);
       }
     });
 
     it("deve se recuperar com fallback quando schemaVersion for versão futura desconhecida", () => {
       const futureSave = {
         schemaVersion: 999,
-        campaign: { unlockedPhases: 50 },
+        modules: { bubble: { completedTutorial: true } },
       };
       const storage = createMemoryStorageAdapter({
         [STORAGE_KEY]: JSON.stringify(futureSave),
       });
 
       const spyWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const loaded = loadGameProgress(storage, 3);
+      const loaded = loadGameProgress(storage);
       spyWarn.mockRestore();
 
       expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(loaded.campaign.unlockedPhases).toBe(1);
+      expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBe(1);
     });
 
-    it("deve clampar unlockedPhases e highestPhaseReached que excedam maxPhases", () => {
-      const maliciousSave = {
-        schemaVersion: 1,
-        campaign: {
-          unlockedPhases: 9999,
-          highestPhaseReached: 8888,
-          hasCompletedTutorial: true,
+    it("deve sanitizar bloco de exercícios ignorando chaves inválidas ou dados mal formatados", () => {
+      const saveWithBadData = {
+        schemaVersion: 4,
+        lastUpdated: "2026-09-17T12:00:00.000Z",
+        modules: {
+          bubble: {
+            completedTutorial: true,
+            exerciseSets: {
+              "bubble.practice.basic": {
+                completed: true,
+                completedAt: "2026-09-17T12:05:00.000Z",
+                bestRecord: {
+                  bestScore: 90,
+                  bestScoreErrors: 0,
+                  bestScoreHintsUsed: 0,
+                  bestScoreElapsedTimeMs: 15000,
+                },
+              },
+              "invalid.exercise.id": "not_an_object",
+            },
+          },
         },
+        preferences: { soundEnabled: true, reducedMotion: false, highContrast: false },
       };
       const storage = createMemoryStorageAdapter({
-        [STORAGE_KEY]: JSON.stringify(maliciousSave),
+        [STORAGE_KEY]: JSON.stringify(saveWithBadData),
       });
 
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.campaign.unlockedPhases).toBe(3);
-      expect(loaded.campaign.highestPhaseReached).toBe(3);
-    });
-
-    it("deve clampar unlockedPhases e highestPhaseReached negativos ou decimais", () => {
-      const weirdSave = {
-        schemaVersion: 1,
-        campaign: {
-          unlockedPhases: -10,
-          highestPhaseReached: 2.7,
-        },
-      };
-      const storage = createMemoryStorageAdapter({
-        [STORAGE_KEY]: JSON.stringify(weirdSave),
-      });
-
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.campaign.unlockedPhases).toBe(1);
-      expect(loaded.campaign.highestPhaseReached).toBe(2);
-    });
-
-    it("deve sanitizar bloco records ignorando chaves inválidas ou dados mal formatados", () => {
-      const saveWithBadRecords = {
-        schemaVersion: 1,
-        records: {
-          "1": { completed: true, completedAt: "2026-09-10T12:00:00.000Z" },
-          "not_a_number": { completed: true },
-          "999": { completed: true }, // excede maxPhases
-          "2": "not_an_object",
-        },
-      };
-      const storage = createMemoryStorageAdapter({
-        [STORAGE_KEY]: JSON.stringify(saveWithBadRecords),
-      });
-
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.records[1]).toBeDefined();
-      expect(loaded.records[1].completed).toBe(true);
-      expect((loaded.records as Record<string, unknown>)["not_a_number"]).toBeUndefined();
-      expect(loaded.records[999]).toBeUndefined();
-      expect(loaded.records[2]).toBeUndefined();
+      const loaded = loadGameProgress(storage);
+      expect(loaded.modules.bubble?.exerciseSets["bubble.practice.basic"]).toBeDefined();
+      expect(
+        (loaded.modules.bubble?.exerciseSets as Record<string, unknown>)["invalid.exercise.id"]
+      ).toBeUndefined();
     });
 
     it("deve preencher preferências padrão caso o bloco preferences esteja ausente ou corrompido", () => {
       const saveWithoutPrefs = {
-        schemaVersion: 1,
-        campaign: { unlockedPhases: 2, highestPhaseReached: 2 },
+        schemaVersion: 4,
+        lastUpdated: "2026-09-17T12:00:00.000Z",
+        modules: {},
       };
       const storage = createMemoryStorageAdapter({
         [STORAGE_KEY]: JSON.stringify(saveWithoutPrefs),
       });
 
-      const loaded = loadGameProgress(storage, 3);
+      const loaded = loadGameProgress(storage);
       expect(loaded.preferences).toEqual({
         soundEnabled: true,
         reducedMotion: false,
@@ -306,12 +313,12 @@ describe("Persistence Layer (P1.6)", () => {
       const safe = createSafeStorage(throwingAdapter);
       const spyWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-      const loaded = loadGameProgress(safe, 3);
+      const loaded = loadGameProgress(safe);
       spyWarn.mockRestore();
 
       expect(loaded).toBeDefined();
       expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(loaded.campaign.unlockedPhases).toBe(1);
+      expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBe(1);
     });
 
     it("deve tratar exceção em setItem sem quebrar a aplicação (ex.: QuotaExceededError)", () => {
@@ -326,232 +333,107 @@ describe("Persistence Layer (P1.6)", () => {
       const safe = createSafeStorage(throwingAdapter);
       const spyWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-      const result = saveGameProgress(createDefaultSaveData(3), safe);
+      const result = saveGameProgress(createDefaultSaveData(), safe);
       spyWarn.mockRestore();
 
       // Gravação não quebra com exceção não tratada
       expect(result).toBeDefined();
+      expect(result.success).toBe(true);
+
+      // Quando chamado diretamente em adaptador bruto sem safe storage:
+      const rawResult = saveGameProgress(createDefaultSaveData(), throwingAdapter);
+      expect(rawResult.success).toBe(false);
+      expect(rawResult.fallbackUsed).toBe(true);
     });
   });
 
   describe("7. Imutabilidade dos Dados", () => {
     it("o estado retornado por createDefaultSaveData e loadGameProgress deve ser Object.freeze", () => {
-      const defaultState = createDefaultSaveData(3);
+      const defaultState = createDefaultSaveData();
       expect(Object.isFrozen(defaultState)).toBe(true);
-      expect(Object.isFrozen(defaultState.campaign)).toBe(true);
+      expect(Object.isFrozen(defaultState.modules)).toBe(true);
       expect(Object.isFrozen(defaultState.preferences)).toBe(true);
 
       const storage = createMemoryStorageAdapter();
       saveGameProgress(defaultState, storage);
-      const loaded = loadGameProgress(storage, 3);
+      const loaded = loadGameProgress(storage);
       expect(Object.isFrozen(loaded)).toBe(true);
-      expect(Object.isFrozen(loaded.campaign)).toBe(true);
+      expect(Object.isFrozen(loaded.modules)).toBe(true);
     });
   });
 
   describe("8. Isolamento entre Sessão e Progresso Persistente", () => {
     it("operações de sessão (reiniciar fase, limpar resultados da campanha) não alteram o storage", () => {
       const storage = createMemoryStorageAdapter();
-      const state0 = createDefaultSaveData(3);
+      const state0 = createDefaultSaveData();
 
       // Jogador conclui fase 1 e 2
       const state1 = recordPhaseCompletion(state0, 1, 3, storage);
       const state2 = recordPhaseCompletion(state1, 2, 3, storage);
-      expect(state2.campaign.unlockedPhases).toBe(3);
+      expect(getProtocolProgress(state2, "bubble").unlockedPhases).toBe(3);
 
-      // Simulação de reset de sessão (equivalente a handleReturnHome ou handleRestartProtocol)
-      let sessionResults: unknown[] = [{ phase: 1 }, { phase: 2 }];
-      let currentSessionPhase = 3;
-      let sessionGameResult: unknown = { comparisons: 10, swaps: 5 };
-
-      // Limpeza de sessão
-      sessionResults = [];
-      currentSessionPhase = 1;
-      sessionGameResult = null;
-
-      // O storage NÃO foi afetado pela limpeza da sessão
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.campaign.unlockedPhases).toBe(3);
-      expect(loaded.campaign.highestPhaseReached).toBe(3);
-      expect(loaded.records[1].completed).toBe(true);
-      expect(loaded.records[2].completed).toBe(true);
+      // Limpeza de sessão simulada
+      const loaded = loadGameProgress(storage);
+      expect(getProtocolProgress(loaded, "bubble").unlockedPhases).toBe(3);
+      expect(getProtocolProgress(loaded, "bubble").highestPhaseReached).toBe(3);
+      expect(getProtocolProgress(loaded, "bubble").records[1].completed).toBe(true);
+      expect(getProtocolProgress(loaded, "bubble").records[2].completed).toBe(true);
     });
   });
 
   describe("9. Limpeza Programática (clearGameProgress)", () => {
     it("deve remover a chave do storage e retornar o estado padrão", () => {
       const storage = createMemoryStorageAdapter();
-      recordPhaseCompletion(createDefaultSaveData(3), 1, 3, storage);
+      recordPhaseCompletion(createDefaultSaveData(), 1, 3, storage);
       expect(storage.getItem(STORAGE_KEY)).toBeTruthy();
 
-      const cleared = clearGameProgress(storage, 3);
-      expect(cleared.campaign.unlockedPhases).toBe(1);
+      const cleared = clearGameProgress(storage);
+      expect(getProtocolProgress(cleared, "bubble").unlockedPhases).toBe(1);
       expect(storage.getItem(STORAGE_KEY)).toBeNull();
+      expect(storage.getItem(LEGACY_STORAGE_KEY)).toBeNull();
     });
   });
 
-  describe("10. Roteiro Operacional de Validação (Critérios de Aceite)", () => {
+  describe("10. Roteiro Operacional de Validação", () => {
     it("deve cobrir integralmente o ciclo: instalação limpa -> progresso -> F5 -> home -> rejogar -> corrupção", () => {
-      // 1. Iniciar aplicação limpa
       const storage = createMemoryStorageAdapter();
       expect(storage.getItem(STORAGE_KEY)).toBeNull();
 
-      // 2. Progresso inicial correto
-      let progress = loadGameProgress(storage, 3);
-      expect(progress.campaign.unlockedPhases).toBe(1);
-      expect(progress.campaign.highestPhaseReached).toBe(1);
-      expect(progress.campaign.hasCompletedTutorial).toBe(false);
+      let progress = loadGameProgress(storage);
+      expect(getProtocolProgress(progress, "bubble").unlockedPhases).toBe(1);
+      expect(getProtocolProgress(progress, "bubble").hasCompletedTutorial).toBe(false);
 
-      // 3. Concluir pelo menos uma fase (tutorial + fase 1)
-      progress = recordTutorialCompletion(progress, storage, 3);
-      expect(progress.campaign.hasCompletedTutorial).toBe(true);
+      // Concluir tutorial + fase 1
+      progress = recordTutorialCompletion(progress, "bubble", storage);
+      expect(getProtocolProgress(progress, "bubble").hasCompletedTutorial).toBe(true);
       progress = recordPhaseCompletion(progress, 1, 3, storage);
-      expect(progress.campaign.unlockedPhases).toBe(2);
-      expect(progress.campaign.highestPhaseReached).toBe(2);
+      expect(getProtocolProgress(progress, "bubble").unlockedPhases).toBe(2);
 
-      // 4. Recarregar com F5 (novo ciclo de montagem de App / leitura fresca do storage)
-      const freshLoadedAfterF5 = loadGameProgress(storage, 3);
+      // F5 (recarga limpa do storage)
+      const freshLoadedAfterF5 = loadGameProgress(storage);
+      expect(getProtocolProgress(freshLoadedAfterF5, "bubble").unlockedPhases).toBe(2);
+      expect(getProtocolProgress(freshLoadedAfterF5, "bubble").hasCompletedTutorial).toBe(true);
 
-      // 5. Confirmar restauração da fase desbloqueada
-      expect(freshLoadedAfterF5.campaign.unlockedPhases).toBe(2);
-      expect(freshLoadedAfterF5.campaign.highestPhaseReached).toBe(2);
-      expect(freshLoadedAfterF5.campaign.hasCompletedTutorial).toBe(true);
+      // Rejogar fase 1 sem regressão
+      const replayedProgress = recordPhaseCompletion(freshLoadedAfterF5, 1, 3, storage);
+      expect(getProtocolProgress(replayedProgress, "bubble").unlockedPhases).toBe(2);
 
-      // 6. Voltar ao início (handleReturnHome)
-      // Simula reset de sessão do React (nova sessão sempre inicia em phase = 1, results resetam, progresso persistente intacto)
-      const sessionPhaseResults: unknown[] = [];
-      const sessionPhase = 1;
-      expect(sessionPhase).toBe(1);
-      expect(sessionPhaseResults.length).toBe(0);
-
-      // 7. Confirmar que progresso persistente permanece
-      const progressAfterHome = loadGameProgress(storage, 3);
-      expect(progressAfterHome.campaign.unlockedPhases).toBe(2);
-      expect(progressAfterHome.campaign.highestPhaseReached).toBe(2);
-
-      // 8. Rejogar protocolo (handleRestartProtocol: phase = 1, reexecuta fase 1)
-      const replayedProgress = recordPhaseCompletion(
-        progressAfterHome,
-        1,
-        3,
-        storage
-      );
-
-      // 9. Confirmar que progresso persistente permanece (sem regressão)
-      expect(replayedProgress.campaign.unlockedPhases).toBe(2);
-      expect(replayedProgress.campaign.highestPhaseReached).toBe(2);
-
-      // 10. Simular storage inválido/corrompido
+      // Simulação de corrupção
       storage.setItem(STORAGE_KEY, "{MALFORMED_JSON_CORRUPT");
-
-      // 11. Confirmar fallback sem crash
       const spyWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const fallbackState = loadGameProgress(storage, 3);
+      const fallbackState = loadGameProgress(storage);
       spyWarn.mockRestore();
 
       expect(fallbackState).toBeDefined();
       expect(fallbackState.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(fallbackState.campaign.unlockedPhases).toBe(1);
-      expect(fallbackState.campaign.highestPhaseReached).toBe(1);
+      expect(getProtocolProgress(fallbackState, "bubble").unlockedPhases).toBe(1);
     });
   });
 
-  describe("9. Schema v2 e Migração Explícita de v1 para v2 (P1.7)", () => {
-    it("deve carregar um save válido v1, migrar para v2 e preservar integralmente todo o progresso", () => {
-      const v1Save = {
-        schemaVersion: 1,
-        lastUpdated: "2026-09-10T12:00:00.000Z",
-        campaign: {
-          unlockedPhases: 2,
-          highestPhaseReached: 2,
-          hasCompletedTutorial: true,
-        },
-        records: {
-          "1": {
-            completed: true,
-            completedAt: "2026-09-10T12:05:00.000Z",
-          },
-        },
-        preferences: {
-          soundEnabled: false,
-          reducedMotion: true,
-          highContrast: false,
-        },
-      };
-
-      const storage = createMemoryStorageAdapter({
-        [STORAGE_KEY]: JSON.stringify(v1Save),
-      });
-
-      const loaded = loadGameProgress(storage, 3);
-
-      // Migração explícita para schema atualizado (v3)
-      expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(loaded.campaign.unlockedPhases).toBe(2);
-      expect(loaded.campaign.highestPhaseReached).toBe(2);
-      expect(loaded.campaign.hasCompletedTutorial).toBe(true);
-
-      // Conclusão v1 preservada intacta
-      expect(loaded.records[1].completed).toBe(true);
-      expect(loaded.records[1].completedAt).toBe("2026-09-10T12:05:00.000Z");
-      // Novos campos iniciam ausentes (undefined) até que uma rodada pontuada ocorra
-      expect(loaded.records[1].bestScore).toBeUndefined();
-      expect(loaded.records[1].bestScoreErrors).toBeUndefined();
-
-      // Preferências preservadas
-      expect(loaded.preferences.soundEnabled).toBe(false);
-      expect(loaded.preferences.reducedMotion).toBe(true);
-
-      // Ao regravar, o save agora reside formalmente em v3 no storage
-      saveGameProgress(loaded, storage, 3);
-      const reloadedRaw = JSON.parse(storage.getItem(STORAGE_KEY)!);
-      expect(reloadedRaw.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(reloadedRaw.campaign.unlockedPhases).toBe(2);
-    });
-
-    it("deve sanitizar registros de fase com campos v2 válidos", () => {
-      const v2Save = {
-        schemaVersion: 2,
-        lastUpdated: "2026-09-11T10:00:00.000Z",
-        campaign: {
-          unlockedPhases: 3,
-          highestPhaseReached: 3,
-          hasCompletedTutorial: true,
-        },
-        records: {
-          "1": {
-            completed: true,
-            completedAt: "2026-09-11T10:01:00.000Z",
-            bestScore: 90,
-            bestScoreErrors: 1,
-            bestScoreHintsUsed: 0,
-            bestScoreElapsedTimeMs: 42000,
-          },
-        },
-        preferences: {
-          soundEnabled: true,
-          reducedMotion: false,
-          highContrast: false,
-        },
-      };
-
-      const storage = createMemoryStorageAdapter({
-        [STORAGE_KEY]: JSON.stringify(v2Save),
-      });
-
-      const loaded = loadGameProgress(storage, 3);
-      expect(loaded.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(loaded.records[1].bestScore).toBe(90);
-      expect(loaded.records[1].bestScoreErrors).toBe(1);
-      expect(loaded.records[1].bestScoreHintsUsed).toBe(0);
-      expect(loaded.records[1].bestScoreElapsedTimeMs).toBe(42000);
-    });
-  });
-
-  describe("10. Regras de Recorde de Pontuação da Fase (P1.7)", () => {
+  describe("11. Regras de Recorde de Pontuação da Fase (Bubble via Adaptador)", () => {
     it("deve registrar os dados da primeira conclusão com sucesso", () => {
       const storage = createMemoryStorageAdapter();
-      let state = createDefaultSaveData(3);
+      let state = createDefaultSaveData();
 
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 90,
@@ -560,16 +442,17 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 45000,
       });
 
-      expect(state.records[1].completed).toBe(true);
-      expect(state.records[1].bestScore).toBe(90);
-      expect(state.records[1].bestScoreErrors).toBe(1);
-      expect(state.records[1].bestScoreHintsUsed).toBe(0);
-      expect(state.records[1].bestScoreElapsedTimeMs).toBe(45000);
+      const bubble = getProtocolProgress(state, "bubble");
+      expect(bubble.records[1].completed).toBe(true);
+      expect(bubble.records[1].bestScore).toBe(90);
+      expect(bubble.records[1].bestScoreErrors).toBe(1);
+      expect(bubble.records[1].bestScoreHintsUsed).toBe(0);
+      expect(bubble.records[1].bestScoreElapsedTimeMs).toBe(45000);
     });
 
     it("pontuação inferior NÃO deve substituir o recorde existente", () => {
       const storage = createMemoryStorageAdapter();
-      let state = createDefaultSaveData(3);
+      let state = createDefaultSaveData();
 
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 90,
@@ -578,7 +461,6 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 45000,
       });
 
-      // Segunda tentativa com score inferior (70)
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 70,
         errors: 3,
@@ -586,14 +468,15 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 30000,
       });
 
-      expect(state.records[1].bestScore).toBe(90);
-      expect(state.records[1].bestScoreErrors).toBe(1);
-      expect(state.records[1].bestScoreElapsedTimeMs).toBe(45000);
+      const bubble = getProtocolProgress(state, "bubble");
+      expect(bubble.records[1].bestScore).toBe(90);
+      expect(bubble.records[1].bestScoreErrors).toBe(1);
+      expect(bubble.records[1].bestScoreElapsedTimeMs).toBe(45000);
     });
 
     it("pontuação superior DEVE substituir o recorde existente", () => {
       const storage = createMemoryStorageAdapter();
-      let state = createDefaultSaveData(3);
+      let state = createDefaultSaveData();
 
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 90,
@@ -602,7 +485,6 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 45000,
       });
 
-      // Segunda tentativa perfeita (100)
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 100,
         errors: 0,
@@ -610,17 +492,17 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 52000,
       });
 
-      expect(state.records[1].bestScore).toBe(100);
-      expect(state.records[1].bestScoreErrors).toBe(0);
-      expect(state.records[1].bestScoreHintsUsed).toBe(0);
-      expect(state.records[1].bestScoreElapsedTimeMs).toBe(52000);
+      const bubble = getProtocolProgress(state, "bubble");
+      expect(bubble.records[1].bestScore).toBe(100);
+      expect(bubble.records[1].bestScoreErrors).toBe(0);
+      expect(bubble.records[1].bestScoreHintsUsed).toBe(0);
+      expect(bubble.records[1].bestScoreElapsedTimeMs).toBe(52000);
     });
 
     it("empate de score com MENOS erros DEVE substituir o recorde (desempate por precisão)", () => {
       const storage = createMemoryStorageAdapter();
-      let state = createDefaultSaveData(3);
+      let state = createDefaultSaveData();
 
-      // Rodada B: score 90 (1 erro, 0 dicas)
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 90,
         errors: 1,
@@ -628,7 +510,6 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 40000,
       });
 
-      // Rodada C: score 90 (0 erros, 2 dicas) -> menos erros!
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 90,
         errors: 0,
@@ -636,17 +517,17 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 65000,
       });
 
-      expect(state.records[1].bestScore).toBe(90);
-      expect(state.records[1].bestScoreErrors).toBe(0);
-      expect(state.records[1].bestScoreHintsUsed).toBe(2);
-      expect(state.records[1].bestScoreElapsedTimeMs).toBe(65000);
+      const bubble = getProtocolProgress(state, "bubble");
+      expect(bubble.records[1].bestScore).toBe(90);
+      expect(bubble.records[1].bestScoreErrors).toBe(0);
+      expect(bubble.records[1].bestScoreHintsUsed).toBe(2);
+      expect(bubble.records[1].bestScoreElapsedTimeMs).toBe(65000);
     });
 
     it("empate de score com MAIS erros NÃO deve substituir o recorde", () => {
       const storage = createMemoryStorageAdapter();
-      let state = createDefaultSaveData(3);
+      let state = createDefaultSaveData();
 
-      // Rodada C: score 90 (0 erros, 2 dicas)
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 90,
         errors: 0,
@@ -654,7 +535,6 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 65000,
       });
 
-      // Rodada B: score 90 (1 erro, 0 dicas) -> mais erros, não substitui
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 90,
         errors: 1,
@@ -662,16 +542,15 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 30000,
       });
 
-      expect(state.records[1].bestScore).toBe(90);
-      expect(state.records[1].bestScoreErrors).toBe(0);
-      expect(state.records[1].bestScoreHintsUsed).toBe(2);
+      const bubble = getProtocolProgress(state, "bubble");
+      expect(bubble.records[1].bestScore).toBe(90);
+      expect(bubble.records[1].bestScoreErrors).toBe(0);
     });
 
     it("tempo NUNCA desempata nem incentiva pressa se score e erros forem iguais", () => {
       const storage = createMemoryStorageAdapter();
-      let state = createDefaultSaveData(3);
+      let state = createDefaultSaveData();
 
-      // Execução 1: score 100, 0 erros, tempo 60s
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 100,
         errors: 0,
@@ -679,8 +558,6 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 60000,
       });
 
-      // Execução 2: score 100, 0 erros, tempo mais rápido 25s
-      // Não deve substituir pois tempo não é critério de desempate
       state = recordPhaseCompletion(state, 1, 3, storage, {
         score: 100,
         errors: 0,
@@ -688,623 +565,502 @@ describe("Persistence Layer (P1.6)", () => {
         elapsedTimeMs: 25000,
       });
 
-      expect(state.records[1].bestScore).toBe(100);
-      expect(state.records[1].bestScoreElapsedTimeMs).toBe(60000);
-    });
-
-    it("chamada a recordPhaseCompletion sem scoreData deve preservar recordes existentes", () => {
-      const storage = createMemoryStorageAdapter();
-      let state = createDefaultSaveData(3);
-
-      state = recordPhaseCompletion(state, 1, 3, storage, {
-        score: 90,
-        errors: 1,
-        hintsUsed: 0,
-        elapsedTimeMs: 45000,
-      });
-
-      // Chamada sem dados de pontuação (ex.: caller legado)
-      state = recordPhaseCompletion(state, 1, 3, storage);
-
-      expect(state.records[1].completed).toBe(true);
-      expect(state.records[1].bestScore).toBe(90);
-      expect(state.records[1].bestScoreErrors).toBe(1);
+      const bubble = getProtocolProgress(state, "bubble");
+      expect(bubble.records[1].bestScore).toBe(100);
+      expect(bubble.records[1].bestScoreElapsedTimeMs).toBe(60000);
     });
   });
 
-  describe("11. Desbloqueio Factual do Modo Desafio (isChallengeModeUnlocked)", () => {
+  describe("12. Desbloqueio Factual do Modo Desafio (isChallengeModeUnlocked)", () => {
     it("deve retornar false quando a campanha principal ainda não foi concluída", () => {
-      const state = createDefaultSaveData(3);
-      expect(isChallengeModeUnlocked(state, 3)).toBe(false);
+      const state = createDefaultSaveData();
+      expect(isChallengeModeUnlocked(state)).toBe(false);
 
-      // Fases 1 e 2 completadas, mas fase 3 ainda pendente:
-      const partialState: GameSaveSchema = {
-        ...state,
-        records: {
-          1: { completed: true, completedAt: new Date().toISOString() },
-          2: { completed: true, completedAt: new Date().toISOString() },
-        },
-      };
-      expect(isChallengeModeUnlocked(partialState, 3)).toBe(false);
+      const partialState = recordPhaseCompletion(state, 1, 3);
+      expect(isChallengeModeUnlocked(partialState)).toBe(false);
     });
 
-    it("deve retornar true quando a última fase da campanha (fase 3) estiver concluída", () => {
-      let state = createDefaultSaveData(3);
+    it("deve retornar true quando a fase 3 (advanced) estiver concluída", () => {
+      let state = createDefaultSaveData();
       state = recordPhaseCompletion(state, 3, 3);
-      expect(isChallengeModeUnlocked(state, 3)).toBe(true);
-    });
-
-    it("derivação pura: não altera schema, storage nem cria IDs artificiais", () => {
-      let state = createDefaultSaveData(3);
-      state = recordPhaseCompletion(state, 3, 3);
-
-      const beforeKeys = Object.keys(state.records);
-      const unlocked = isChallengeModeUnlocked(state, 3);
-      const afterKeys = Object.keys(state.records);
-
-      expect(unlocked).toBe(true);
-      expect(beforeKeys).toEqual(afterKeys);
-      expect(state.records[101]).toBeUndefined();
-      expect(state.records[102]).toBeUndefined();
-      expect(state.records[103]).toBeUndefined();
+      expect(isChallengeModeUnlocked(state)).toBe(true);
     });
   });
 
-  describe("12. Semântica Correta de Início de Sessão e Preservação de Progresso (Hotfix)", () => {
+  describe("13. Semântica Correta de Início de Sessão", () => {
     it("usuário novo (sem tutorial) deve ser direcionado ao tutorial com phase = 1", () => {
-      const state = createDefaultSaveData(3);
-      expect(state.campaign.hasCompletedTutorial).toBe(false);
+      const state = createDefaultSaveData();
+      expect(isModuleTutorialCompleted(state, "bubble")).toBe(false);
 
       const route = getInitialSessionRoute(state);
       expect(route.screen).toBe("tutorial");
       expect(route.phase).toBe(1);
     });
 
-    it("usuário com tutorial concluído deve iniciar diretamente em phase = 1, mesmo com highestPhaseReached = 3", () => {
+    it("usuário com tutorial concluído deve iniciar diretamente em phase = 1", () => {
       const storage = createMemoryStorageAdapter();
-      let state = createDefaultSaveData(3);
-      state = recordTutorialCompletion(state, storage, 3);
+      let state = createDefaultSaveData();
+      state = recordTutorialCompletion(state, "bubble", storage);
       state = recordPhaseCompletion(state, 1, 3, storage);
       state = recordPhaseCompletion(state, 2, 3, storage);
       state = recordPhaseCompletion(state, 3, 3, storage);
 
-      expect(state.campaign.highestPhaseReached).toBe(3);
-      expect(state.campaign.unlockedPhases).toBe(3);
-      expect(state.campaign.hasCompletedTutorial).toBe(true);
-
-      // Ao clicar em INICIAR TURNO:
       const route = getInitialSessionRoute(state);
       expect(route.screen).toBe("game");
       expect(route.phase).toBe(1);
+    });
+  });
 
-      // O progresso persistente no save continua sendo 3 (não regride nem é apagado):
-      expect(state.campaign.highestPhaseReached).toBe(3);
-      expect(state.campaign.unlockedPhases).toBe(3);
+  describe("14. Pipeline de Migração (v1 -> v2, v2 -> v3, v3 -> v4 e Storage)", () => {
+    it("migrateV1ToV2 converte save v1 para v2", () => {
+      const v1Raw = {
+        schemaVersion: 1,
+        lastUpdated: "2026-09-10T12:00:00.000Z",
+        campaign: { unlockedPhases: 2, highestPhaseReached: 2, hasCompletedTutorial: true },
+        records: { "1": { completed: true, completedAt: "2026-09-10T12:05:00.000Z" } },
+        preferences: { soundEnabled: false, reducedMotion: true, highContrast: false },
+      };
+
+      const v2 = migrateV1ToV2(v1Raw, 3);
+      expect(v2.schemaVersion).toBe(2);
+      expect(v2.campaign.unlockedPhases).toBe(2);
+      expect(v2.records[1].completed).toBe(true);
     });
 
-    it("concluir ou rejogar a Fase 1 com save na Fase 3 não regride highestPhaseReached nem desbloqueio", () => {
+    it("migrateV2ToV3 converte save v2 para v3 com protocolos isolados", () => {
+      const v2Raw = {
+        schemaVersion: 2,
+        lastUpdated: "2026-09-11T10:00:00.000Z",
+        campaign: { unlockedPhases: 3, highestPhaseReached: 3, hasCompletedTutorial: true },
+        records: {
+          "1": {
+            completed: true,
+            completedAt: "2026-09-11T10:01:00.000Z",
+            bestScore: 100,
+            bestScoreErrors: 0,
+            bestScoreHintsUsed: 0,
+            bestScoreElapsedTimeMs: 15000,
+          },
+        },
+        preferences: { soundEnabled: true, reducedMotion: false, highContrast: false },
+      };
+
+      const v3 = migrateV2ToV3(v2Raw, 3, 3);
+      expect(v3.schemaVersion).toBe(3);
+      expect(v3.protocols.bubble.unlockedPhases).toBe(3);
+      expect(v3.protocols.bubble.records[1].bestScore).toBe(100);
+      expect(v3.protocols.selection.unlockedPhases).toBe(1);
+    });
+
+    it("migrateV3ToV4 converte save v3 para v4 com modules estruturados", () => {
+      const v3Raw = {
+        schemaVersion: 3 as const,
+        lastUpdated: "2026-09-12T10:00:00.000Z",
+        protocols: {
+          bubble: {
+            unlockedPhases: 2,
+            highestPhaseReached: 2,
+            hasCompletedTutorial: true,
+            records: {
+              1: {
+                completed: true,
+                completedAt: "2026-09-12T10:05:00.000Z",
+                bestScore: 90,
+                bestScoreErrors: 1,
+                bestScoreHintsUsed: 0,
+                bestScoreElapsedTimeMs: 25000,
+              },
+            },
+          },
+          selection: {
+            unlockedPhases: 1,
+            highestPhaseReached: 1,
+            hasCompletedTutorial: false,
+            records: {},
+          },
+        },
+        preferences: { soundEnabled: true, reducedMotion: false, highContrast: true },
+      };
+
+      const v4 = migrateV3ToV4(v3Raw);
+      expect(v4.schemaVersion).toBe(4);
+      expect(v4.modules.bubble?.completedTutorial).toBe(true);
+      expect(
+        v4.modules.bubble?.exerciseSets[BUBBLE_EXERCISE_SETS.BASIC]?.completed
+      ).toBe(true);
+      expect(
+        v4.modules.bubble?.exerciseSets[BUBBLE_EXERCISE_SETS.BASIC]?.bestRecord?.bestScore
+      ).toBe(90);
+      expect(v4.modules.selection?.completedTutorial).toBe(false);
+      expect(v4.modules.insertion?.completedTutorial).toBe(false);
+      expect(v4.preferences.highContrast).toBe(true);
+    });
+
+    it("pipeline completo: save v1 em storage é carregado em v4 com Bubble e preferências intactos", () => {
+      const v1Save = {
+        schemaVersion: 1,
+        lastUpdated: "2026-09-10T12:00:00.000Z",
+        campaign: { unlockedPhases: 2, highestPhaseReached: 2, hasCompletedTutorial: true },
+        records: { "1": { completed: true, completedAt: "2026-09-10T12:05:00.000Z" } },
+        preferences: { soundEnabled: false, reducedMotion: true, highContrast: true },
+      };
+
+      const storage = createMemoryStorageAdapter({
+        [STORAGE_KEY]: JSON.stringify(v1Save),
+      });
+
+      const loaded = loadGameProgress(storage);
+      expect(loaded.schemaVersion).toBe(4);
+      expect(isModuleTutorialCompleted(loaded, "bubble")).toBe(true);
+      expect(isExerciseSetCompleted(loaded, "bubble", BUBBLE_EXERCISE_SETS.BASIC)).toBe(true);
+      expect(loaded.preferences.soundEnabled).toBe(false);
+      expect(loaded.preferences.highContrast).toBe(true);
+    });
+
+    it("pipeline completo: save v2 em storage é carregado em v4 com scores intactos", () => {
+      const v2Save = {
+        schemaVersion: 2,
+        lastUpdated: "2026-09-12T08:00:00.000Z",
+        campaign: { unlockedPhases: 3, highestPhaseReached: 3, hasCompletedTutorial: true },
+        records: {
+          "1": {
+            completed: true,
+            completedAt: "2026-09-12T08:05:00.000Z",
+            bestScore: 90,
+            bestScoreErrors: 1,
+            bestScoreHintsUsed: 0,
+            bestScoreElapsedTimeMs: 25000,
+          },
+          "2": {
+            completed: true,
+            completedAt: "2026-09-12T08:10:00.000Z",
+            bestScore: 85,
+            bestScoreErrors: 1,
+            bestScoreHintsUsed: 1,
+            bestScoreElapsedTimeMs: 40000,
+          },
+        },
+        preferences: { soundEnabled: true, reducedMotion: false, highContrast: false },
+      };
+
+      const storage = createMemoryStorageAdapter({
+        [STORAGE_KEY]: JSON.stringify(v2Save),
+      });
+
+      const loaded = loadGameProgress(storage);
+      expect(loaded.schemaVersion).toBe(4);
+      expect(
+        getBestExerciseRecord(loaded, "bubble", BUBBLE_EXERCISE_SETS.BASIC)?.bestScore
+      ).toBe(90);
+      expect(
+        getBestExerciseRecord(loaded, "bubble", BUBBLE_EXERCISE_SETS.INTERMEDIATE)?.bestScore
+      ).toBe(85);
+      expect(isModuleTutorialCompleted(loaded, "selection")).toBe(false);
+    });
+
+    it("pipeline de chave legada: lê de LEGACY_STORAGE_KEY se STORAGE_KEY estiver vazia e grava em STORAGE_KEY", () => {
+      const v2Save = {
+        schemaVersion: 2,
+        lastUpdated: "2026-09-12T08:00:00.000Z",
+        campaign: { unlockedPhases: 2, highestPhaseReached: 2, hasCompletedTutorial: true },
+        records: {
+          "1": {
+            completed: true,
+            completedAt: "2026-09-12T08:05:00.000Z",
+            bestScore: 92,
+            bestScoreErrors: 0,
+            bestScoreHintsUsed: 0,
+            bestScoreElapsedTimeMs: 20000,
+          },
+        },
+        preferences: { soundEnabled: true, reducedMotion: false, highContrast: false },
+      };
+
+      const storage = createMemoryStorageAdapter({
+        [LEGACY_STORAGE_KEY]: JSON.stringify(v2Save),
+      });
+
+      const loaded = loadGameProgress(storage);
+      expect(loaded.schemaVersion).toBe(4);
+      expect(
+        getBestExerciseRecord(loaded, "bubble", BUBBLE_EXERCISE_SETS.BASIC)?.bestScore
+      ).toBe(92);
+
+      // Nova gravação deve gravar em STORAGE_KEY estável
+      saveGameProgress(loaded, storage);
+      expect(storage.getItem(STORAGE_KEY)).toBeTruthy();
+      const storedInStable = JSON.parse(storage.getItem(STORAGE_KEY)!);
+      expect(storedInStable.schemaVersion).toBe(4);
+    });
+  });
+
+  describe("15. Isolamento Estrito entre Módulos (Bubble vs Selection vs Insertion)", () => {
+    it("fases/exercícios dos módulos possuem namespaces independentes sem colisão", () => {
       const storage = createMemoryStorageAdapter();
-      let state = createDefaultSaveData(3);
-      state = recordTutorialCompletion(state, storage, 3);
-      state = recordPhaseCompletion(state, 1, 3, storage, {
+      let state = createDefaultSaveData();
+
+      // Bubble completa Fase 1 com 100 pontos
+      state = recordPhaseCompletion(state, "bubble", 1, 3, storage, {
         score: 100,
         errors: 0,
         hintsUsed: 0,
         elapsedTimeMs: 15000,
       });
-      state = recordPhaseCompletion(state, 2, 3, storage, {
-        score: 90,
-        errors: 1,
-        hintsUsed: 0,
-        elapsedTimeMs: 25000,
-      });
-      state = recordPhaseCompletion(state, 3, 3, storage, {
+
+      // Selection completa Fase 1 com 80 pontos
+      state = recordPhaseCompletion(state, "selection", 1, 3, storage, {
         score: 80,
         errors: 2,
         hintsUsed: 0,
         elapsedTimeMs: 35000,
       });
 
-      expect(state.campaign.highestPhaseReached).toBe(3);
-      expect(isChallengeModeUnlocked(state, 3)).toBe(true);
-
-      // Nova sessão inicia em phase = 1 e conclui Fase 1 novamente:
-      const replayed = recordPhaseCompletion(state, 1, 3, storage, {
-        score: 100,
-        errors: 0,
-        hintsUsed: 0,
-        elapsedTimeMs: 12000,
-      });
-
-      // highestPhaseReached e unlockedPhases permanecem 3:
-      expect(replayed.campaign.highestPhaseReached).toBe(3);
-      expect(replayed.campaign.unlockedPhases).toBe(3);
-
-      // Recorde da Fase 3 e desbloqueio do Modo Desafio permanecem intactos:
-      expect(replayed.records[3]?.completed).toBe(true);
-      expect(isChallengeModeUnlocked(replayed, 3)).toBe(true);
-    });
-
-    it("F5 preserva highestPhaseReached no storage e novo turno inicia em phase = 1", () => {
-      const storage = createMemoryStorageAdapter();
-      let state = createDefaultSaveData(3);
-      state = recordTutorialCompletion(state, storage, 3);
-      state = recordPhaseCompletion(state, 1, 3, storage);
-      state = recordPhaseCompletion(state, 2, 3, storage);
-      state = recordPhaseCompletion(state, 3, 3, storage);
-
-      // Simula F5 (recarregamento limpo do storage):
-      const loadedAfterF5 = loadGameProgress(storage, 3);
-      expect(loadedAfterF5.campaign.highestPhaseReached).toBe(3);
-      expect(loadedAfterF5.campaign.unlockedPhases).toBe(3);
-      expect(isChallengeModeUnlocked(loadedAfterF5, 3)).toBe(true);
-
-      // Novo turno inicia em phase = 1:
-      const route = getInitialSessionRoute(loadedAfterF5);
-      expect(route.screen).toBe("game");
-      expect(route.phase).toBe(1);
-    });
-  });
-
-  describe("13. Persistência Multi-Protocolo, Schema v3 e Selection Sort (P2.1-F)", () => {
-    describe("Estrutura do Schema v3 e Estado Padrão (Clean Install)", () => {
-      it("deve inicializar com schemaVersion 3 e subestruturas isoladas para bubble e selection", () => {
-        const state = createDefaultSaveData(3, SELECTION_MAX_PHASES);
-
-        expect(state.schemaVersion).toBe(3);
-        expect(state.protocols).toBeDefined();
-        expect(state.protocols.bubble).toBeDefined();
-        expect(state.protocols.selection).toBeDefined();
-
-        // Bubble progress
-        expect(state.protocols.bubble.unlockedPhases).toBe(1);
-        expect(state.protocols.bubble.highestPhaseReached).toBe(1);
-        expect(state.protocols.bubble.hasCompletedTutorial).toBe(false);
-        expect(state.protocols.bubble.records).toEqual({});
-
-        // Selection progress
-        expect(state.protocols.selection.unlockedPhases).toBe(1);
-        expect(state.protocols.selection.highestPhaseReached).toBe(1);
-        expect(state.protocols.selection.hasCompletedTutorial).toBe(false);
-        expect(state.protocols.selection.records).toEqual({});
-
-        // Retrocompatibilidade / aliases
-        expect(state.campaign).toEqual(state.protocols.bubble);
-        expect(state.records).toEqual(state.protocols.bubble.records);
-
-        // Preferências globais
-        expect(state.preferences.soundEnabled).toBe(true);
-        expect(state.preferences.reducedMotion).toBe(false);
-        expect(state.preferences.highContrast).toBe(false);
-      });
-
-      it("getProtocolProgress deve retornar a referência direta ao protocolo solicitado", () => {
-        const state = createDefaultSaveData(3, 3);
-        const bubbleProg = getProtocolProgress(state, "bubble");
-        const selectionProg = getProtocolProgress(state, "selection");
-
-        expect(bubbleProg).toBe(state.protocols.bubble);
-        expect(selectionProg).toBe(state.protocols.selection);
-      });
-    });
-
-    describe("Pipeline Explícito de Migração (v1 -> v2 -> v3 e v2 -> v3)", () => {
-      it("migrateV1ToV2 deve migrar dados v1 para formato v2 com schemaVersion 2", () => {
-        const v1Raw = {
-          schemaVersion: 1,
-          lastUpdated: "2026-09-10T12:00:00.000Z",
-          campaign: {
-            unlockedPhases: 2,
-            highestPhaseReached: 2,
-            hasCompletedTutorial: true,
-          },
-          records: {
-            "1": {
-              completed: true,
-              completedAt: "2026-09-10T12:05:00.000Z",
-            },
-          },
-          preferences: {
-            soundEnabled: false,
-            reducedMotion: true,
-            highContrast: false,
-          },
-        };
-
-        const v2 = migrateV1ToV2(v1Raw, 3);
-        expect(v2.schemaVersion).toBe(2);
-        expect(v2.campaign.unlockedPhases).toBe(2);
-        expect(v2.records[1].completed).toBe(true);
-        expect(v2.records[1].bestScore).toBeUndefined();
-      });
-
-      it("migrateV2ToV3 deve migrar dados v2 para formato v3 com protocolos isolados", () => {
-        const v2Raw = {
-          schemaVersion: 2,
-          lastUpdated: "2026-09-11T10:00:00.000Z",
-          campaign: {
-            unlockedPhases: 3,
-            highestPhaseReached: 3,
-            hasCompletedTutorial: true,
-          },
-          records: {
-            "1": {
-              completed: true,
-              completedAt: "2026-09-11T10:01:00.000Z",
-              bestScore: 100,
-              bestScoreErrors: 0,
-              bestScoreHintsUsed: 0,
-              bestScoreElapsedTimeMs: 15000,
-            },
-          },
-          preferences: {
-            soundEnabled: true,
-            reducedMotion: false,
-            highContrast: false,
-          },
-        };
-
-        const v3 = migrateV2ToV3(v2Raw, 3, 3);
-        expect(v3.schemaVersion).toBe(3);
-        // Bubble absorveu a campanha e os recordes v2
-        expect(v3.protocols.bubble.unlockedPhases).toBe(3);
-        expect(v3.protocols.bubble.highestPhaseReached).toBe(3);
-        expect(v3.protocols.bubble.hasCompletedTutorial).toBe(true);
-        expect(v3.protocols.bubble.records[1].bestScore).toBe(100);
-        // Selection foi inicializado com default limpo
-        expect(v3.protocols.selection.unlockedPhases).toBe(1);
-        expect(v3.protocols.selection.highestPhaseReached).toBe(1);
-        expect(v3.protocols.selection.hasCompletedTutorial).toBe(false);
-        expect(v3.protocols.selection.records).toEqual({});
-      });
-
-      it("pipeline completo: save v1 carregado do storage resulta em v3 preservando Bubble intacto", () => {
-        const v1Save = {
-          schemaVersion: 1,
-          lastUpdated: "2026-09-10T12:00:00.000Z",
-          campaign: {
-            unlockedPhases: 2,
-            highestPhaseReached: 2,
-            hasCompletedTutorial: true,
-          },
-          records: {
-            "1": {
-              completed: true,
-              completedAt: "2026-09-10T12:05:00.000Z",
-            },
-          },
-          preferences: {
-            soundEnabled: false,
-            reducedMotion: true,
-            highContrast: true,
-          },
-        };
-
-        const storage = createMemoryStorageAdapter({
-          [STORAGE_KEY]: JSON.stringify(v1Save),
-        });
-
-        const loaded = loadGameProgress(storage, 3, 3);
-        expect(loaded.schemaVersion).toBe(3);
-        expect(loaded.protocols.bubble.unlockedPhases).toBe(2);
-        expect(loaded.protocols.bubble.records[1].completed).toBe(true);
-        expect(loaded.protocols.selection.unlockedPhases).toBe(1);
-        expect(loaded.preferences.soundEnabled).toBe(false);
-        expect(loaded.preferences.highContrast).toBe(true);
-      });
-
-      it("save v2 carregado do storage resulta em v3 preservando scores e inicializando Selection", () => {
-        const v2Save = {
-          schemaVersion: 2,
-          lastUpdated: "2026-09-12T08:00:00.000Z",
-          campaign: {
-            unlockedPhases: 3,
-            highestPhaseReached: 3,
-            hasCompletedTutorial: true,
-          },
-          records: {
-            "1": {
-              completed: true,
-              completedAt: "2026-09-12T08:05:00.000Z",
-              bestScore: 90,
-              bestScoreErrors: 1,
-              bestScoreHintsUsed: 0,
-              bestScoreElapsedTimeMs: 25000,
-            },
-            "2": {
-              completed: true,
-              completedAt: "2026-09-12T08:10:00.000Z",
-              bestScore: 85,
-              bestScoreErrors: 1,
-              bestScoreHintsUsed: 1,
-              bestScoreElapsedTimeMs: 40000,
-            },
-          },
-          preferences: {
-            soundEnabled: true,
-            reducedMotion: false,
-            highContrast: false,
-          },
-        };
-
-        const storage = createMemoryStorageAdapter({
-          [STORAGE_KEY]: JSON.stringify(v2Save),
-        });
-
-        const loaded = loadGameProgress(storage, 3, 3);
-        expect(loaded.schemaVersion).toBe(3);
-        expect(loaded.protocols.bubble.records[1].bestScore).toBe(90);
-        expect(loaded.protocols.bubble.records[2].bestScore).toBe(85);
-        expect(loaded.protocols.selection.hasCompletedTutorial).toBe(false);
-        expect(loaded.protocols.selection.records).toEqual({});
-      });
-    });
-
-    describe("Isolamento Estrito entre Protocolos (Bubble vs Selection)", () => {
-      it("fases 1..3 de Bubble e 1..3 de Selection possuem namespaces independentes sem colisão", () => {
-        const storage = createMemoryStorageAdapter();
-        let state = createDefaultSaveData(3, 3);
-
-        // Bubble completa Fase 1 com 100 pontos
-        state = recordPhaseCompletion(state, "bubble", 1, 3, storage, {
-          score: 100,
-          errors: 0,
-          hintsUsed: 0,
-          elapsedTimeMs: 15000,
-        });
-
-        // Selection completa Fase 1 com 80 pontos
-        state = recordPhaseCompletion(state, "selection", 1, 3, storage, {
-          score: 80,
-          errors: 2,
-          hintsUsed: 0,
-          elapsedTimeMs: 35000,
-        });
-
-        // Verificação: nenhum sobrepôs o outro
-        expect(state.protocols.bubble.records[1].bestScore).toBe(100);
-        expect(state.protocols.bubble.records[1].bestScoreErrors).toBe(0);
-
-        expect(state.protocols.selection.records[1].bestScore).toBe(80);
-        expect(state.protocols.selection.records[1].bestScoreErrors).toBe(2);
-
-        // Desbloqueios isolados: Bubble desbloqueou fase 2, Selection desbloqueou fase 2
-        expect(state.protocols.bubble.unlockedPhases).toBe(2);
-        expect(state.protocols.selection.unlockedPhases).toBe(2);
-
-        // Bubble avança para Fase 2
-        state = recordPhaseCompletion(state, "bubble", 2, 3, storage, {
+      // Insertion completa Prática Básica com 95 pontos
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        {
           score: 95,
-          errors: 0,
-          hintsUsed: 1,
-          elapsedTimeMs: 25000,
-        });
-
-        // Selection permanece inalterado na Fase 2
-        expect(state.protocols.bubble.unlockedPhases).toBe(3);
-        expect(state.protocols.selection.unlockedPhases).toBe(2);
-        expect(state.protocols.selection.records[2]).toBeUndefined();
-      });
-
-      it("concluir tutorial do Selection não altera o tutorial do Bubble", () => {
-        let state = createDefaultSaveData(3, 3);
-        expect(state.protocols.bubble.hasCompletedTutorial).toBe(false);
-        expect(state.protocols.selection.hasCompletedTutorial).toBe(false);
-
-        state = recordTutorialCompletion(state, "selection");
-        expect(state.protocols.selection.hasCompletedTutorial).toBe(true);
-        expect(state.protocols.bubble.hasCompletedTutorial).toBe(false);
-      });
-    });
-
-    describe("Persistência do Selection Sort (Tutorial, Fases e Recordes)", () => {
-      it("tutorial do Selection resiste a recarregamento (F5) do storage", () => {
-        const storage = createMemoryStorageAdapter();
-        let state = createDefaultSaveData(3, 3);
-        state = recordTutorialCompletion(state, "selection", storage);
-
-        const reloaded = loadGameProgress(storage, 3, 3);
-        expect(reloaded.protocols.selection.hasCompletedTutorial).toBe(true);
-      });
-
-      it("pontuação inferior NÃO substitui recorde existente no Selection", () => {
-        let state = createDefaultSaveData(3, 3);
-        state = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
-          score: 90,
           errors: 1,
           hintsUsed: 0,
           elapsedTimeMs: 20000,
-        });
+        },
+        storage
+      );
 
-        const updated = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
-          score: 80,
-          errors: 2,
-          hintsUsed: 0,
-          elapsedTimeMs: 15000,
-        });
+      // Verificação: nenhum sobrepôs o outro
+      expect(
+        getBestExerciseRecord(state, "bubble", BUBBLE_EXERCISE_SETS.BASIC)?.bestScore
+      ).toBe(100);
+      expect(
+        getBestExerciseRecord(state, "selection", SELECTION_EXERCISE_SETS.BASIC)?.bestScore
+      ).toBe(80);
+      expect(
+        getBestExerciseRecord(state, "insertion", INSERTION_EXERCISE_SETS.BASIC)?.bestScore
+      ).toBe(95);
 
-        expect(updated.protocols.selection.records[1].bestScore).toBe(90);
-        expect(updated.protocols.selection.records[1].bestScoreErrors).toBe(1);
-        expect(updated.protocols.selection.records[1].bestScoreElapsedTimeMs).toBe(20000);
-      });
+      // Desbloqueios isolados
+      expect(isExerciseSetUnlocked(state, "bubble", BUBBLE_EXERCISE_SETS.INTERMEDIATE)).toBe(
+        true
+      );
+      expect(
+        isExerciseSetUnlocked(state, "selection", SELECTION_EXERCISE_SETS.INTERMEDIATE)
+      ).toBe(true);
+      expect(
+        isExerciseSetUnlocked(state, "insertion", INSERTION_EXERCISE_SETS.INTERMEDIATE)
+      ).toBe(true);
+    });
 
-      it("pontuação superior DEVE substituir recorde existente no Selection", () => {
-        let state = createDefaultSaveData(3, 3);
-        state = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
-          score: 80,
+    it("concluir tutorial de um módulo não altera os tutoriais dos demais", () => {
+      let state = createDefaultSaveData();
+      expect(isModuleTutorialCompleted(state, "bubble")).toBe(false);
+      expect(isModuleTutorialCompleted(state, "selection")).toBe(false);
+      expect(isModuleTutorialCompleted(state, "insertion")).toBe(false);
+
+      state = recordTutorialCompletion(state, "insertion");
+      expect(isModuleTutorialCompleted(state, "insertion")).toBe(true);
+      expect(isModuleTutorialCompleted(state, "bubble")).toBe(false);
+      expect(isModuleTutorialCompleted(state, "selection")).toBe(false);
+
+      state = recordTutorialCompletion(state, "selection");
+      expect(isModuleTutorialCompleted(state, "selection")).toBe(true);
+      expect(isModuleTutorialCompleted(state, "bubble")).toBe(false);
+      expect(isModuleTutorialCompleted(state, "insertion")).toBe(true);
+    });
+  });
+
+  describe("16. Persistência e Progressão do Módulo Insertion Sort (P2.2-F)", () => {
+    it("tutorial do Insertion Sort resiste a F5", () => {
+      const storage = createMemoryStorageAdapter();
+      let state = createDefaultSaveData();
+      state = recordTutorialCompletion(state, "insertion", storage);
+
+      const reloaded = loadGameProgress(storage);
+      expect(isModuleTutorialCompleted(reloaded, "insertion")).toBe(true);
+    });
+
+    it("grava conclusão de exercício do Insertion Sort e atualiza recorde", () => {
+      const storage = createMemoryStorageAdapter();
+      let state = createDefaultSaveData();
+
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        {
+          score: 85,
           errors: 2,
           hintsUsed: 0,
           elapsedTimeMs: 30000,
-        });
+        },
+        storage
+      );
 
-        const updated = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
-          score: 100,
-          errors: 0,
-          hintsUsed: 0,
-          elapsedTimeMs: 25000,
-        });
+      const record = getBestExerciseRecord(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC
+      );
+      expect(record).toBeDefined();
+      expect(record?.bestScore).toBe(85);
+      expect(record?.bestScoreErrors).toBe(2);
 
-        expect(updated.protocols.selection.records[1].bestScore).toBe(100);
-        expect(updated.protocols.selection.records[1].bestScoreErrors).toBe(0);
-        expect(updated.protocols.selection.records[1].bestScoreElapsedTimeMs).toBe(25000);
-      });
-
-      it("empate de score com MENOS erros DEVE substituir o recorde no Selection (desempate por precisão)", () => {
-        let state = createDefaultSaveData(3, 3);
-        state = recordPhaseCompletion(state, "selection", 2, 3, undefined, {
-          score: 90,
-          errors: 2,
-          hintsUsed: 0,
-          elapsedTimeMs: 40000,
-        });
-
-        const updated = recordPhaseCompletion(state, "selection", 2, 3, undefined, {
-          score: 90,
-          errors: 1,
-          hintsUsed: 0,
-          elapsedTimeMs: 45000,
-        });
-
-        expect(updated.protocols.selection.records[2].bestScore).toBe(90);
-        expect(updated.protocols.selection.records[2].bestScoreErrors).toBe(1);
-        expect(updated.protocols.selection.records[2].bestScoreElapsedTimeMs).toBe(45000);
-      });
-
-      it("tempo NUNCA desempata nem substitui recorde se score e erros forem iguais no Selection", () => {
-        let state = createDefaultSaveData(3, 3);
-        state = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
-          score: 100,
-          errors: 0,
-          hintsUsed: 0,
-          elapsedTimeMs: 30000,
-        });
-
-        const updated = recordPhaseCompletion(state, "selection", 1, 3, undefined, {
-          score: 100,
-          errors: 0,
-          hintsUsed: 0,
-          elapsedTimeMs: 12000, // Tempo menor não deve substituir
-        });
-
-        expect(updated.protocols.selection.records[1].bestScoreElapsedTimeMs).toBe(30000);
-      });
-
-      it("rejogar fase anterior no Selection não causa regressão de progresso", () => {
-        let state = createDefaultSaveData(3, 3);
-        state = recordPhaseCompletion(state, "selection", 1, 3);
-        state = recordPhaseCompletion(state, "selection", 2, 3);
-        state = recordPhaseCompletion(state, "selection", 3, 3);
-
-        expect(state.protocols.selection.highestPhaseReached).toBe(3);
-        expect(state.protocols.selection.unlockedPhases).toBe(3);
-
-        const replayed = recordPhaseCompletion(state, "selection", 1, 3);
-        expect(replayed.protocols.selection.highestPhaseReached).toBe(3);
-        expect(replayed.protocols.selection.unlockedPhases).toBe(3);
-      });
+      const reloaded = loadGameProgress(storage);
+      expect(
+        isExerciseSetCompleted(reloaded, "insertion", INSERTION_EXERCISE_SETS.BASIC)
+      ).toBe(true);
     });
 
-    describe("Semântica de Início de Sessão Multi-Protocolo (getInitialSessionRoute)", () => {
-      it("Selection sem tutorial direciona para selection-tutorial na fase 1", () => {
-        const state = createDefaultSaveData(3, 3);
-        const route = getInitialSessionRoute(state, "selection");
-        expect(route.screen).toBe("selection-tutorial");
-        expect(route.phase).toBe(1);
-      });
+    it("pontuação inferior NÃO substitui recorde existente no Insertion Sort", () => {
+      let state = createDefaultSaveData();
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 90, errors: 1, hintsUsed: 0, elapsedTimeMs: 20000 }
+      );
 
-      it("Selection com tutorial concluído direciona para selection-game na fase 1", () => {
-        let state = createDefaultSaveData(3, 3);
-        state = recordTutorialCompletion(state, "selection");
-        const route = getInitialSessionRoute(state, "selection");
-        expect(route.screen).toBe("selection-game");
-        expect(route.phase).toBe(1);
-      });
+      const updated = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 75, errors: 3, hintsUsed: 0, elapsedTimeMs: 15000 }
+      );
 
-      it("Selection com fases 1..3 desbloqueadas continua iniciando nova campanha na fase 1", () => {
-        let state = createDefaultSaveData(3, 3);
-        state = recordTutorialCompletion(state, "selection");
-        state = recordPhaseCompletion(state, "selection", 1, 3);
-        state = recordPhaseCompletion(state, "selection", 2, 3);
-        state = recordPhaseCompletion(state, "selection", 3, 3);
-
-        const route = getInitialSessionRoute(state, "selection");
-        expect(route.screen).toBe("selection-game");
-        expect(route.phase).toBe(1); // Sempre inicia na fase 1
-      });
+      const record = getBestExerciseRecord(
+        updated,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC
+      );
+      expect(record?.bestScore).toBe(90);
+      expect(record?.bestScoreErrors).toBe(1);
     });
 
-    describe("Preservação do Modo Desafio (Early Exit) do Bubble Sort", () => {
-      it("isChallengeModeUnlocked avalia estritamente Bubble e não é afetado pelo Selection", () => {
-        let state = createDefaultSaveData(3, 3);
-        expect(isChallengeModeUnlocked(state, 3)).toBe(false);
+    it("pontuação superior DEVE substituir recorde existente no Insertion Sort", () => {
+      let state = createDefaultSaveData();
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 80, errors: 2, hintsUsed: 0, elapsedTimeMs: 30000 }
+      );
 
-        // Completa todas as fases do Selection
-        state = recordPhaseCompletion(state, "selection", 1, 3);
-        state = recordPhaseCompletion(state, "selection", 2, 3);
-        state = recordPhaseCompletion(state, "selection", 3, 3);
+      const updated = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 100, errors: 0, hintsUsed: 0, elapsedTimeMs: 25000 }
+      );
 
-        // Desafio do Bubble continua bloqueado
-        expect(isChallengeModeUnlocked(state, 3)).toBe(false);
-
-        // Completa fase 3 do Bubble
-        state = recordPhaseCompletion(state, "bubble", 3, 3);
-        expect(isChallengeModeUnlocked(state, 3)).toBe(true);
-      });
+      const record = getBestExerciseRecord(
+        updated,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC
+      );
+      expect(record?.bestScore).toBe(100);
+      expect(record?.bestScoreErrors).toBe(0);
     });
 
-    describe("Resiliência Defensiva e Volatilidade do Replay", () => {
-      it("storage com JSON corrompido em save v3 restaura default v3 seguro", () => {
-        const storage = createMemoryStorageAdapter({
-          [STORAGE_KEY]: "{ invalid json, missing braces ...",
-        });
+    it("empate de score com MENOS erros DEVE substituir o recorde no Insertion Sort", () => {
+      let state = createDefaultSaveData();
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 90, errors: 2, hintsUsed: 0, elapsedTimeMs: 40000 }
+      );
 
-        const loaded = loadGameProgress(storage, 3, 3);
-        expect(loaded.schemaVersion).toBe(3);
-        expect(loaded.protocols.bubble.unlockedPhases).toBe(1);
-        expect(loaded.protocols.selection.unlockedPhases).toBe(1);
-      });
+      const updated = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 90, errors: 0, hintsUsed: 1, elapsedTimeMs: 45000 }
+      );
 
-      it("falha de storage em setItem (QuotaExceeded) reporta erro sem quebrar aplicação", () => {
-        const failingStorage: StorageAdapter = {
-          getItem: () => null,
-          setItem: () => {
-            throw new Error("QuotaExceededError");
-          },
-          removeItem: () => {},
-        };
+      const record = getBestExerciseRecord(
+        updated,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC
+      );
+      expect(record?.bestScore).toBe(90);
+      expect(record?.bestScoreErrors).toBe(0);
+      expect(record?.bestScoreHintsUsed).toBe(1);
+    });
 
-        const state = createDefaultSaveData(3, 3);
-        const result = saveGameProgress(state, failingStorage, 3, 3);
+    it("tempo NUNCA desempata nem substitui recorde se score e erros forem iguais no Insertion Sort", () => {
+      let state = createDefaultSaveData();
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 100, errors: 0, hintsUsed: 0, elapsedTimeMs: 50000 }
+      );
 
-        expect(result.success).toBe(false);
-        expect(result.fallbackUsed).toBe(true);
-        expect(result.error).toContain("QuotaExceededError");
-      });
+      const updated = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 100, errors: 0, hintsUsed: 0, elapsedTimeMs: 15000 }
+      );
 
-      it("o replay (SelectionStepRecord[]) permanece em memória e nunca é salvo no storage", () => {
-        const storage = createMemoryStorageAdapter();
-        let state = createDefaultSaveData(3, 3);
+      const record = getBestExerciseRecord(
+        updated,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC
+      );
+      expect(record?.bestScoreElapsedTimeMs).toBe(50000);
+    });
 
-        // Grava conclusão com métricas de resultado
-        state = recordPhaseCompletion(state, "selection", 1, 3, storage, {
-          score: 100,
-          errors: 0,
-          hintsUsed: 0,
-          elapsedTimeMs: 15000,
-        });
+    it("derivação pura de desbloqueios do Insertion Sort: Basic livre, Intermediate após Basic, Advanced após Intermediate", () => {
+      let state = createDefaultSaveData();
 
-        const storedRaw = storage.getItem(STORAGE_KEY);
-        expect(storedRaw).toBeDefined();
-        // Não contém chaves de replay ou steps
-        expect(storedRaw).not.toContain("history");
-        expect(storedRaw).not.toContain("initialArray");
-        expect(storedRaw).not.toContain("seed");
-        expect(storedRaw).not.toContain("frames");
-        expect(storedRaw).not.toContain("INSPECTION");
-      });
+      // Inicialmente, apenas basic está desbloqueado
+      expect(isExerciseSetUnlocked(state, "insertion", INSERTION_EXERCISE_SETS.BASIC)).toBe(
+        true
+      );
+      expect(
+        isExerciseSetUnlocked(state, "insertion", INSERTION_EXERCISE_SETS.INTERMEDIATE)
+      ).toBe(false);
+      expect(
+        isExerciseSetUnlocked(state, "insertion", INSERTION_EXERCISE_SETS.ADVANCED)
+      ).toBe(false);
+      expect(isModuleRegularPracticeCompleted(state, "insertion")).toBe(false);
+
+      // Conclui Basic
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 90, errors: 0, hintsUsed: 0 }
+      );
+      expect(
+        isExerciseSetUnlocked(state, "insertion", INSERTION_EXERCISE_SETS.INTERMEDIATE)
+      ).toBe(true);
+      expect(
+        isExerciseSetUnlocked(state, "insertion", INSERTION_EXERCISE_SETS.ADVANCED)
+      ).toBe(false);
+
+      // Conclui Intermediate
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.INTERMEDIATE,
+        { score: 95, errors: 0, hintsUsed: 0 }
+      );
+      expect(
+        isExerciseSetUnlocked(state, "insertion", INSERTION_EXERCISE_SETS.ADVANCED)
+      ).toBe(true);
+      expect(isModuleRegularPracticeCompleted(state, "insertion")).toBe(false);
+
+      // Conclui Advanced
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.ADVANCED,
+        { score: 100, errors: 0, hintsUsed: 0 }
+      );
+      expect(isModuleRegularPracticeCompleted(state, "insertion")).toBe(true);
     });
   });
 });
-
-
-

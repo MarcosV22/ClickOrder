@@ -1,9 +1,9 @@
 # 07 — Backend e Persistência: Realidade Atual, Armazenamento Local e Arquitetura Futura
 
-> **Documento canônico:** Diagnóstico de persistência, modelo de armazenamento local implementado (P1.6), matriz de gatilhos operacionais e diretrizes para arquitetura futura de backend do **Sorting Station**.  
+> **Documento canônico:** Diagnóstico de persistência, modelo de armazenamento local implementado (Schema v4 - P2.2-F), matriz de gatilhos operacionais e diretrizes para arquitetura futura de backend do **Sorting Station**.  
 > **Status:** Ativo / Base de Verdade da Wiki  
-> **Data:** 11/09/2026 (Atualizado em P1.6)  
-> **Dependências:** [`AGENTS.md`](../../AGENTS.md), [`CLAUDE.md`](../../CLAUDE.md), [`00-repository-inventory.md`](./00-repository-inventory.md), [`01-product-vision.md`](./01-product-vision.md), [`02-system-architecture.md`](./02-system-architecture.md), [`ADR 0006`](../../docs/adr/0006-decoupled-local-storage-persistence.md).
+> **Data:** 17/09/2026 (Atualizado no Marco P2.2-F)  
+> **Dependências:** [`AGENTS.md`](../../AGENTS.md), [`00-repository-inventory.md`](./00-repository-inventory.md), [`01-product-vision.md`](./01-product-vision.md), [`02-system-architecture.md`](./02-system-architecture.md), [`ADR 0006`](../../docs/adr/0006-decoupled-local-storage-persistence.md), [`ADR 0015`](../../docs/adr/0015-multi-protocol-persistence-schema-v3.md), [`ADR 0018`](../../docs/adr/0018-game-to-educational-platform-transition.md), [`ADR 0021`](../../docs/adr/0021-module-exercise-persistence-schema-v4.md).
 
 ---
 
@@ -18,12 +18,14 @@ Esta seção documenta a realidade técnica fática do repositório em relação
 ```mermaid
 flowchart LR
     BrowserTab["Aba do Navegador (F5 / Reload)"]
-    AppState["Estado em Memória React (App.tsx)\nscreen, phase, result, phaseResults"]
-    Storage[("Armazenamento Local (localStorage)\nsorting_station_v1_save\n[IMPLEMENTADO - P1.6]")]
+    AppState["Estado em Memória React (App.tsx)\nscreen, currentModule, currentExerciseSetId, volatileResult"]
+    Storage[("Armazenamento Local (localStorage)\nsorting_station_save\n[IMPLEMENTADO - Schema v4 (P2.2-F)]")]
+    LegacyKey[("Chave Legada (Fallback)\nsorting_station_v1_save")]
     BackendServer[("Servidor Backend / API Remota\n[INEXISTENTE]")]
 
     BrowserTab <--> AppState
     AppState <-->|StorageAdapter (Safe Fallback)| Storage
+    Storage -.->|Fallback de leitura transparente| LegacyKey
     AppState -.->|INEXISTENTE| BackendServer
 ```
 
@@ -38,25 +40,25 @@ flowchart LR
 ### 1.3. Ausência de Autenticação e Perfis Remotos
 - O sistema não possui contas de usuário em servidor, tela de login, sessões ativas com token ou cookies de rastreamento. Todos os usuários operam com dados locais e privados em seu próprio dispositivo.
 
-### 1.4. Como o Estado é Gerenciado e Separado (P1.6)
+### 1.4. Como o Estado é Gerenciado e Separado (P2.2-F)
 A arquitetura separa estritamente duas categorias de estado:
 
 1. **Estado Volátil da Sessão (Em Memória RAM):**
-   - Em [`src/App.tsx`](../../src/App.tsx): `screen`, `result` da fase corrente, `phaseResults` acumulados na campanha em andamento;
-   - Em [`src/screens/GameScreen.tsx`](../../src/screens/GameScreen.tsx): FSM de ordenação, par sob análise, animações, histórico da fase atual;
-   - Em [`src/screens/ReplayScreen.tsx`](../../src/screens/ReplayScreen.tsx): frame de inspeção retrospectiva corrente;
-   - **Comportamento em Reset:** Clicar em "VOLTAR AO INÍCIO" (`handleReturnHome`) ou "REJOGAR PROTOCOLO" (`handleRestartProtocol`) reinicializa os arrays voláteis de sessão, mas **NÃO apaga o progresso gravado em disco**.
+   - Em [`src/App.tsx`](../../src/App.tsx): `screen`, rota ativa, `result` da atividade corrente, `insertionSessionScores` acumulados no conjunto de práticas;
+   - Em [`src/screens/GameScreen.tsx`](../../src/screens/GameScreen.tsx), [`src/screens/SelectionGameScreen.tsx`](../../src/screens/SelectionGameScreen.tsx) e [`src/screens/InsertionGameScreen.tsx`](../../src/screens/InsertionGameScreen.tsx): FSMs de ordenação, pares/elementos sob análise, animações, histórico da execução atual;
+   - Em [`src/screens/ReplayScreen.tsx`](../../src/screens/ReplayScreen.tsx), [`src/screens/SelectionReplayScreen.tsx`](../../src/screens/SelectionReplayScreen.tsx) e [`src/screens/InsertionReplayScreen.tsx`](../../src/screens/InsertionReplayScreen.tsx): frame de inspeção retrospectiva corrente;
+   - **Comportamento em Reset:** Clicar em "VOLTAR AO INÍCIO" (`handleReturnHome`) ou "REINICIAR PRÁTICA" (`handleRestartExercise`) reinicializa o estado volátil de sessão, mas **NÃO regride o progresso persistido**.
 
 2. **Progresso Persistente de Longo Prazo (Armazenamento Local Desacoplado):**
    - Gerenciado exclusivamente através de `src/game/persistence/`;
    - Restaurado na inicialização da aplicação (inclusive após recarregar a página com F5);
-   - Preservado entre sessões e reinicializações de protocolo.
+   - Preservado entre sessões e navegações de rota.
 
 ---
 
-# PARTE 2 — PERSISTÊNCIA LOCAL MULTI-PROTOCOLO IMPLEMENTADA `[IMPLEMENTADO - P2.1-F]` (ADR 0006, ADR 0007, ADR 0015)
+# PARTE 2 — PERSISTÊNCIA SCHEMA V4 ORIENTADA A MÓDULOS E EXERCÍCIOS `[IMPLEMENTADO - P2.2-F]` (ADR 0021)
 
-Conforme deliberado nos [ADR 0006](../../docs/adr/0006-decoupled-local-storage-persistence.md), [ADR 0007](../../docs/adr/0007-protocol-score-and-descriptive-elapsed-time.md) e [ADR 0015](../../docs/adr/0015-multi-protocol-persistence-schema-v3.md), a persistência local opera com isolamento total dos componentes React, garantindo resiliência defensiva, suporte multi-protocolo e conformidade pedagógica.
+Conforme deliberado no [ADR 0021](../../docs/adr/0021-module-exercise-persistence-schema-v4.md), a persistência local opera com isolamento total dos componentes React, garantindo resiliência defensiva, suporte multi-módulo extensível e conformidade pedagógica.
 
 ---
 
@@ -64,162 +66,129 @@ Conforme deliberado nos [ADR 0006](../../docs/adr/0006-decoupled-local-storage-p
 
 | Categoria | Dado | Persistido? | Justificativa Arquitetural |
 | :--- | :--- | :---: | :--- |
-| **Protocolo (Bubble/Selection)** | `unlockedPhases` | **SIM** | Registra o nível de fases desbloqueadas pelo operador no protocolo em questão (1 a 3). Não altera a fase inicial da sessão (novo turno sempre inicia na Fase 1). |
-| **Protocolo (Bubble/Selection)** | `highestPhaseReached` | **SIM** | Registra a maior fase alcançada pelo operador na campanha histórica daquele protocolo. Não determina a fase ativa da sessão. |
-| **Protocolo (Bubble/Selection)** | `hasCompletedTutorial` | **SIM** | Evita forçar a leitura do tutorial toda vez que o operador clica em "INICIAR TURNO". O tutorial permanece acessível a qualquer momento via "COMO JOGAR". Resiste a F5. |
-| **Recordes por Fase** | `records[phase].completed` | **SIM** | Registro factual booleano de conclusão da fase dentro do protocolo correspondente. |
-| **Recordes por Fase** | `records[phase].completedAt` | **SIM** | Timestamp ISO 8601 da conclusão mais recente. |
-| **Recordes por Fase** | `records[phase].bestScore` | **SIM** | Melhor pontuação obtida na fase (0 a 100), conforme fórmula do P1.7. |
-| **Recordes por Fase** | `records[phase].bestScoreErrors` | **SIM** | Decisões incorretas cometidas na execução da melhor pontuação. |
-| **Recordes por Fase** | `records[phase].bestScoreHintsUsed` | **SIM** | Dicas utilizadas na execução da melhor pontuação. |
-| **Recordes por Fase** | `records[phase].bestScoreElapsedTimeMs` | **SIM** | Duração factual da execução da melhor pontuação (não utilizado em desempate). |
-| **Preferências Globais** | `soundEnabled`, `reducedMotion`, `highContrast` | **SIM** | Configurações globais de acessibilidade e áudio do operador, compartilhadas entre protocolos. |
-| **Metadados** | `schemaVersion`, `lastUpdated` | **SIM** | Versionamento canônico (`schemaVersion: 3` em P2.1-F) e data ISO da última mutação de estado. |
-| **Sessão** | `phaseResults` (resumo global) | **NÃO** | As métricas da campanha corrente pertencem ao ciclo de jogo ativo e são resetadas ao reiniciar o protocolo. |
-| **Sessão** | `result` (fase corrente) | **NÃO** | Dados voláteis da última fase jogada na rodada em andamento. |
-| **Sessão / Replay** | `history: StepRecord[]`, `SelectionStepRecord[]` | **NÃO** | Histórico detalhado de micro-passos e frames consumido apenas durante a tela de replay da sessão atual (100% volátil em RAM). |
-| **Pedagogia** | Estrelas, rankings, notas globais | **NÃO** | **Proibido inventar métricas arbitrárias.** O sistema adota a `Pontuação do Protocolo` por fase baseada em decisões incorretas e dicas, com tempo puramente descritivo (ADR 0007). |
+| **Módulos Curriculares** | `modules[moduleId].completedTutorial` | **SIM** | Evita forçar a repetição do tutorial guiado toda vez que o estudante entra na atividade. O tutorial permanece acessível a qualquer momento via Hub ou botão dedicado. Resiste a F5. |
+| **Conjuntos de Exercícios** | `exerciseSets[exerciseSetId].completed` | **SIM** | Registro factual booleano de conclusão do exercício dentro do módulo correspondente. |
+| **Conjuntos de Exercícios** | `exerciseSets[exerciseSetId].completedAt` | **SIM** | Timestamp ISO 8601 da conclusão mais recente daquele exercício. |
+| **Recordes de Exercício** | `bestRecord.bestScore` | **SIM** | Melhor pontuação obtida no exercício (0 a 100), conforme fórmula da Carta Pedagógica ($100 - 10\times\text{erros} - 5\times\text{dicas}$). |
+| **Recordes de Exercício** | `bestRecord.bestScoreErrors` | **SIM** | Quantidade de decisões incorretas cometidas na execução da melhor pontuação. |
+| **Recordes de Exercício** | `bestRecord.bestScoreHintsUsed` | **SIM** | Quantidade de dicas utilizadas na execução da melhor pontuação. |
+| **Recordes de Exercício** | `bestRecord.bestScoreElapsedTimeMs` | **SIM** | Duração factual da execução da melhor pontuação (estritamente descritiva; **nunca** desempata recordes). |
+| **Preferências Globais** | `soundEnabled`, `reducedMotion`, `highContrast` | **SIM** | Configurações globais de acessibilidade e áudio do estudante, compartilhadas entre todos os módulos. |
+| **Metadados** | `schemaVersion`, `lastUpdated` | **SIM** | Versionamento canônico (`schemaVersion: 4` em P2.2-F) e data ISO da última mutação de estado. |
+| **Desbloqueios Derivados** | `unlockedPhases`, `isUnlocked`, `challengeUnlocked` | **NÃO** | **Proibido salvar flags redundantes no storage.** Desbloqueios são calculados puramente a partir de `completed` de exercícios anteriores. |
+| **Sessão / Replay** | `history: StepRecord[]`, `frames`, `seeds` | **NÃO** | Quadros de replay e histórico de micro-passos residem exclusivamente na memória RAM da sessão atual. Seeds procedurais nunca são salvos. |
+| **Demonstração Canônica** | Telas de demonstração | **NÃO** | A demonstração executa vetores fixos curados em tempo de execução e não salva histórico. |
 
 ---
 
-## 2.2. Schema Versionado Canônico Multi-Protocolo (v3 — P2.1-F)
+## 2.2. Schema Versionado Canônico v4 (`src/game/persistence/types.ts`)
 
-- **Chave de Armazenamento:** `sorting_station_v1_save` (preservada estritamente para manter compatibilidade)
-- **Versão Atual:** `3` (pipeline explícito e transparente a partir de `schemaVersion: 1` e `schemaVersion: 2`)
+- **Chave Canônica Estável:** `STORAGE_KEY = "sorting_station_save"`
+- **Chave Legada para Fallback:** `LEGACY_STORAGE_KEY = "sorting_station_v1_save"`
+- **Versão Atual:** `4`
 
 ```typescript
-// src/game/persistence/types.ts
-export type SupportedProtocol = "bubble" | "selection";
+export type ModuleId =
+  | "bubble"
+  | "selection"
+  | "insertion"
+  | "merge"
+  | "quick"
+  | "heap";
 
-export interface PhaseRecord {
+export interface ExerciseRecordV4 {
+  readonly bestScore: number;
+  readonly bestScoreErrors: number;
+  readonly bestScoreHintsUsed: number;
+  readonly bestScoreElapsedTimeMs: number;
+}
+
+export interface ExerciseSetProgressV4 {
   readonly completed: boolean;
-  readonly completedAt: string;
-  readonly bestScore?: number;
-  readonly bestScoreErrors?: number;
-  readonly bestScoreHintsUsed?: number;
-  readonly bestScoreElapsedTimeMs?: number;
-}
-
-export interface ProtocolProgress {
-  readonly unlockedPhases: number;      // 1 a 3 (clamped)
-  readonly highestPhaseReached: number;  // 1 a 3 (clamped)
-  readonly hasCompletedTutorial: boolean;
-  readonly records: Record<number, PhaseRecord>;
-}
-
-export interface GameSaveSchema {
-  readonly schemaVersion: number; // 3
-  readonly lastUpdated: string;   // ISO 8601
-  readonly protocols: {
-    readonly bubble: ProtocolProgress;
-    readonly selection: ProtocolProgress;
-  };
-  readonly preferences: {
-    readonly soundEnabled: boolean;
-    readonly reducedMotion: boolean;
-    readonly highContrast: boolean;
-  };
-
-  // Aliases de conveniência retrocompatíveis (apontam para protocols.bubble)
-  readonly campaign: ProtocolProgress;
-  readonly records: Record<number, PhaseRecord>;
-}
-```
-
-### Isolamento Estrito de Namespaces
-- Fases 1, 2 e 3 do Bubble Sort residem em `protocols.bubble.records[1..3]`;
-- Fases 1, 2 e 3 do Selection Sort residem em `protocols.selection.records[1..3]`;
-- **Proibição de Números Mágicos:** Nenhum identificador artificial ou sintético (como `101`, `201`) é utilizado no sistema. Cada protocolo possui suas próprias fases numéricas naturais de 1 a 3 isoladas pelo namespace do protocolo;
-- Concluir fases no Selection Sort não afeta o progresso ou recordes do Bubble Sort, e vice-versa.
-
----
-
-## 2.3. Arquitetura Defensiva e Pipeline de Migração (ADR 0015)
-
-A camada de persistência reside em `src/game/persistence/` e implementa o padrão **Storage Adapter**:
-
-1. **Abstração `StorageAdapter`:** Define os métodos contratuais `getItem`, `setItem` e `removeItem`.
-2. **`MemoryStorageAdapter`:** Implementação 100% volátil em memória para testes unitários isolados e fallback automático.
-3. **`createSafeStorage()`:** Envolve qualquer storage real com tratamento estrito de exceções:
-   - **`SecurityError`:** Lançado por navegadores em contextos de sandbox restritos ou modo anônimo severo;
-   - **`QuotaExceededError`:** Lançado quando a cota do domínio é ultrapassada;
-   - **Comportamento:** Ao capturar qualquer exceção, a operação é redirecionada de forma transparente para um `MemoryStorageAdapter` em memória, emitindo aviso em `console.warn` e **impedindo a quebra da aplicação**.
-4. **Pipeline Explícito de Migração (`validateAndMigrateSaveData`):**
-   - Não utiliza conversão cega (`as`) em dados externos;
-   - Sanitiza tipos inválidos, descarta chaves espúrias e clampa valores numéricos;
-   - **Migração v1 $\rightarrow$ v2:** Saves de `schemaVersion: 1` têm campanha, conclusões, preferências e timestamps migrados;
-   - **Migração v2 $\rightarrow$ v3:** O progresso e os recordes do Bubble existentes no save v2 são preservados e encapsulados em `protocols.bubble`, enquanto `protocols.selection` é inicializado com o padrão limpo;
-   - **Pipeline v1 $\rightarrow$ v2 $\rightarrow$ v3:** Saves legados v1 transitam deterministicamente por ambos os passos sem perda de dados;
-   - Caso o payload JSON esteja corrompido ou o `schemaVersion` seja superior/desconhecido, descarta com segurança e restaura o estado padrão (`createDefaultSaveData`).
-
----
-
-## 2.4. Regras de Atualização de Recordes de Fase (ADR 0007 / ADR 0015)
-
-Ao concluir uma fase com novos dados de pontuação (`PhaseScoreData`), a função pura `recordPhaseCompletion` avalia a substituição do recorde existente de forma isolada no protocolo alvo:
-
-1. **Substituição por Pontuação Superior:**
-   Se `newScore > bestScore`, os dados de pontuação (`bestScore`, `bestScoreErrors`, `bestScoreHintsUsed`, `bestScoreElapsedTimeMs`) são integralmente atualizados com a nova rodada;
-2. **Substituição por Desempate de Precisão (Menos Erros):**
-   Se `newScore === bestScore` E `newErrors < bestScoreErrors`, o recorde é atualizado para refletir a execução mais precisa;
-3. **Imutabilidade em Pontuação Inferior ou Mais Erros:**
-   Se `newScore < bestScore`, ou se em empate `newErrors >= bestScoreErrors`, o recorde atual é **estritamente preservado**;
-4. **Veto ao Desempate por Tempo:**
-   O tempo decorrido (`elapsedTimeMs`) **NUNCA** é usado como critério de desempate. Caso score e erros sejam idênticos, o recorde pré-existente permanece inalterado. O jogo não estimula pressa, mas foco reflexivo e conceitual;
-5. **Preservação de Conclusão:**
-   `completed: true` e `completedAt` mantêm o registro factual da execução mais recente, independentemente da substituição do recorde de pontuação.
-
----
-
-## 2.5. Diagnóstico do Schema v3 e Especificação Conceitual do Schema v4 (ADR 0018)
-
-### 2.5.1. Diagnóstico das Limitações do Schema v3 Atual
-Embora o Schema v3 atual atenda perfeitamente à operação independente de Bubble e Selection Sort em suas campanhas de 3 fases, a transição do produto para **Plataforma Educacional** expõe limitações estruturais:
-1. **Chaves Estáticas de Protocolo:** A interface `SaveData` fixa os protocolos como propriedades rígidas (`protocols: { bubble: ProtocolProgress; selection: ProtocolProgress }`). A inclusão dos outros 4 módulos (Insertion, Merge, Quick e Heap) exigiria quebrar a tipagem estática raiz;
-2. **Indexação Numérica Rígida por Fases:** Os recordes são indexados por inteiros (`Record<number, PhaseRecord>`), refletindo a mentalidade legada de "fases de jogo lineares" (1, 2, 3);
-3. **Falta de Suporte à Taxonomia de Exercícios:** O Schema v3 não suporta nativamente a classificação transversal de 8 tipos de exercícios (Introdução, Demonstração, Tutorial Guiado, Prática Básica, Prática Progressiva, Casos, Desafio e Prática Livre).
-4. **Risco de Proliferação com Seeds Procedurais:** Persistir cada seed procedural como exercício distinto poluiria o storage. O progresso deve ser agregado por conjunto de exercícios (`moduleId + exerciseSetId`).
-
-### 2.5.2. Especificação Conceitual do Schema v4 (Projetado)
-
-> [!NOTE]
-> **Diretriz Mandatória de Não-Alteração de Código em PLATFORM-R0:**  
-> A especificação abaixo constitui um **desenho arquitetural puramente conceitual**. O código em `src/game/persistence/` e os saves existentes de usuários reais no navegador permanecem **100% inalterados no Schema v3** durante esta tarefa documental.
-
-No futuro, a migração para o Schema v4 adotará um modelo dinâmico e extensível:
-
-```typescript
-// Especificação Conceitual do Schema v4 (Projeção para Futura Migração)
-export interface SaveDataV4 {
-  readonly schemaVersion: 4;
-  readonly lastUpdated: string;
-  readonly preferences: GlobalPreferences;
-  readonly modules: Record<string, ModuleProgressV4>; // indexado por moduleId ('bubble', 'selection', etc.)
+  readonly completedAt?: string;
+  readonly bestRecord?: ExerciseRecordV4;
 }
 
 export interface ModuleProgressV4 {
-  readonly moduleId: string;
-  readonly completed: boolean;
   readonly completedTutorial: boolean;
-  readonly unlockedExercises: readonly string[];
-  readonly exercises: Record<string, ExerciseRecordV4>; // indexado por exerciseId ('basic', 'cases-nearly-sorted', etc.)
+  readonly exerciseSets: Record<string, ExerciseSetProgressV4>;
 }
 
-export interface ExerciseRecordV4 {
-  readonly exerciseId: string;
-  readonly exerciseType: ExerciseTypeId;
-  readonly completed: boolean;
-  readonly completedAt: string;
-  readonly bestScore?: number;
-  readonly bestScoreErrors?: number;
-  readonly bestScoreHintsUsed?: number;
-  readonly bestScoreElapsedTimeMs?: number;
+export interface GlobalPreferences {
+  readonly soundEnabled: boolean;
+  readonly reducedMotion: boolean;
+  readonly highContrast: boolean;
+}
+
+export interface GameSaveSchemaV4 {
+  readonly schemaVersion: 4;
+  readonly lastUpdated: string;
+  readonly preferences: GlobalPreferences;
+  readonly modules: Partial<Record<ModuleId, ModuleProgressV4>>;
 }
 ```
 
-**Pipeline de Migração Projetado (v3 $\rightarrow$ v4):**
-- O migrador converterá as chaves `protocols.bubble.records[1]`, `[2]`, `[3]` em `modules.bubble.exercises["basic"]`, `["intermediate"]`, `["advanced"]`;
-- As preferências globais (`soundEnabled`, `reducedMotion`, `highContrast`) serão preservadas sem qualquer perda.
+### Identificadores Canônicos de Exercícios (`src/game/persistence/constants.ts`)
+```typescript
+export const BUBBLE_EXERCISE_SETS = {
+  BASIC: "bubble.practice.basic",
+  INTERMEDIATE: "bubble.practice.intermediate",
+  ADVANCED: "bubble.practice.advanced",
+  CHALLENGE_EARLY_EXIT: "bubble.challenge.early-exit",
+} as const;
+
+export const SELECTION_EXERCISE_SETS = {
+  BASIC: "selection.practice.basic",
+  INTERMEDIATE: "selection.practice.intermediate",
+  ADVANCED: "selection.practice.advanced",
+} as const;
+
+export const INSERTION_EXERCISE_SETS = {
+  BASIC: "insertion.practice.basic",
+  INTERMEDIATE: "insertion.practice.intermediate",
+  ADVANCED: "insertion.practice.advanced",
+} as const;
+```
+
+---
+
+## 2.3. Pipeline de Migração Sequencial e Validação Defensiva
+
+```mermaid
+flowchart LR
+    S1[Save v1] -->|migrateV1ToV2| S2[Save v2]
+    S2 -->|migrateV2ToV3| S3[Save v3]
+    S3 -->|migrateV3ToV4| S4[Save v4]
+    RawJSON[JSON Externo] -->|validateAndMigrateSaveData| S4
+    S4 -->|Sanitização Estrita| App[Aplicação Canônica]
+    Corrupt[JSON Corrompido] -->|Fallback Seguro| Default[createDefaultSaveData]
+```
+
+1. **`migrateV1ToV2`:** Converte conclusões simples de fase para v2;
+2. **`migrateV2ToV3`:** Mapeia recordes de Bubble para `protocols.bubble` e inicializa Selection limpo;
+3. **`migrateV3ToV4`:** Transforma o progresso factual das fases 1/2/3 de Bubble e Selection nos respectivos `exerciseSetIds` (`basic`, `intermediate`, `advanced`) com pontuações, erros, tempos, dicas e tutoriais integralmente preservados;
+4. **Sanitização Nativa v4:** Remove chaves espúrias, clampa métricas corrompidas e garante imutabilidade via `Object.freeze`;
+5. **Fallback Seguro:** Caso o payload não seja JSON válido ou declare versão futura desconhecida (> 4), gera estado padrão limpo sem interrupção do app.
+
+---
+
+## 2.4. Regras Canônicas de Recorde (ADR 0007 / ADR 0021)
+
+A substituição de recordes é governada pela função pura `shouldUpdateRecord(current, candidate)`:
+
+1. **Maior Pontuação:** Se `candidate.score > current.bestScore`, atualiza;
+2. **Desempate por Menor Erro:** Se `candidate.score === current.bestScore` E `candidate.errors < current.bestScoreErrors`, atualiza (recompensa maior precisão conceitual);
+3. **Veto ao Desempate por Tempo:** Se score e erros forem idênticos, o tempo de execução **NÃO** desempata nem incentiva pressa mecânica;
+4. **Tentativas Incompletas:** Novas tentativas não concluídas ou reinicializadas antes do fim nunca sobrescrevem recordes.
+
+---
+
+## 2.5. Adaptadores de Compatibilidade
+
+Para preservar o funcionamento imediato das telas legadas de Bubble e Selection sem introduzir refatores precipitados fora de escopo:
+- `getProtocolProgress(saveData, protocolId)`: Função pura que deriva sob demanda a projeção legada `ProtocolProgress` (`unlockedPhases`, `highestPhaseReached`, `hasCompletedTutorial`, `records`);
+- `recordPhaseCompletion`: Converte chamadas de fase (1, 2, 3) para os respectivos exercícios do Schema v4;
+- `isChallengeModeUnlocked(saveData)`: Deriva o desbloqueio do Modo Desafio (Early Exit) a partir da conclusão factual de `bubble.practice.advanced`.
 
 ---
 
@@ -248,103 +217,3 @@ graph TD
 4. **Painel de Turmas e Professores (*Classroom Management*):** Funcionalidade onde docentes possam cadastrar turmas, atribuir listas de fases customizadas e acompanhar relatórios consolidados de rendimento dos alunos.
 5. **Telemetria de Baixo Nível para Pesquisa Acadêmica:** Coleta massiva e padronizada de eventos temporais (ex.: milissegundos transcorridos entre cada clique, quantidade exata de erros por passada) para fundamentar a avaliação estatística do artigo científico.
 6. **Analytics de Aprendizagem (*Learning Analytics*):** Processamento centralizado para identificar conceitos onde os estudantes mais travam (ex.: detecção estatística de dificuldade na compreensão do caso médio do Bubble Sort).
-
----
-
-# PARTE 4 — ARQUITETURA FUTURA POSSÍVEL (AGNOSTA DE TECNOLOGIA)
-
-Esta seção traça o modelo conceitual de uma futura API, **sem escolher tecnologias ou frameworks de forma arbitrária e sem inventar endpoints ou bancos inexistentes**.
-
----
-
-## 4.1. Domínios Conceituais da API Futura
-
-Caso um dos gatilhos da Parte 3 seja disparado, a API deverá ser estruturada em torno dos seguintes subdomínios de negócio:
-
-1. **Domínio de Identidade e Acesso (Identity & Access):**
-   - Gerenciamento de credenciais, sessões seguras e perfis de usuário (`ESTUDANTE`, `PROFESSOR`, `PESQUISADOR`).
-2. **Domínio de Turmas e Currículo (Academic Management):**
-   - Agrupamento de alunos em turmas, vinculação a professores e definição de trilhas de fases personalizadas.
-3. **Domínio de Sessões de Jogo e Telemetria (Game Tracking):**
-   - Registro de execuções de fase (*runs*), registro de ações atômicas (comparações, trocas, erros) e cálculo auditado de eficiência.
-4. **Domínio de Pesquisa e Analytics (Research Analytics):**
-   - Extração de datasets anonimizados para ferramentas de análise estatística (R, Python, SPSS).
-
----
-
-## 4.2. Entidades Conceituais de Dados
-
-```mermaid
-erDiagram
-    USER ||--o{ CLASSROOM_STUDENT : participa
-    CLASSROOM ||--o{ CLASSROOM_STUDENT : contem
-    USER ||--o{ CLASSROOM : administra
-    USER ||--o{ GAME_SESSION : executa
-    PHASE_DEFINITION ||--o{ GAME_SESSION : instancia
-    GAME_SESSION ||--o{ STEP_TELEMETRY : registra
-
-    USER {
-        uuid id PK
-        string email
-        string role "STUDENT | TEACHER | RESEARCHER"
-        datetime created_at
-    }
-
-    CLASSROOM {
-        uuid id PK
-        uuid teacher_id FK
-        string name
-        string invite_code
-    }
-
-    PHASE_DEFINITION {
-        int id PK
-        string algorithm "BUBBLE | SELECTION | INSERTION"
-        int_array initial_array
-        int theoretical_min_comparisons
-    }
-
-    GAME_SESSION {
-        uuid id PK
-        uuid user_id FK
-        int phase_id FK
-        datetime started_at
-        datetime finished_at
-        int comparisons_count
-        int swaps_count
-        int errors_count
-        int hints_used
-        boolean completed
-    }
-
-    STEP_TELEMETRY {
-        uuid id PK
-        uuid session_id FK
-        int step_index
-        int pass_index
-        int pair_left
-        int pair_right
-        string action_taken "SWAP | KEEP | INVALID"
-        int response_time_ms
-    }
-```
-
----
-
-## 4.3. Requisitos Mandatórios de Privacidade e Conformidade (LGPD / GDPR)
-
-A introdução de qualquer mecanismo remoto de armazenamento deve cumprir integralmente a legislação de proteção de dados:
-
-- **Minimização de Dados:** Coletar apenas as informações estritamente necessárias para o funcionamento pedagógico e acadêmico.
-- **Anonimização em Pesquisa Acadêmica:** Todos os dados de telemetria utilizados para a confecção de artigos científicos devem ser anonimizados ou pseudonimizados, desvinculando identificadores pessoais (nomes, e-mails) de métricas de desempenho.
-- **Consentimento Informado:** Termo de Consentimento Livre e Esclarecido (TCLE) digital integrado para estudantes que participarem de coletas de dados empíricas.
-- **Direito ao Esquecimento:** Mecanismo acessível para que o usuário solicite a exclusão definitiva de sua conta e de seu histórico de sessões.
-
----
-
-## 4.4. Obrigatoriedade de um Registro de Decisão Arquitetural (ADR)
-
-> [!CAUTION]
-> **Proibição de Escolha Arbitrária de Frameworks:**  
-> A escolha da linguagem de backend (ex.: TypeScript/Node vs. Python vs. Go), do framework (ex.: Fastify vs. NestJS vs. FastAPI), do banco de dados (ex.: PostgreSQL relacional vs. MongoDB) e do provedor de nuvem (ex.: AWS, GCP, Fly.io) **não deve ser decidida precipitadamente**.  
-> Antes de qualquer linha de código de backend ser escrita, a equipe deverá obrigatoriamente formalizar um **ADR (Architecture Decision Record)** documentando o contexto, requisitos de latência, custos estimados de operação, conformidade e alternativas avaliadas.

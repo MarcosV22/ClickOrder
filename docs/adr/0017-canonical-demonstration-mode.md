@@ -34,8 +34,9 @@ Fez-se necessário formalizar uma arquitetura limpa, pura e reutilizável para o
 ### 2.1. Distinção Conceitual Rigorosa: Demonstração vs. Replay
 
 Fica formalizada a separação inegociável entre os dois modos:
-- **MODO DEMONSTRAÇÃO:** Execução canônica, correta e perfeita preparada autonomamente pelo sistema a partir de um vetor curado fixo. Objetivo: **Observação passiva e aprendizado inicial** da dinâmica do protocolo. É 100% volátil, não possui pontuação, erros ou dicas, e não altera o `localStorage` nem o Schema v3 de persistência.
-- **MODO REPLAY:** Reconstrução factual e estrita da execução histórica previamente realizada pelo próprio jogador durante uma fase da campanha. Objetivo: **Reflexão pós-ação**, autoavaliação de erros e consolidação de aprendizado.
+- **Demonstração e Replay compartilham o mesmo pipeline de visualização derivado de `history`**, mas possuem origem, navegação e finalidade pedagógica distintas:
+- **MODO DEMONSTRAÇÃO:** Execução canônica, correta e perfeita preparada autonomamente pelo sistema a partir de um vetor curado fixo. Objetivo: **Observação passiva e aprendizado inicial (pré-prática)** da dinâmica do protocolo. É 100% volátil, não possui pontuação, erros ou dicas, e não altera o storage nem os esquemas de persistência.
+- **MODO REPLAY:** Reconstrução factual e estrita da execução histórica previamente realizada pelo próprio jogador durante um exercício. Objetivo: **Reflexão pós-ação**, autoavaliação de erros e consolidação de aprendizado sobre a execução real do estudante.
 
 ### 2.2. Camada Pura de Demonstração (`src/game/demonstration/`)
 

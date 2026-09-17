@@ -468,8 +468,7 @@ describe("Selection Sort Campaign & Gameplay (P2.1-D)", () => {
       const afterSave = loadGameProgress(storage);
       expect(afterSave).toEqual(initialSave);
       expect(afterSave.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(afterSave.campaign.unlockedPhases).toBe(initialSave.campaign.unlockedPhases);
-      expect(afterSave.records).toEqual(initialSave.records);
+      expect(afterSave.modules.bubble).toEqual(initialSave.modules.bubble);
     });
   });
 });

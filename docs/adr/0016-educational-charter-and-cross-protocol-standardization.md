@@ -70,7 +70,7 @@ Fica estabelecida a hierarquia conceitual obrigatória:
 7. **Campaign Complete:** Tela consolidada de encerramento da campanha com 5 cartões globais factuais.
 
 ### 2.4. Institucionalização do Modo Demonstração sem Duplicação de Código
-O Modo Demonstração não exigirá telas ou motores visuais adicionais. Ele será formalizado como uma **instanciação da esteira de Replay alimentada por uma execução ideal gerada pela engine pura correspondente** (em modo autoplay e somente-leitura), acessível a partir da Home ou do Briefing.
+Demonstração e Replay compartilham o mesmo pipeline de visualização derivado de `history`, mas possuem origem, navegação e finalidade pedagógica distintas: a **Demonstração** é a execução canônica pré-prática para observação inicial orientada pelo sistema, enquanto o **Replay** é a reflexão retrospectiva sobre a execução real do estudante. Ambos utilizam os mesmos componentes e telas de visualização (`ReplayScreen`, `SelectionReplayScreen`, `InsertionReplayScreen`) alimentados por suas respectivas fontes de quadros.
 
 ### 2.5. Glossário Canônico Controlado
 Terminologia oficial congelada em [`docs/wiki/12-pedagogy-and-academic-traceability.md`](../wiki/12-pedagogy-and-academic-traceability.md) e [`docs/wiki/05-ux-design-system.md`](../wiki/05-ux-design-system.md) para unificar nomenclatura entre código-fonte, interface de usuário e documentação acadêmica.

@@ -8,6 +8,8 @@ import {
   createDefaultSaveData,
   recordPhaseCompletion,
   recordTutorialCompletion,
+  recordExerciseCompletion,
+  INSERTION_EXERCISE_SETS,
 } from "../game/persistence";
 
 describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
@@ -48,15 +50,15 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
       expect(selection.practiceItems).toContain("Transferência pontual no commit");
     });
 
-    it("declara Insertion Sort como EM BREVE, com status coming_soon e tema âmbar", () => {
+    it("declara Insertion Sort como disponível, com status available e tema âmbar", () => {
       const insertion = getProtocolMetadata("insertion");
       expect(insertion.id).toBe("insertion");
       expect(insertion.name).toBe("INSERTION SORT");
       expect(insertion.metaphor).toContain("TRILHO DE INSERÇÃO");
-      expect(insertion.status).toBe("coming_soon");
-      expect(insertion.statusLabel).toBe("EM BREVE");
-      expect(insertion.demonstrationStatus).toBe("coming_soon");
-      expect(insertion.demonstrationLabel).toBe("DEMO (EM BREVE)");
+      expect(insertion.status).toBe("available");
+      expect(insertion.statusLabel).toBe("DISPONÍVEL");
+      expect(insertion.demonstrationStatus).toBe("available");
+      expect(insertion.demonstrationLabel).toBe("DEMONSTRAÇÃO");
       expect(insertion.totalPhases).toBe(3);
       expect(insertion.theme.primaryColor).toBe("amber");
       expect(insertion.practiceItems).toContain("Região ordenada provisória (ORD)");
@@ -179,13 +181,27 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
       expect(bubbleSummary.isChallengeUnlocked).toBe(false);
     });
 
-    it("Insertion Sort sempre reporta zero fases e tutorial não concluído de modo seguro", () => {
-      const state = createDefaultSaveData(3, 3);
+    it("reflete conclusão de práticas do Insertion Sort no resumo", () => {
+      let state = createDefaultSaveData();
+      state = recordTutorialCompletion(state, "insertion");
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 95, errors: 0, hintsUsed: 0 }
+      );
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.INTERMEDIATE,
+        { score: 100, errors: 0, hintsUsed: 0 }
+      );
+
       const summary = getProtocolProgressSummary("insertion", state);
-      expect(summary.completedPhases).toBe(0);
+      expect(summary.completedPhases).toBe(2);
       expect(summary.totalPhases).toBe(3);
-      expect(summary.hasCompletedTutorial).toBe(false);
-      expect(summary.bestScore).toBeUndefined();
+      expect(summary.hasCompletedTutorial).toBe(true);
+      expect(summary.bestScore).toBe(100);
       expect(summary.isChallengeUnlocked).toBeUndefined();
     });
 
@@ -200,20 +216,18 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
   });
 
   describe("3. Roteamento, Acessibilidade e Disponibilidade dos Protocolos", () => {
-    it("garante que apenas protocolos disponíveis possuem status operacional ativo", () => {
+    it("garante que todos os 3 protocolos curriculares estão ativos e disponíveis", () => {
       const availableProtocols = PROTOCOL_CATALOG.filter((p) => p.status === "available");
-      expect(availableProtocols.map((p) => p.id)).toEqual(["bubble", "selection"]);
-
-      const pendingProtocols = PROTOCOL_CATALOG.filter((p) => p.status === "coming_soon");
-      expect(pendingProtocols.map((p) => p.id)).toEqual(["insertion"]);
+      expect(availableProtocols.map((p) => p.id)).toEqual(["bubble", "selection", "insertion"]);
+      expect(availableProtocols).toHaveLength(3);
     });
 
-    it("assegura que Insertion Sort não expõe rota ativa de treinamento ou tutorial", () => {
+    it("assegura que Insertion Sort expõe status disponível e demonstração ativa", () => {
       const insertion = getProtocolMetadata("insertion");
-      expect(insertion.status).toBe("coming_soon");
-      expect(insertion.statusLabel).toBe("EM BREVE");
-      // O algoritmo não está disponível para iniciar treinamento
-      expect(insertion.status === "available").toBe(false);
+      expect(insertion.status).toBe("available");
+      expect(insertion.statusLabel).toBe("DISPONÍVEL");
+      expect(insertion.demonstrationStatus).toBe("available");
+      expect(insertion.demonstrationLabel).toBe("DEMONSTRAÇÃO");
     });
 
     it("assegura que os 3 protocolos preparam a infraestrutura para o Modo Demonstração (P2.1-G-D)", () => {
@@ -222,6 +236,7 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
         expect(protocol.id).toBeDefined();
         expect(protocol.name).toBeDefined();
         expect(protocol.theme).toBeDefined();
+        expect(protocol.demonstrationStatus).toBe("available");
       });
     });
   });

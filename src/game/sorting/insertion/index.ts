@@ -9,5 +9,5 @@ export * from "./insertionTutorialGuide";
 export * from "./practiceCatalog";
 export * from "./insertionPedagogy";
 export * from "./insertionPseudocode";
-
-
+export * from "./insertionReplayModel";
+export * from "./insertionReplayPseudocode";

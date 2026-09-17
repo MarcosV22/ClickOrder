@@ -163,6 +163,30 @@ describe("Modo Demonstração Educacional (P2.1-G-D)", () => {
         expect(highlight.activeLineIds.length).toBeGreaterThan(0);
       }
     });
+
+    it("deriva frames completos de Replay para a demonstração do Insertion Sort", async () => {
+      const { buildInsertionReplayFrames } = await import(
+        "../sorting/insertion/insertionReplayModel"
+      );
+      const { getInsertionPseudocodeHighlight } = await import(
+        "../sorting/insertion/insertionReplayPseudocode"
+      );
+      const demo = runInsertionDemonstration();
+      const frames = buildInsertionReplayFrames(demo.initialArray, demo.history);
+
+      expect(frames.length).toBe(demo.history.length + 1);
+      expect(frames[0].frameType).toBe("INITIAL");
+      expect(frames[0].values).toEqual([6, 3, 5, 2, 7]);
+      expect(frames[frames.length - 1].values).toEqual([2, 3, 5, 6, 7]);
+      expect(frames[frames.length - 1].isCompleted).toBe(true);
+
+      // Verifica que todos os frames mapeiam para linhas válidas do pseudocódigo
+      for (const frame of frames) {
+        const highlight = getInsertionPseudocodeHighlight(frame);
+        expect(highlight.primaryLineId).toBeDefined();
+        expect(highlight.activeLineIds.length).toBeGreaterThan(0);
+      }
+    });
   });
 
   describe("Garantias Transversais e Não-Mutabilidade", () => {
@@ -178,6 +202,12 @@ describe("Modo Demonstração Educacional (P2.1-G-D)", () => {
       expect(selectionDemo.score).toBeUndefined();
       // @ts-expect-error verificação de ausência de erros
       expect(selectionDemo.errors).toBeUndefined();
+
+      const insertionDemo = runInsertionDemonstration();
+      // @ts-expect-error verificação de ausência de campos de gameplay
+      expect(insertionDemo.score).toBeUndefined();
+      // @ts-expect-error verificação de ausência de erros
+      expect(insertionDemo.errors).toBeUndefined();
     });
 
     it("execuções de demonstração são puras e não dependem nem alteram o storage", async () => {
@@ -187,8 +217,10 @@ describe("Modo Demonstração Educacional (P2.1-G-D)", () => {
 
       runBubbleDemonstration();
       runSelectionDemonstration();
+      runInsertionDemonstration();
       getDemonstrationExecution("bubble");
       getDemonstrationExecution("selection");
+      getDemonstrationExecution("insertion");
 
       expect(JSON.stringify(initialSave)).toBe(snapshot);
     });

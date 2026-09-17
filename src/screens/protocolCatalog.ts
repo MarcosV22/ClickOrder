@@ -1,5 +1,15 @@
 import type { GameSaveSchema } from "../game/persistence/types";
-import { isChallengeModeUnlocked } from "../game/persistence/persistenceService";
+import {
+  isChallengeModeUnlocked,
+  getModuleProgress,
+  isModuleTutorialCompleted,
+  isExerciseSetCompleted,
+} from "../game/persistence/persistenceService";
+import {
+  BUBBLE_EXERCISE_SETS,
+  SELECTION_EXERCISE_SETS,
+  INSERTION_EXERCISE_SETS,
+} from "../game/persistence/constants";
 
 export type ProtocolId = "bubble" | "selection" | "insertion";
 
@@ -94,20 +104,20 @@ export const PROTOCOL_CATALOG: readonly ProtocolMetadata[] = Object.freeze([
       "Carga-chave sob inspeção",
       "Deslocamento e inserção",
     ]),
-    status: "coming_soon",
-    statusLabel: "EM BREVE",
-    demonstrationStatus: "coming_soon",
-    demonstrationLabel: "DEMO (EM BREVE)",
+    status: "available",
+    statusLabel: "DISPONÍVEL",
+    demonstrationStatus: "available",
+    demonstrationLabel: "DEMONSTRAÇÃO",
     totalPhases: 3,
     theme: {
       primaryColor: "amber",
-      accentGlow: "rgba(245, 158, 11, 0.08)",
-      borderClass: "border-white/10",
-      borderHoverClass: "border-white/10",
-      badgeBgClass: "bg-zinc-900/60 border-zinc-700/50",
-      badgeTextClass: "text-amber-400/90",
-      titleGradientClass: "from-white/60 via-zinc-400 to-white/40",
-      practiceBadgeClass: "bg-zinc-900/40 border-zinc-800 text-zinc-400",
+      accentGlow: "rgba(245, 158, 11, 0.15)",
+      borderClass: "border-amber-500/30",
+      borderHoverClass: "hover:border-amber-400/60",
+      badgeBgClass: "bg-amber-950/40 border-amber-500/30",
+      badgeTextClass: "text-amber-400",
+      titleGradientClass: "from-amber-300 via-orange-400 to-amber-400",
+      practiceBadgeClass: "bg-amber-950/30 border-amber-500/20 text-amber-300/90",
     },
   },
 ]);
@@ -120,15 +130,34 @@ export interface ProtocolProgressSummary {
   readonly isChallengeUnlocked?: boolean;
 }
 
+const MODULE_REGULAR_EXERCISES: Record<ProtocolId, readonly string[]> = Object.freeze({
+  bubble: [
+    BUBBLE_EXERCISE_SETS.BASIC,
+    BUBBLE_EXERCISE_SETS.INTERMEDIATE,
+    BUBBLE_EXERCISE_SETS.ADVANCED,
+  ],
+  selection: [
+    SELECTION_EXERCISE_SETS.BASIC,
+    SELECTION_EXERCISE_SETS.INTERMEDIATE,
+    SELECTION_EXERCISE_SETS.ADVANCED,
+  ],
+  insertion: [
+    INSERTION_EXERCISE_SETS.BASIC,
+    INSERTION_EXERCISE_SETS.INTERMEDIATE,
+    INSERTION_EXERCISE_SETS.ADVANCED,
+  ],
+});
+
 /**
  * Calcula o resumo factual de progresso pedagógico para exibição no card da Home.
- * Não altera dados no storage e opera como função pura.
+ * Suporta uniformemente todos os módulos sob o Schema v4.
+ * Opera como função pura sem efeitos colaterais.
  */
 export function getProtocolProgressSummary(
   protocolId: ProtocolId,
   saveData?: GameSaveSchema
 ): ProtocolProgressSummary {
-  if (!saveData || protocolId === "insertion") {
+  if (!saveData) {
     return {
       completedPhases: 0,
       totalPhases: 3,
@@ -136,33 +165,32 @@ export function getProtocolProgressSummary(
     };
   }
 
-  const progress = saveData.protocols[protocolId];
-  if (!progress) {
-    return {
-      completedPhases: 0,
-      totalPhases: 3,
-      hasCompletedTutorial: false,
-    };
+  const exercises = MODULE_REGULAR_EXERCISES[protocolId] ?? [];
+  let completedPhases = 0;
+  for (const exId of exercises) {
+    if (isExerciseSetCompleted(saveData, protocolId, exId)) {
+      completedPhases += 1;
+    }
   }
 
-  const completedRecords = Object.values(progress.records).filter(
-    (r) => r && r.completed
-  );
-  const completedPhases = completedRecords.length;
-
-  const validScores = completedRecords
-    .map((r) => r.bestScore)
-    .filter((s): s is number => typeof s === "number");
+  const moduleProgress = getModuleProgress(saveData, protocolId);
+  const validScores: number[] = [];
+  for (const setProgress of Object.values(moduleProgress.exerciseSets)) {
+    if (setProgress?.completed && setProgress.bestRecord?.bestScore !== undefined) {
+      validScores.push(setProgress.bestRecord.bestScore);
+    }
+  }
 
   const bestScore = validScores.length > 0 ? Math.max(...validScores) : undefined;
+  const hasCompletedTutorial = isModuleTutorialCompleted(saveData, protocolId);
 
   const isChallengeUnlocked =
-    protocolId === "bubble" ? isChallengeModeUnlocked(saveData, 3) : undefined;
+    protocolId === "bubble" ? isChallengeModeUnlocked(saveData) : undefined;
 
   return {
     completedPhases,
     totalPhases: 3,
-    hasCompletedTutorial: progress.hasCompletedTutorial,
+    hasCompletedTutorial,
     bestScore,
     isChallengeUnlocked,
   };

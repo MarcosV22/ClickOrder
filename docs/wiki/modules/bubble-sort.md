@@ -236,11 +236,12 @@ Para qualquer passada $i$ ($0 \le i \le n - 2$):
 
 ---
 
-## 17. Persistência e Progresso
+## 17. Persistência e Progresso (Schema v4 - ADR 0021)
 
-- **Schema Atual:** Schema v3 (`protocols.bubble` em `sorting_station_v1_save`).
-- **Dados Persistidos:** `unlockedPhases`, `highestPhaseReached`, `hasCompletedTutorial`, `records[phase]` (com `completed`, `bestScore`, `bestScoreErrors`, `bestScoreHintsUsed`, `bestScoreElapsedTimeMs`).
-- **Migração Futura (Schema v4):** O módulo `bubble` exportará seus registros sob chaves modulares `records["bubble-basic"]`, `records["bubble-intermediate"]`, `records["bubble-advanced"]`, e `records["bubble-challenge-X"]`.
+- **Schema Atual:** Schema v4 (`modules.bubble` em `sorting_station_save`, com fallback de leitura da chave legada `sorting_station_v1_save`).
+- **Dados Persistidos:** `completedTutorial`, `exerciseSets["bubble.practice.basic"]`, `exerciseSets["bubble.practice.intermediate"]`, `exerciseSets["bubble.practice.advanced"]` e `exerciseSets["bubble.challenge.early-exit"]` (com `completed`, `completedAt`, `bestRecord`).
+- **Desbloqueios Derivados:** O Modo Desafio é derivado sob demanda via `isChallengeModeUnlocked(saveData)` a partir da conclusão factual da prática avançada.
+- **Retrocompatibilidade:** Projeção sob demanda para componentes legados via `getProtocolProgress(saveData, "bubble")`.
 
 ---
 

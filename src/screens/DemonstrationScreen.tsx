@@ -1,8 +1,8 @@
 /**
- * Tela do Modo Demonstração Educacional (P2.1-G-D).
+ * Tela do Modo Demonstração Educacional (P2.1-G-D / P2.2-E).
  *
  * Apresenta uma execução canônica e perfeita gerada autonomamente pelas
- * engines reais (BubbleSortEngine ou SelectionSortEngine) sobre vetores curados fixos.
+ * engines reais (BubbleSortEngine, SelectionSortEngine ou InsertionSortEngine) sobre vetores curados fixos.
  *
  * É uma experiência observacional, volátil e livre de efeitos colaterais
  * de persistência, pontuação ou penalidades.
@@ -11,6 +11,7 @@
 import { useMemo } from "react";
 import ReplayScreen from "./ReplayScreen";
 import SelectionReplayScreen from "./SelectionReplayScreen";
+import InsertionReplayScreen from "./InsertionReplayScreen";
 import {
   getDemonstrationExecution,
   type DemonstrationProtocol,
@@ -56,15 +57,24 @@ export default function DemonstrationScreen({
     );
   }
 
+  if (execution.protocol === "insertion") {
+    return (
+      <InsertionReplayScreen
+        initialArray={execution.initialArray}
+        history={execution.history}
+        mode="demonstration"
+        onBackToResult={onBack}
+        onStartTraining={onStartTraining}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white p-6">
       <div className="p-6 rounded-2xl bg-amber-950/40 border border-amber-500/40 text-center max-w-md">
         <h2 className="text-lg font-bold text-amber-400 mb-2">
-          Demonstração Visual em Preparação
+          Protocolo Não Reconhecido
         </h2>
-        <p className="text-xs font-mono text-white/70 mb-4">
-          O driver de demonstração do Insertion Sort está ativo ({execution.history.length} passos computados). A interface com pseudocódigo integrado será ativada no módulo P2.2-E.
-        </p>
         <button
           type="button"
           onClick={onBack}

@@ -183,6 +183,21 @@ O modelo oficial de deliberação está versionado em [`docs/adr/TEMPLATE.md`](.
 - **Contexto:** Formaliza a redefinição oficial do Sorting Station como "Plataforma educacional interativa e gamificada para aprendizagem, prática e visualização de algoritmos de ordenação" (Marco PLATFORM-R0). Congela os 6 módulos curriculares oficiais (Bubble, Selection, Insertion, Merge, Quick, Heap); estabelece o Module Standard transversal de 20 seções; define a taxonomia transversal de 8 tipos de exercícios (A a H); documenta a migração conceitual de fases para exercícios (Prática Básica, Intermediária e Avançada) sem alteração de código ou persistência; bloqueia o Laboratório Comparativo até a homologação dos 6 módulos; projeta a especificação conceitual do Schema v4 de persistência; e reposiciona a camada narrativa secundária para backlog opcional de gamificação.
 - **Impacto:** Fundação institucional do Marco PLATFORM-R0 e remodelagem completa da arquitetura da Wiki.
 
+### [ADR 0019: Camada Pedagógica e Tutorial Interativo do Insertion Sort](../../docs/adr/0019-insertion-sort-pedagogical-layer-and-interactive-tutorial.md)
+- **Status:** `Aceito` (2026-09-16)
+- **Contexto:** Formaliza a camada conceitual e o tutorial interativo do Insertion Sort (Marco P2.2-C). Adota a metáfora visual de elevação de chave com deslocamentos lineares regressivos (*shifts*), FSM bimodal `COMPARE_AND_SHIFT` / `INSERT_READY`, vetor curado `[4, 2, 3]` com 8 passos determinísticos e feedback formativo imediato sem punição mecânica.
+- **Impacto:** Conclusão de P2.2-C com 322 testes unitários aprovados.
+
+### [ADR 0020: Sistema de Prática Interativa e Progressão do Insertion Sort](../../docs/adr/0020-insertion-sort-interactive-practice-system.md)
+- **Status:** `Aceito` (2026-09-17)
+- **Contexto:** Formaliza o gameplay e a progressão prática do Insertion Sort (Marco P2.2-D). Implementa `insertionConstraints.ts`, trilha de exercícios `basic` (n=4), `intermediate` (n=5) e `advanced` (n=6), telemetria factual de *shifts* e *inserts* em `ResultScreen` e `PracticeSetCompleteScreen`, e consolidação do fluxo deliberado de exercícios.
+- **Impacto:** Conclusão de P2.2-D com 344 testes unitários aprovados.
+
+### [ADR 0021: Persistência Orientada a Módulos e Exercícios (Schema v4), Migração v3->v4 e Ativação Pública do Insertion Sort](../../docs/adr/0021-module-exercise-persistence-schema-v4.md)
+- **Status:** `Aceito` (2026-09-17)
+- **Contexto:** Concretiza a persistência da plataforma educacional (Marco P2.2-F). Rejeita a extensão direta de `protocols.insertion` no Schema v3 e adota o Schema v4 canônico estruturado em `modules` e `exerciseSets`. Implementa pipeline de migração determinístico $v1 \rightarrow v2 \rightarrow v3 \rightarrow v4$, estabiliza a chave `sorting_station_save` com fallback seguro para `sorting_station_v1_save`, estabelece a regra estrita de recordes (tempo nunca desempata) e ativa publicamente o Módulo Insertion Sort no Hub (`PROTOCOL_CATALOG`).
+- **Impacto:** Conclusão de P2.2-F com 376 testes unitários aprovados.
+
 ---
 
 ## 5. Catálogo de Candidatos a ADR Futuro

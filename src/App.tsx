@@ -18,14 +18,20 @@ import InsertionGameScreen, {
 } from "./screens/InsertionGameScreen";
 import PracticeSetCompleteScreen from "./screens/PracticeSetCompleteScreen";
 import DemonstrationScreen from "./screens/DemonstrationScreen";
+import InsertionReplayScreen from "./screens/InsertionReplayScreen";
 import type { ProtocolId } from "./screens/protocolCatalog";
+import type { DemonstrationProtocol } from "./game/demonstration";
 import { PhaseResult } from "./game/campaign/campaignSummary";
 import {
   loadGameProgress,
   recordPhaseCompletion,
+  recordExerciseCompletion,
   recordTutorialCompletion,
   isChallengeModeUnlocked,
+  isModuleTutorialCompleted,
+  isExerciseSetCompleted,
   getInitialSessionRoute,
+  INSERTION_EXERCISE_SETS,
   type GameSaveSchema,
 } from "./game/persistence";
 import {
@@ -126,9 +132,9 @@ export default function App() {
   const [briefingReturnScreen, setBriefingReturnScreen] =
     useState<"home" | "campaign-complete">("home");
 
-  // Estado do Modo Demonstração Educacional (P2.1-G-D)
+  // Estado do Modo Demonstração Educacional (P2.1-G-D / P2.2-E)
   const [demonstrationProtocol, setDemonstrationProtocol] =
-    useState<"bubble" | "selection">("bubble");
+    useState<DemonstrationProtocol>("bubble");
   const [demonstrationReturnScreen, setDemonstrationReturnScreen] =
     useState<"home" | "briefing">("home");
 
@@ -330,7 +336,33 @@ export default function App() {
       return [...prev, data];
     });
 
+    const exerciseSetId =
+      data.level === "basic"
+        ? INSERTION_EXERCISE_SETS.BASIC
+        : data.level === "intermediate"
+          ? INSERTION_EXERCISE_SETS.INTERMEDIATE
+          : INSERTION_EXERCISE_SETS.ADVANCED;
+
+    const updated = recordExerciseCompletion(
+      saveData,
+      "insertion",
+      exerciseSetId,
+      {
+        score: data.score,
+        errors: data.errors,
+        hintsUsed: data.hintsUsed,
+        elapsedTimeMs: data.elapsedTimeMs,
+      }
+    );
+    setSaveData(updated);
+
     setScreen("result");
+  };
+
+  const handleInsertionTutorialComplete = () => {
+    const updated = recordTutorialCompletion(saveData, "insertion");
+    setSaveData(updated);
+    handleStartInsertionPractice("basic");
   };
 
   const handleNextPhase = () => {
@@ -438,12 +470,29 @@ export default function App() {
 
   const handleBriefingStart = () => {
     if (briefingModeId === "insertion-canonical") {
-      setScreen("insertion-tutorial");
+      if (!isModuleTutorialCompleted(saveData, "insertion")) {
+        setScreen("insertion-tutorial");
+      } else {
+        const startLevel = !isExerciseSetCompleted(
+          saveData,
+          "insertion",
+          INSERTION_EXERCISE_SETS.BASIC
+        )
+          ? "basic"
+          : !isExerciseSetCompleted(
+              saveData,
+              "insertion",
+              INSERTION_EXERCISE_SETS.INTERMEDIATE
+            )
+            ? "intermediate"
+            : "advanced";
+        handleStartInsertionPractice(startLevel);
+      }
       return;
     }
 
     if (briefingModeId === "selection-canonical") {
-      if (!saveData.protocols.selection.hasCompletedTutorial) {
+      if (!isModuleTutorialCompleted(saveData, "selection")) {
         setScreen("selection-tutorial");
       } else {
         const gen = generateSelectionPhaseArray(1);
@@ -508,7 +557,6 @@ export default function App() {
     protocolId: ProtocolId,
     origin: "home" | "briefing"
   ) => {
-    if (protocolId === "insertion") return;
     setDemonstrationProtocol(protocolId);
     setDemonstrationReturnScreen(origin);
     setScreen("demonstration");
@@ -523,6 +571,25 @@ export default function App() {
       handleSelectCampaign();
     } else if (demonstrationProtocol === "selection") {
       handleSelectSelection();
+    } else if (demonstrationProtocol === "insertion") {
+      if (!isModuleTutorialCompleted(saveData, "insertion")) {
+        setScreen("insertion-tutorial");
+      } else {
+        const startLevel = !isExerciseSetCompleted(
+          saveData,
+          "insertion",
+          INSERTION_EXERCISE_SETS.BASIC
+        )
+          ? "basic"
+          : !isExerciseSetCompleted(
+              saveData,
+              "insertion",
+              INSERTION_EXERCISE_SETS.INTERMEDIATE
+            )
+            ? "intermediate"
+            : "advanced";
+        handleStartInsertionPractice(startLevel);
+      }
     }
   };
 
@@ -596,7 +663,11 @@ export default function App() {
           onBack={() => setScreen(briefingReturnScreen)}
           onOpenDemonstration={() =>
             handleOpenDemonstration(
-              briefingModeId === "selection-canonical" ? "selection" : "bubble",
+              briefingModeId === "insertion-canonical"
+                ? "insertion"
+                : briefingModeId === "selection-canonical"
+                  ? "selection"
+                  : "bubble",
               "briefing"
             )
           }
@@ -616,7 +687,7 @@ export default function App() {
       )}
       {screen === "insertion-tutorial" && (
         <InsertionTutorialScreen
-          onComplete={() => handleStartInsertionPractice("basic")}
+          onComplete={handleInsertionTutorialComplete}
           onBack={() => setScreen("home")}
         />
       )}
@@ -677,9 +748,7 @@ export default function App() {
           protocol={result.protocol}
           onNext={handleNextPhase}
           onRepeat={handleRepeat}
-          onViewReplay={
-            result.protocol !== "insertion" ? () => setScreen("replay") : undefined
-          }
+          onViewReplay={() => setScreen("replay")}
           variant={result.protocol === "bubble" ? (result.variant ?? activeVariant) : undefined}
           earlyExitTriggered={result.protocol === "bubble" ? result.earlyExitTriggered : undefined}
           terminationPass={result.protocol === "bubble" ? result.terminationPass : undefined}
@@ -701,6 +770,13 @@ export default function App() {
             phase={currentPhase}
             variant={result.variant ?? activeVariant}
             earlyExitTriggered={result.earlyExitTriggered}
+            onBackToResult={() => setScreen("result")}
+          />
+        ) : result.protocol === "insertion" ? (
+          <InsertionReplayScreen
+            initialArray={result.initialArray}
+            history={result.history}
+            practiceTitle={result.practiceDefinition.title}
             onBackToResult={() => setScreen("result")}
           />
         ) : null

@@ -1,9 +1,9 @@
 # Módulo 03 — Insertion Sort
 
 > **Documento canônico do módulo curricular:** Especificação integral de design pedagógico, mecânico e computacional do Módulo de Insertion Sort da plataforma **Sorting Station**.  
-> **Status de Implementação:** `EM ANDAMENTO` (Marco P2.2; P2.2-A, P2.2-B e P2.2-C concluídos — Constraints, Briefing, Tutorial Interativo e Driver Puro de Demonstração 100% Verdes).  
-> **Data de Atualização:** 15/09/2026 (Marco P2.2-C / ADR 0019)  
-> **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`ADR 0019`](../../adr/0019-insertion-sort-pedagogical-layer-and-interactive-tutorial.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md), [`05-ux-design-system.md`](../05-ux-design-system.md), [`10-roadmap.md`](../10-roadmap.md), [`12-pedagogy-and-academic-traceability.md`](../12-pedagogy-and-academic-traceability.md).
+> **Status de Implementação:** `IMPLEMENTADO E ATIVADO (P2.2 CONCLUÍDO)` (P2.2-A a P2.2-F concluídos — Constraints, Briefing, Tutorial Interativo, Práticas, Replay Retrospectivo, Pseudocódigo Sincronizado, Demonstração Visual, Persistência Schema v4 e Ativação Pública no Hub).  
+> **Data de Atualização:** 17/09/2026 (Marco P2.2-F / ADR 0019 / ADR 0020 / ADR 0021)  
+> **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`ADR 0019`](../../adr/0019-insertion-sort-pedagogical-layer-and-interactive-tutorial.md), [`ADR 0020`](../../adr/0020-insertion-interactive-practice-system.md), [`ADR 0021`](../../adr/0021-module-exercise-persistence-schema-v4.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md), [`05-ux-design-system.md`](../05-ux-design-system.md), [`07-backend-and-persistence.md`](../07-backend-and-persistence.md), [`10-roadmap.md`](../10-roadmap.md), [`12-pedagogy-and-academic-traceability.md`](../12-pedagogy-and-academic-traceability.md).
 
 ---
 
@@ -13,7 +13,7 @@
 - **Identificador de Sistema (`moduleId`):** `insertion`
 - **Rótulo Diegético na Interface:** `PROTOCOLO: INSERTION SORT // DESVIO E ENCAIXE DE CARGAS`
 - **Subtítulo Diegético:** *Desvio e Encaixe de Cargas*
-- **Status Factual:** `EM ANDAMENTO` (Engine pura, constraints, briefing, tutorial guiado e driver de demonstração implementados; P2.2-C concluído; próximo sub-marco: P2.2-D — Gameplay procedural e campanha)
+- **Status Factual:** `IMPLEMENTADO E ATIVADO (P2.2 CONCLUÍDO)` (Engine pura, constraints, briefing, tutorial guiado, práticas proceduralmente calibradas, tela de conclusão do conjunto, ResultScreen com telemetria de shifts/inserts, modelo de replay puro, pseudocódigo sincronizado de 11 linhas, tela unificada de replay/demonstração e persistência Schema v4 ativa; status no catálogo: `available`)
 - **Classificação Curricular:** Algoritmo Elementar de Inserção com Subvetor Ordenado Crescente
 - **Complexidade Temporal:**
   - **Melhor Caso (Vetor Já Ordenado):** $\Omega(n)$ comparações, $0$ deslocamentos físicos
@@ -275,23 +275,50 @@ Utiliza exclusivamente a infraestrutura global `generateSortingArray` (PRNG Mulb
 
 ---
 
-## 16. Replay e Derivação de Quadros
+## 16. Replay Retrospectivo e Demonstração Visual (P2.2-E)
 
-- **Módulo Dedicado:** `insertionReplayModel.ts` consumindo `history: readonly InsertionStepRecord[]`.
-- **Tipos de Quadros Imutáveis:**
-  - `INITIAL`: Exibição do vetor inicial com subvetor $A[0]$ marcado como `ORD`.
-  - `KEY_LIFT`: A chave eleva-se ao trilho aéreo e a vaga é aberta em $i$.
-  - `COMPARISON`: Destaque relacional entre $A[j]$ e a chave suspensa.
-  - `SHIFT`: Animação de deslocamento de $A[j]$ para $j+1$, com transferência da vaga para $j$.
-  - `INSERTION`: Descida da chave para a vaga $j+1$ e expansão da fronteira `ORD`.
-- **Pseudocódigo Sincronizado:** O painel `InsertionSortPseudocodePanel.tsx` destaca dinamicamente a linha exata da instrução correspondente ao quadro em exibição.
+- **Módulo Dedicado:** `insertionReplayModel.ts` consumindo `(initialArray, history: readonly InsertionStepRecord[])`.
+- **Invariante Estrutural Estrita:** `frames.length === 1 + history.length` (exatamente 1 quadro `INITIAL` e 1 quadro para cada `StepRecord`). Sem geração de microframes artificiais (`INIT_J`, `DECREMENT_J`, `END_WHILE` ou `COMPARISON` isolado sem passo correspondente).
+- **Tipos de Quadros Imutáveis (`InsertionReplayFrame`):**
+  - `INITIAL`: Exibição do vetor inicial com a primeira carga estabelecendo `ORD` provisório de tamanho 1. Nenhuma vaga aberta e nenhum elemento suspenso.
+  - `KEY_LIFT`: A chave eleva-se ao trilho aéreo (`key = A[i]`) e a vaga física é aberta na esteira (`holeIndex = i`).
+  - `SHIFT`: A carga $A[j]$ desliza para a direita ocupando $j+1$, e a vaga física desloca-se para $j$. A comparação concreta ($A[j] > \text{chave} \rightarrow \text{VERDADEIRO}$) fica registrada no próprio quadro que justificou o movimento.
+  - `INSERT`: Encaixe definitivo da chave na vaga, fechando a lacuna e expandindo `ORD` para cobrir $0 \dots i$. Discriminado pedagogicamente por:
+    - `CONDITION_FALSE`: Parada por $A[j] \le \text{chave}$ (condição booleana falsa);
+    - `HEAD_REACHED`: Parada por $j = -1$ (cabeceira da esteira alcançada).
+- **Tratamento Rigoroso da Cabeceira:** Invariante inegociável de nunca exibir $A[-1]$ ou tentar comparar com posições fora do arranjo; o quadro exibe textualmente `j < 0 • CABECEIRA ALCANÇADA`.
+- **Semântica Visual e Papéis de Caixas (`BoxRole`):**
+  - A vaga aberta (`InsertionHoleSlot`) nunca recebe badge `ORD` nem o papel `ordered`;
+  - Cargas preenchidas dentro da região $0 \dots \text{orderedBoundary}$ recebem o papel `ordered` (`ORD`) ou `ordered-scan` (`ORD • SCAN`) se coincidentes com $j$;
+  - Durante passos intermediários, o selo esmeralda definitivo `OK` jamais é emitido;
+  - Somente após o quadro final consolidado (`isCompleted === true`), todas as caixas assumem o papel `sorted` (`OK`).
+- **Pseudocódigo Sincronizado de 11 Linhas:** O componente `InsertionSortPseudocodePanel.tsx` consome `getInsertionPseudocodeHighlight(frame)` e mapeia determinística e imutavelmente a linha primária em foco, as linhas de escopo ativas, o resultado booleano da condição e o bloco factual de contexto concreto.
+- **Tela de Visualização Unificada:** `InsertionReplayScreen.tsx` opera como casca compartilhada para ambos os modos:
+  - `mode: "replay"`: Auditoria técnica pós-exercício iniciada pausada com botão `← VOLTAR AO RESULTADO`;
+  - `mode: "demonstration"`: Demonstração canônica pré-treinamento iniciada com autoplay ativo, botão `← VOLTAR` e CTA `INICIAR TREINAMENTO`.
+- **Demonstração Canônica:** Alimentada autonomamente por `runInsertionDemonstration(CURATED_INSERTION_DEMO_ARRAY)` sobre o vetor curado `[6, 3, 5, 2, 7]`.
 
 ---
 
-## 17. Persistência e Progresso
+## 17. Persistência e Progresso (Schema v4 - ADR 0021)
 
-- **Schema v3 Atual:** Mapeado futuramente via chave isolada `protocols.insertion: ProtocolProgress` em `SaveData`, garantindo independência estrita em relação ao Bubble e Selection Sort.
-- **Projeção para Schema v4:** Mapeamento conceitual para `moduleId: "insertion"` com `exerciseSetIds`: `["insertion.practice.basic", "insertion.practice.intermediate", "insertion.practice.advanced"]`.
+- **Persistência Canônica Implementada (Schema v4):** Mapeado diretamente em `saveData.modules.insertion` na chave `sorting_station_save`:
+  - `completedTutorial: boolean` — Persiste conclusão do tutorial interativo `[4, 2, 3]`;
+  - `exerciseSets`: Mapeamento de cada conjunto de exercícios concluído:
+    - `"insertion.practice.basic"` ($n=4$)
+    - `"insertion.practice.intermediate"` ($n=5$)
+    - `"insertion.practice.advanced"` ($n=6$)
+  - `bestRecord`: Registra factual de melhor pontuação (`bestScore`, `bestScoreErrors`, `bestScoreHintsUsed`, `bestScoreElapsedTimeMs`).
+- **Política Estrita de Recordes:**
+  - Maior pontuação substitui recorde anterior;
+  - Empate de pontuação: menor número de erros substitui recorde (recompensa por precisão);
+  - Tempo de execução **NUNCA** desempata recordes nem incentiva pressa mecânica;
+  - Deslocamentos e inserções não alteram critério de recorde.
+- **Desbloqueios Derivados:**
+  - Prática básica sempre desbloqueada;
+  - Prática intermediária desbloqueada ao concluir básica;
+  - Prática avançada desbloqueada ao concluir intermediária;
+  - Zero flags redundantes persistidas no storage.
 - **Volatilidade de Sessão:** Demonstrações e quadros de Replay permanecem estritamente voláteis em memória RAM.
 
 ---
