@@ -168,6 +168,26 @@ body {
   background-size: 60px 60px;
 }
 
-/* Scrollbar hidden */
-::-webkit-scrollbar { display: none; }
-* { scrollbar-width: none; }
+/* Custom futuristic scrollbar with clear navigation affordance */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(6, 11, 26, 0.7);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 245, 255, 0.25);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 245, 255, 0.5);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 245, 255, 0.3) rgba(6, 11, 26, 0.7);
+}

@@ -96,7 +96,7 @@ export default function ReplayScreen({
   );
 
   return (
-    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col justify-start pt-4 sm:pt-6 pb-16 sm:pb-24 px-4 md:px-6 gap-4 sm:gap-6">
+    <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines flex flex-col justify-start pt-4 sm:pt-6 pb-16 sm:pb-24 px-4 md:px-6 gap-4 sm:gap-6 select-none">
       {/* Glow effects */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-500/5 rounded-full blur-[90px] pointer-events-none" />
@@ -140,7 +140,7 @@ export default function ReplayScreen({
       </div>
 
       {/* Main Content Area */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-start sm:justify-center gap-4 sm:gap-5 max-w-4xl w-full mx-auto my-0 py-2">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-start gap-4 sm:gap-5 max-w-4xl w-full mx-auto my-0 py-2">
         {/* Step & Action Badge Header */}
         <div className="flex flex-col items-center gap-2 text-center">
           <div className="flex flex-wrap items-center justify-center gap-3">

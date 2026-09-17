@@ -624,7 +624,7 @@ export default function App() {
     gameMode === "CHALLENGE" ? "EARLY_EXIT" : "CANONICAL";
 
   return (
-    <div className="w-full h-full overflow-hidden">
+    <div className="w-full h-full min-h-screen overflow-x-hidden">
       {screen === "home" && (
         <HomeScreen
           saveData={saveData}

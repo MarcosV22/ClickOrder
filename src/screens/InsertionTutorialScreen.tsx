@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import GameButton from "../components/GameButton";
 import NumberedBox, { type BoxRole } from "../components/NumberedBox";
 import InsertionHoleSlot from "../components/InsertionHoleSlot";
@@ -88,8 +88,19 @@ export default function InsertionTutorialScreen({
     return "default";
   };
 
+  const completionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (gameState.completed) {
+      completionRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [gameState.completed]);
+
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-6 md:p-8 select-none">
+    <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines text-white flex flex-col items-center justify-start p-4 sm:p-6 md:p-8 pb-16 sm:pb-24 select-none">
+      {/* Ambient glow matching amber insertion theme */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-amber-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-cyan-500/5 rounded-full blur-[90px] pointer-events-none" />
       {/* Top Bar */}
       <header className="w-full max-w-4xl flex items-center justify-between mb-6 pb-4 border-b border-white/10">
         <div className="flex items-center gap-3">
@@ -162,11 +173,12 @@ export default function InsertionTutorialScreen({
         </section>
 
         {/* Workspace: Trilho Aéreo + Esteira */}
-        <section className="w-full flex flex-col items-center gap-6 p-6 rounded-2xl bg-slate-900/80 border border-white/10 shadow-2xl relative overflow-hidden">
+        <section className="w-full flex flex-col items-center gap-6 p-6 rounded-2xl bg-[#080f28]/95 border border-amber-500/20 shadow-2xl relative overflow-hidden">
           {/* 1. Trilho Aéreo (Overhead Rail) */}
           <div className="w-full flex flex-col items-center gap-2 pb-4 border-b border-dashed border-white/10">
             <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-amber-300/80 uppercase">
-              <span>🛤 TRILHO AÉREO • CHAVE SUSPENSA</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span>TRILHO AÉREO • CHAVE SUSPENSA</span>
             </div>
 
             <div className="h-32 flex items-center justify-center">
@@ -193,7 +205,8 @@ export default function InsertionTutorialScreen({
           {/* 2. Esteira de Cargas (Conveyor Belt) */}
           <div className="w-full flex flex-col items-center gap-3">
             <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-white/50 uppercase">
-              <span>⚙ ESTEIRA DE CARGAS • PARTIÇÃO OPERACIONAL</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+              <span>ESTEIRA DE CARGAS • PARTIÇÃO OPERACIONAL</span>
             </div>
 
             <div className="flex items-center justify-center gap-4 sm:gap-6 py-4 px-6 rounded-xl bg-black/40 border border-white/5 w-full min-h-[140px] overflow-x-auto">
@@ -268,12 +281,15 @@ export default function InsertionTutorialScreen({
         {/* Action Controls */}
         <section className="w-full flex flex-col items-center gap-3">
           {gameState.completed ? (
-            <div className="flex flex-col items-center gap-4 w-full max-w-md">
-              <div className="text-center p-5 rounded-xl bg-emerald-950/50 border border-emerald-500/40 w-full shadow-lg">
-                <span className="text-emerald-400 text-lg font-bold block mb-1">
+            <div
+              ref={completionRef}
+              className="flex flex-col items-center gap-4 w-full max-w-md animate-fade-in"
+            >
+              <div className="text-center p-4 sm:p-5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 w-full shadow-xl">
+                <span className="text-emerald-400 text-base sm:text-lg font-bold block mb-1">
                   ✓ TUTORIAL CONCLUÍDO COM SUCESSO!
                 </span>
-                <p className="text-xs text-white/80 font-mono leading-relaxed mb-3">
+                <p className="text-xs text-white/80 font-mono leading-relaxed mb-2.5">
                   Você dominou o ciclo canônico do Insertion Sort:
                 </p>
                 <ul className="text-left text-xs font-mono text-emerald-200/90 space-y-1 list-disc list-inside">
@@ -288,7 +304,7 @@ export default function InsertionTutorialScreen({
                 variant="primary"
                 size="md"
                 icon="✓"
-                className="w-full"
+                className="w-full shadow-lg shadow-emerald-950/40"
               >
                 CONCLUIR TUTORIAL
               </GameButton>

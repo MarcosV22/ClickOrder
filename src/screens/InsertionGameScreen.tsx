@@ -295,7 +295,7 @@ export default function InsertionGameScreen({
   };
 
   return (
-    <div className="flex flex-col w-full h-full min-h-screen bg-[#060b1a] bg-grid scanlines text-white select-none">
+    <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines text-white flex flex-col justify-start select-none">
       {/* 1. Header Canônico da Prática Curricular */}
       <header className="flex flex-wrap items-center justify-between gap-4 w-full px-6 py-3.5 bg-[#080f28]/90 border-b border-amber-500/20 shadow-md">
         {/* Identificação do Módulo */}
@@ -358,7 +358,7 @@ export default function InsertionGameScreen({
       </header>
 
       {/* Conteúdo Principal */}
-      <main className="flex-1 flex flex-col items-center justify-start max-w-5xl w-full mx-auto p-4 sm:p-6 gap-6">
+      <main className="flex-1 flex flex-col items-center justify-start max-w-5xl w-full mx-auto p-4 sm:p-6 pb-16 sm:pb-24 gap-6">
         {/* Painel Descritivo da Prática */}
         <section className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-[#0a1232]/80 border border-amber-500/20 shadow-lg">
           <div className="flex flex-col gap-1">

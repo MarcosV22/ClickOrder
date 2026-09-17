@@ -70,7 +70,7 @@ export default function DemonstrationScreen({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white p-6">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#060b1a] bg-grid scanlines text-white p-6 select-none">
       <div className="p-6 rounded-2xl bg-amber-950/40 border border-amber-500/40 text-center max-w-md">
         <h2 className="text-lg font-bold text-amber-400 mb-2">
           Protocolo Não Reconhecido

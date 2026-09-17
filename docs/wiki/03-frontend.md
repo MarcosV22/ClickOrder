@@ -113,17 +113,18 @@ flowchart TD
 
 ### 3.1. `src/App.tsx` (Componente Raiz)
 - **Responsabilidades:**
-  - Armazenar o estado global de navegação (`screen`: `"home" | "briefing" | "tutorial" | "selection-tutorial" | "game" | "selection-game" | "result" | "replay" | "selection-replay" | "demonstration" | "campaign-complete" | "selection-campaign-complete"`) ([`src/App.tsx`](../../src/App.tsx));
-  - Armazenar o identificador ativo de briefing (`briefingModeId`: `"bubble-canonical" | "bubble-early-exit" | "selection-canonical"`);
-  - Armazenar o contexto do Modo Demonstração (`demonstrationProtocol`: `"bubble" | "selection"` e `demonstrationReturnScreen`: `"home" | "briefing"`);
+  - Container raiz da aplicação estruturado estritamente segundo a **Scrollable Screen Rule** ([`05-ux-design-system.md`](./05-ux-design-system.md#10-regra-canônica-de-telas-verticais-e-rolagem-scrollable-screen-rule)), operando com `<div className="w-full h-full min-h-screen overflow-x-hidden">`, eliminando cortes acidentais de viewport e garantindo o crescimento natural e scroll vertical livre para todas as telas (Hotfix PLATFORM-UI-H1);
+  - Armazenar o estado global de navegação (`screen`: `"home" | "briefing" | "tutorial" | "selection-tutorial" | "insertion-tutorial" | "game" | "selection-game" | "insertion-game" | "result" | "replay" | "selection-replay" | "insertion-replay" | "demonstration" | "campaign-complete" | "selection-campaign-complete" | "insertion-practice-complete"`) ([`src/App.tsx`](../../src/App.tsx));
+  - Armazenar o identificador ativo de briefing (`briefingModeId`: `"bubble-canonical" | "bubble-early-exit" | "selection-canonical" | "insertion-canonical"`);
+  - Armazenar o contexto do Modo Demonstração (`demonstrationProtocol`: `"bubble" | "selection" | "insertion"` e `demonstrationReturnScreen`: `"home" | "briefing"`);
   - Armazenar o número da fase ativa (`phase`: `1 | 2 | 3`) ([`src/App.tsx`](../../src/App.tsx));
-  - Armazenar o último resultado recebido (`result`: `GameResult | null`, união discriminada por `protocol: "bubble" | "selection"`) ([`src/App.tsx`](../../src/App.tsx));
-  - Armazenar em memória os resultados acumulados de cada fase concluída (`phaseResults`: `PhaseResult[]` para Bubble e `selectionResults`: `SelectionGameResult[]` para Selection);
-  - Controlar o estado volátil de conclusão de tutorial da sessão (`hasCompletedSelectionTutorial`), garantindo que o tutorial seja obrigatório na primeira execução do Selection Sort e opcional subsequentemente na mesma sessão;
+  - Armazenar o último resultado recebido (`result`: `GameResult | null`, união discriminada por `protocol: "bubble" | "selection" | "insertion"`) ([`src/App.tsx`](../../src/App.tsx));
+  - Armazenar em memória os resultados acumulados de cada fase concluída (`phaseResults`: `PhaseResult[]` para Bubble, `selectionResults`: `SelectionGameResult[]` para Selection e `insertionResults` para Insertion);
+  - Controlar o estado volátil de conclusão de tutorial da sessão (`hasCompletedSelectionTutorial`, `hasCompletedInsertionTutorial`), garantindo que o tutorial seja obrigatório na primeira execução e opcional subsequentemente na mesma sessão;
   - Definir as matrizes de fases procedurais do Bubble Sort (`PHASES`) e do Selection Sort (`SELECTION_PHASES`: F1 $n=4$, F2 $n=5$, F3 $n=6$);
   - Determinar semanticamente se há próxima fase (`hasNextPhase = phase < activePhases.length`);
-  - Orquestrar a transição para `CampaignCompleteScreen` (Bubble) ou `SelectionCampaignCompleteScreen` (Selection) ao finalizar a fase 3;
-  - Forçar a remontagem de `GameScreen` através da prop `key={'game-phase-${phase}'}` ([`src/App.tsx`](../../src/App.tsx)).
+  - Orquestrar a transição para `CampaignCompleteScreen` (Bubble), `SelectionCampaignCompleteScreen` (Selection) ou `PracticeSetCompleteScreen` (Insertion);
+  - Forçar a remontagem de telas de gameplay através da prop `key={'game-phase-${phase}'}` ([`src/App.tsx`](../../src/App.tsx)).
 
 ### 3.2. `src/screens/HomeScreen.tsx`, `ProtocolCard.tsx` e `protocolCatalog.ts`
 - **Responsabilidades:** Hub Educacional Simétrico de Protocolos, ambientação narrativa na "Central Logística v2.0" e seleção curricular de algoritmos de ordenação (P2.1-G-C / ADR 0016). A Home deixa de tratar o Bubble Sort como jogo único e adota o Sorting Station como plataforma transversal de aprendizagem.

@@ -377,3 +377,33 @@ Para eliminar qualquer dependência exclusiva de cores (em conformidade com WCAG
 | `sorted` | Borda esmeralda com glow sutil | `OK` | Carga definitivamente consolidada em sua posição ordenada final (invariante fixa) |
 | `ordered` | Borda esmeralda tracejada/suave | `ORD` | Carga pertencente a partição ordenada provisória, ainda sujeita a deslocamentos (preparação Insertion Sort) |
 
+---
+
+## 10. Regra Canônica de Telas Verticais e Rolagem (Scrollable Screen Rule)
+
+Consolidada formalmente no marco **PLATFORM-UI-H1**, esta diretriz inegociável de UX e layout garante que qualquer tela cujo conteúdo cresça além da altura do viewport (especialmente em tutoriais, relatórios de resultado, replays e esteiras com trilhos verticais) permaneça perfeitamente navegável, sem cortes de conteúdo ou botões de ação (CTAs) inacessíveis.
+
+### 10.1. Enunciado da Regra (Scrollable Screen Rule)
+
+Toda tela com conteúdo potencialmente superior ao viewport **DEVE**:
+1. **Utilizar Altura Mínima, Nunca Altura Fixa:**
+   - O nó raiz deve declarar `min-h-screen w-full h-full`.
+   - **Proibição Estrita:** É estritamente proibido utilizar `h-screen overflow-hidden` em containers ancestrais ou nós raízes de telas cujo conteúdo possa crescer verticalmente (ex.: `App.tsx` opera com `w-full h-full min-h-screen overflow-x-hidden`).
+2. **Permitir Scroll Vertical e Conter Transbordamento Horizontal:**
+   - O nó raiz ou o container principal com scroll deve declarar `overflow-y-auto overflow-x-hidden`.
+3. **Alinhamento a Partir do Topo (`justify-start`):**
+   - O container de fluxo vertical deve posicionar os elementos a partir do topo (`justify-start`).
+   - É proibido depender de `justify-center` no container principal de telas roláveis, pois quando o conteúdo excede a altura da janela, o topo é empurrado para fora da viewport em coordenadas negativas inacessíveis.
+4. **Padding Inferior de Segurança (Safe Bottom Padding):**
+   - Toda tela rolável deve aplicar espaçamento inferior seguro: `pb-16 sm:pb-24`.
+   - O último elemento interativo (CTA final, botão de conclusão de tutorial, avançar fase, etc.) deve ter espaço livre suficiente abaixo de si para visualização confortável e clique sem encavalar na borda da tela.
+5. **Isolamento da Rolagem Horizontal da Esteira Mecânica:**
+   - A esteira de roletes e caixas utiliza `overflow-x-auto` estritamente restrito ao seu container físico (`.conveyor-track`).
+   - O transbordamento horizontal da esteira não deve interceptar ou bloquear o evento vertical de rolagem da página.
+6. **Scrollbars Acessíveis e Temáticas:**
+   - É proibido ocultar globalmente barras de rolagem funcionais com `display: none` ou `scrollbar-width: none`.
+   - A plataforma adota uma estilização sci-fi acessível (`scrollbar-width: thin; scrollbar-color: rgba(0, 245, 255, 0.3) rgba(6, 11, 26, 0.7)` e seletores `::-webkit-scrollbar`), fornecendo affordance visual clara de navegação para usuários de mouse/desktop.
+7. **Revelação Suave de Conclusão (Smooth Auto-Scroll):**
+   - Ao concluir fluxos de etapas ou tutoriais interativos que geram cards adicionais na parte inferior da tela, o componente deve disparar `scrollIntoView({ behavior: "smooth", block: "nearest" })` para garantir que o card de sucesso e seu CTA fiquem imediatamente visíveis sem sobressaltos.
+
+

@@ -368,7 +368,7 @@ export default function GameScreen({
   };
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-[#060b1a] bg-grid scanlines flex flex-col">
+    <div className="relative w-full h-full min-h-screen overflow-hidden bg-[#060b1a] bg-grid scanlines flex flex-col select-none">
       {/* Header */}
       <PhaseHeader
         protocol={variant === "EARLY_EXIT" ? "BUBBLE (DESAFIO)" : "BUBBLE"}
@@ -377,7 +377,7 @@ export default function GameScreen({
       />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-start gap-4 sm:gap-6 px-4 sm:px-6 py-4 pb-16 sm:pb-24 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-start gap-4 sm:gap-6 px-4 sm:px-6 py-4 pb-16 sm:pb-24 overflow-y-auto overflow-x-hidden">
         {/* Ambient glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-64 bg-blue-600/4 rounded-full blur-[100px] pointer-events-none" />
 

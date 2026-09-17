@@ -78,7 +78,7 @@ export default function HomeScreen({
   };
 
   return (
-    <div className="relative w-full h-full min-h-full overflow-y-auto bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-10 pb-16 sm:pb-24 px-4">
+    <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-10 pb-16 sm:pb-24 px-4 select-none">
       {/* Animated belt CSS */}
       <style>{`
         @keyframes scroll-belt {

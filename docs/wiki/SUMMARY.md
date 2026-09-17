@@ -1,7 +1,7 @@
 # Sorting Station – Sumário Operacional da Plataforma
 
 > **Status da Documentação:** Ativo / Canônico  
-> **Data da Última Revisão:** 15/09/2026 (Marco PLATFORM-R0)  
+> **Data da Última Revisão:** 17/09/2026 (Marcos PLATFORM-R0 e PLATFORM-UI-H1)  
 > **Governança:** [`AGENTS.md`](../../AGENTS.md) e [`ADR 0018`](../adr/0018-game-to-educational-platform-transition.md).  
 > 
 > *Este documento é o ponto de entrada operacional e mapa de navegação canônico da Wiki. Ele não substitui a leitura das páginas temáticas detalhadas correspondentes ao escopo da tarefa.*
@@ -140,6 +140,7 @@ flowchart TD
 - **Máquinas de Estados Imutáveis:** Cada passo gera um novo estado congelado (`Object.freeze`);
 - **Geração Procedural Universal:** Um único gerador PRNG Mulberry32 determinístico (`arrayGenerator.ts`) atende a todos os algoritmos através de constraints específicas. Nenhum algoritmo possui gerador próprio;
 - **Persistência Desacoplada:** Schema v4 implementado e ativo (`sorting_station_save`), orientado a módulos e conjuntos de exercícios (`exerciseSets`), com pipeline de migração v1->v2->v3->v4 e fallback de leitura da chave legada;
+- **Padronização de Telas e Rolagem Vertical (Scrollable Screen Rule — PLATFORM-UI-H1):** Diretriz canônica eliminando `overflow-hidden` podador de viewports, adotando `min-h-screen`, `overflow-y-auto`, `overflow-x-hidden`, `justify-start` e `pb-16 sm:pb-24` em todas as telas com conteúdo dinâmico;
 - **Suíte de Testes Automatizados:** **Vitest** com **376 testes unitários** em 27 arquivos com 100% de aprovação.
 
 ---
