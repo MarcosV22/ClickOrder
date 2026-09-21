@@ -135,16 +135,18 @@ Após $j = n-1$, $minIndex$ aponta para o menor elemento de todo o subvetor $[i 
 
 ---
 
-## 10. Tipos de Exercícios Suportados
+## 10. Tipos de Exercícios Suportados (PLATFORM-R1-B)
 
 | Tipo de Exercício | Suporte no Módulo | Implementação Concreta no Código |
 | :--- | :---: | :--- |
 | **Introdução / Conceito** | `OBRIGATÓRIO` | `ProtocolModeBriefingScreen.tsx` (`selection-canonical`) |
 | **Demonstração** | `OBRIGATÓRIO` | `DemonstrationScreen.tsx` consumindo `selectionDemonstration.ts` (`[4, 1, 3]`) |
 | **Tutorial Guiado** | `OBRIGATÓRIO` | `SelectionTutorialScreen.tsx` com engine real |
-| **Prática Básica** | `OBRIGATÓRIO` | `SelectionGameScreen.tsx` (Fase 1: $n=4$ gerado proceduralmente) |
-| **Prática Progressiva** | `OBRIGATÓRIO` | `SelectionGameScreen.tsx` (Fase 2: $n=5$, Fase 3: $n=6$) |
+| **Seletor de Práticas** | `OBRIGATÓRIO` | `PracticeSelector.tsx` com catálogo curricular transversal (`src/game/curriculum/`) |
+| **Prática Básica** | `OBRIGATÓRIO` | `SelectionGameScreen.tsx` (`selection.practice.basic`: $n=4$ gerado proceduralmente) |
+| **Prática Progressiva** | `OBRIGATÓRIO` | `SelectionGameScreen.tsx` (`selection.practice.intermediate`: $n=5$, `selection.practice.advanced`: $n=6$) |
 | **Casos do Algoritmo** | `OBRIGATÓRIO` | Exercícios curados de instabilidade e casos sem troca |
+| **Conclusão de Conjunto** | `OBRIGATÓRIO` | `PracticeSetCompleteScreen.tsx` agregando telemetria e síntese pedagógica |
 | **Desafio** | `OPCIONAL` | Modo com limite estrito de tempo de inspeção |
 | **Prática Livre (Sandbox)**| `OPCIONAL` | Planejado para expansão futura da plataforma |
 
@@ -168,10 +170,10 @@ Após $j = n-1$, $minIndex$ aponta para o menor elemento de todo o subvetor $[i 
 ## 12. Geração Procedural e Constraints do Módulo
 
 - **Módulo:** `selectionConstraints.ts` e `generateSelectionPhaseArray`.
-- **Tamanhos Curriculares:**
-  - Prática Básica (Fase 1): $n = 4$ elementos;
-  - Prática Intermediária (Fase 2): $n = 5$ elementos;
-  - Prática Avançada (Fase 3): $n = 6$ elementos.
+- **Tamanhos Curriculares Canônicos:**
+  - Prática Básica (`selection.practice.basic`): $n = 4$ elementos;
+  - Prática Intermediária (`selection.practice.intermediate`): $n = 5$ elementos;
+  - Prática Avançada (`selection.practice.advanced`): $n = 6$ elementos.
 - **Constraints Matemáticas Dedicadas:**
   - `isGlobalMinNotInFirstPosition`: impede vetores onde o menor elemento global já inicia na posição $0$ (o que tornaria a primeira passada trivial);
   - `hasAtLeastOneKeepMin`: assegura ao menos uma decisão `KEEP_MIN` em cada exercício para evitar que o aluno apenas clique em novo mínimo automaticamente;

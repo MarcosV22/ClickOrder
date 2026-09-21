@@ -71,7 +71,7 @@ export default function ProtocolCard({
             className="text-[10px] font-mono tracking-widest text-white/40 uppercase"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            {isAvailable ? `${metadata.totalPhases} FASES` : "CURRICULAR"}
+            {isAvailable ? `${metadata.totalPhases} PRÁTICAS` : "CURRICULAR"}
           </span>
         </div>
 
@@ -135,7 +135,7 @@ export default function ProtocolCard({
           {isAvailable ? (
             <div className="grid grid-cols-3 gap-2 bg-[#060b1a]/60 border border-white/10 rounded-lg p-2.5">
               <div className="flex flex-col">
-                <span className="text-[9px] font-mono text-white/40 uppercase">Fases</span>
+                <span className="text-[9px] font-mono text-white/40 uppercase">Práticas</span>
                 <span
                   className="text-xs font-bold text-white font-mono mt-0.5"
                   style={{ fontFamily: "'Space Mono', monospace" }}
@@ -275,7 +275,7 @@ export default function ProtocolCard({
                 className="w-full text-[10px] text-white/35 font-mono text-center py-1.5 px-2 rounded bg-black/30 border border-white/5"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                🔒 DESAFIO: Conclua as 3 fases do Bubble
+                🔒 DESAFIO: Conclua as 3 práticas do Bubble
               </div>
             )}
           </div>

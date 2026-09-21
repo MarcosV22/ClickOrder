@@ -25,7 +25,7 @@ O front-end do **Sorting Station** opera como uma Single Page Application (SPA) 
 ```text
 src/
 ├── main.tsx             # Ponto de entrada React (createRoot, StrictMode e importação de index.css)
-├── App.tsx              # Componente raiz: gerencia telas (screen), fases (phase), resultado e demonstração
+├── App.tsx              # Componente raiz: gerencia telas (screen), roteamento, práticas e resultado
 ├── index.css            # Folha de estilo global: fontes web, Tailwind v4, tokens @theme e animações
 ├── vite-env.d.ts        # Declarações de tipos do cliente Vite
 ├── screens/             # Telas completas da aplicação (orquestradas por App.tsx)
@@ -33,21 +33,23 @@ src/
 │   ├── ProtocolCard.tsx # Componente simétrico de cartão de protocolo para o Hub da Home
 │   ├── protocolCatalog.ts # Catálogo desacoplado de metadados dos protocolos
 │   ├── ProtocolModeBriefingScreen.tsx # Briefing intermediário orientado a dados com ação de demonstração
+│   ├── PracticeSelector.tsx # Seletor Canônico de Práticas (Básica, Intermediária, Avançada, Desafio Early Exit)
 │   ├── TutorialScreen.tsx # Tutorial explicativo com demonstração cíclica animada (Bubble)
 │   ├── SelectionTutorialScreen.tsx # Tutorial interativo com engine real sobre [4, 1, 3] (Selection)
-│   ├── GameScreen.tsx   # Tela de jogo interativa: Bubble Sort esteira e lógica de ordenação
-│   ├── SelectionGameScreen.tsx # Tela de jogo interativa: Selection Sort esteira, scanner e commits (P2.1-D / ADR 0013)
-│   ├── ResultScreen.tsx # Relatório de término de fase/prática: estatísticas e pseudocódigo (Bubble, Selection e Insertion)
-│   ├── ReplayScreen.tsx # Reprodução retrospectiva passo a passo com suporte a replay e demonstração Bubble
-│   ├── SelectionReplayScreen.tsx # Reprodução retrospectiva Selection com pseudocódigo sincronizado e demonstração
-│   ├── InsertionReplayScreen.tsx # Reprodução retrospectiva Insertion com pseudocódigo de 11 linhas e demonstração
-│   ├── DemonstrationScreen.tsx # Modo Demonstração Educacional canônico puro (Bubble, Selection e Insertion)
-│   ├── CampaignCompleteScreen.tsx # Relatório final de homologação do Protocolo Bubble Sort
-│   ├── SelectionCampaignCompleteScreen.tsx # Relatório final de homologação do Protocolo Selection Sort
-│   ├── InsertionGameScreen.tsx # Ambiente de prática do Insertion Sort (básico, intermediário, avançado)
-│   ├── InsertionTutorialScreen.tsx # Tutorial guiado do Insertion Sort
-│   └── PracticeSetCompleteScreen.tsx # Relatório final de conclusão do conjunto de práticas de Insertion Sort
+│   ├── InsertionTutorialScreen.tsx # Tutorial guiado com engine real sobre [4, 2, 3] (Insertion)
+│   ├── GameScreen.tsx   # Ambiente de prática interativo do Bubble Sort (pares adjacentes)
+│   ├── SelectionGameScreen.tsx # Ambiente de prática interativo do Selection Sort (INSPECT/COMMIT)
+│   ├── InsertionGameScreen.tsx # Ambiente de prática interativo do Insertion Sort (deslocamentos e encaixe)
+│   ├── ResultScreen.tsx # Relatório pós-exercício unificado: estatísticas factuais e reflexão pedagógica
+│   ├── ReplayScreen.tsx # Reprodução retrospectiva Bubble com pseudocódigo sincronizado
+│   ├── SelectionReplayScreen.tsx # Reprodução retrospectiva Selection com pseudocódigo sincronizado
+│   ├── InsertionReplayScreen.tsx # Reprodução retrospectiva Insertion com pseudocódigo sincronizado
+│   ├── DemonstrationScreen.tsx # Modo Demonstração Educacional canônico puro (Bubble, Selection, Insertion)
+│   ├── PracticeSetCompleteScreen.tsx # Relatório canônico final de conclusão de conjunto de práticas (Bubble, Selection, Insertion)
+│   ├── CampaignCompleteScreen.tsx # Wrapper de retrocompatibilidade delegando para PracticeSetCompleteScreen
+│   └── SelectionCampaignCompleteScreen.tsx # Wrapper de retrocompatibilidade delegando para PracticeSetCompleteScreen
 ├── game/
+│   ├── curriculum/      # Catálogo Curricular Transversal (practiceCatalog.ts, types.ts)
 │   ├── briefing/        # Catálogo e tipos de dados para briefings orientados a dados (P1.10 / ADR 0010)
 │   ├── campaign/        # Agregação pura de métricas da campanha (PhaseResult, calculateCampaignSummary)
 │   ├── demonstration/   # Geração autônoma de demonstração via engines reais (Bubble, Selection, Insertion)

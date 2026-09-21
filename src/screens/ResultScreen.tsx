@@ -31,6 +31,7 @@ interface ResultScreenProps {
   onNext: () => void;
   onRepeat: () => void;
   onViewReplay?: () => void;
+  onOpenSelector?: () => void;
 }
 
 export default function ResultScreen({
@@ -55,6 +56,7 @@ export default function ResultScreen({
   onNext,
   onRepeat,
   onViewReplay,
+  onOpenSelector,
 }: ResultScreenProps) {
   const isSelection = protocol === "selection";
   const isInsertion = protocol === "insertion";
@@ -93,15 +95,11 @@ export default function ResultScreen({
 
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-emerald-500/20 bg-emerald-950/20 mb-3">
-              <span className="text-[10px] text-emerald-400 tracking-widest"
+              <span className="text-[10px] text-emerald-400 tracking-widest uppercase font-mono"
                 style={{ fontFamily: "'Space Mono', monospace" }}>
-                {isInsertion
-                  ? `PROTOCOLO INSERTION — ${practiceTitle ?? "EXERCÍCIO"} CONCLUÍDO`
-                  : isSelection
-                    ? `PROTOCOLO SELECTION — FASE ${phase} CONCLUÍDA`
-                    : isEarlyExit
-                      ? `MODO DESAFIO — CENÁRIO ${phase} CONCLUÍDO`
-                      : `PROTOCOLO BUBBLE — FASE ${phase} CONCLUÍDA`}
+                {isEarlyExit
+                  ? `MODO DESAFIO — CENÁRIO ${phase} CONCLUÍDO`
+                  : `MÓDULO ${protocol.toUpperCase()} — ${practiceTitle ?? `PRÁTICA ${phase}`} CONCLUÍDA`}
               </span>
             </div>
             <h2
@@ -119,20 +117,12 @@ export default function ResultScreen({
                     ANTECIPADO!
                   </span>
                 </>
-              ) : isInsertion ? (
+              ) : (
                 <>
                   EXERCÍCIO
                   <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-cyan-400 to-emerald-400">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-cyan-400 to-amber-300">
                     CONCLUÍDO!
-                  </span>
-                </>
-              ) : (
-                <>
-                  ORDENAÇÃO
-                  <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-cyan-400">
-                    CONCLUÍDA!
                   </span>
                 </>
               )}
@@ -409,24 +399,21 @@ export default function ResultScreen({
             </GameButton>
           )}
           <GameButton onClick={onRepeat} variant="secondary" size="md" icon="↺">
-            {isInsertion
-              ? "REPETIR EXERCÍCIO"
-              : isEarlyExit
-                ? "REPETIR CENÁRIO"
-                : "REPETIR FASE"}
+            {isEarlyExit ? "REPETIR CENÁRIO" : "REPETIR EXERCÍCIO"}
           </GameButton>
+          {onOpenSelector && (
+            <GameButton onClick={onOpenSelector} variant="secondary" size="md" icon="☰">
+              SELETOR
+            </GameButton>
+          )}
           <GameButton onClick={onNext} variant="primary" size="md" icon="→" iconPosition="right">
             {hasNextPhase
-              ? isInsertion
-                ? "PRÓXIMA PRÁTICA"
-                : isEarlyExit
-                  ? "PRÓXIMO CENÁRIO"
-                  : "PRÓXIMA FASE"
-              : isInsertion
-                ? "CONCLUIR PRÁTICAS"
-                : isEarlyExit
-                  ? "CONCLUIR DESAFIOS"
-                  : "CONCLUIR PROTOCOLO"}
+              ? isEarlyExit
+                ? "PRÓXIMO CENÁRIO"
+                : "PRÓXIMA PRÁTICA"
+              : isEarlyExit
+                ? "CONCLUIR DESAFIOS"
+                : "CONCLUIR CONJUNTO"}
           </GameButton>
         </div>
       </div>

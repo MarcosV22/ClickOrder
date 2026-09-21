@@ -1,63 +1,202 @@
 /**
- * Tela de Conclusão do Conjunto de Práticas Regulares do Módulo Insertion Sort.
+ * Tela Canônica de Conclusão do Conjunto de Práticas Curriculares (PLATFORM-R1-B).
  *
- * Concebida para o modelo da Sorting Station como Plataforma Educacional:
- * - Apresenta a consolidação das práticas: Básica (n=4), Intermediária (n=5) e Avançada (n=6);
- * - Elimina vocabulário de "campanha" e "fases";
- * - Consolida telemetria factual: Comparações, Deslocamentos, Inserções, Erros, Dicas e Pontuação;
- * - Exibe vetores finais consolidados com NumberedBox (role="sorted");
- * - Botões canônicos padronizados: Repetir Práticas e Voltar ao Hub.
+ * Princípios de Design & Arquitetura:
+ * 1. Abstração canônica unificada para Bubble Sort, Selection Sort e Insertion Sort.
+ * 2. Elimina vocabulário de "campanha" e "fases", consolidando o modelo:
+ *    Módulo Curricular -> Conjunto de Práticas -> Práticas (Básica, Intermediária, Avançada).
+ * 3. Apresenta métricas factuais transversais e específicas de cada algoritmo:
+ *    - Comparações Totais;
+ *    - Movimentações (Trocas Adjacentes para Bubble, Transferências para Selection, Deslocamentos/Inserções para Insertion);
+ *    - Erros, Dicas, Tempo Total e Média de Pontuação.
+ * 4. Exibe os vetores finais consolidados com NumberedBox (role="sorted").
+ * 5. Bloco de síntese pedagógica discriminado por algoritmo.
+ * 6. Suporte ao Caso Especial: no Bubble Sort, se o Modo Desafio estiver desbloqueado,
+ *    apresenta destaque com CTA direto para Early Exit.
+ * 7. Respeita a Scrollable Screen Rule (PLATFORM-UI-H1) com Single Scroll Owner.
  */
 
 import GameButton from "../components/GameButton";
 import NumberedBox from "../components/NumberedBox";
+import type { ModuleId, GameSaveSchema } from "../game/persistence/types";
+import { getModulePracticeStates } from "../game/curriculum/practiceCatalog";
 import { formatElapsedTime } from "../game/session";
-import type { InsertionPracticeCompleteData } from "./InsertionGameScreen";
+
+export interface UnifiedPracticeResult {
+  readonly level?: "basic" | "intermediate" | "advanced";
+  readonly phase?: number;
+  readonly practiceTitle?: string;
+  readonly comparisons: number;
+  readonly swaps?: number;
+  readonly shifts?: number;
+  readonly insertions?: number;
+  readonly errors: number;
+  readonly hintsUsed: number;
+  readonly score: number;
+  readonly elapsedTimeMs?: number;
+  readonly finalArray: readonly number[];
+  readonly initialArray?: readonly number[];
+  readonly practiceDefinition?: {
+    readonly title: string;
+    readonly description?: string;
+    readonly size?: number;
+  };
+}
 
 export interface PracticeSetCompleteScreenProps {
-  practiceResults: readonly InsertionPracticeCompleteData[];
-  onRepeatPractices: () => void;
-  onReturnHome: () => void;
+  readonly moduleId?: ModuleId;
+  readonly practiceResults?: readonly UnifiedPracticeResult[] | readonly any[];
+  readonly results?: readonly any[]; // retrocompatibilidade com CampaignCompleteScreen
+  readonly totalPhases?: number; // retrocompatibilidade
+  readonly saveData?: GameSaveSchema;
+  readonly onRepeatPractices?: () => void;
+  readonly onRestartProtocol?: () => void; // retrocompatibilidade
+  readonly onReturnHome: () => void;
+  readonly onOpenSelector?: () => void;
+  readonly onStartChallenge?: () => void;
+  readonly isChallengeUnlocked?: boolean;
+}
+
+interface ModuleCompleteTheme {
+  readonly name: string;
+  readonly subtitle: string;
+  readonly primaryColor: string;
+  readonly badgeBorder: string;
+  readonly badgeBg: string;
+  readonly badgeText: string;
+  readonly glowClasses: string;
+  readonly titleGradient: string;
+  readonly cardBorder: string;
+  readonly movementLabel: string;
+  readonly pedagogicalTitle: string;
+  readonly pedagogicalText: string;
+}
+
+const COMPLETE_THEMES: Partial<Record<ModuleId, ModuleCompleteTheme>> = {
+  bubble: {
+    name: "BUBBLE SORT",
+    subtitle:
+      "Você dominou a mecânica canônica por trocas adjacentes: comparações entre vizinhos, propagação da maior carga para a extremidade direita e consolidação progressiva.",
+    primaryColor: "cyan",
+    badgeBorder: "border-cyan-500/30",
+    badgeBg: "bg-cyan-950/40",
+    badgeText: "text-cyan-300",
+    glowClasses: "bg-cyan-500/10",
+    titleGradient: "from-cyan-300 via-blue-400 to-purple-400",
+    cardBorder: "border-cyan-500/20",
+    movementLabel: "Trocas Adjacentes",
+    pedagogicalTitle: "Síntese Conceitual do Bubble Sort",
+    pedagogicalText:
+      "O Bubble Sort opera através de comparações estritamente locais entre pares contíguos. A cada passada, o elemento de maior peso flutua para a direita até atingir sua vaga definitiva. As posições consolidadas formam uma partição imutável que reduz o custo das passadas seguintes.",
+  },
+  selection: {
+    name: "SELECTION SORT",
+    subtitle:
+      "Você dominou a mecânica canônica por varredura seletiva: localização da menor carga desordenada via scanner e transferência pontual por passada.",
+    primaryColor: "purple",
+    badgeBorder: "border-purple-500/30",
+    badgeBg: "bg-purple-950/40",
+    badgeText: "text-purple-300",
+    glowClasses: "bg-purple-500/10",
+    titleGradient: "from-purple-300 via-cyan-400 to-emerald-400",
+    cardBorder: "border-purple-500/20",
+    movementLabel: "Transferências Pontuais",
+    pedagogicalTitle: "Síntese Conceitual do Selection Sort",
+    pedagogicalText:
+      "O Selection Sort divide a esteira entre uma partição ordenada à esquerda e uma não ordenada à direita. Ele varre todos os itens restantes buscando o menor elemento e realiza no máximo UMA transferência física por passada, minimizando movimentações no cenário prático.",
+  },
+  insertion: {
+    name: "INSERTION SORT",
+    subtitle:
+      "Você dominou a mecânica canônica por deslocamento: elevação da chave ao trilho aéreo, comparações regressivas na partição ordenada e encaixe direto na vaga.",
+    primaryColor: "amber",
+    badgeBorder: "border-amber-500/30",
+    badgeBg: "bg-amber-950/40",
+    badgeText: "text-amber-300",
+    glowClasses: "bg-amber-500/10",
+    titleGradient: "from-amber-300 via-cyan-400 to-emerald-400",
+    cardBorder: "border-amber-500/20",
+    movementLabel: "Deslocamentos",
+    pedagogicalTitle: "Síntese Conceitual do Insertion Sort",
+    pedagogicalText:
+      "O Insertion Sort constrói a partição ordenada progressivamente. Cargas maiores são deslocadas para a direita apenas enquanto forem maiores que a chave suspensa no trilho aéreo, tornando o algoritmo especialmente eficiente para sequências quase ordenadas: O(n) no melhor caso.",
+  },
+};
+
+function resolvePracticeTitle(item: any, fallbackIdx: number): string {
+  if (item?.practiceDefinition?.title) return item.practiceDefinition.title;
+  if (item?.practiceTitle) return item.practiceTitle;
+  if (item?.level === "basic") return "PRÁTICA BÁSICA";
+  if (item?.level === "intermediate") return "PRÁTICA INTERMEDIÁRIA";
+  if (item?.level === "advanced") return "PRÁTICA AVANÇADA";
+  if (item?.phase === 1) return "PRÁTICA BÁSICA";
+  if (item?.phase === 2) return "PRÁTICA INTERMEDIÁRIA";
+  if (item?.phase === 3) return "PRÁTICA AVANÇADA";
+  return fallbackIdx === 0
+    ? "PRÁTICA BÁSICA"
+    : fallbackIdx === 1
+      ? "PRÁTICA INTERMEDIÁRIA"
+      : "PRÁTICA AVANÇADA";
 }
 
 export default function PracticeSetCompleteScreen({
+  moduleId = "insertion",
   practiceResults,
+  results,
+  saveData,
   onRepeatPractices,
+  onRestartProtocol,
   onReturnHome,
+  onOpenSelector,
+  onStartChallenge,
+  isChallengeUnlocked = false,
 }: PracticeSetCompleteScreenProps) {
-  const totalComparisons = practiceResults.reduce((acc, r) => acc + r.comparisons, 0);
-  const totalShifts = practiceResults.reduce((acc, r) => acc + r.shifts, 0);
-  const totalInsertions = practiceResults.reduce((acc, r) => acc + r.insertions, 0);
-  const totalErrors = practiceResults.reduce((acc, r) => acc + r.errors, 0);
-  const totalHints = practiceResults.reduce((acc, r) => acc + r.hintsUsed, 0);
-  const totalTimeMs = practiceResults.reduce((acc, r) => acc + r.elapsedTimeMs, 0);
+  const theme = COMPLETE_THEMES[moduleId] ?? COMPLETE_THEMES.insertion!;
+  const rawList: readonly any[] = practiceResults ?? results ?? [];
+  const curricularStates = saveData ? getModulePracticeStates(saveData, moduleId) : [];
+  const curricularCompletedCount = curricularStates.length > 0
+    ? curricularStates.filter((s) => s.status === "completed").length
+    : 3;
+  const isCurriculumFullyCompleted = curricularCompletedCount === 3;
+
+  const totalComparisons = rawList.reduce((acc, r) => acc + (r.comparisons ?? 0), 0);
+  const totalSwaps = rawList.reduce((acc, r) => acc + (r.swaps ?? 0), 0);
+  const totalShifts = rawList.reduce((acc, r) => acc + (r.shifts ?? 0), 0);
+  const totalInsertions = rawList.reduce((acc, r) => acc + (r.insertions ?? 0), 0);
+  const totalErrors = rawList.reduce((acc, r) => acc + (r.errors ?? 0), 0);
+  const totalHints = rawList.reduce((acc, r) => acc + (r.hintsUsed ?? 0), 0);
+  const totalTimeMs = rawList.reduce((acc, r) => acc + (r.elapsedTimeMs ?? 0), 0);
   const avgScore =
-    practiceResults.length > 0
-      ? Math.round(
-          practiceResults.reduce((acc, r) => acc + r.score, 0) /
-            practiceResults.length,
-        )
+    rawList.length > 0
+      ? Math.round(rawList.reduce((acc, r) => acc + (r.score ?? 0), 0) / rawList.length)
       : 100;
+
+  const handleRepeat = onRepeatPractices ?? onRestartProtocol ?? onReturnHome;
 
   return (
     <main
       className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-8 pb-16 sm:pb-24 px-4 sm:px-8 text-white select-none"
-      aria-label="Tela de Conclusão do Conjunto de Práticas do Insertion Sort"
+      aria-label={`Tela de Conclusão do Conjunto de Práticas do ${theme.name}`}
     >
-      {/* Glow effects */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[650px] h-[300px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* Glow effects de fundo */}
+      <div
+        className={`absolute top-1/4 left-1/2 -translate-x-1/2 w-[650px] h-[300px] ${theme.glowClasses} rounded-full blur-[120px] pointer-events-none`}
+      />
       <div className="absolute bottom-1/4 left-1/4 w-72 h-72 bg-cyan-500/10 rounded-full blur-[90px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-emerald-500/10 rounded-full blur-[90px] pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center gap-6 max-w-4xl w-full my-0">
         {/* Top status badge */}
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-amber-500/30 bg-amber-950/40">
-          <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+        <div
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border ${theme.badgeBorder} ${theme.badgeBg}`}
+        >
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span
-            className="text-[11px] text-amber-300 tracking-[0.25em] uppercase font-bold"
+            className={`text-[11px] ${theme.badgeText} tracking-[0.25em] uppercase font-bold`}
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            MÓDULO EDUCACIONAL • INSERTION SORT
+            MÓDULO EDUCACIONAL • {theme.name}
+            {isCurriculumFullyCompleted ? " • CURRÍCULO 3/3 CONCLUÍDO" : ""}
           </span>
         </div>
 
@@ -67,12 +206,14 @@ export default function PracticeSetCompleteScreen({
             className="text-4xl sm:text-5xl font-black text-white tracking-tight"
             style={{
               fontFamily: "'Orbitron', sans-serif",
-              textShadow: "0 0 35px rgba(245,158,11,0.35)",
+              textShadow: "0 0 35px rgba(52,211,153,0.35)",
             }}
           >
             CONJUNTO DE PRÁTICAS
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-cyan-400 to-emerald-400">
+            <span
+              className={`text-transparent bg-clip-text bg-gradient-to-r ${theme.titleGradient}`}
+            >
               CONCLUÍDO!
             </span>
           </h1>
@@ -80,7 +221,7 @@ export default function PracticeSetCompleteScreen({
             className="text-sm sm:text-base text-white/70 max-w-xl text-center leading-relaxed"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            Você dominou a mecânica canônica por deslocamento: elevação da chave ao trilho aéreo, comparações regressivas na partição ordenada e encaixe direto na vaga.
+            {theme.subtitle}
           </p>
         </header>
 
@@ -89,25 +230,33 @@ export default function PracticeSetCompleteScreen({
           className="w-full panel-border bg-[#080f28]/90 rounded-xl p-5 sm:p-6"
           aria-label="Resumo Global de Métricas"
         >
-          <div
-            className="text-[10px] text-white/40 tracking-widest uppercase mb-4 text-center font-mono"
-          >
-            CONSOLIDAÇÃO FACTUAL DAS PRÁTICAS
+          <div className="text-[10px] text-white/40 tracking-widest uppercase mb-1 text-center font-mono">
+            CONSOLIDAÇÃO FACTUAL DAS PRÁTICAS (ÚLTIMAS TENTATIVAS DA SESSÃO)
           </div>
+          <p className="text-[11px] text-white/50 text-center font-mono mb-4 max-w-xl mx-auto leading-relaxed">
+            {rawList.length < 3
+              ? `Soma consolidada da(s) ${rawList.length} prática(s) concluída(s) nesta sessão. Seu progresso curricular acumulado (${curricularCompletedCount}/3 no módulo) está preservado sem necessidade de repetir práticas anteriores.`
+              : "Soma consolidada das 3 práticas concluídas na sessão ativa. Cada card abaixo preserva o registro individual factual da respectiva prática (tempo puramente descritivo)."}
+          </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-amber-500/20">
+            {/* Práticas */}
+            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-white/10">
               <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
-                Práticas
+                Práticas (Sessão)
               </span>
               <span
-                className="text-2xl font-black text-amber-300"
+                className="text-2xl font-black text-emerald-400"
                 style={{ fontFamily: "'Orbitron', sans-serif" }}
               >
-                {practiceResults.length} / 3
+                {rawList.length} / 3
+              </span>
+              <span className="text-[9px] text-white/40 font-mono mt-0.5 text-center">
+                {isCurriculumFullyCompleted ? "Módulo: 3/3 Salvo" : `Módulo: ${curricularCompletedCount}/3 Salvo`}
               </span>
             </div>
 
+            {/* Comparações */}
             <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-cyan-500/20">
               <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
                 Comparações
@@ -120,30 +269,47 @@ export default function PracticeSetCompleteScreen({
               </span>
             </div>
 
-            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-purple-500/20">
-              <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
-                Deslocamentos
-              </span>
-              <span
-                className="text-2xl font-black text-purple-400 glow-purple"
-                style={{ fontFamily: "'Orbitron', sans-serif" }}
-              >
-                {totalShifts}
-              </span>
-            </div>
+            {/* Movimentações: Trocas para Bubble/Selection, Deslocamentos para Insertion */}
+            {moduleId === "insertion" ? (
+              <>
+                <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-purple-500/20">
+                  <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
+                    Deslocamentos
+                  </span>
+                  <span
+                    className="text-2xl font-black text-purple-400 glow-purple"
+                    style={{ fontFamily: "'Orbitron', sans-serif" }}
+                  >
+                    {totalShifts}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-amber-500/20">
+                  <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
+                    Inserções
+                  </span>
+                  <span
+                    className="text-2xl font-black text-amber-300"
+                    style={{ fontFamily: "'Orbitron', sans-serif" }}
+                  >
+                    {totalInsertions}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-purple-500/20">
+                <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
+                  {theme.movementLabel}
+                </span>
+                <span
+                  className="text-2xl font-black text-purple-400 glow-purple"
+                  style={{ fontFamily: "'Orbitron', sans-serif" }}
+                >
+                  {totalSwaps}
+                </span>
+              </div>
+            )}
 
-            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-amber-500/20">
-              <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
-                Inserções
-              </span>
-              <span
-                className="text-2xl font-black text-amber-300"
-                style={{ fontFamily: "'Orbitron', sans-serif" }}
-              >
-                {totalInsertions}
-              </span>
-            </div>
-
+            {/* Erros */}
             <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-white/10">
               <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
                 Erros
@@ -158,6 +324,20 @@ export default function PracticeSetCompleteScreen({
               </span>
             </div>
 
+            {/* Tempo se disponível, senão Dicas */}
+            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-white/10">
+              <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
+                {totalTimeMs > 0 ? "Tempo (Descritivo)" : "Dicas"}
+              </span>
+              <span
+                className="text-xl sm:text-2xl font-black text-white/80"
+                style={{ fontFamily: "'Orbitron', sans-serif" }}
+              >
+                {totalTimeMs > 0 ? formatElapsedTime(totalTimeMs) : totalHints}
+              </span>
+            </div>
+
+            {/* Média de Pontuação */}
             <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-emerald-500/20">
               <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
                 Pontuação Média
@@ -173,85 +353,178 @@ export default function PracticeSetCompleteScreen({
         </section>
 
         {/* Detalhamento de cada Prática Realizada */}
-        <section className="w-full flex flex-col gap-4" aria-label="Práticas Concluídas">
-          <div className="text-[10px] text-white/40 tracking-widest uppercase text-center font-mono">
-            VETORES CONSOLIDADOS POR NÍVEL
-          </div>
+        {rawList.length > 0 && (
+          <section className="w-full flex flex-col gap-4" aria-label="Práticas Concluídas">
+            <div className="text-[10px] text-white/40 tracking-widest uppercase text-center font-mono">
+              VETORES CONSOLIDADOS POR NÍVEL
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {practiceResults.map((result) => (
-              <div
-                key={result.level}
-                className="flex flex-col gap-3 p-4 rounded-xl bg-[#080f28]/90 border border-amber-500/20 shadow-md"
-              >
-                <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                  <span className="text-xs font-bold text-amber-300 font-mono uppercase">
-                    {result.practiceDefinition.title}
-                  </span>
-                  <span className="text-[10px] text-emerald-400 font-mono font-bold px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-500/30">
-                    SCORE: {result.score}
-                  </span>
-                </div>
+            <div
+              className={
+                rawList.length === 1
+                  ? "max-w-md mx-auto w-full"
+                  : rawList.length === 2
+                    ? "grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto w-full"
+                    : "grid grid-cols-1 md:grid-cols-3 gap-4 w-full"
+              }
+            >
+              {rawList.map((item, idx) => {
+                const practiceTitle = resolvePracticeTitle(item, idx);
+                const finalArray: readonly number[] = item.finalArray ?? [];
 
-                <div className="flex flex-wrap items-center justify-center gap-2 py-2">
-                  {result.finalArray.map((val, idx) => (
-                    <NumberedBox
-                      key={`box-${result.level}-${idx}`}
-                      value={val}
-                      index={idx}
-                      role="sorted"
-                      size="sm"
-                    />
-                  ))}
-                </div>
+                return (
+                  <div
+                    key={`practice-result-${idx}`}
+                    className={`flex flex-col gap-3 p-4 rounded-xl bg-[#080f28]/90 border ${theme.cardBorder} shadow-md`}
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                      <span
+                        className={`text-xs font-bold ${theme.badgeText} font-mono uppercase`}
+                      >
+                        {practiceTitle}
+                      </span>
+                      <span className="text-[10px] text-emerald-400 font-mono font-bold px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-500/30">
+                        SCORE: {item.score ?? 100}
+                      </span>
+                    </div>
 
-                <div className="grid grid-cols-3 gap-1 pt-2 border-t border-white/5 text-[10px] font-mono text-white/60 text-center">
-                  <div>
-                    <span className="block text-white/30 text-[9px]">COMP.</span>
-                    <span className="text-cyan-300 font-bold">{result.comparisons}</span>
+                    <div className="flex flex-wrap items-center justify-center gap-2 py-2">
+                      {finalArray.map((val: number, boxIdx: number) => (
+                        <NumberedBox
+                          key={`box-${idx}-${boxIdx}`}
+                          value={val}
+                          index={boxIdx}
+                          role="sorted"
+                          size="sm"
+                        />
+                      ))}
+                    </div>
+
+                    <div
+                      className={`grid ${
+                        moduleId === "insertion" ? "grid-cols-4" : "grid-cols-3"
+                      } gap-1 pt-2 border-t border-white/5 text-[10px] font-mono text-white/60 text-center`}
+                    >
+                      <div>
+                        <span className="block text-white/30 text-[9px]">COMP.</span>
+                        <span className="text-cyan-300 font-bold">{item.comparisons ?? 0}</span>
+                      </div>
+                      <div>
+                        <span className="block text-white/30 text-[9px]">
+                          {moduleId === "insertion"
+                            ? "DESLOC."
+                            : moduleId === "selection"
+                              ? "TRANSF."
+                              : "TROCAS"}
+                        </span>
+                        <span className="text-purple-400 font-bold">
+                          {moduleId === "insertion" ? (item.shifts ?? 0) : (item.swaps ?? 0)}
+                        </span>
+                      </div>
+                      {moduleId === "insertion" && (
+                        <div>
+                          <span className="block text-white/30 text-[9px]">INSERÇÕES</span>
+                          <span className="text-amber-300 font-bold">{item.insertions ?? 0}</span>
+                        </div>
+                      )}
+                      <div>
+                        <span className="block text-white/30 text-[9px]">ERROS</span>
+                        <span
+                          className={
+                            item.errors > 0
+                              ? "text-red-400 font-bold"
+                              : "text-white/40"
+                          }
+                        >
+                          {item.errors ?? 0}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-white/30 text-[9px]">DESLOC.</span>
-                    <span className="text-purple-400 font-bold">{result.shifts}</span>
-                  </div>
-                  <div>
-                    <span className="block text-white/30 text-[9px]">INSERÇÕES</span>
-                    <span className="text-amber-300 font-bold">{result.insertions}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Síntese Pedagógica */}
-        <section className="w-full p-4 rounded-xl bg-amber-950/20 border border-amber-500/30 flex flex-col gap-2">
-          <span className="text-xs font-bold text-amber-300 font-mono uppercase">
-            Síntese Conceitual do Insertion Sort
+        <section
+          className={`w-full p-4 rounded-xl ${theme.badgeBg} border ${theme.badgeBorder} flex flex-col gap-2`}
+        >
+          <span className={`text-xs font-bold ${theme.badgeText} font-mono uppercase`}>
+            {theme.pedagogicalTitle}
           </span>
           <p className="text-xs text-white/80 font-mono leading-relaxed">
-            Ao contrário do Bubble Sort (comparações adjacentes em lote) e do Selection Sort (varredura completa para achar o menor elemento), o Insertion Sort constrói a partição ordenada progressivamente. Cargas maiores são deslocadas para a direita somente enquanto forem maiores que a chave, tornando o algoritmo especialmente eficiente para sequências quase ordenadas: O(n) no melhor caso.
+            {theme.pedagogicalText}
           </p>
         </section>
+
+        {/* Destaque Caso Especial: Early Exit para Bubble Sort */}
+        {moduleId === "bubble" && (isChallengeUnlocked || onStartChallenge) && (
+          <section
+            className="w-full p-5 rounded-xl bg-amber-950/30 border border-amber-500/40 flex flex-col sm:flex-row items-center justify-between gap-4"
+            aria-label="Desbloqueio do Caso Especial Early Exit"
+          >
+            <div className="flex flex-col gap-1 text-left">
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-amber-300 font-bold tracking-widest uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                CASO ESPECIAL DESBLOQUEADO
+              </div>
+              <h3
+                className="text-lg font-bold text-white tracking-wide"
+                style={{ fontFamily: "'Orbitron', sans-serif" }}
+              >
+                MODO DESAFIO: EARLY EXIT
+              </h3>
+              <p className="text-xs text-white/70 font-mono">
+                Com o conjunto regular concluído, experimente a variante otimizada capaz de interromper o laço quando nenhuma troca ocorrer.
+              </p>
+            </div>
+
+            {onStartChallenge && (
+              <GameButton
+                onClick={onStartChallenge}
+                variant="primary"
+                size="md"
+                icon="⚡"
+                className="shrink-0 whitespace-nowrap"
+              >
+                INICIAR DESAFIO
+              </GameButton>
+            )}
+          </section>
+        )}
 
         {/* Ações Finais */}
         <div className="flex flex-wrap items-center justify-center gap-4 w-full pt-4">
           <GameButton
-            onClick={onRepeatPractices}
+            onClick={handleRepeat}
             variant="secondary"
             size="md"
             icon="↺"
-            className="min-w-[200px]"
+            className="min-w-[180px]"
           >
             REPETIR PRÁTICAS
           </GameButton>
+
+          {onOpenSelector && (
+            <GameButton
+              onClick={onOpenSelector}
+              variant="secondary"
+              size="md"
+              icon="☰"
+              className="min-w-[180px]"
+            >
+              SELETOR DE PRÁTICAS
+            </GameButton>
+          )}
 
           <GameButton
             onClick={onReturnHome}
             variant="primary"
             size="md"
             icon="⌂"
-            className="min-w-[200px]"
+            className="min-w-[180px]"
           >
             VOLTAR AO HUB
           </GameButton>
@@ -260,7 +533,7 @@ export default function PracticeSetCompleteScreen({
         {/* Rodapé Descritivo */}
         <footer className="text-center pt-2">
           <span className="text-[10px] text-white/30 tracking-widest font-mono uppercase">
-            ESTAÇÃO DE CLASSIFICAÇÃO • MÓDULO INSERTION SORT (PRÁTICAS REGULARES HOMOLOGADAS)
+            ESTAÇÃO DE CLASSIFICAÇÃO • MÓDULO {theme.name} (PRÁTICAS REGULARES CONCLUÍDAS)
           </span>
         </footer>
       </div>

@@ -332,7 +332,6 @@ export function recordExerciseCompletion(
 
   const updatedModule: ModuleProgressV4 = Object.freeze({
     ...currentModule,
-    completedTutorial: true,
     exerciseSets: updatedExerciseSets,
   });
 
@@ -499,7 +498,13 @@ export function recordPhaseCompletion(
   }
 
   const exerciseSetId = mapPhaseToExerciseSetId(protocol, completedPhase);
-  return recordExerciseCompletion(current, protocol, exerciseSetId, scoreData, storage);
+  const updatedExercise = recordExerciseCompletion(current, protocol, exerciseSetId, scoreData);
+  const currentMod = getModuleProgress(updatedExercise, protocol);
+  if (!currentMod.completedTutorial) {
+    return recordTutorialCompletion(updatedExercise, protocol, storage);
+  }
+  saveGameProgress(updatedExercise, storage);
+  return updatedExercise;
 }
 
 /**

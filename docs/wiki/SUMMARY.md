@@ -48,8 +48,8 @@ A plataforma possui um currículo oficial congelado em **6 Módulos de Algoritmo
 
 | Módulo Curricular | Status Factual | Implementação no Código | Documentação Canônica |
 | :--- | :---: | :--- | :--- |
-| **01. Bubble Sort** | `IMPLEMENTADO` | Engine pura (`bubbleSortEngine.ts`), FSM sequencial estrita, tutorial guiado (`[3, 1, 2]`), demonstração autônoma (`[5, 2, 4, 1]`), prática de 3 níveis procedurais, modo Early Exit, replay retrospectivo e pseudocódigo sincronizado de 9/14 linhas. Persistido em Schema v4 (`bubble.practice.*`). | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |
-| **02. Selection Sort** | `IMPLEMENTADO` | Engine pura (`selectionSortEngine.ts`), FSM bimodal `INSPECT`/`COMMIT`, constraints procedurais, briefing oficial, tutorial guiado (`[4, 1, 3]`), demonstração autônoma, prática de 3 níveis com animação de longa distância, replay e pseudocódigo sincronizado de 13 linhas. Persistido em Schema v4 (`selection.practice.*`). | [`modules/selection-sort.md`](./modules/selection-sort.md) |
+| **01. Bubble Sort** | `IMPLEMENTADO E PADRONIZADO (PLATFORM-R1-B)` | Engine pura (`bubbleSortEngine.ts`), FSM sequencial estrita, tutorial guiado (`[3, 1, 2]`), demonstração autônoma (`[5, 2, 4, 1]`), Seletor de Práticas (`PracticeSelector`), conjunto canônico de 3 práticas procedurais (`basic`: 4 cargas, `intermediate`: 5 cargas, `advanced`: 6 cargas), Caso Especial Curricular / Desafio Early Exit desacoplado (desbloqueado pelo Schema v4), replay retrospectivo com pseudocódigo sincronizado de 9/14 linhas, e conclusão via `PracticeSetCompleteScreen`. Linguagem legada de Fase/Campanha eliminada da UI ativa. Persistido em Schema v4 (`bubble.practice.*`). | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |
+| **02. Selection Sort** | `IMPLEMENTADO E PADRONIZADO (PLATFORM-R1-B)` | Engine pura (`selectionSortEngine.ts`), FSM bimodal `INSPECT`/`COMMIT`, constraints procedurais, briefing oficial, tutorial guiado (`[4, 1, 3]`), demonstração autônoma, Seletor de Práticas (`PracticeSelector`), conjunto canônico de 3 práticas procedurais (`basic`: 4 cargas, `intermediate`: 5 cargas, `advanced`: 6 cargas) com animação de longa distância preservando mecânica singular de varredura seletiva e transferência pontual, replay com pseudocódigo sincronizado de 13 linhas, e conclusão via `PracticeSetCompleteScreen`. Linguagem legada de Fase/Campanha eliminada da UI ativa. Persistido em Schema v4 (`selection.practice.*`). | [`modules/selection-sort.md`](./modules/selection-sort.md) |
 | **03. Insertion Sort** | `IMPLEMENTADO E ATIVADO (P2.2-F)` | Engine pura (`insertionSortEngine.ts`), FSM de deslocamentos (*shifts*), constraints procedurais, briefing oficial, tutorial guiado (`[4, 2, 3]`), demonstração canônica autônoma (`[6, 3, 5, 2, 7]`), práticas interativas progressivas (`basic`, `intermediate`, `advanced`), `PracticeSetCompleteScreen`, `ResultScreen` com telemetria de *shifts*/*inserts*, replay retrospectivo puro (`insertionReplayModel.ts`), pseudocódigo sincronizado de 11 linhas (`InsertionSortPseudocodePanel.tsx`), persistência no Schema v4 orientada a exercícios e ativado publicamente no catálogo do Hub com status `available`. | [`modules/insertion-sort.md`](./modules/insertion-sort.md) |
 | **04. Merge Sort** | `FUTURO` | Especificação completa no Module Standard; código algorítmico não iniciado (Marco P3.1). | [`modules/merge-sort.md`](./modules/merge-sort.md) |
 | **05. Quick Sort** | `FUTURO` | Especificação completa no Module Standard; código algorítmico não iniciado (Marco P3.2). | [`modules/quick-sort.md`](./modules/quick-sort.md) |
@@ -103,45 +103,56 @@ flowchart TD
     subgraph UI ["1. Camada de Apresentação (React 19 / JSX / Tailwind v4)"]
         Home["HomeScreen (Hub de Módulos)"]
         Briefing["ProtocolModeBriefingScreen"]
+        Selector["PracticeSelector (Seletor Canônico de Práticas)"]
         DemoScreen["DemonstrationScreen"]
-        TutorScreen["TutorialScreen / SelectionTutorialScreen"]
-        PlayScreen["GameScreen / SelectionGameScreen"]
+        TutorScreen["TutorialScreen / SelectionTutorialScreen / InsertionTutorialScreen"]
+        PlayScreen["GameScreen / SelectionGameScreen / InsertionGameScreen"]
         ResScreen["ResultScreen"]
-        RepScreen["ReplayScreen / SelectionReplayScreen"]
-        CompScreen["CampaignCompleteScreen"]
+        RepScreen["ReplayScreen / SelectionReplayScreen / InsertionReplayScreen"]
+        CompScreen["PracticeSetCompleteScreen (Conclusão Unificada de Práticas)"]
     end
 
     subgraph Core ["2. Núcleo Puro de Domínio (src/game/ — TypeScript Puro)"]
-        Engines["sorting/\nbubbleSortEngine.ts\nselectionSortEngine.ts"]
-        DemoGen["demonstration/\nbubbleDemonstration.ts\nselectionDemonstration.ts"]
+        Curriculum["curriculum/\npracticeCatalog.ts"]
+        Engines["sorting/\nbubbleSortEngine.ts\nselectionSortEngine.ts\ninsertionSortEngine.ts"]
+        DemoGen["demonstration/\nbubbleDemonstration.ts\nselectionDemonstration.ts\ninsertionDemonstration.ts"]
         GenPRNG["generation/\narrayGenerator.ts (Mulberry32)"]
-        RepModel["replay/\nreplayModel.ts\nselectionReplayModel.ts"]
+        RepModel["replay/\nreplayModel.ts\nselectionReplayModel.ts\ninsertionReplayModel.ts"]
         ScoreSess["session/ & campaign/\nprotocolScore.ts\ncampaignSummary.ts"]
-        Persist["persistence/\nstorageAdapter.ts (Schema v3)"]
+        Persist["persistence/\nstorageAdapter.ts (Schema v4)"]
     end
 
     subgraph Storage ["3. Armazenamento Local"]
-        LS[("localStorage\nsorting_station_v1_save")]
+        LS[("localStorage\nsorting_station_save (Schema v4)")]
         Mem[("MemoryStorageAdapter\n(Fallback defensivo)")]
     end
 
+    Home --> Curriculum
     Home --> Engines
+    Selector --> Curriculum
+    Briefing --> Selector
+    Selector --> PlayScreen
     DemoScreen --> DemoGen --> Engines
     PlayScreen --> Engines
     PlayScreen --> GenPRNG
     ResScreen --> RepModel
+    PlayScreen --> ResScreen
+    ResScreen --> CompScreen
+    CompScreen --> Selector
     RepScreen --> RepModel
     Engines --> Persist
+    Curriculum --> Persist
     Persist --> LS
     Persist -.-> Mem
 ```
 
 - **Isolamento Total:** As engines algorítmicas em `src/game/` não importam React, hooks ou JSX;
 - **Máquinas de Estados Imutáveis:** Cada passo gera um novo estado congelado (`Object.freeze`);
+- **Catálogo Curricular Unificado (`src/game/curriculum/`):** Define imutavelmente práticas (`basic`, `intermediate`, `advanced`) com tamanhos procedurais ($n=4, 5, 6$), objetivos formativos e derivação de desbloqueio transversal orientada a `exerciseSets` do Schema v4;
 - **Geração Procedural Universal:** Um único gerador PRNG Mulberry32 determinístico (`arrayGenerator.ts`) atende a todos os algoritmos através de constraints específicas. Nenhum algoritmo possui gerador próprio;
 - **Persistência Desacoplada:** Schema v4 implementado e ativo (`sorting_station_save`), orientado a módulos e conjuntos de exercícios (`exerciseSets`), com pipeline de migração v1->v2->v3->v4 e fallback de leitura da chave legada;
 - **Padronização de Telas e Rolagem Vertical (Scrollable Screen Rule — PLATFORM-UI-H1):** Diretriz canônica eliminando `overflow-hidden` podador de viewports, adotando `min-h-screen`, `overflow-y-auto`, `overflow-x-hidden`, `justify-start` e `pb-16 sm:pb-24` em todas as telas com conteúdo dinâmico, dono único do scroll vertical e acessibilidade via `prefers-reduced-motion`;
-- **Suíte de Testes Automatizados:** **Vitest** com **390 testes unitários** em 27 arquivos com 100% de aprovação.
+- **Suíte de Testes Automatizados:** **Vitest** com **411 testes unitários** em 29 arquivos com 100% de aprovação.
 
 ---
 
@@ -178,10 +189,10 @@ A próxima prioridade oficial de implementação de software é:
 | **Design System, tokens e acessibilidade** | [`05-ux-design-system.md`](./05-ux-design-system.md) |
 | **Ambiente Figma Make e scripts operacionais** | [`06-development-environment.md`](./06-development-environment.md) |
 | **Persistência Schema v4 e migração v3->v4** | [`07-backend-and-persistence.md`](./07-backend-and-persistence.md) |
-| **Suíte de testes Vitest (376 testes) e DoD** | [`08-testing-and-quality.md`](./08-testing-and-quality.md) |
+| **Suíte de testes Vitest (413 testes) e DoD** | [`08-testing-and-quality.md`](./08-testing-and-quality.md) |
 | **Build, deploy e empacotamento** | [`09-build-deploy.md`](./09-build-deploy.md) |
 | **Roadmap canônico da plataforma e legado histórico** | [`10-roadmap.md`](./10-roadmap.md) |
-| **Governança de ADRs e índice de decisões 0001 a 0021** | [`11-architecture-decisions.md`](./11-architecture-decisions.md) |
+| **Governança de ADRs e índice de decisões 0001 a 0022** | [`11-architecture-decisions.md`](./11-architecture-decisions.md) |
 | **Pedagogia, rigor ético e diretrizes para o artigo** | [`12-pedagogy-and-academic-traceability.md`](./12-pedagogy-and-academic-traceability.md) |
 | **Padrão transversal de módulo e taxonomia de exercícios**| [`modules/README.md`](./modules/README.md) |
 | **Módulo 01: Bubble Sort** | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |

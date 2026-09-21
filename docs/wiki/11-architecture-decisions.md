@@ -198,6 +198,11 @@ O modelo oficial de deliberação está versionado em [`docs/adr/TEMPLATE.md`](.
 - **Contexto:** Concretiza a persistência da plataforma educacional (Marco P2.2-F). Rejeita a extensão direta de `protocols.insertion` no Schema v3 e adota o Schema v4 canônico estruturado em `modules` e `exerciseSets`. Implementa pipeline de migração determinístico $v1 \rightarrow v2 \rightarrow v3 \rightarrow v4$, estabiliza a chave `sorting_station_save` com fallback seguro para `sorting_station_v1_save`, estabelece a regra estrita de recordes (tempo nunca desempata) e ativa publicamente o Módulo Insertion Sort no Hub (`PROTOCOL_CATALOG`).
 - **Impacto:** Conclusão de P2.2-F com 376 testes unitários aprovados.
 
+### [ADR 0022: Padronização Visual e Estrutural de Bubble e Selection como Módulos de Exercícios](../../docs/adr/0022-canonical-exercise-module-standardization.md)
+- **Status:** `Aceito` (2026-09-21)
+- **Contexto:** Formaliza a convergência dos módulos Bubble Sort e Selection Sort ao modelo canônico da plataforma educacional (Marco PLATFORM-R1-B). Elimina termos legados de "fases" e "campanha" na interface ativa; adota o Catálogo Curricular compartilhado (`src/game/curriculum/practiceCatalog.ts`) com práticas progressivas (`basic`: 4 cargas, `intermediate`: 5 cargas, `advanced`: 6 cargas); introduz o Seletor de Práticas reutilizável (`PracticeSelector.tsx`); desacopla o Early Exit do Bubble Sort como Caso Especial Curricular desbloqueado pelo Schema v4; unifica a tela de conclusão via `PracticeSetCompleteScreen.tsx` preservando wrappers finos para retrocompatibilidade; e preserva rigorosamente as mecânicas singulares de cada algoritmo.
+- **Impacto:** Conclusão de PLATFORM-R1-B com 408 testes unitários aprovados e zero erros TypeScript.
+
 ---
 
 ## 5. Catálogo de Candidatos a ADR Futuro

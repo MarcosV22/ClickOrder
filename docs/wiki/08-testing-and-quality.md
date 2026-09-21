@@ -12,34 +12,36 @@
 Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Insertion Sort e Schema v4)**, a infraestrutura de testes automatizados do projeto cobre 100% da lógica pura de domínio, FSMs de ordenação (Bubble, Selection e Insertion Sort), tutoriais, conjuntos de prática progressiva, agregação de resultados, geração procedural Mulberry32, briefing, telemetria de sessão, replay da execução, pseudocódigo sincronizado, modo demonstração e persistência Schema v4:
 
 - **Framework de Testes Implementado:** **Vitest** (`vitest ^5.0.0`) instalado como dependência de desenvolvimento canônica via `pnpm add -D vitest`.
-- **Arquivos de Teste Ativos (27 arquivos, 390 testes automatizados aprovados 100% verde):**
+- **Arquivos de Teste Ativos (29 arquivos, 413 testes automatizados aprovados 100% verde):**
   1. `src/game/sorting/selection/selectionSortEngine.test.ts` (18 testes)
   2. `src/game/sorting/insertion/insertionSortEngine.test.ts` (18 testes)
   3. `src/game/replay/selectionReplayPseudocode.test.ts` (9 testes)
   4. `src/game/sorting/insertion/insertionReplayModel.test.ts` (13 testes)
   5. `src/game/briefing/briefing.test.ts` (20 testes)
   6. `src/screens/protocolCatalog.test.ts` (15 testes)
-  7. `src/game/generation/arrayGenerator.test.ts` (31 testes)
-  8. `src/game/persistence/persistence.test.ts` (60 testes)
-  9. `src/game/sorting/bubbleSortEngine.test.ts` (39 testes)
-  10. `src/game/replay/replayModel.test.ts` (11 testes)
-  11. `src/game/sorting/selection/selectionCampaign.test.ts` (19 testes)
-  12. `src/game/demonstration/demonstration.test.ts` (24 testes)
-  13. `src/game/replay/replayPseudocode.test.ts` (12 testes)
-  14. `src/game/sorting/selection/selectionConstraints.test.ts` (16 testes)
-  15. `src/game/replay/selectionReplayModel.test.ts` (9 testes)
-  16. `src/game/sorting/insertion/insertionReplayPseudocode.test.ts` (8 testes)
-  17. `src/game/sorting/selection/selectionTutorialGuide.test.ts` (3 testes)
-  18. `src/game/sorting/insertion/insertionPracticeGameplay.test.ts` (13 testes)
-  19. `src/game/sorting/insertion/insertionConstraints.test.ts` (10 testes)
-  20. `src/game/sorting/insertion/insertionTutorialGuide.test.ts` (3 testes)
-  21. `src/game/session/protocolScore.test.ts` (11 testes)
-  22. `src/game/sorting/insertion/practiceCatalog.test.ts` (5 testes)
-  23. `src/game/tutorial/tutorialGuide.test.ts` (5 testes)
-  24. `src/game/campaign/campaignSummary.test.ts` (4 testes)
-  25. `src/game/sorting/insertion/insertionPedagogy.test.ts` (6 testes)
-  26. `src/screens/campaignCompleteConfig.test.ts` (3 testes)
-  27. `src/game/session/sessionMetrics.test.ts` (5 testes)
+  7. `src/game/curriculum/practiceCatalog.test.ts` (11 testes - Catálogo Curricular Transversal)
+  8. `src/screens/practiceFlow.test.tsx` (8 testes - Integração de Seletor, Conclusão de Práticas e Cenário Cross-Sessão)
+  9. `src/game/generation/arrayGenerator.test.ts` (31 testes)
+  10. `src/game/persistence/persistence.test.ts` (64 testes - Schema v4, Gravação Única e Integridade Factual de Tutorial)
+  11. `src/game/sorting/bubbleSortEngine.test.ts` (39 testes)
+  12. `src/game/replay/replayModel.test.ts` (11 testes)
+  13. `src/game/sorting/selection/selectionCampaign.test.ts` (19 testes)
+  14. `src/game/demonstration/demonstration.test.ts` (24 testes)
+  15. `src/game/replay/replayPseudocode.test.ts` (12 testes)
+  16. `src/game/sorting/selection/selectionConstraints.test.ts` (16 testes)
+  17. `src/game/replay/selectionReplayModel.test.ts` (9 testes)
+  18. `src/game/sorting/insertion/insertionReplayPseudocode.test.ts` (8 testes)
+  19. `src/game/sorting/selection/selectionTutorialGuide.test.ts` (3 testes)
+  20. `src/game/sorting/insertion/insertionPracticeGameplay.test.ts` (13 testes)
+  21. `src/game/sorting/insertion/insertionConstraints.test.ts` (10 testes)
+  22. `src/game/sorting/insertion/insertionTutorialGuide.test.ts` (3 testes)
+  23. `src/game/session/protocolScore.test.ts` (11 testes)
+  24. `src/game/sorting/insertion/practiceCatalog.test.ts` (5 testes)
+  25. `src/game/tutorial/tutorialGuide.test.ts` (5 testes)
+  26. `src/game/campaign/campaignSummary.test.ts` (4 testes)
+  27. `src/game/sorting/insertion/insertionPedagogy.test.ts` (6 testes)
+  28. `src/screens/campaignCompleteConfig.test.ts` (3 testes)
+  29. `src/game/session/sessionMetrics.test.ts` (5 testes)
 - **Scripts de Teste Canônicos em [`package.json`](../../package.json):**
   - `pnpm run test:run`: Execução única headless da suíte completa;
   - `pnpm test`: Modo watch interativo de desenvolvimento.
@@ -54,9 +56,9 @@ A Pirâmide de Qualidade do Sorting Station possui seus dois primeiros níveis t
 graph TD
     subgraph Piramide_Qualidade ["Pirâmide de Garantia da Qualidade"]
         N1["Nível 1: Checagem Estática & Tipagem\n(tsc, vite build, oxfmt) [ATIVO HOJE]"]
-        N2["Nível 2: Testes Unitários de Domínio & Persistência\n(Vitest: 390 testes em 27 arquivos) [ATIVO HOJE]"]
-        N3["Nível 3: Testes de Integração de FSM & Telas\n(Transições de estado, callbacks, fluxos) [PLANEJADO]"]
-        N4["Nível 4: Acessibilidade, Responsividade & E2E\n(Teclado, reduced-motion, telas) [PLANEJADO]"]
+        N2["Nível 2: Testes Unitários de Domínio & Persistência\n(Vitest: 413 testes em 29 arquivos) [ATIVO HOJE]"]
+        N3["Nível 3: Testes de Integração de FSM & Telas\n(Transições de estado, callbacks, fluxos) [ATIVO HOJE]"]
+        N4["Nível 4: Acessibilidade, Responsividade & E2E\n(Teclado, reduced-motion, telas) [PLANEJADO / HOMOLOGAÇÃO MANUAL PENDENTE]"]
 
         N1 --> N2
         N2 --> N3
@@ -66,7 +68,7 @@ graph TD
 
 > [!NOTE]
 > **Tooling de Teste Ativo:**  
-> O **Vitest** é o executor oficial de testes do projeto, com **376 testes automatizados 100% verdes** distribuídos em 27 arquivos de teste.
+> O **Vitest** é o executor oficial de testes do projeto, com **413 testes automatizados 100% verdes** distribuídos em 29 arquivos de teste. A homologação visual interativa renderizada em browser real (viewports 1366x768, 1600x900, 1920x1080 e <700px) permanece como pendência manual declarada.
 
 ---
 

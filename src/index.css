@@ -191,3 +191,15 @@ body {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 245, 255, 0.3) rgba(6, 11, 26, 0.7);
 }
+
+/* Acessibilidade WCAG 2.1: Desativação universal de animações e transições quando solicitado pelo usuário */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

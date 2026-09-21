@@ -1292,4 +1292,115 @@ describe("Persistence Layer (P1.6 - P2.2-F)", () => {
       ).toBeUndefined();
     });
   });
+
+  describe("8. Garantia de Gravação Única e Integridade Canônica v4 (PLATFORM-R1-B)", () => {
+    it("recordExerciseCompletion realiza exatamente uma gravação no storage por conclusão", () => {
+      let setItemCallCount = 0;
+      const trackingStorage: StorageAdapter = {
+        getItem: () => null,
+        setItem: () => {
+          setItemCallCount++;
+        },
+        removeItem: () => {},
+      };
+
+      const initial = createDefaultSaveData();
+      const updated = recordExerciseCompletion(
+        initial,
+        "bubble",
+        BUBBLE_EXERCISE_SETS.BASIC,
+        { score: 95, errors: 0, hintsUsed: 1, elapsedTimeMs: 12000 },
+        trackingStorage
+      );
+
+      expect(setItemCallCount).toBe(1);
+      expect(updated.modules.bubble?.exerciseSets[BUBBLE_EXERCISE_SETS.BASIC]?.completed).toBe(true);
+      expect(
+        updated.modules.bubble?.exerciseSets[BUBBLE_EXERCISE_SETS.BASIC]?.bestRecord?.bestScore
+      ).toBe(95);
+    });
+
+    it("recordExerciseCompletion persiste apenas no modelo canônico v4 sem chaves legadas", () => {
+      const storage = createMemoryStorageAdapter();
+      const initial = createDefaultSaveData();
+
+      recordExerciseCompletion(
+        initial,
+        "selection",
+        SELECTION_EXERCISE_SETS.INTERMEDIATE,
+        { score: 100, errors: 0, hintsUsed: 0, elapsedTimeMs: 18000 },
+        storage
+      );
+
+      const raw = storage.getItem(STORAGE_KEY);
+      expect(raw).not.toBeNull();
+      const parsed = JSON.parse(raw!);
+
+      expect(parsed.schemaVersion).toBe(4);
+      expect(parsed.modules.selection.exerciseSets[SELECTION_EXERCISE_SETS.INTERMEDIATE].completed).toBe(true);
+      expect(parsed.campaign).toBeUndefined();
+      expect(parsed.protocols).toBeUndefined();
+      expect(parsed.highestPhaseReached).toBeUndefined();
+      expect(parsed.unlockedPhases).toBeUndefined();
+    });
+
+    it("recordPhaseCompletion atua exclusivamente como adaptador e não gera mutações independentes", () => {
+      let setItemCallCount = 0;
+      const trackingStorage: StorageAdapter = {
+        getItem: () => null,
+        setItem: () => {
+          setItemCallCount++;
+        },
+        removeItem: () => {},
+      };
+
+      const initial = createDefaultSaveData();
+      const result = recordPhaseCompletion(
+        initial,
+        "bubble",
+        2,
+        3,
+        trackingStorage,
+        { score: 85, errors: 1, hintsUsed: 1, elapsedTimeMs: 20000 }
+      );
+
+      expect(setItemCallCount).toBe(1);
+      expect(result.modules.bubble?.exerciseSets[BUBBLE_EXERCISE_SETS.INTERMEDIATE]?.completed).toBe(true);
+      expect(
+        result.modules.bubble?.exerciseSets[BUBBLE_EXERCISE_SETS.INTERMEDIATE]?.bestRecord?.bestScore
+      ).toBe(85);
+    });
+
+    it("recordExerciseCompletion preserva o status factual de completedTutorial e não marca tutorial completado indevidamente", () => {
+      let state = createDefaultSaveData();
+      expect(isModuleTutorialCompleted(state, "insertion")).toBe(false);
+      expect(isModuleTutorialCompleted(state, "bubble")).toBe(false);
+
+      // Conclui prática sem ter concluído tutorial
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 100, errors: 0, hintsUsed: 0, elapsedTimeMs: 15000 }
+      );
+
+      // A prática foi gravada, mas o tutorial NÃO foi marcado como concluído factualmente
+      expect(isExerciseSetCompleted(state, "insertion", INSERTION_EXERCISE_SETS.BASIC)).toBe(true);
+      expect(isModuleTutorialCompleted(state, "insertion")).toBe(false);
+
+      // Conclusão explícita de tutorial
+      state = recordTutorialCompletion(state, "insertion");
+      expect(isModuleTutorialCompleted(state, "insertion")).toBe(true);
+
+      // Próxima prática executada preserva o tutorial concluído
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.INTERMEDIATE,
+        { score: 95, errors: 0, hintsUsed: 0, elapsedTimeMs: 20000 }
+      );
+      expect(isExerciseSetCompleted(state, "insertion", INSERTION_EXERCISE_SETS.INTERMEDIATE)).toBe(true);
+      expect(isModuleTutorialCompleted(state, "insertion")).toBe(true);
+    });
+  });
 });

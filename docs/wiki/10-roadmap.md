@@ -79,6 +79,22 @@ flowchart LR
 
 ---
 
+### Marco 1.5: PADRONIZAÇÃO VISUAL E ESTRUTURAL DE BUBBLE E SELECTION (PLATFORM-R1-B) — `IMPLEMENTAÇÃO CONCLUÍDA / HOMOLOGAÇÃO VISUAL EM BROWSER PENDENTE`
+- **Objetivo:** Migrar Bubble Sort e Selection Sort da linguagem visual legada ("Fase / Campanha") para o modelo canônico da plataforma ("Módulo / Prática / Exercício / Conjunto de Práticas"), consolidando a convergência com o Insertion Sort ([`ADR 0022`](../adr/0022-canonical-exercise-module-standardization.md)).
+- **Entregáveis Concluídos:**
+  1. Catálogo curricular transversal unificado (`src/game/curriculum/practiceCatalog.ts`) com tipos puros (`PracticeDefinition`, `PracticeLevel`, `PracticeProgressState`);
+  2. Componente reutilizável `PracticeSelector.tsx` data-driven para seleção direta de práticas desbloqueadas com telemetria;
+  3. Desacoplamento do Early Exit no Bubble Sort como Modo Desafio / Caso Especial Curricular derivado pelo Schema v4;
+  4. Padronização de cabeçalhos (`PhaseHeader.tsx`) e telas (`GameScreen.tsx`, `SelectionGameScreen.tsx`), eliminando termos de fases legadas sem alterar mecânicas singulares;
+  5. Normalização de `ResultScreen.tsx` ("EXERCÍCIO CONCLUÍDO!") e ação para o Seletor de Práticas;
+  6. Unificação transversal da conclusão na tela canônica `PracticeSetCompleteScreen.tsx` com diferenciação honesta entre progresso curricular acumulado (ex.: 3/3 salvo) e práticas da sessão ativa sem fabricação de métricas;
+  7. Persistência canônica exclusiva via `recordExerciseCompletion` com garantia de escrita única por conclusão, integridade factual de `completedTutorial`, e eliminação de gravação redundante;
+  8. Suíte de testes expandida para 29 arquivos e 413 testes automatizados 100% verdes com cobertura comportamental de cenários cross-sessão.
+- **Pendência Declarada:**
+  - Validação renderizada interativa em navegador real nas resoluções 1366x768, 1600x900, 1920x1080 e altura <700px (roteiro manual entregue).
+
+---
+
 ### Marco 2: MÓDULO MERGE SORT (P3.1) — `FUTURO (PRÓXIMO MARCO)`
 - **Objetivo:** Primeiro módulo log-linear da plataforma, demonstrando Divisão e Conquista.
 - **Entregáveis:**

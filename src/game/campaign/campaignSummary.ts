@@ -1,5 +1,6 @@
 export interface PhaseResult {
   phase: number;
+  practiceTitle?: string;
   comparisons: number;
   swaps: number;
   errors: number;

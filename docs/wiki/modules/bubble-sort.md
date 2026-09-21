@@ -145,17 +145,19 @@ Para qualquer passada $i$ ($0 \le i \le n - 2$):
 
 ---
 
-## 10. Tipos de Exercícios Suportados
+## 10. Tipos de Exercícios Suportados (PLATFORM-R1-B)
 
 | Tipo de Exercício | Suporte no Módulo | Implementação Concreta no Código |
 | :--- | :---: | :--- |
 | **Introdução / Conceito** | `OBRIGATÓRIO` | `ProtocolModeBriefingScreen.tsx` (`bubble-canonical`, `bubble-early-exit`) |
 | **Demonstração** | `OBRIGATÓRIO` | `DemonstrationScreen.tsx` consumindo `bubbleDemonstration.ts` (`[5, 2, 4, 1]`) |
 | **Tutorial Guiado** | `OBRIGATÓRIO` | `TutorialScreen.tsx` sobre `[3, 1, 2]` |
-| **Prática Básica** | `OBRIGATÓRIO` | `GameScreen.tsx` (Fase 1: $n=4$ gerado proceduralmente) |
-| **Prática Progressiva** | `OBRIGATÓRIO` | `GameScreen.tsx` (Fase 2: $n=5$, Fase 3: $n=6$ com sementes procedurais) |
+| **Seletor de Práticas** | `OBRIGATÓRIO` | `PracticeSelector.tsx` com catálogo curricular transversal (`src/game/curriculum/`) |
+| **Prática Básica** | `OBRIGATÓRIO` | `GameScreen.tsx` (`bubble.practice.basic`: $n=4$ gerado proceduralmente) |
+| **Prática Progressiva** | `OBRIGATÓRIO` | `GameScreen.tsx` (`bubble.practice.intermediate`: $n=5$, `bubble.practice.advanced`: $n=6$) |
 | **Casos do Algoritmo** | `OBRIGATÓRIO` | Modo Desafio (`CHALLENGE_SCENARIOS`: ordenado, quase ordenado, pior caso) |
-| **Desafio** | `OPCIONAL` | Modo Early Exit com telemetria de operações evitadas |
+| **Desafio** | `OPCIONAL` | Modo Early Exit com telemetria de operações evitadas (desbloqueado após 3 práticas) |
+| **Conclusão de Conjunto** | `OBRIGATÓRIO` | `PracticeSetCompleteScreen.tsx` agregando telemetria e síntese pedagógica |
 | **Prática Livre (Sandbox)**| `OPCIONAL` | Planejado para expansão futura da plataforma |
 
 ---
@@ -177,11 +179,11 @@ Para qualquer passada $i$ ($0 \le i \le n - 2$):
 
 ## 12. Geração Procedural e Constraints do Módulo
 
-- **Gerador:** `generateSortingArray` (PRNG Mulberry32) configurado com `BUBBLE_CAMPAIGN_CONSTRAINTS`.
-- **Tamanhos Curriculares:**
-  - Prática Básica (Fase 1): $n = 4$ elementos;
-  - Prática Intermediária (Fase 2): $n = 5$ elementos;
-  - Prática Avançada (Fase 3): $n = 6$ elementos.
+- **Gerador:** `generateSortingArray` (PRNG Mulberry32) configurado com constraints procedurais.
+- **Tamanhos Curriculares Canônicos:**
+  - Prática Básica (`bubble.practice.basic`): $n = 4$ elementos;
+  - Prática Intermediária (`bubble.practice.intermediate`): $n = 5$ elementos;
+  - Prática Avançada (`bubble.practice.advanced`): $n = 6$ elementos.
 - **Constraints Matemáticas Obrigatórias:**
   - `isNotSorted`: impede vetores já ordenados de surgirem na prática regular;
   - `isNotStrictlyReversed`: impede vetores estritamente decrescentes em práticas iniciais;

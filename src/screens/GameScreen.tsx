@@ -41,6 +41,8 @@ interface GameScreenProps {
   totalPhases?: number;
   variant?: BubbleSortVariant;
   modeTitle?: string;
+  practiceTitle?: string;
+  onBackToSelector?: () => void;
 }
 
 const INITIAL_ARRAY = [5, 2, 4, 1];
@@ -52,7 +54,19 @@ export default function GameScreen({
   totalPhases = 3,
   variant = "CANONICAL",
   modeTitle,
+  practiceTitle,
+  onBackToSelector,
 }: GameScreenProps) {
+  const effectivePracticeTitle =
+    practiceTitle ??
+    (variant === "EARLY_EXIT"
+      ? (modeTitle ?? `DESAFIO — CENÁRIO ${phase}`)
+      : phase === 1
+        ? "PRÁTICA BÁSICA"
+        : phase === 2
+          ? "PRÁTICA INTERMEDIÁRIA"
+          : "PRÁTICA AVANÇADA");
+
   // --------------------------------------------------------------------------
   // 1. Estado Canônico da Engine (Fonte Única de Verdade Algorítmica)
   // --------------------------------------------------------------------------
@@ -371,9 +385,11 @@ export default function GameScreen({
     <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines flex flex-col select-none">
       {/* Header */}
       <PhaseHeader
-        protocol={variant === "EARLY_EXIT" ? "BUBBLE (DESAFIO)" : "BUBBLE"}
-        phase={phase}
-        totalPhases={totalPhases}
+        moduleTitle="BUBBLE SORT"
+        practiceTitle={effectivePracticeTitle}
+        practiceNumber={phase}
+        totalPractices={totalPhases}
+        onBackToSelector={onBackToSelector}
       />
 
       {/* Main content */}
@@ -394,7 +410,7 @@ export default function GameScreen({
           >
             {variant === "EARLY_EXIT"
               ? (modeTitle ?? `MODO DESAFIO — CENÁRIO ${phase}`)
-              : `PROTOCOLO BUBBLE — FASE ${phase}`}
+              : `MÓDULO BUBBLE SORT — ${effectivePracticeTitle}`}
           </h2>
         </div>
 
@@ -405,7 +421,7 @@ export default function GameScreen({
               className="text-xs px-2.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-mono tracking-wider uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              FASE {phase} DE {totalPhases}
+              {effectivePracticeTitle} • {gameState.arrayLength} CARGAS
             </span>
             <span
               className="text-xs px-2.5 py-0.5 rounded bg-purple-950/40 border border-purple-500/30 text-purple-300 font-mono tracking-wider uppercase"

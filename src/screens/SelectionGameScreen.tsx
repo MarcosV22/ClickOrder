@@ -42,21 +42,35 @@ export interface SelectionPhaseCompleteData {
 
 interface SelectionGameScreenProps {
   onComplete: (data: SelectionPhaseCompleteData) => void;
-  initialArray: readonly number[];
-  phase: number;
+  initialArray?: readonly number[];
+  phase?: number;
   totalPhases?: number;
   seed?: SeedInput;
+  practiceTitle?: string;
+  onBackToSelector?: () => void;
   onResetPhase?: () => void;
 }
 
+const DEFAULT_INITIAL_ARRAY = [4, 1, 3];
+
 export default function SelectionGameScreen({
   onComplete,
-  initialArray,
+  initialArray = DEFAULT_INITIAL_ARRAY,
   phase = 1,
   totalPhases = 3,
   seed,
+  practiceTitle,
+  onBackToSelector,
   onResetPhase,
 }: SelectionGameScreenProps) {
+  const effectivePracticeTitle =
+    practiceTitle ??
+    (phase === 1
+      ? "PRÁTICA BÁSICA"
+      : phase === 2
+        ? "PRÁTICA INTERMEDIÁRIA"
+        : "PRÁTICA AVANÇADA");
+
   // --------------------------------------------------------------------------
   // 1. Estado Canônico da Engine (Fonte Única de Verdade Algorítmica)
   // --------------------------------------------------------------------------
@@ -356,8 +370,8 @@ export default function SelectionGameScreen({
     const initialExp = getExpectedSelectionInspection(freshState);
     setMessage({
       text: initialExp
-        ? `Fase reiniciada. Compare a carga #${initialExp.j + 1} (${initialExp.scannerValue}) com o candidato mínimo #${initialExp.minIndex + 1} (${initialExp.currentMinValue}).`
-        : "Fase reiniciada.",
+        ? `Exercício reiniciado. Compare a carga #${initialExp.j + 1} (${initialExp.scannerValue}) com o candidato mínimo #${initialExp.minIndex + 1} (${initialExp.currentMinValue}).`
+        : "Exercício reiniciado.",
       type: "info",
     });
 
@@ -408,9 +422,11 @@ export default function SelectionGameScreen({
 
       {/* Header */}
       <PhaseHeader
-        protocol="SELECTION"
-        phase={phase}
-        totalPhases={totalPhases}
+        moduleTitle="SELECTION SORT"
+        practiceTitle={effectivePracticeTitle}
+        practiceNumber={phase}
+        totalPractices={totalPhases}
+        onBackToSelector={onBackToSelector}
       />
 
       <div className="relative z-10 flex flex-col items-center gap-3 sm:gap-4 max-w-4xl w-full my-0 py-2">
@@ -418,10 +434,10 @@ export default function SelectionGameScreen({
         <div className="w-full flex flex-wrap items-center justify-between gap-2 px-2">
           <div className="flex items-center gap-2">
             <span
-              className="text-xs px-2.5 py-1 rounded bg-purple-950/60 border border-purple-500/30 text-purple-300 tracking-wider font-bold"
+              className="text-xs px-2.5 py-1 rounded bg-purple-950/60 border border-purple-500/30 text-purple-300 tracking-wider font-bold uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              SELECTION SORT
+              {effectivePracticeTitle} • {gameState.arrayLength} CARGAS
             </span>
             <span
               className="text-xs text-white/50 font-mono"
@@ -606,7 +622,7 @@ export default function SelectionGameScreen({
                   ✓ ORDENAÇÃO CONCLUÍDA!
                 </span>
                 <span className="text-[11px] text-white/60 font-mono">
-                  Calculando métricas da fase...
+                  Calculando métricas do exercício...
                 </span>
               </div>
             </div>
@@ -653,7 +669,7 @@ export default function SelectionGameScreen({
                   onClick={handleReset}
                   className="text-xs text-white/30 hover:text-white/70 transition-colors font-mono cursor-pointer"
                 >
-                  ↺ REINICIAR FASE
+                  ↺ REINICIAR EXERCÍCIO
                 </button>
               </div>
             </div>
@@ -691,7 +707,7 @@ export default function SelectionGameScreen({
                   onClick={handleReset}
                   className="text-xs text-white/30 hover:text-white/70 transition-colors font-mono cursor-pointer"
                 >
-                  ↺ REINICIAR FASE
+                  ↺ REINICIAR EXERCÍCIO
                 </button>
               </div>
             </div>
