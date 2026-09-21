@@ -203,6 +203,11 @@ O modelo oficial de deliberação está versionado em [`docs/adr/TEMPLATE.md`](.
 - **Contexto:** Formaliza a convergência dos módulos Bubble Sort e Selection Sort ao modelo canônico da plataforma educacional (Marco PLATFORM-R1-B). Elimina termos legados de "fases" e "campanha" na interface ativa; adota o Catálogo Curricular compartilhado (`src/game/curriculum/practiceCatalog.ts`) com práticas progressivas (`basic`: 4 cargas, `intermediate`: 5 cargas, `advanced`: 6 cargas); introduz o Seletor de Práticas reutilizável (`PracticeSelector.tsx`); desacopla o Early Exit do Bubble Sort como Caso Especial Curricular desbloqueado pelo Schema v4; unifica a tela de conclusão via `PracticeSetCompleteScreen.tsx` preservando wrappers finos para retrocompatibilidade; e preserva rigorosamente as mecânicas singulares de cada algoritmo.
 - **Impacto:** Conclusão de PLATFORM-R1-B com 408 testes unitários aprovados e zero erros TypeScript.
 
+### [ADR 0023: Design Pedagógico e Mecânico do Módulo Merge Sort (P3.1-A)](../../docs/adr/0023-merge-sort-pedagogical-mechanical-design.md)
+- **Status:** `PROPOSTO / AGUARDA REVISÃO` (2026-09-21)
+- **Contexto:** Especifica a arquitetura pedagógica e cinestésica para o Módulo 04 (Merge Sort), marcando o início do Marco P3 (algoritmos log-lineares de Divisão e Conquista). Estabelece a variante canônica Top-Down pós-ordem com convenção fechada $[left, right]$ e ponto médio $\lfloor (left+right)/2 \rfloor$; define a mecânica ativa de intercalação com dois ponteiros ($p_1, p_2$) confrontando frentes de ramais convergentes sob sensores ópticos; introduz a Esteira Coletora Auxiliar ancorando visualmente o custo de memória $O(n)$; formaliza a regra estrita de desempate $\le$ no Ramal Esquerdo para salvaguardar a estabilidade algorítmica; detalha a distinção curricular entre partição localmente ordenada (`ORD`) e ordenação global imutável (`OK`); e mapeia as 20 seções do Module Standard sem iniciar a implementação de código.
+- **Impacto:** Entrega de P3.1-A aguardando revisão humana antes da implementação da engine em P3.1-B.
+
 ---
 
 ## 5. Catálogo de Candidatos a ADR Futuro

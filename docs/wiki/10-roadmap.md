@@ -95,14 +95,15 @@ flowchart LR
 
 ---
 
-### Marco 2: MÓDULO MERGE SORT (P3.1) — `FUTURO (PRÓXIMO MARCO)`
-- **Objetivo:** Primeiro módulo log-linear da plataforma, demonstrando Divisão e Conquista.
-- **Entregáveis:**
-  1. Visualização de sub-esteiras paralelas bifurcadas;
-  2. Botoeira com dois ponteiros para intercalação guiada;
-  3. Métrica especializada de escritas em memória auxiliar;
-  4. Demonstração autônoma sobre `[7, 2, 5, 3]`;
-  5. Modo de intercalação balanceada e assimétrica.
+### Marco 2: MÓDULO MERGE SORT (P3.1) — `EM PROGRESSO (P3.1-A CONCLUÍDO / AGUARDA REVISÃO)`
+- **Objetivo:** Primeiro módulo log-linear $\Theta(n \log n)$ da plataforma, demonstrando Divisão e Conquista, preservação estrita de estabilidade e memória auxiliar $O(n)$ com esteiras convergentes.
+- **Sub-marcos:**
+  - **P3.1-A: Design Pedagógico e Mecânico (`CONCLUÍDO / PROPOSTO PARA REVISÃO`):** Especificação completa das 20 seções do Module Standard ([`modules/merge-sort.md`](./modules/merge-sort.md)) e proposta arquitetural formalizada no [`ADR 0023`](../adr/0023-merge-sort-pedagogical-mechanical-design.md) (Top-Down pós-ordem, intercalação ativa com dois ponteiros, esteira coletora auxiliar, regra de estabilidade $\le$ e distinção entre partição `ORD` e conclusão `OK`).
+  - **P3.1-B: Engine Pura e FSM (`FUTURO`):** Implementação de `src/game/sorting/merge/mergeSortEngine.ts` com testes unitários no Vitest.
+  - **P3.1-C: Camada Pedagógica, Tutorial e Demonstração (`FUTURO`):** Constraints Mulberry32, briefing oficial, tutorial interativo curto e demonstração canônica autônoma.
+  - **P3.1-D: Estação de Intercalação e Seletor de Práticas (`FUTURO`):** Tela `MergeGameScreen.tsx` desktop-first, confluência de esteiras e integração com Seletor.
+  - **P3.1-E: Replay e Pseudocódigo Sincronizado (`FUTURO`):** Modelo de derivação histórica pura e painel de 18 linhas.
+  - **P3.1-F: Persistência Schema v4 e Ativação no Hub (`FUTURO`):** Gravação sob `merge.practice.*` e ativação como `available`.
 
 ---
 

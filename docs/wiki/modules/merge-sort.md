@@ -1,9 +1,9 @@
 # Módulo 04 — Merge Sort
 
-> **Documento canônico do módulo curricular:** Especificação integral do Módulo de Merge Sort da plataforma **Sorting Station**.  
-> **Status de Implementação:** `FUTURO` (Marco P3; algoritmo de Divisão e Conquista; engine, visualização de sub-esteiras e intercalação em planejamento arquitetural).  
-> **Data de Atualização:** 15/09/2026 (Marco PLATFORM-R0)  
-> **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md), [`10-roadmap.md`](../10-roadmap.md).
+> **Documento canônico do módulo curricular:** Especificação integral de design pedagógico, mecânico e computacional do Módulo de Merge Sort da plataforma **Sorting Station**.  
+> **Status de Implementação:** `ESPECIFICAÇÃO DE DESIGN PROPOSTA (P3.1-A)` (Design pedagógico, mecânica cinestésica, FSM, pseudocódigo, métricas, casos curados e contratos arquiteturais documentados; aguarda aprovação para início da engine P3.1-B; código algorítmico não iniciado).  
+> **Data de Atualização:** 21/09/2026 (Marco P3.1-A / ADR 0023 Proposto — Revisão 2)  
+> **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`ADR 0021`](../../adr/0021-module-exercise-persistence-schema-v4.md), [`ADR 0022`](../../adr/0022-canonical-exercise-module-standardization.md), [`ADR 0023`](../../adr/0023-merge-sort-pedagogical-mechanical-design.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md), [`05-ux-design-system.md`](../05-ux-design-system.md), [`07-backend-and-persistence.md`](../07-backend-and-persistence.md), [`10-roadmap.md`](../10-roadmap.md), [`12-pedagogy-and-academic-traceability.md`](../12-pedagogy-and-academic-traceability.md).
 
 ---
 
@@ -11,219 +11,376 @@
 
 - **Nome Canônico:** Merge Sort (Ordenação por Intercalação / Divisão e Conquista)
 - **Identificador de Sistema (`moduleId`):** `merge`
-- **Rótulo Diegético na Interface:** `PROTOCOLO: MERGE SORT // ESTEIRAS PARALELAS E INTERCALAÇÃO`
-- **Status Factual:** `FUTURO` (Marco P3 da Plataforma)
+- **Rótulo Diegético na Interface:** `PROTOCOLO: MERGE SORT // ESTEIRAS CONVERGENTES E INTERCALAÇÃO`
+- **Subtítulo Diegético:** *Divisão de Fluxos e Intercalação Ordenada*
+- **Status Factual:** `ESPECIFICAÇÃO DE DESIGN PROPOSTA (P3.1-A)` (Aguardando homologação de design; código algorítmico não iniciado)
 - **Classificação Curricular:** Algoritmo Avançado de Divisão e Conquista Assintoticamente Ótimo
 - **Complexidade Temporal:**
-  - **Melhor Caso:** $\Theta(n \log n)$ comparações
+  - **Melhor Caso:** $\Theta(n \log n)$ comparações ($\approx \lceil \frac{n}{2} \rceil \log_2 n$)
   - **Caso Médio:** $\Theta(n \log n)$ comparações
   - **Pior Caso:** $\Theta(n \log n)$ comparações ($n \log_2 n - n + 1$)
-- **Complexidade Espacial (Memória Auxiliar):** $O(n)$ (requer esteira/buffer temporário de intercalação)
-- **Estabilidade Formal:** Estável (preserva a ordem relativa de elementos com chaves idênticas se o desempate na intercalação priorizar o subvetor esquerdo: $\le$)
-- **Tema Visual e Acentos:** Azul Cobalto / Ciano Elétrico (`#2563eb` e `#38bdf8`), esteiras bifurcadas em níveis multinível
+- **Complexidade Espacial (Espaço Auxiliar):** $O(n)$ células/posições (capacidade máxima da esteira coletora temporária para acomodar o intervalo ativo)
+- **Estabilidade Formal:** Estável (preserva rigorosamente a ordem relativa de elementos de mesmo valor ao aplicar a regra de desempate canônica $\le$, priorizando sempre o subvetor da esquerda)
+- **Tema Visual e Acentos:** Azul Cobalto / Ciano Elétrico (`#2563eb` e `#38bdf8`), sensores ópticos de inspeção e bifurcação de ramais
 
 ---
 
 ## 2. Objetivos de Aprendizagem
 
-Ao concluir o Módulo de Merge Sort, o estudante deverá ser capaz de:
-1. **Lembrar:** Identificar a estratégia clássica de Divisão e Conquista: dividir recursivamente até atingir o caso base unitário ($n=1$) e intercalar as metades ordenadas.
-2. **Entender:** Explicar por que a complexidade do Merge Sort é estritamente $\Theta(n \log n)$ em todos os casos (árvore de recursão com altura $\lceil \log_2 n \rceil$ e trabalho linear de intercalação $O(n)$ por nível).
-3. **Aplicar:** Operar o processo de intercalação com dois ponteiros ($p_1$ no subvetor esquerdo e $p_2$ no subvetor direito), escolhendo a menor carga para encaminhar à esteira de saída.
-4. **Analisar:** Reconhecer o custo de memória auxiliar $O(n)$ e compreender por que o algoritmo necessita de uma estrutura temporária para consolidar a mesclagem.
-5. **Avaliar:** Contrastar a estabilidade e a previsibilidade absoluta de desempenho do Merge Sort com algoritmos como Quick Sort e Heap Sort.
+Ao concluir o Módulo de Merge Sort, o estudante deverá demonstrar competência nos seguintes conceitos algorítmicos e computacionais (estruturados sob a Taxonomia de Bloom revisada):
+
+1. **Lembrar (Conhecimento):**
+   - Identificar as duas etapas estruturais do algoritmo: **Divisão** (decomposição recursiva até subproblemas de tamanho unitário $n=1$) e **Intercalação** (reunião ordenada de dois subvetores adjacentes);
+   - Citar a condição axiomática de parada da recursão ($left \ge right$ ou tamanho $\le 1$), reconhecendo que uma partição unitária está trivialmente ordenada por definição sem necessidade de comparações.
+2. **Entender (Compreensão):**
+   - Explicar por que a complexidade de tempo do Merge Sort é $\Theta(n \log n)$ em todos os cenários, fruto de uma árvore de recursão com altura $\lceil \log_2 n \rceil$ onde cada nível realiza no máximo $n-1$ comparações de intercalação;
+   - Compreender que a divisão de vetores é uma operação **puramente estrutural** que não altera nem ordena os dados, e que toda a ordenação ocorre exclusivamente durante o processo de intercalação;
+   - Diferenciar um subvetor intercalado e ordenado localmente (`ORD`) da ordenação global definitiva do vetor (`OK`), compreendendo que um trecho local ordenado pode precisar ser deslocado e rearranjado em intercalações de níveis superiores.
+3. **Aplicar (Execução):**
+   - Conduzir a estação de intercalação operando os dois ponteiros ($p_1$ no Ramal Esquerdo e $p_2$ no Ramal Direito), confrontando os elementos nas respectivas cabeças e despachando sempre o menor para a esteira coletora auxiliar;
+   - Aplicar a regra canônica de desempate ($E[p_1] == D[p_2]$) selecionando o elemento do Ramal Esquerdo para salvaguardar a estabilidade do algoritmo;
+   - Identificar o momento exato em que um dos ramais se esgota e comandar a transferência direta das cargas remanescentes do outro ramal sem efetuar comparações espúrias.
+4. **Analisar (Diferenciação):**
+   - Reconhecer a necessidade de memória auxiliar $O(n)$ no Merge Sort canônico, analisando por que a intercalação direta na esteira de origem sem buffer auxiliar demandaria deslocamentos contíguos custosos ($O(n^2)$);
+   - Comparar a invariância de desempenho do Merge Sort ($\Theta(n \log n)$ fixo) com o caráter adaptativo do Insertion Sort ($O(n)$ no melhor caso e $O(n^2)$ no pior) e a volatilidade do Quick Sort ($O(n \log n)$ no médio e $O(n^2)$ no pior caso de pivô).
+5. **Avaliar (Julgamento):**
+   - Avaliar o trade-off entre custo de memória auxiliar ($O(n)$ posições) versus previsibilidade estrita de desempenho assintótico, justificando cenários onde o Merge Sort é preferível a algoritmos in-place.
 
 ---
 
 ## 3. Modelo Mental e Metáfora Visual
 
-- **A Central Logística:** Um pátio de triagem multinível automatizado com sistemas de bifurcação e confluência de esteiras.
-- **A Fase de Divisão (*Split*):** A esteira principal divide seu fluxo em dois ramais paralelos (Ramal Superior / Esquerdo e Ramal Inferior / Direito) até que cada compartimento contenha apenas uma carga isolada (caso trivialmente ordenado).
-- **A Esteira Auxiliar de Intercalação (*Merge Track*):** Uma esteira coletora limpa posicionada logo abaixo dos dois ramais convergentes.
-- **Dois Sensores Ópticos ($p_1$ e $p_2$):** Um sensor monitora a cabeça do Ramal Esquerdo e outro monitora a cabeça do Ramal Direito.
-- **O Despacho Ordenado:** O operador compara as duas cargas na ponta dos ramais e autoriza a menor a descer para a esteira coletora. Se acabarem as cargas de um ramal, o restante do outro ramal desce diretamente.
-- **A Confluência no Nível Superior:** A esteira coletora ordenada substitui a partição correspondente no nível acima.
+### 3.1. A Metáfora Canônica: Pátio de Triagem com Esteiras Convergentes
+O módulo é ambientado no setor de confluência logística da Central Espacial:
+
+```
+[ NÍVEL SUPERIOR: Árvore de Decomposição Estrutural / Contexto Global ]
+  (Bloco Ativo em Destaque: Intervalo [left .. right], corte em mid)
+
+         ┌───────────────────────────────┐
+         │ Ramal Esquerdo (Subvetor E)   │  p1 ──► [ Carga E[p1] ] ...
+         │ Janela sobre A[left .. mid]   │             │
+         └──────────────┬────────────────┘             ▼ [Sensores Ópticos]
+                        │                          [ E[p1] <= D[p2] ? ]
+         ┌──────────────┴────────────────┐             ▲
+         │ Ramal Direito (Subvetor D)    │  p2 ──► [ Carga D[p2] ] ...
+         │ Janela sobre A[mid+1..right]  │             │
+         └───────────────────────────────┘
+                        │
+                        ▼  (Despacho Ordenado)
+   ═════════════════════════════════════════════════════════════════
+   ESTEIRA COLETORA AUXILIAR (Buffer Temporário B[0 .. len-1])
+   [ Carga 1 ] [ Carga 2 ] [ Carga 3 ] [ Vaga ] [ Vaga ]
+   ═════════════════════════════════════════════════════════════════
+                        │
+                        ▼  (Cópia de Retorno / Consolidação Automática)
+   [ RECOLOCAÇÃO NA ESTEIRA PRINCIPAL: Intervalo A[left..right] marcado como ORD ]
+```
+
+- **Ramais como Janelas Diretas do Vetor Principal:** Os ramais superior/esquerdo ($E$) e inferior/direito ($D$) não representam cópias físicas prévias nem geram consumo oculto de memória; constituem janelas lógicas sobre os intervalos $A[left \dots mid]$ e $A[mid + 1 \dots right]$.
+- **A Estação de Intercalação (*Convergence Station*):** Confluência pneumática onde os dois ramais encontram a esteira coletora. As cargas de cada ramal formam uma fila onde apenas o elemento da frente (apontado por $p_1$ ou $p_2$) está sob o campo de visão dos sensores ópticos.
+- **Sensores Ópticos de Inspeção:** Dois feixes de luz (ciano para a esquerda, índigo para a direita) iluminam simultaneamente as duas cargas sob confronto. O painel central exibe a condição a comparar ($E[p_1] \le D[p_2]$), sem revelar antecipadamente o resultado booleano ou a resposta correta durante a prática.
+- **A Esteira Coletora Auxiliar (*Merge Buffer Track*):** Esteira temporária posicionada logo abaixo da confluência. Ela recebe as cargas despachadas na ordem exata decidida pelo operador. Sua presença visual permanente ancora fisicamente o consumo de espaço auxiliar $O(n)$.
+- **Drenagem da Cauda Remanescente:** Quando um dos ramais se esgota, o sensor correspondente acusa `RAMAL ESGOTADO`. O sistema destaca que os elementos restantes do outro ramal já são maiores que tudo o que desceu e já estão ordenados entre si, habilitando o botão de liberação direta da cauda.
+- **Cópia de Retorno Automática e Badges (`ORD` vs `OK`):** Ao encher o buffer, os elementos são transferidos de volta para as posições $[left \dots right]$ da esteira principal. O trecho recebe a borda ciano e o badge **`ORD` (Subvetor Localmente Ordenado)**. Somente no término da última intercalação raiz $[0 \dots n-1]$ as cargas recebem o badge verde **`OK` (Ordenação Global Definitiva)**.
 
 ---
 
-## 4. Operações Fundamentais e Invariantes
+## 4. Operações Fundamentais, Invariantes e Recorrência de Escritas
 
-### 4.1. Caso Base da Recursão
-Um subvetor com comprimento $n \le 1$ está trivialmente ordenado por definição; nenhuma operação de divisão ou intercalação é executada.
+```mermaid
+flowchart TD
+    subgraph Divisao ["1. Fase de Divisão (Top-Down)"]
+        D1["mergeSort(left, right)"] --> D2{"left >= right ?"}
+        D2 -- "SIM (Tamanho <= 1)" --> D3["Caso Base: Trivialmente Ordenado\nRetorna sem operações"]
+        D2 -- "NÃO" --> D4["Calcula meio = ⌊(left + right) / 2⌋"]
+        D4 --> D5["mergeSort(left, mid)"]
+        D5 --> D6["mergeSort(mid + 1, right)"]
+        D6 --> D7["intercalar(left, mid, right)"]
+    end
 
-### 4.2. Invariante da Intercalação (*Merge Step*)
-Dadas duas metades adjacentes $A[inicio \dots meio]$ e $A[meio+1 \dots fim]$ já ordenadas internamente:
-- A cada passo da intercalação com ponteiros $p_1$ e $p_2$, o buffer de saída $B[inicio \dots k-1]$ contém os $k - inicio$ menores elementos da união dos dois subvetores, dispostos em ordem estritamente não decrescente.
-- O próximo elemento inserido em $B[k]$ é $\min(A[p_1], A[p_2])$.
+    subgraph Intercalacao ["2. Fase de Intercalação (Merge Step)"]
+        I1["Inicializa: p1 = left, p2 = mid + 1, k = 0"] --> I2{"p1 <= mid E p2 <= right ?"}
+        I2 -- "SIM (Ambos com cargas)" --> I3{"Comparação Única:\nA[p1].value <= A[p2].value ?"}
+        I3 -- "VERDADEIRO\n(ou Empate)" --> I4["Buffer[k] = A[p1]\np1 = p1 + 1, k = k + 1"]
+        I3 -- "FALSO" --> I5["Buffer[k] = A[p2]\np2 = p2 + 1, k = k + 1"]
+        I4 --> I2
+        I5 --> I2
+        
+        I2 -- "NÃO (Um lado esgotado)" --> I6["Drenagem: Copiar restante do ramal ativo\npara Buffer[k..len-1] sem comparações"]
+        I6 --> I7["Cópia de Retorno Automática:\nA[left + idx] = Buffer[idx]\nMarca [left..right] como ORD (ou OK se raiz)"]
+    end
+```
 
-### 4.3. Regra Canônica de Estabilidade
-Quando $A[p_1] = A[p_2]$, a decisão **deve obrigatoriamente despachar o elemento do subvetor esquerdo ($p_1$)**. Essa invariante impede que elementos equivalentes sofram transposição e garante a estabilidade formal.
+### 4.1. Convenção Canônica de Limites e Partição Ímpar
+- Intervalos $[left, right]$ fechados e inclusivos ($0 \le left \le right \le n - 1$).
+- Ponto médio truncado:
+  $$mid = \left\lfloor \frac{left + right}{2} \right\rfloor = left + \left\lfloor \frac{right - left}{2} \right\rfloor$$
+- Ramo esquerdo: $[left \dots mid]$, com comprimento $len_E = mid - left + 1 = \lceil len / 2 \rceil$.
+- Ramo direito: $[mid + 1 \dots right]$, com comprimento $len_D = right - mid = \lfloor len / 2 \rfloor$.
+- **Exemplo de Partição Ímpar ($n=5$ em $[0 \dots 4]$):**
+  $mid = \lfloor (0+4)/2 \rfloor = 2 \implies \text{Esquerda: } [0 \dots 2] \text{ (3 elementos)}; \text{ Direita: } [3 \dots 4] \text{ (2 elementos)}$.
+
+### 4.2. Invariante da Intercalação
+Ao intercalar duas metades adjacentes $A[left \dots mid]$ e $A[mid + 1 \dots right]$:
+- A cada iteração $k$ ($0 \le k < len$):
+  1. O buffer coletor $B[0 \dots k-1]$ contém exatamente os $k$ menores elementos de $A[left \dots right]$ em ordem não decrescente de `value`: $B[0].value \le B[1].value \le \dots \le B[k-1].value$;
+  2. Todos os elementos remanescentes em $A[p_1 \dots mid]$ e em $A[p_2 \dots right]$ possuem `value` maior ou igual a qualquer elemento já alocado em $B[0 \dots k-1]$.
+
+### 4.3. Identidade Estável e Regra de Desempate
+Cada carga possui identidade persistente:
+```typescript
+export interface MergeElement {
+  readonly id: string;            // Identificador único imutável
+  readonly value: number;         // Valor numérico de ordenação
+  readonly originalIndex: number; // Índice inicial no vetor bruto (0..n-1)
+  readonly label?: string;        // Rótulo visual opcional (ex.: "4a", "4b")
+}
+```
+- A comparação algorítmica utiliza **exclusivamente** `element.value`.
+- **Regra de Desempate:** Se $E[p_1].value == D[p_2].value$, a decisão correta é **obrigatoriamente despachar o elemento do Ramal Esquerdo ($p_1$)**.
+- Como $p_1$ possuía índice original menor que $p_2$, priorizar a esquerda preserva a ordem relativa original, garantindo estabilidade formal.
+
+### 4.4. Recorrência Exata de Escritas
+A métrica de **Escritas** ($W(n)$) computa a movimentação de dados:
+1. $1$ escrita no buffer por elemento ao descer da frente de um ramal;
+2. $1$ escrita no vetor principal por elemento ao retornar do buffer para $A[left \dots right]$.
+- Em cada intercalação de intervalo $L$, ocorrem exatamente $L$ escritas no buffer e $L$ escritas no vetor principal ($2L$ escritas).
+- **Recorrência:**
+  $$W(0) = 0, \quad W(1) = 0$$
+  $$W(n) = W\left(\left\lceil \frac{n}{2} \right\rceil\right) + W\left(\left\lfloor \frac{n}{2} \right\rfloor\right) + 2n, \quad \text{para } n \ge 2$$
+- **Valores Padronizados:**
+  - **$n = 4$:** $W(4) = W(2) + W(2) + 2(4) = 4 + 4 + 8 = \mathbf{16 \text{ escritas}}$ (8 no buffer, 8 no vetor principal);
+  - **$n = 5$:** $W(5) = W(3) + W(2) + 2(5) = 10 + 4 + 10 = \mathbf{24 \text{ escritas}}$ (12 no buffer, 12 no vetor principal);
+  - **$n = 6$:** $W(6) = W(3) + W(3) + 2(6) = 10 + 10 + 12 = \mathbf{32 \text{ escritas}}$ (16 no buffer, 16 no vetor principal).
+- *Distinção Obrigatória:* A contagem de escritas mede operações computacionais ($O(n \log n)$) e **não** mede espaço auxiliar ($O(n)$ células).
 
 ---
 
-## 5. Mecânica Interativa Própria
+## 5. Mecânica Interativa e Divisão de Agência
 
-- **Visualização da Árvore de Divisão:** O estudante visualiza a representação esquemática das sub-esteiras geradas pela divisão binária.
-- **Botoeira de Intercalação Guiada:** Durante a fase de mesclagem, o estudante controla os dois ponteiros com as ações:
-  - `[ ⇙ DESPACHAR ESQUERDA ]` (seleciona $A[p_1]$);
-  - `[ ⇘ DESPACHAR DIREITA ]` (seleciona $A[p_2]$);
-  - `[ ⇊ DESPACHAR RESTANTE ]` (libera a cauda do subvetor que não se esgotou).
-- **Feedback Cinestésico:** A carga selecionada desce suavemente para a esteira coletora enquanto a outra permanece em espera no seu ramal.
+### 5.1. Justificativa Didática da Escolha de Interação
+A variante Top-Down com travessia pós-ordem à esquerda foi selecionada por alinhar-se perfeitamente aos objetivos pedagógicos da plataforma: ela expõe visualmente a decomposição de problemas em subproblemas idênticos, reforça o raciocínio recursivo estruturado e conecta-se diretamente à metáfora física das esteiras industriais que se bifurcam hierarquicamente e confluem em estações de triagem. A abordagem Bottom-Up (iterativa com blocos em potências de 2), embora evite pilha recursiva em linguagens de baixo nível, oculta a intuição visual de ramificação e torna a árvore de divisão menos evidente para iniciantes.
+
+### 5.2. O que o Aluno Decide vs O que o Sistema Automatiza nas Práticas
+
+| Etapa | Responsabilidade do Aluno | Automação do Sistema | Justificativa Pedagógica |
+| :--- | :--- | :--- | :--- |
+| **Divisão Estrutural** | Nenhuma (observação do fluxo). | Anima a abertura dos ramais e calcula limites $mid$. | Elimina cliques vazios e foca o esforço na resolução algorítmica. |
+| **Confronto de Frentes** | Compara os valores nas cabeças e aciona `DESPACHAR ESQUERDA` ou `DESPACHAR DIREITA`. | Mantém sensores nas frentes e bloqueia cargas traseiras. | Garante que cada comparação computacional resulte de uma decisão consciente. |
+| **Desempate Estável** | Aplica a regra de estabilidade escolhendo a esquerda sob empate. | Feedback imediato caso tente violar a ordem relativa. | Ensina ativamente por que o Merge Sort é estável. |
+| **Esgotamento de Ramal** | Comanda `DESPACHAR RESTANTE` ao notar que um ramal esvaziou. | Desativa o ramal vazio e habilita o botão de drenagem direta. | Fixa o conceito de que a cauda remanescente já está ordenada e custa $0$ comparações. |
+| **Cópia de Retorno** | Nenhuma (observação da consolidação). | Transfere o buffer para a esteira principal e marca `ORD` (ou `OK` na raiz). | Mantém ritmo fluido sem burocracia mecânica. |
+
+*Nota para Tutorial e Demonstração:* Permitem-se pausas explicativas antes da divisão e da cópia de retorno para scaffolding conceitual, sem contabilizá-las como decisões algorítmicas avaliadas.
 
 ---
 
-## 6. Pseudocódigo Canônico (18 Instruções — `MERGE_SORT_PSEUDOCODE`)
+## 6. Pseudocódigo Canônico (18 Linhas — `MERGE_SORT_PSEUDOCODE`)
 
 ```text
-1.  procedimento mergeSort(A, inicio, fim)
-2.    se inicio < fim então
-3.      meio ← ⌊(inicio + fim) / 2⌋
-4.      mergeSort(A, inicio, meio)
-5.      mergeSort(A, meio + 1, fim)
-6.      intercalar(A, inicio, meio, fim)
-7.    fim se
-8.  fim procedimento
-9.
+ 1. procedimento mergeSort(A, inicio, fim)
+ 2.   se inicio < fim então
+ 3.     meio ← ⌊(inicio + fim) / 2⌋
+ 4.     mergeSort(A, inicio, meio)
+ 5.     mergeSort(A, meio + 1, fim)
+ 6.     intercalar(A, inicio, meio, fim)
+ 7.   fim se
+ 8. fim procedimento
+ 9. 
 10. procedimento intercalar(A, inicio, meio, fim)
-11.   copiar A[inicio..meio] para E e A[meio+1..fim] para D
-12.   p1 ← 0, p2 ← 0, k ← inicio
-13.   enquanto p1 < tamanho(E) e p2 < tamanho(D) faça
-14.     se E[p1] ≤ D[p2] então
-15.       A[k] ← E[p1]; p1 ← p1 + 1
-16.     senão
-17.       A[k] ← D[p2]; p2 ← p2 + 1
-18.     fim se; k ← k + 1
-19.   fim enquanto
-20.   copiar elementos restantes de E ou D para A
+11.   p1 ← inicio, p2 ← meio + 1, k ← 0
+12.   enquanto p1 ≤ meio e p2 ≤ fim faça
+13.     se A[p1].value ≤ A[p2].value então
+14.       Buffer[k] ← A[p1]; p1 ← p1 + 1
+15.     senão
+16.       Buffer[k] ← A[p2]; p2 ← p2 + 1
+17.     fim se; k ← k + 1
+18.   fim enquanto
+19.   copiar elementos restantes de A[p1..meio] ou A[p2..fim] para Buffer
+20.   copiar Buffer[0..k-1] de volta para A[inicio..fim]
 21. fim procedimento
 ```
+
+### Mapeamento com a FSM:
+- `DIVIDE_AUTOMATIC`: Linhas 2–5 (`se inicio < fim`, cálculo de `meio` e chamadas recursivas);
+- `COMPARE_HEADS`: Linhas 12–13 (`enquanto...`, teste relacional `A[p1].value ≤ A[p2].value`);
+- `DISPATCH_LEFT`: Linha 14 (`Buffer[k] ← A[p1]; p1 ← p1 + 1; k ← k + 1`);
+- `DISPATCH_RIGHT`: Linha 16 (`Buffer[k] ← A[p2]; p2 ← p2 + 1; k ← k + 1`);
+- `DRAIN_READY`: Linha 19 (`copiar elementos restantes... para Buffer`);
+- `COPY_BACK_AUTOMATIC`: Linha 20 (`copiar Buffer... de volta para A[inicio..fim]`).
 
 ---
 
 ## 7. Métricas Factuais Adequadas ao Algoritmo
 
-- **Comparações de Intercalação ($C(n)$):** Contabiliza estritamente os confrontos entre cabeças de fila ($E[p_1] \le D[p_2]$).
-- **Escritas em Memória / Transferências ($W(n)$):** Contabiliza cópias para o buffer temporário e transferências de volta para a esteira principal ($2n \lceil \log_2 n \rceil$).
-- **Profundidade da Árvore de Chamadas:** Altura máxima da recursão ($\lceil \log_2 n \rceil$).
-- **Decisões Incorretas (`errors`):** Tentar despachar o elemento maior da confluência.
-- **Pontuação do Protocolo:**
-  $$\text{score} = \max(0, 100 - (\text{errors} \times 10) - (\text{hintsUsed} \times 5))$$
+1. **Comparações de Dados ($C(n)$):**
+   - Contabiliza **exclusivamente** os confrontos relacionais entre duas cargas sob os sensores ópticos ($A[p_1].value \le A[p_2].value$).
+   - Uma comparação entre o mesmo par de frentes ativas é registrada **uma única vez**.
+   - Testes de limites de laço ($p_1 \le meio$), verificações de caso base e drenagem da cauda remanescente **não** somam comparações.
+2. **Escritas ($W(n)$):**
+   - Registra as transferências físicas (1 no buffer + 1 no vetor principal por elemento).
+   - Decomposta na UI como: *Escritas no Buffer* e *Escritas no Vetor Principal*.
+3. **Decisões Incorretas (`errors`):**
+   - Tentativa de despachar a carga de maior valor ou escolher o ramal direito sob empate (violação de estabilidade).
+   - Incrementa `errors` (+1), exibe feedback explicativo e **não** avança o estado da engine nem soma novas comparações algorítmicas.
+4. **Ações Impossíveis:**
+   - Ações inválidas para o estado corrente (ex.: despachar ramal esgotado). Bloqueadas pela UI e ignoradas pela engine com **zero penalidade**.
+5. **Dicas Utilizadas (`hintsUsed`):** Revelação assistida da inequação (-5 pontos).
+6. **Tempo Decorrido (`elapsedTimeMs`):** Estritamente descritivo, com zero impacto na pontuação.
+7. **Pontuação do Protocolo:**
+   $$\text{score} = \max\Big(0,\, 100 - (\text{errors} \times 10) - (\text{hintsUsed} \times 5)\Big)$$
 
 ---
 
 ## 8. Modo Demonstração
 
-- **Propósito:** Demonstrar de ponta a ponta a separação em sub-esteiras e o processo ritmado de intercalação ordenada.
-- **Vetor Curado Canônico:** `[7, 2, 5, 3]` ($n=4$).
-- **Etapas da Demonstração:**
-  - Divisão: `[7, 2]` e `[5, 3]`; subdivisão em `[7]`, `[2]`, `[5]`, `[3]`.
-  - Intercalação Nível 1: mescla `[7]` e `[2]` resultando em `[2, 7]`; mescla `[5]` e `[3]` resultando em `[3, 5]`.
-  - Intercalação Nível 2 (Final): confronta cabeças de `[2, 7]` e `[3, 5]`:
-    - $2 \le 3 \rightarrow$ desce 2;
-    - $7 > 3 \rightarrow$ desce 3;
-    - $7 > 5 \rightarrow$ desce 5;
-    - Ramal direito esgotado $\rightarrow$ desce 7;
-    - Vetor final perfeitamente consolidado: `[2, 3, 5, 7]`.
+- **Propósito:** Apresentação autônoma da Divisão e Conquista antes da prática, ilustrando a separação física, o desempate estável e a intercalação ritmada.
+- **Vetor Canônico Curado:** `[7, 2, 5, 3]` ($n=4$).
+- **Justificativa da Escolha:**
+  - Árvore balanceada com 2 níveis de profundidade ($2^2 = 4$), ideal para visualização em tela única;
+  - Decompõe em `[7, 2]` e `[5, 3]`;
+  - Intercalações de nível 1 geram `[2, 7]` e `[3, 5]` com 1 comparação e 4 escritas cada;
+  - Intercalação final confronta:
+    1. $2 \le 3 \rightarrow$ desce 2;
+    2. $7 > 3 \rightarrow$ desce 3;
+    3. $7 > 5 \rightarrow$ desce 5;
+    4. Ramal direito esgotado $\rightarrow$ drena 7 sem comparação adicional.
+  - Consolida em `[2, 3, 5, 7]` com 3 comparações e 8 escritas.
+  - Total geral: 5 comparações e 16 escritas (8 no buffer, 8 no vetor principal).
 
 ---
 
 ## 9. Tutorial Guiado
 
-- **Vetor de Scaffolding:** `[4, 1, 3, 2]`.
-- **Foco Didático do Tutorial:** O tutorial pula a divisão e foca o aluno diretamente no desafio de intercalar duas esteiras já ordenadas (`[1, 4]` e `[2, 3]`), praticando o uso alternado dos botões de despacho e observando a estabilidade no desempate.
+- **Propósito:** Scaffolding assistido passo a passo ensinando a mecânica da confluência e a regra de estabilidade antes de submeter o aluno ao algoritmo completo.
+- **Vetor de Scaffolding Curado:** `[4a, 1, 3, 4b]` ($n=4$).
+- **Diferenciação Curricular Importante:**
+  - O algoritmo completo executa as divisões estruturais e as intercalações locais dos ramos esquerdos e direitos, gerando as sub-esteiras `E = [1, 4a]` e `D = [3, 4b]`.
+  - O trecho interativo focal do tutorial concentra-se na **intercalação raiz** (`intercalar(0, 1, 3)`), onde o estudante vivencia em 4 passos didáticos:
+    1. Comparação ordinária ($1 \le 3 \rightarrow$ comanda esquerda);
+    2. Alternância de ramal ($4a > 3 \rightarrow$ comanda direita);
+    3. **Empate Crítico ($4a == 4b$):** Bloqueio explicativo da direita para fixar a regra de estabilidade: *"Valores iguais! Priorize o Ramal Esquerdo para manter a ordem relativa original"*;
+    4. Esgotamento lateral $\rightarrow$ Libera `[ DESPACHAR RESTANTE ]` para descer $4b$.
 
 ---
 
 ## 10. Tipos de Exercícios Suportados
 
-| Tipo de Exercício | Suporte no Módulo | Planejamento de Implementação |
+| Tipo de Exercício | Status no Módulo | Configuração Curricular e Objetivo Didático |
 | :--- | :---: | :--- |
-| **Introdução / Conceito** | `OBRIGATÓRIO` | Briefing de Divisão e Conquista |
-| **Demonstração** | `OBRIGATÓRIO` | Demonstração animada com árvore de sub-esteiras (`[7, 2, 5, 3]`) |
-| **Tutorial Guiado** | `OBRIGATÓRIO` | Prática de intercalação assistida com duas filas ordenadas |
-| **Prática Básica** | `OBRIGATÓRIO` | Intercalação com $n=4$ |
-| **Prática Progressiva** | `OBRIGATÓRIO` | Intercalação com $n=6$ e $n=8$ (árvore completa de 3 níveis) |
-| **Casos do Algoritmo** | `OBRIGATÓRIO` | Casos curados de pior caso de comparações e elementos alternados |
-| **Desafio** | `OPCIONAL` | Modo "Operador Concorrente": intercalação sob ritmo contínuo |
-| **Prática Livre (Sandbox)**| `OPCIONAL` | Divisão e intercalação livre com tamanho customizável |
+| **1. Introdução / Conceito** | `OBRIGATÓRIO` | Briefing interativo sobre Divisão e Conquista e complexidade $\Theta(n \log n)$. |
+| **2. Demonstração** | `OBRIGATÓRIO` | Demonstração canônica sobre `[7, 2, 5, 3]` com pseudocódigo sincronizado. |
+| **3. Tutorial Guiado** | `OBRIGATÓRIO` | Passo a passo assistido sobre `[4a, 1, 3, 4b]` com ênfase na estabilidade da intercalação raiz. |
+| **4. Prática Básica** | `OBRIGATÓRIO` | **Lote com 4 cargas ($n=4$):** Árvore balanceada com 2 níveis de recursão. Foco na alternância de frentes e consolidação inicial de `ORD`. |
+| **5. Prática Intermediária** | `OBRIGATÓRIO` | **Lote com 5 cargas ($n=5$):** Introdução à partição assimétrica ($\lceil 5/2 \rceil = 3$ e $\lfloor 5/2 \rfloor = 2$). Foco em subvetores desiguais e drenagem assimétrica. |
+| **6. Prática Avançada** | `OBRIGATÓRIO` | **Lote com 6 cargas ($n=6$) com duplicatas:** Árvore de 3 níveis, desempate sob chaves duplicadas identificadas ($X_a, X_b$) e garantia de estabilidade sob dados densos. |
+| **7. Desafio de Otimização** | `OPCIONAL` | Modo "Tolerância Zero": completar a intercalação com 0 erros de estabilidade. |
+| **8. Prática Livre (Sandbox)**| `OPCIONAL` | Entrada customizada pelo usuário ($4 \le n \le 8$) com inspeção da árvore. |
 
 ---
 
 ## 11. Casos Pedagógicos Curados Específicos
 
-1. **Caso 1: Intercalação Perfeitamente Alternada (`[1, 3, 5]` e `[2, 4, 6]`)**  
-   - Propósito: Pior caso de comparações para a etapa de intercalação ($2m - 1$ comparações, onde $m$ é o tamanho de cada metade). Os ponteiros alternam a cada passo ($1 \rightarrow 2 \rightarrow 3 \rightarrow 4 \rightarrow 5$).
-2. **Caso 2: Subvetor Esquerdo Inteiramente Menor (`[1, 2, 3]` e `[7, 8, 9]`)**  
-   - Propósito: Melhor caso de comparações. A esteira esquerda se esgota em $m$ passos, permitindo despejar o bloco direito sem nenhuma comparação adicional.
-3. **Caso 3: Elementos Duplicados e Estabilidade (`[4a, 8]` e `[4b, 6]`)**  
-   - Propósito: Provar que o critério $E[p_1] \le D[p_2]$ preserva $4a$ antes de $4b$ na esteira de saída.
-4. **Caso 4: Vetor com Potência de 2 ($n=8$)**  
-   - Propósito: Árvore perfeitamente balanceada com 3 níveis de profundidade exatos.
-5. **Caso 5: Vetor com Tamanho Ímpar ($n=5$)**  
-   - Propósito: Demonstrar divisão assimétrica ($\lfloor 5/2 \rfloor = 2$ e $3$) sem perda de consistência.
+1. **Pior Caso de Comparações na Intercalação (`[1, 3, 5]` e `[2, 4, 6]`):** Elementos alternam perfeitamente ($1 \rightarrow 2 \rightarrow 3 \rightarrow 4 \rightarrow 5$), exigindo $len - 1 = 5$ comparações para mesclar 6 itens.
+2. **Melhor Caso de Comparações na Intercalação (`[1, 2, 3]` e `[7, 8, 9]`):** Ramo esquerdo esgota-se com 3 comparações, e o ramo direito inteiro é drenado sem comparações ($len/2$ comparações).
+3. **Estabilidade com Chaves Duplicadas (`[3a, 8]` e `[3b, 6]`):** Prova que a condição $\le$ preserva $3a$ antes de $3b$ na esteira coletora.
+4. **Vetor Inversamente Ordenado (`[6, 5, 4, 3, 2, 1]`):** Evidencia que o Merge Sort processa o vetor invertido no mesmo tempo assintótico $\Theta(n \log n)$ com o mesmo número previsível de níveis.
+5. **Vetor de Tamanho Ímpar ($n=5$ — `[5, 2, 4, 1, 3]`):** Demonstra a divisão assimétrica em sub-esteiras de 3 e 2 elementos.
 
 ---
 
 ## 12. Geração Procedural e Constraints do Módulo
 
-- **Configuração:** `MERGE_MODULE_CONSTRAINTS` via gerador universal.
-- **Tamanhos Curriculares:** Potências de 2 favorecidas no início ($n=4, n=8$) para clareza visual da árvore, expandindo para ímpares ($n=5, n=7$).
-- **Constraints Obrigatórias:**
-  - Garantir que a confluência final contenha ao menos uma alternância entre sub-esteiras;
-  - Intervalo de valores: $1 \dots 99$.
+O módulo utilizará estritamente o gerador procedural compartilhado da plataforma:
+```typescript
+generateSortingArray(size: number, seed: number): number[]
+```
+Fundamentado no algoritmo PRNG determinístico **Mulberry32** ([`ADR 0002`](../../adr/0002-procedural-generation-mulberry32.md)), garantindo reprodutibilidade matemática absoluta sem recorrer a geradores proprietários ou `Math.random()`.
+
+### Restrições Matemáticas Procedurais (`MERGE_CONSTRAINTS`):
+- Valores inteiros no domínio $[1 \dots 99]$;
+- Rejeição de vetores já ordenados (regeneração automática com `seed + 1`);
+- Garantia de que a intercalação raiz possua ao menos uma alternância entre ramais (impedindo que a metade esquerda seja trivialmente menor em bloco);
+- Injeção controlada de exatamente um par de chaves duplicadas na Prática Avançada ($n=6$) para verificação de estabilidade.
 
 ---
 
 ## 13. Feedback Formativo e Tratamento de Erros
 
-- **Despachar Carga Maior na Confluência:**
-  - Alerta: *"Erro de Intercalação: A carga A (valor X) é maior que a carga B (valor Y) no outro ramal! O Merge Sort deve sempre colher a menor carga disponível para manter a esteira de saída ordenada."*
-- **Violação de Estabilidade no Empate:**
-  - Alerta: *"Em caso de valores iguais, priorize sempre o ramal da esquerda para assegurar a estabilidade do algoritmo."*
+1. **Tentativa de Despachar a Carga Maior:**
+   - Ação bloqueada; `errors` incrementado (+1); ponteiros e buffer inalterados;
+   - Feedback: *"Atenção na Confluência: A carga selecionada é maior que a do outro ramal. O Merge Sort exige sempre colher a menor carga para manter o buffer ordenado."*
+2. **Tentativa de Despachar a Direita sob Empate:**
+   - Ação bloqueada; `errors` incrementado (+1);
+   - Feedback: *"Violação de Estabilidade: Ambas as cargas possuem o mesmo valor. O Merge Sort exige priorizar o Ramal Esquerdo para preservar a ordem relativa original dos itens."*
+3. **Ações Impossíveis:**
+   - Tentativa de clique em ramal vazio ou acionamento via teclado de botão indisponível: ação ignorada com zero penalidade.
 
 ---
 
 ## 14. Sistema de Dicas
 
-- **Dica de Intercalação:** O sistema analisa $E[p_1]$ e $D[p_2]$ e instrui:
-  - *"Compare os dois elementos à frente dos ramais. Como X < Y, clique em DESPACHAR ESQUERDA."*
+Acesso sob demanda via `[ SOLICITAR DICA ]` (-5 pontos):
+- **Nível 1 (Frentes Ativas):** Ilumina as duas cargas sob os sensores ópticos.
+- **Nível 2 (Orientação Relacional):** Indica qual ramal contém a menor carga sem revelar antecipadamente o botão.
+- **Nível 3 (Aviso de Esgotamento):** Instruções quando um lado atinge o fim da fila: *"O Ramal Esquerdo terminou. Acione DESPACHAR RESTANTE."*
 
 ---
 
 ## 15. Tela de Resultado e Reflexão
 
-- **Apresentação:** Relatório analítico destacando a independência do número de comparações em relação à ordem inicial das entradas, comprovando a robustez do limite assintótico $O(n \log n)$.
+Ao concluir uma prática, a tela [`ResultScreen.tsx`](../../src/screens/ResultScreen.tsx) apresenta:
+- Comparações de dados efetuadas;
+- Escritas totais, decompostas em *Escritas no Buffer* e *Escritas no Vetor Principal*;
+- Erros conceituais cometidos;
+- Tempo decorrido (descritivo);
+- Pontuação do Protocolo alcançada;
+- Painel de reflexão comparando o custo de tempo $\Theta(n \log n)$ com a necessidade de espaço auxiliar $O(n)$ células.
 
 ---
 
 ## 16. Replay e Inspeção Retrospectiva
 
-- **Visualização Especial:** O Replay exibe uma linha do tempo multinível, permitindo ao estudante navegar entre os passos de intercalação de cada ramo da árvore recursiva.
+- Derivação pura de quadros a partir do array imutável de `MergeStepRecord`, gravados com snapshots **POST-event**.
+- Os eventos em lote (`DRAIN` e `COPY_BACK`) contêm sequências estruturadas de elementos, permitindo animação fluida no Replay sem que a UI precise inventar estados intermediários.
+- Rótulos diegéticos ($X_a, X_b$) permanecem visíveis para auditoria de estabilidade.
 
 ---
 
 ## 17. Persistência e Progresso
 
-- **Suporte Futuro no Schema v4:** Registros sob o identificador `records["merge-basic"]`, `records["merge-intermediate"]`, etc.
+Schema v4 canônico ([`ADR 0021`](../../adr/0021-module-exercise-persistence-schema-v4.md)):
+- `merge.practice.basic`: Prática Básica ($n=4$);
+- `merge.practice.intermediate`: Prática Intermediária ($n=5$);
+- `merge.practice.advanced`: Prática Avançada ($n=6$).
+- Desbloqueio progressivo derivado deterministicamente; persistência em escrita atômica única com `completedTutorial`.
 
 ---
 
 ## 18. Acessibilidade e Inclusão
 
-- **Diferenciação Espacial e Textual:** Os ramais recebem identificadores textuais claros (`RAMAL ESQUERDO`, `RAMAL DIREITO`, `SAÍDA`) com cores contrastantes para operadores daltônicos.
+- **Navegação por Teclado Dedicada:** Atalhos específicos para evitar conflito com a ativação nativa do botão focado via `Enter`/`Espaço`:
+  - `1` (ou `ArrowLeft`): `DESPACHAR ESQUERDA`;
+  - `2` (ou `ArrowRight`): `DESPACHAR DIREITA`;
+  - `3` (ou `D`): `DESPACHAR RESTANTE`.
+- Foco por teclado (`Tab`) ativa normalmente o botão selecionado via `Enter` ou `Espaço`.
+- **Independência de Cor:** Identificadores textuais explícitos (`ESQUERDA`, `DIREITA`, `ORD`, `OK`).
+- **Suporte a `prefers-reduced-motion`:** Transições instantâneas sem interpolação contínua.
+- **Single Scroll Owner:** Sem barras de rolagem aninhadas.
 
 ---
 
 ## 19. Riscos Pedagógicos e Armadilhas Conceituais
 
-1. **Achar que o Algoritmo "Ordena" Durante a Divisão:** Supor que as caixas se ordenam enquanto descem para os ramais.  
-   *Salvaguarda:* A interface enfatiza que a divisão é puramente estrutural e que toda a ordenação ocorre durante a **intercalação** (*merge*).
-2. **Esquecer a Memória Auxiliar:** Não perceber que as cargas precisam de uma esteira temporária.  
-   *Salvaguarda:* A presença física visível da esteira coletora auxiliar.
+1. **Achar que a Divisão Ordena:** Esclarecido pela manutenção da desordem e das cores originais nos ramais.
+2. **Confundir `ORD` com `OK`:** Trechos locais recebem `ORD` (azul); o status `OK` (verde) é conferido exclusivamente no término da intercalação raiz $[0 \dots n-1]$.
+3. **Confundir Escritas com Espaço Auxiliar:** As escritas somam $O(n \log n)$ operações de movimentação, enquanto o espaço auxiliar é estritamente $O(n)$ células.
+4. **Violar a Estabilidade:** Bloqueado pela engine com feedback instrutivo.
 
 ---
 
 ## 20. Relação Futura com o Laboratório Comparativo
 
-- **Confronto com Algoritmos Quadráticos:** O Merge Sort mostrará no laboratório uma redução dramática de comparações para $n \ge 16$ em relação a Bubble e Selection Sort.
-- **Métrica Especial:** Consumo de memória auxiliar ($+n$ slots) explicitado graficamente no painel do laboratório.
+- O Merge Sort fornecerá telemetria alinhada: Comparações de Dados $C(n)$ e Escritas $W(n)$.
+- No Laboratório Comparativo, confrontará diretamente o crescimento quadrático de Bubble e Selection Sort ($n(n-1)/2$) com o platô log-linear do Merge Sort para $n \ge 16$, além de evidenciar o custo de memória auxiliar $+N$ slots.
