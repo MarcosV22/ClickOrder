@@ -51,7 +51,7 @@ A plataforma possui um currículo oficial congelado em **6 Módulos de Algoritmo
 | **01. Bubble Sort** | `IMPLEMENTADO E PADRONIZADO (PLATFORM-R1-B)` | Engine pura (`bubbleSortEngine.ts`), FSM sequencial estrita, tutorial guiado (`[3, 1, 2]`), demonstração autônoma (`[5, 2, 4, 1]`), Seletor de Práticas (`PracticeSelector`), conjunto canônico de 3 práticas procedurais (`basic`: 4 cargas, `intermediate`: 5 cargas, `advanced`: 6 cargas), Caso Especial Curricular / Desafio Early Exit desacoplado (desbloqueado pelo Schema v4), replay retrospectivo com pseudocódigo sincronizado de 9/14 linhas, e conclusão via `PracticeSetCompleteScreen`. Linguagem legada de Fase/Campanha eliminada da UI ativa. Persistido em Schema v4 (`bubble.practice.*`). | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |
 | **02. Selection Sort** | `IMPLEMENTADO E PADRONIZADO (PLATFORM-R1-B)` | Engine pura (`selectionSortEngine.ts`), FSM bimodal `INSPECT`/`COMMIT`, constraints procedurais, briefing oficial, tutorial guiado (`[4, 1, 3]`), demonstração autônoma, Seletor de Práticas (`PracticeSelector`), conjunto canônico de 3 práticas procedurais (`basic`: 4 cargas, `intermediate`: 5 cargas, `advanced`: 6 cargas) com animação de longa distância preservando mecânica singular de varredura seletiva e transferência pontual, replay com pseudocódigo sincronizado de 13 linhas, e conclusão via `PracticeSetCompleteScreen`. Linguagem legada de Fase/Campanha eliminada da UI ativa. Persistido em Schema v4 (`selection.practice.*`). | [`modules/selection-sort.md`](./modules/selection-sort.md) |
 | **03. Insertion Sort** | `IMPLEMENTADO E ATIVADO (P2.2-F)` | Engine pura (`insertionSortEngine.ts`), FSM de deslocamentos (*shifts*), constraints procedurais, briefing oficial, tutorial guiado (`[4, 2, 3]`), demonstração canônica autônoma (`[6, 3, 5, 2, 7]`), práticas interativas progressivas (`basic`, `intermediate`, `advanced`), `PracticeSetCompleteScreen`, `ResultScreen` com telemetria de *shifts*/*inserts*, replay retrospectivo puro (`insertionReplayModel.ts`), pseudocódigo sincronizado de 11 linhas (`InsertionSortPseudocodePanel.tsx`), persistência no Schema v4 orientada a exercícios e ativado publicamente no catálogo do Hub com status `available`. | [`modules/insertion-sort.md`](./modules/insertion-sort.md) |
-| **04. Merge Sort** | `DESIGN ESPECIFICADO (P3.1-A)` | Especificação completa de 20 seções no Module Standard e ADR 0023 proposto; código algorítmico não iniciado (Marco P3.1). | [`modules/merge-sort.md`](./modules/merge-sort.md) |
+| **04. Merge Sort** | `ESTAÇÃO DE INTERCALAÇÃO E SELETOR IMPLEMENTADOS (P3.1-D)` | Estação Desktop-First (`MergeGameScreen.tsx`), botoeira contextual (`DISPATCH_LEFT`, `DISPATCH_RIGHT`, `DRAIN_REMAINDER`), travas de sincronização síncrona, janelas sobre o vetor principal, buffer auxiliar, telemetria contínua (comparações, escritas no buffer e no vetor principal), atalhos locais 1/2/3, Seletor de Práticas (`PracticeSelector` com tema merge e 3 práticas $n=4, 5, 6$), `ResultScreen` com decomposição factual de escritas e nota formativa, fluxo completo de repetição e progressão curricular no `App.tsx`. Geração procedural com fallback determinístico testado sob duplicatas. 481 testes verdes no Vitest (35 arquivos). Replay e persistência Schema v4 aguardam sub-marcos P3.1-E e P3.1-F; Merge permanece indisponível no Hub público. | [`modules/merge-sort.md`](./modules/merge-sort.md) |
 | **05. Quick Sort** | `FUTURO` | Especificação completa no Module Standard; código algorítmico não iniciado (Marco P3.2). | [`modules/quick-sort.md`](./modules/quick-sort.md) |
 | **06. Heap Sort** | `FUTURO` | Especificação completa no Module Standard; código algorítmico não iniciado (Marco P3.3). | [`modules/heap-sort.md`](./modules/heap-sort.md) |
 
@@ -152,7 +152,7 @@ flowchart TD
 - **Geração Procedural Universal:** Um único gerador PRNG Mulberry32 determinístico (`arrayGenerator.ts`) atende a todos os algoritmos através de constraints específicas. Nenhum algoritmo possui gerador próprio;
 - **Persistência Desacoplada:** Schema v4 implementado e ativo (`sorting_station_save`), orientado a módulos e conjuntos de exercícios (`exerciseSets`), com pipeline de migração v1->v2->v3->v4 e fallback de leitura da chave legada;
 - **Padronização de Telas e Rolagem Vertical (Scrollable Screen Rule — PLATFORM-UI-H1):** Diretriz canônica eliminando `overflow-hidden` podador de viewports, adotando `min-h-screen`, `overflow-y-auto`, `overflow-x-hidden`, `justify-start` e `pb-16 sm:pb-24` em todas as telas com conteúdo dinâmico, dono único do scroll vertical e acessibilidade via `prefers-reduced-motion`;
-- **Suíte de Testes Automatizados:** **Vitest** com **411 testes unitários** em 29 arquivos com 100% de aprovação.
+- **Suíte de Testes Automatizados:** **Vitest** com **481 testes unitários** em 35 arquivos com 100% de aprovação.
 
 ---
 
@@ -160,14 +160,14 @@ flowchart TD
 
 A próxima prioridade oficial de implementação de software é:
 
-> **Marco P3.1 — Módulo Merge Sort (Engine Pura e Especificação Pedagógica)**  
-> Implementação da engine pura de Merge Sort em `src/game/sorting/merge/` baseada na taxonomia curricular do Module Standard (divisão binária recursiva, representação visual de subarrays temporários e intercalação ordenada com dois ponteiros).
+> **Marco P3.1-E — Replay Retrospectivo e Pseudocódigo Sincronizado de 30 linhas do Merge Sort**  
+> Implementação do modelo funcional de replay retrospectivo (`mergeReplayModel.ts`), tela de visualização e reflexão com depurador temporal passo a passo, exibição do pseudocódigo sincronizado de 30 linhas cobrindo divisão, intercalação e cópia de volta, e ancoragem conceitual com as métricas factuais da sessão.
 
 ---
 
 ## 8. O que é trabalho futuro?
 
-1. **Marco P3.1:** Módulo Merge Sort (divisão binária recursiva e intercalação com dois ponteiros);
+1. **Marco P3.1:** Módulo Merge Sort (P3.1-E: Replay/Pseudocódigo; P3.1-F: Persistência Schema v4 e Hub);
 2. **Marco P3.2:** Módulo Quick Sort (particionamento Lomuto/Hoare com pivô e recursão);
 3. **Marco P3.3:** Módulo Heap Sort (Max-Heap, afundamento *sift-down* e extração);
 4. **Marco P3.4:** **Laboratório Comparativo** ([`comparison-lab.md`](./comparison-lab.md)) — **Status: BLOQUEADO até que os 6 módulos estejam implementados**;
@@ -189,7 +189,7 @@ A próxima prioridade oficial de implementação de software é:
 | **Design System, tokens e acessibilidade** | [`05-ux-design-system.md`](./05-ux-design-system.md) |
 | **Ambiente Figma Make e scripts operacionais** | [`06-development-environment.md`](./06-development-environment.md) |
 | **Persistência Schema v4 e migração v3->v4** | [`07-backend-and-persistence.md`](./07-backend-and-persistence.md) |
-| **Suíte de testes Vitest (413 testes) e DoD** | [`08-testing-and-quality.md`](./08-testing-and-quality.md) |
+| **Suíte de testes Vitest (466 testes) e DoD** | [`08-testing-and-quality.md`](./08-testing-and-quality.md) |
 | **Build, deploy e empacotamento** | [`09-build-deploy.md`](./09-build-deploy.md) |
 | **Roadmap canônico da plataforma e legado histórico** | [`10-roadmap.md`](./10-roadmap.md) |
 | **Governança de ADRs e índice de decisões 0001 a 0023** | [`11-architecture-decisions.md`](./11-architecture-decisions.md) |

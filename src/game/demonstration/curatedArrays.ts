@@ -49,3 +49,23 @@ export const CURATED_SELECTION_DEMO_ARRAY: readonly number[] = Object.freeze([
 export const CURATED_INSERTION_DEMO_ARRAY: readonly number[] = Object.freeze([
   6, 3, 5, 2, 7,
 ]);
+
+/**
+ * Vetor curado para a demonstração canônica do Merge Sort.
+ *
+ * Características pedagógicas obrigatórias (n = 4 elementos: [7, 2, 5, 3]):
+ * - Decomposição binária estrita: [7, 2] e [5, 3];
+ * - Primeira intercalação [0..1]: 7 vs 2 -> despacha 2, drena 7 -> consolidação ORD [2, 7];
+ * - Segunda intercalação [2..3]: 5 vs 3 -> despacha 3, drena 5 -> consolidação ORD [3, 5];
+ * - Intercalação raiz [0..3]: confluência entre [2, 7] e [3, 5]:
+ *   1. 2 vs 3 -> despacha 2 (buffer[0]);
+ *   2. 7 vs 3 -> despacha 3 (buffer[1]);
+ *   3. 7 vs 5 -> despacha 5 (buffer[2]);
+ *   4. esgotamento do ramal direito -> drena 7 (buffer[3]);
+ *   5. cópia de retorno para a esteira principal -> [2, 3, 5, 7] com selo OK.
+ * - Total de métricas: exatamente 5 comparações e 16 escritas (8 no buffer, 8 no vetor principal), 0 erros, 0 dicas.
+ */
+export const CURATED_MERGE_DEMO_ARRAY: readonly number[] = Object.freeze([
+  7, 2, 5, 3,
+]);
+

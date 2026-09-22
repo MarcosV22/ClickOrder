@@ -46,7 +46,7 @@ flowchart LR
 | **01. Bubble Sort** | [`modules/bubble-sort.md`](./modules/bubble-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO` | Persistido em Schema v4 (`bubble.practice.*`) |
 | **02. Selection Sort** | [`modules/selection-sort.md`](./modules/selection-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO` | Persistido em Schema v4 (`selection.practice.*`) |
 | **03. Insertion Sort** | [`modules/insertion-sort.md`](./modules/insertion-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO E ATIVADO` | P2.2 integralmente concluído com Schema v4 |
-| **04. Merge Sort** | [`modules/merge-sort.md`](./modules/merge-sort.md) | $\Theta(n \log n)$ | `FUTURO` (P3.1) | Arquitetura de sub-esteiras e intercalação |
+| **04. Merge Sort** | [`modules/merge-sort.md`](./modules/merge-sort.md) | $\Theta(n \log n)$ | `CAMADA PEDAGÓGICA IMPLEMENTADA` (P3.1-C) | Estação visual de confluência (P3.1-D) |
 | **05. Quick Sort** | [`modules/quick-sort.md`](./modules/quick-sort.md) | $\Theta(n \log n)$ | `FUTURO` (P3.2) | Particionamento bilateral e seleção de pivô |
 | **06. Heap Sort** | [`modules/heap-sort.md`](./modules/heap-sort.md) | $\Theta(n \log n)$ | `FUTURO` (P3.3) | Estrutura de max-heap e afundamento (*sift-down*) |
 | **Laboratório Comparativo**| [`comparison-lab.md`](./comparison-lab.md) | Multi-algoritmo | `BLOQUEADO` | Aguarda conclusão dos 6 módulos |
@@ -95,14 +95,14 @@ flowchart LR
 
 ---
 
-### Marco 2: MÓDULO MERGE SORT (P3.1) — `EM PROGRESSO (P3.1-A CONCLUÍDO / AGUARDA REVISÃO)`
+### Marco 2: MÓDULO MERGE SORT (P3.1) — `EM PROGRESSO (P3.1-D CONCLUÍDO)`
 - **Objetivo:** Primeiro módulo log-linear $\Theta(n \log n)$ da plataforma, demonstrando Divisão e Conquista, preservação estrita de estabilidade e memória auxiliar $O(n)$ com esteiras convergentes.
 - **Sub-marcos:**
-  - **P3.1-A: Design Pedagógico e Mecânico (`CONCLUÍDO / PROPOSTO PARA REVISÃO`):** Especificação completa das 20 seções do Module Standard ([`modules/merge-sort.md`](./modules/merge-sort.md)) e proposta arquitetural formalizada no [`ADR 0023`](../adr/0023-merge-sort-pedagogical-mechanical-design.md) (Top-Down pós-ordem, intercalação ativa com dois ponteiros, esteira coletora auxiliar, regra de estabilidade $\le$ e distinção entre partição `ORD` e conclusão `OK`).
-  - **P3.1-B: Engine Pura e FSM (`FUTURO`):** Implementação de `src/game/sorting/merge/mergeSortEngine.ts` com testes unitários no Vitest.
-  - **P3.1-C: Camada Pedagógica, Tutorial e Demonstração (`FUTURO`):** Constraints Mulberry32, briefing oficial, tutorial interativo curto e demonstração canônica autônoma.
-  - **P3.1-D: Estação de Intercalação e Seletor de Práticas (`FUTURO`):** Tela `MergeGameScreen.tsx` desktop-first, confluência de esteiras e integração com Seletor.
-  - **P3.1-E: Replay e Pseudocódigo Sincronizado (`FUTURO`):** Modelo de derivação histórica pura e painel de 18 linhas.
+  - **P3.1-A: Design Pedagógico e Mecânico (`CONCLUÍDO / APROVADO`):** Especificação completa das 20 seções do Module Standard ([`modules/merge-sort.md`](./modules/merge-sort.md)) e proposta arquitetural formalizada no [`ADR 0023`](../adr/0023-merge-sort-pedagogical-mechanical-design.md) (Top-Down pós-ordem, intercalação ativa com dois ponteiros, esteira coletora auxiliar, regra de estabilidade $\le$ e distinção entre partição `ORD` e conclusão `OK`).
+  - **P3.1-B: Engine Pura e FSM (`CONCLUÍDO`):** Implementação funcional de `src/game/sorting/merge/mergeSortEngine.ts`, tipos contratuais em `types.ts`, ponto de entrada em `index.ts` e suíte exaustiva de testes unitários no Vitest (`mergeSortEngine.test.ts`, 22 testes 100% verdes). Invariantes testadas: casos base (vazio e unitário com 0 comparações/escritas), recorrência exata $W(4)=16, W(5)=24, W(6)=32$, estabilidade estrita em chaves duplicadas com desempate na esquerda, drenagem de ambos os lados sem comparações, tratamento de ações impossíveis com zero penalidade e reconstrução factual sem reexecução algorítmica.
+  - **P3.1-C: Camada Pedagógica, Tutorial e Demonstração (`CONCLUÍDO`):** Constraints procedurais Mulberry32 com predicado de confronto real de duplicatas (`mergeConstraints.ts`), catálogo data-driven de práticas (`practiceCatalog.ts`), camada pedagógica e dicas (`mergePedagogy.ts`), tutorial interativo curto guiado (`[4a, 1, 3, 4b]`) com retenção de passo em erro e desempate reflexivo na confluência raiz (`mergeTutorialGuide.ts`), demonstração canônica autônoma (`[7, 2, 5, 3]`) via engine pura (`mergeDemonstration.ts`), briefing oficial do protocolo (`briefingCatalog.ts`) com 7 pilares pedagógicos e derivação pura de quadros visuais (`MergeVisualStepFrame`) para Replay. 53 testes do módulo no Vitest; total do projeto em 466 testes 100% verdes em 34 arquivos.
+  - **P3.1-D: Estação de Intercalação e Seletor de Práticas (`CONCLUÍDO`):** Interface `MergeGameScreen.tsx` desktop-first, pátio de triagem com ramais esquerdo e direito como janelas sobre o vetor principal sem cópias algorítmicas adicionais, sensor óptico de confronto de cabeças sem vazar a resposta, esteira coletora auxiliar (buffer) com realce do slot $k$, botoeira com `GameButton` (`DISPATCH_LEFT`, `DISPATCH_RIGHT`, `DRAIN_REMAINDER`), atalhos locais de teclado `1`, `2`, `3` sem captura global indevida, trava síncrona contra decisões sobre quadros defasados, suporte a `prefers-reduced-motion`, limpeza de timers no desmonte, Seletor de Práticas (`PracticeSelector` com tema `merge` e 3 práticas $n=4, 5, 6$), `ResultScreen` segregando escritas no buffer e no principal, navegação curricular completa no `App.tsx` (sessão pura em memória sem corromper storage). Fallback procedural testado sob duplicatas. 481 testes verdes no Vitest (35 arquivos).
+  - **P3.1-E: Replay e Pseudocódigo Sincronizado (`PRÓXIMO SUB-MARCO`):** Modelo de derivação histórica pura e painel de 30 linhas sincronizado.
   - **P3.1-F: Persistência Schema v4 e Ativação no Hub (`FUTURO`):** Gravação sob `merge.practice.*` e ativação como `available`.
 
 ---

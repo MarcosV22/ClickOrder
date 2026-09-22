@@ -20,6 +20,10 @@ import PracticeSetCompleteScreen from "./screens/PracticeSetCompleteScreen";
 import PracticeSelector from "./screens/PracticeSelector";
 import DemonstrationScreen from "./screens/DemonstrationScreen";
 import InsertionReplayScreen from "./screens/InsertionReplayScreen";
+import MergeGameScreen, {
+  type MergePracticeCompleteData,
+} from "./screens/MergeGameScreen";
+import { generateMergePracticeArray } from "./game/sorting/merge/mergeConstraints";
 import type { ProtocolId } from "./screens/protocolCatalog";
 import type { DemonstrationProtocol } from "./game/demonstration";
 import { PhaseResult } from "./game/campaign/campaignSummary";
@@ -72,6 +76,7 @@ type Screen =
   | "game"
   | "selection-game"
   | "insertion-practice"
+  | "merge-practice"
   | "result"
   | "replay"
   | "demonstration"
@@ -79,7 +84,7 @@ type Screen =
   | "selection-campaign-complete"
   | "insertion-practice-complete";
 
-type GameMode = "CAMPAIGN" | "CHALLENGE" | "SELECTION" | "INSERTION";
+type GameMode = "CAMPAIGN" | "CHALLENGE" | "SELECTION" | "INSERTION" | "MERGE";
 
 const TOTAL_PHASES = BUBBLE_CAMPAIGN_PHASE_LENGTHS.length;
 const SELECTION_TOTAL_PHASES = 3;
@@ -119,13 +124,28 @@ export interface InsertionGameResult extends BaseGameResult {
   practiceDefinition: InsertionPracticeDefinition;
 }
 
+export interface MergeGameResult extends BaseGameResult {
+  protocol: "merge";
+  level: PracticeLevel;
+  writesInBuffer: number;
+  writesInMain: number;
+  totalWrites: number;
+  practiceTitle: string;
+}
+
 export type GameResult =
   | BubbleGameResult
   | SelectionGameResult
-  | InsertionGameResult;
+  | InsertionGameResult
+  | MergeGameResult;
 
+export interface AppProps {
+  initialScreen?: Screen;
+  initialModule?: ModuleId;
+  initialLevel?: PracticeLevel;
+}
 
-export default function App() {
+export default function App({ initialScreen, initialModule, initialLevel }: AppProps = {}) {
   const [saveData, setSaveData] = useState<GameSaveSchema>(() =>
     loadGameProgress(undefined, TOTAL_PHASES, SELECTION_TOTAL_PHASES)
   );
@@ -133,7 +153,16 @@ export default function App() {
   const [briefingModeId, setBriefingModeId] =
     useState<BriefingModeId>("bubble-canonical");
   const [challengeScenarioIndex, setChallengeScenarioIndex] = useState<number>(0);
-  const [screen, setScreen] = useState<Screen>("home");
+  const [screen, setScreen] = useState<Screen>(() => {
+    if (initialScreen) return initialScreen;
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("module") === "merge") {
+        return "practice-selector";
+      }
+    }
+    return "home";
+  });
   const [briefingReturnScreen, setBriefingReturnScreen] =
     useState<"home" | "campaign-complete">("home");
 
@@ -170,17 +199,77 @@ export default function App() {
     InsertionPracticeCompleteData[]
   >([]);
 
+  // Estado da Prática do Merge Sort (Sessão pura em memória P3.1-D)
+  const [mergeLevel, setMergeLevel] = useState<PracticeLevel>(() => initialLevel ?? "basic");
+  const [mergeArray, setMergeArray] = useState<readonly number[]>(() =>
+    generateMergePracticeArray((initialLevel as any) ?? "basic").result.values
+  );
+  const [mergeSeed, setMergeSeed] = useState<SeedInput>(() => "");
+  const [mergePracticeResults, setMergePracticeResults] = useState<
+    MergePracticeCompleteData[]
+  >([]);
+
   // Resultado unificado
   const [result, setResult] = useState<GameResult | null>(null);
 
   // Módulo ativo no Seletor de Práticas
-  const [selectorModule, setSelectorModule] = useState<ModuleId>("bubble");
+  const [selectorModule, setSelectorModule] = useState<ModuleId>(() => {
+    if (initialModule) return initialModule;
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("module") === "merge") {
+        return "merge";
+      }
+    }
+    return "bubble";
+  });
 
   const isChallengeUnlocked = isChallengeModeUnlocked(saveData, TOTAL_PHASES);
 
   const handleOpenPracticeSelector = (modId: ModuleId) => {
     setSelectorModule(modId);
     setScreen("practice-selector");
+  };
+
+  const handleStartMergePractice = (lvl: PracticeLevel = "basic") => {
+    const gen = generateMergePracticeArray(lvl as any);
+    setMergeArray(gen.result.values);
+    setMergeSeed(gen.result.seed);
+    setMergeLevel(lvl);
+    setResult(null);
+    setScreen("merge-practice");
+  };
+
+  const handleMergeComplete = (data: MergePracticeCompleteData) => {
+    setResult({
+      protocol: "merge",
+      level: data.level,
+      comparisons: data.comparisons,
+      writesInBuffer: data.writesInBuffer,
+      writesInMain: data.writesInMain,
+      totalWrites: data.totalWrites,
+      swaps: 0,
+      errors: data.errors,
+      hintsUsed: data.hintsUsed,
+      finalArray: data.finalArray,
+      initialArray: data.initialArray,
+      score: data.score,
+      elapsedTimeMs: data.elapsedTimeMs,
+      practiceTitle: data.practiceTitle,
+      seed: mergeSeed,
+    });
+
+    setMergePracticeResults((prev) => {
+      const idx = prev.findIndex((p) => p.level === data.level);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = data;
+        return copy;
+      }
+      return [...prev, data];
+    });
+
+    setScreen("result");
   };
 
   const handleSelectPracticeLevel = (level: PracticeLevel) => {
@@ -205,6 +294,9 @@ export default function App() {
     } else if (selectorModule === "insertion") {
       setGameMode("INSERTION");
       handleStartInsertionPractice(level);
+    } else if (selectorModule === "merge") {
+      setGameMode("MERGE");
+      handleStartMergePractice(level);
     }
   };
 
@@ -417,6 +509,23 @@ export default function App() {
   };
 
   const handleNextPhase = () => {
+    // Fluxo Merge Sort
+    if (result?.protocol === "merge") {
+      const nextLevel: PracticeLevel | null =
+        result.level === "basic"
+          ? "intermediate"
+          : result.level === "intermediate"
+            ? "advanced"
+            : null;
+
+      if (nextLevel !== null) {
+        handleStartMergePractice(nextLevel);
+      } else {
+        handleOpenPracticeSelector("merge");
+      }
+      return;
+    }
+
     // Fluxo Insertion Sort
     if (result?.protocol === "insertion") {
       const nextLevel = getNextInsertionPracticeLevel(result.level);
@@ -481,6 +590,12 @@ export default function App() {
 
   const handleRepeat = () => {
     // Mantém estritamente o MESMO vetor e a MESMA seed da rodada
+    if (result?.protocol === "merge") {
+      setResult(null);
+      setScreen("merge-practice");
+      return;
+    }
+
     if (result?.protocol === "insertion") {
       setResult(null);
       setScreen("insertion-practice");
@@ -643,13 +758,15 @@ export default function App() {
         ? CHALLENGE_SCENARIOS.length
         : TOTAL_PHASES;
   const hasNextPhase =
-    result?.protocol === "insertion"
-      ? getNextInsertionPracticeLevel(result.level) !== null
-      : result?.protocol === "selection"
-        ? selectionPhase < SELECTION_TOTAL_PHASES
-        : gameMode === "CHALLENGE"
-          ? challengeScenarioIndex < CHALLENGE_SCENARIOS.length - 1
-          : phase < TOTAL_PHASES;
+    result?.protocol === "merge"
+      ? result.level !== "advanced"
+      : result?.protocol === "insertion"
+        ? getNextInsertionPracticeLevel(result.level) !== null
+        : result?.protocol === "selection"
+          ? selectionPhase < SELECTION_TOTAL_PHASES
+          : gameMode === "CHALLENGE"
+            ? challengeScenarioIndex < CHALLENGE_SCENARIOS.length - 1
+            : phase < TOTAL_PHASES;
   const canonicalComparisons =
     (currentArray.length * (currentArray.length - 1)) / 2;
   const activeVariant: BubbleSortVariant =
@@ -715,8 +832,11 @@ export default function App() {
             else if (selectorModule === "selection") setScreen("selection-tutorial");
             else if (selectorModule === "insertion") setScreen("insertion-tutorial");
           }}
-          onOpenDemonstration={() =>
-            handleOpenDemonstration(selectorModule as ProtocolId, "home")
+          onOpenDemonstration={
+            selectorModule !== "merge"
+              ? () =>
+                  handleOpenDemonstration(selectorModule as ProtocolId, "home")
+              : undefined
           }
           onReturnHome={handleReturnHome}
           onStartChallenge={
@@ -771,6 +891,16 @@ export default function App() {
           onBackToHub={handleReturnHome}
         />
       )}
+      {screen === "merge-practice" && (
+        <MergeGameScreen
+          key={`merge-practice-${mergeLevel}-${mergeSeed}`}
+          level={mergeLevel as any}
+          initialArray={mergeArray}
+          seed={mergeSeed}
+          onComplete={handleMergeComplete}
+          onBackToSelector={() => handleOpenPracticeSelector("merge")}
+        />
+      )}
       {screen === "game" && (
         <GameScreen
           key={`${gameMode}-${currentPhase}-${gameMode === "CAMPAIGN" ? campaignSeed : ""}`}
@@ -803,20 +933,25 @@ export default function App() {
           swaps={result.swaps}
           shifts={result.protocol === "insertion" ? result.shifts : undefined}
           insertions={result.protocol === "insertion" ? result.insertions : undefined}
+          writesInBuffer={result.protocol === "merge" ? result.writesInBuffer : undefined}
+          writesInMain={result.protocol === "merge" ? result.writesInMain : undefined}
+          totalWrites={result.protocol === "merge" ? result.totalWrites : undefined}
           practiceTitle={
-            result.protocol === "insertion"
-              ? result.practiceDefinition.title
-              : result.protocol === "selection"
-                ? selectionPhase === 1
-                  ? "PRÁTICA BÁSICA"
-                  : selectionPhase === 2
-                    ? "PRÁTICA INTERMEDIÁRIA"
-                    : "PRÁTICA AVANÇADA"
-                : phase === 1
-                  ? "PRÁTICA BÁSICA"
-                  : phase === 2
-                    ? "PRÁTICA INTERMEDIÁRIA"
-                    : "PRÁTICA AVANÇADA"
+            result.protocol === "merge"
+              ? result.practiceTitle
+              : result.protocol === "insertion"
+                ? result.practiceDefinition.title
+                : result.protocol === "selection"
+                  ? selectionPhase === 1
+                    ? "PRÁTICA BÁSICA"
+                    : selectionPhase === 2
+                      ? "PRÁTICA INTERMEDIÁRIA"
+                      : "PRÁTICA AVANÇADA"
+                  : phase === 1
+                    ? "PRÁTICA BÁSICA"
+                    : phase === 2
+                      ? "PRÁTICA INTERMEDIÁRIA"
+                      : "PRÁTICA AVANÇADA"
           }
           errors={result.errors}
           hintsUsed={result.hintsUsed}
@@ -827,8 +962,12 @@ export default function App() {
           protocol={result.protocol}
           onNext={handleNextPhase}
           onRepeat={handleRepeat}
-          onOpenSelector={() => handleOpenPracticeSelector(result.protocol)}
-          onViewReplay={() => setScreen("replay")}
+          onOpenSelector={() =>
+            handleOpenPracticeSelector(result.protocol as ModuleId)
+          }
+          onViewReplay={
+            result.protocol !== "merge" ? () => setScreen("replay") : undefined
+          }
           variant={result.protocol === "bubble" ? (result.variant ?? activeVariant) : undefined}
           earlyExitTriggered={result.protocol === "bubble" ? result.earlyExitTriggered : undefined}
           terminationPass={result.protocol === "bubble" ? result.terminationPass : undefined}

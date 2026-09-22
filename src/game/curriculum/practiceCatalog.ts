@@ -13,6 +13,7 @@ import {
   BUBBLE_EXERCISE_SETS,
   SELECTION_EXERCISE_SETS,
   INSERTION_EXERCISE_SETS,
+  MERGE_EXERCISE_SETS,
 } from "../persistence/constants";
 import type {
   PracticeDefinition,
@@ -138,10 +139,50 @@ export const INSERTION_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.
   },
 ]);
 
+export const MERGE_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.freeze([
+  {
+    id: MERGE_EXERCISE_SETS.BASIC,
+    moduleId: "merge",
+    level: "basic",
+    title: "PRÁTICA BÁSICA",
+    shortTitle: "BÁSICA",
+    description:
+      "Lote introdutório com 4 cargas. Consolidação da mecânica de dois ponteiros, intercalação e drenagem de ramal.",
+    size: 4,
+    pedagogicalObjective:
+      "Comparar frentes de ramais, colher o menor elemento para o buffer auxiliar e drenar a cauda restante quando um ramal esgotar.",
+  },
+  {
+    id: MERGE_EXERCISE_SETS.INTERMEDIATE,
+    moduleId: "merge",
+    level: "intermediate",
+    title: "PRÁTICA INTERMEDIÁRIA",
+    shortTitle: "INTERMEDIÁRIA",
+    description:
+      "Lote com 5 cargas. Compreensão da divisão assimétrica em subproblemas de 3 e 2 elementos.",
+    size: 5,
+    pedagogicalObjective:
+      "Acompanhar a divisão estrutural de tamanho ímpar (3 à esquerda e 2 à direita) e coordenar as intercalações locais e raiz.",
+  },
+  {
+    id: MERGE_EXERCISE_SETS.ADVANCED,
+    moduleId: "merge",
+    level: "advanced",
+    title: "PRÁTICA AVANÇADA",
+    shortTitle: "AVANÇADA",
+    description:
+      "Lote completo com 6 cargas. Domínio de confluências com chaves duplicadas e desempate estável obrigatório na esquerda.",
+    size: 6,
+    pedagogicalObjective:
+      "Aplicar com rigor a regra de estabilidade canônica (<=): sob valores iguais na frente dos dois ramais, despachar invariavelmente a esquerda.",
+  },
+]);
+
 export const MODULE_PRACTICE_CATALOG: Partial<Record<ModuleId, readonly PracticeDefinition[]>> = Object.freeze({
   bubble: BUBBLE_PRACTICE_CATALOG,
   selection: SELECTION_PRACTICE_CATALOG,
   insertion: INSERTION_PRACTICE_CATALOG,
+  merge: MERGE_PRACTICE_CATALOG,
 });
 
 /**

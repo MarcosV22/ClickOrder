@@ -105,7 +105,7 @@ function validateCandidate(
  * Constrói permutações sistemáticas a partir de valores uniformemente distribuídos no range
  * e valida rigorosamente contra todas as constraints configuradas.
  */
-function attemptDeterministicFallback(
+export function attemptDeterministicFallback(
   length: number,
   minValue: number,
   maxValue: number,
@@ -160,6 +160,32 @@ function attemptDeterministicFallback(
     p5[mid - 1] = p5[mid];
     p5[mid] = tmp;
     patterns.push(p5);
+  }
+
+  // Padrões com duplicatas determinísticas quando allowDuplicates for permitido
+  if (allowDuplicates && length >= 3) {
+    // Padrão Dup 1: Duplicata cruzada entre primeira e segunda metade
+    // (garante desordem, repetição e confronto em divisões de subproblemas)
+    const pDupCross = [...baseValues];
+    const half = Math.floor(length / 2);
+    pDupCross[half] = pDupCross[0];
+    const tmp0 = pDupCross[0];
+    pDupCross[0] = pDupCross[1];
+    pDupCross[1] = tmp0;
+    if (length >= 6) {
+      const tmpLast = pDupCross[length - 1];
+      pDupCross[length - 1] = pDupCross[length - 2];
+      pDupCross[length - 2] = tmpLast;
+    }
+    patterns.push(pDupCross);
+
+    // Padrão Dup 2: Duplicata no extremo e transposição interna
+    const pDupEdge = [...baseValues];
+    pDupEdge[pDupEdge.length - 1] = pDupEdge[0];
+    const tmpEdge = pDupEdge[0];
+    pDupEdge[0] = pDupEdge[1];
+    pDupEdge[1] = tmpEdge;
+    patterns.push(pDupEdge);
   }
 
   // Padrão 6 a 15: Amostras adicionais com novas derivações pseudoaleatórias controladas

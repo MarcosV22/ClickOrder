@@ -7,6 +7,7 @@ import {
   SELECTION_SORT_PSEUDOCODE,
 } from "../game/replay";
 import { INSERTION_SORT_PSEUDOCODE } from "../game/sorting/insertion";
+import { MERGE_SORT_PSEUDOCODE } from "../game/sorting/merge";
 import { formatElapsedTime } from "../game/session";
 
 interface ResultScreenProps {
@@ -15,6 +16,9 @@ interface ResultScreenProps {
   swaps?: number;
   shifts?: number;
   insertions?: number;
+  writesInBuffer?: number;
+  writesInMain?: number;
+  totalWrites?: number;
   errors: number;
   hintsUsed: number;
   score?: number;
@@ -22,7 +26,7 @@ interface ResultScreenProps {
   phase?: number;
   practiceTitle?: string;
   hasNextPhase?: boolean;
-  protocol?: "bubble" | "selection" | "insertion";
+  protocol?: "bubble" | "selection" | "insertion" | "merge";
   variant?: BubbleSortVariant;
   earlyExitTriggered?: boolean;
   terminationPass?: number;
@@ -40,6 +44,9 @@ export default function ResultScreen({
   swaps = 0,
   shifts = 0,
   insertions = 0,
+  writesInBuffer = 0,
+  writesInMain = 0,
+  totalWrites = 0,
   errors,
   hintsUsed,
   score,
@@ -58,9 +65,10 @@ export default function ResultScreen({
   onViewReplay,
   onOpenSelector,
 }: ResultScreenProps) {
+  const isMerge = protocol === "merge";
   const isSelection = protocol === "selection";
   const isInsertion = protocol === "insertion";
-  const isEarlyExit = variant === "EARLY_EXIT" && !isSelection && !isInsertion;
+  const isEarlyExit = variant === "EARLY_EXIT" && !isSelection && !isInsertion && !isMerge;
   const effectiveAvoided =
     comparisonsAvoided ?? Math.max(0, canonicalComparisons - comparisons);
   const pseudocodeLines: readonly {
@@ -68,13 +76,15 @@ export default function ResultScreen({
     readonly lineNumber: number;
     readonly indent: number;
     readonly text: string;
-  }[] = isInsertion
-    ? INSERTION_SORT_PSEUDOCODE
-    : isSelection
-      ? SELECTION_SORT_PSEUDOCODE
-      : isEarlyExit
-        ? BUBBLE_SORT_EARLY_EXIT_PSEUDOCODE
-        : BUBBLE_SORT_PSEUDOCODE;
+  }[] = isMerge
+    ? MERGE_SORT_PSEUDOCODE
+    : isInsertion
+      ? INSERTION_SORT_PSEUDOCODE
+      : isSelection
+        ? SELECTION_SORT_PSEUDOCODE
+        : isEarlyExit
+          ? BUBBLE_SORT_EARLY_EXIT_PSEUDOCODE
+          : BUBBLE_SORT_PSEUDOCODE;
 
   return (
     <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-8 pb-16 sm:pb-24 px-4 sm:px-8 select-none">
@@ -230,7 +240,25 @@ export default function ResultScreen({
                         color: "text-cyan-300",
                       },
                     ]),
-                ...(isInsertion
+                ...(isMerge
+                  ? [
+                      {
+                        label: "Escritas no Buffer",
+                        value: String(writesInBuffer ?? 0),
+                        color: "text-blue-300",
+                      },
+                      {
+                        label: "Escritas no Principal",
+                        value: String(writesInMain ?? 0),
+                        color: "text-cyan-300",
+                      },
+                      {
+                        label: "Total de Escritas",
+                        value: String(totalWrites ?? ((writesInBuffer ?? 0) + (writesInMain ?? 0))),
+                        color: "text-sky-300",
+                      },
+                    ]
+                  : isInsertion
                   ? [
                       {
                         label: "Deslocamentos",
@@ -311,6 +339,15 @@ export default function ResultScreen({
                 Insertion Sort mantém uma região ordenada e desloca somente os elementos necessários para abrir espaço à chave.
               </div>
             )}
+
+            {isMerge && (
+              <div className="mt-1 p-2.5 rounded-lg border border-blue-500/30 bg-blue-950/30 text-[11px] text-blue-200/90 leading-relaxed font-mono">
+                <span className="font-bold text-blue-300 uppercase block mb-1">
+                  Nota Pedagógica (Merge Sort):
+                </span>
+                Merge Sort divide o problema em subvetores independentes e intercala os resultados com estabilidade e espaço auxiliar.
+              </div>
+            )}
           </div>
 
           {/* Pseudocode & Principle Panel */}
@@ -319,32 +356,40 @@ export default function ResultScreen({
               className="text-[10px] text-white/30 tracking-widest uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              {isInsertion
-                ? "PSEUDOCÓDIGO — INSERTION SORT"
-                : isSelection
-                  ? "PSEUDOCÓDIGO — SELECTION SORT"
-                  : isEarlyExit
-                    ? "PSEUDOCÓDIGO — EARLY EXIT"
-                    : "PSEUDOCÓDIGO — BUBBLE SORT"}
+              {isMerge
+                ? "PSEUDOCÓDIGO — MERGE SORT"
+                : isInsertion
+                  ? "PSEUDOCÓDIGO — INSERTION SORT"
+                  : isSelection
+                    ? "PSEUDOCÓDIGO — SELECTION SORT"
+                    : isEarlyExit
+                      ? "PSEUDOCÓDIGO — EARLY EXIT"
+                      : "PSEUDOCÓDIGO — BUBBLE SORT"}
             </span>
             <div className="flex flex-col gap-0.5">
               {pseudocodeLines.map((item) => (
                 <div
                   key={item.id}
                   className={`px-2 py-0.5 rounded text-[10px] leading-relaxed ${
-                    isInsertion
-                      ? item.id === "SHIFT_RIGHT" ||
-                        item.id === "INSERT_KEY" ||
-                        item.id === "LIFT_KEY"
-                        ? "bg-amber-950/40 text-amber-300"
+                    isMerge
+                      ? item.id === "COMPARE_CONDITION" ||
+                        item.id === "DRAIN_REMAINDER" ||
+                        item.id === "COPY_BACK"
+                        ? "bg-blue-950/40 text-blue-300"
                         : "text-white/40"
-                      : item.id === "SWAP_STATEMENT" ||
-                        item.id === "BREAK_STATEMENT" ||
-                        item.id === "UPDATE_MIN"
-                        ? isSelection
-                          ? "bg-purple-950/40 text-purple-300"
-                          : "bg-cyan-950/40 text-cyan-300"
-                        : "text-white/40"
+                      : isInsertion
+                        ? item.id === "SHIFT_RIGHT" ||
+                          item.id === "INSERT_KEY" ||
+                          item.id === "LIFT_KEY"
+                          ? "bg-amber-950/40 text-amber-300"
+                          : "text-white/40"
+                        : item.id === "SWAP_STATEMENT" ||
+                          item.id === "BREAK_STATEMENT" ||
+                          item.id === "UPDATE_MIN"
+                          ? isSelection
+                            ? "bg-purple-950/40 text-purple-300"
+                            : "bg-cyan-950/40 text-cyan-300"
+                          : "text-white/40"
                   }`}
                   style={{
                     fontFamily: "'Space Mono', monospace",
@@ -378,7 +423,18 @@ export default function ResultScreen({
               </div>
             )}
 
-            {!isSelection && !isEarlyExit && !isInsertion && (
+            {isMerge && (
+              <div className="p-3.5 rounded-lg bg-blue-950/30 border border-blue-500/20 flex flex-col gap-2 mt-1">
+                <p className="text-xs text-blue-200/90 leading-relaxed font-mono font-bold">
+                  Merge Sort divide o problema recursivamente e intercala os subvetores com tempo previsível Θ(n log n).
+                </p>
+                <p className="text-[11px] text-white/60 leading-relaxed font-mono">
+                  A intercalação utiliza um buffer auxiliar para acomodar os elementos em ordem estável. Sob chaves iguais nas frentes dos ramais, a priorização estrita do Ramal Esquerdo preserva a ordem relativa original dos itens.
+                </p>
+              </div>
+            )}
+
+            {!isSelection && !isEarlyExit && !isInsertion && !isMerge && (
               <div className="p-3.5 rounded-lg bg-cyan-950/30 border border-cyan-500/20 flex flex-col gap-2 mt-1">
                 <p className="text-xs text-cyan-200/90 leading-relaxed font-mono font-bold">
                   Bubble Sort propaga o maior elemento a cada passada por comparações adjacentes.

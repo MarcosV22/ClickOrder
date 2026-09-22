@@ -13,17 +13,18 @@ import {
   BUBBLE_EXERCISE_SETS,
   SELECTION_EXERCISE_SETS,
   INSERTION_EXERCISE_SETS,
+  MERGE_EXERCISE_SETS,
 } from "../persistence";
 
-describe("Curriculum Transversal Practice Catalog (PLATFORM-R1-B)", () => {
+describe("Curriculum Transversal Practice Catalog (PLATFORM-R1-B / P3.1-D)", () => {
   describe("1. Integridade Estrutural dos Catálogos por Módulo", () => {
-    it("possui exatamente 3 módulos canônicos: bubble, selection e insertion", () => {
+    it("possui os 4 módulos canônicos: bubble, selection, insertion e merge", () => {
       const moduleKeys = Object.keys(MODULE_PRACTICE_CATALOG);
-      expect(moduleKeys).toEqual(["bubble", "selection", "insertion"]);
+      expect(moduleKeys).toEqual(["bubble", "selection", "insertion", "merge"]);
     });
 
     it("cada módulo contém exatamente 3 práticas (basic, intermediate, advanced)", () => {
-      for (const moduleId of ["bubble", "selection", "insertion"] as const) {
+      for (const moduleId of ["bubble", "selection", "insertion", "merge"] as const) {
         const practices = getModulePractices(moduleId);
         expect(practices).toHaveLength(3);
         expect(practices.map((p) => p.level)).toEqual([
@@ -50,10 +51,15 @@ describe("Curriculum Transversal Practice Catalog (PLATFORM-R1-B)", () => {
       expect(insertion[0].id).toBe(INSERTION_EXERCISE_SETS.BASIC);
       expect(insertion[1].id).toBe(INSERTION_EXERCISE_SETS.INTERMEDIATE);
       expect(insertion[2].id).toBe(INSERTION_EXERCISE_SETS.ADVANCED);
+
+      const merge = getModulePractices("merge");
+      expect(merge[0].id).toBe(MERGE_EXERCISE_SETS.BASIC);
+      expect(merge[1].id).toBe(MERGE_EXERCISE_SETS.INTERMEDIATE);
+      expect(merge[2].id).toBe(MERGE_EXERCISE_SETS.ADVANCED);
     });
 
     it("fornece títulos e objetivos pedagógicos não vazios para todas as práticas", () => {
-      for (const moduleId of ["bubble", "selection", "insertion"] as const) {
+      for (const moduleId of ["bubble", "selection", "insertion", "merge"] as const) {
         const practices = getModulePractices(moduleId);
         for (const p of practices) {
           expect(p.title).toMatch(/^PRÁTICA/);

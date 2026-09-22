@@ -258,11 +258,94 @@ export const INSERTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
   startVariant: "primary",
 };
 
+/**
+ * Briefing oficial para o protocolo Merge Sort ("Divisão e Confluência").
+ * Foco pedagógico: decomposição recursiva, buffer auxiliar, estabilidade sob empate e distinção ORD vs OK.
+ */
+export const MERGE_CANONICAL_BRIEFING: ProtocolModeBriefing = {
+  id: "merge-canonical",
+  protocolName: "PROTOCOLO: MERGE SORT",
+  modeName: "DIVISÃO E CONFLUÊNCIA",
+  badgeText: "PLATAFORMA EDUCACIONAL • MÓDULO 04",
+  badgeVariant: "cyan",
+  subtitle: "Decomposição recursiva e intercalação ordenada com dois ponteiros e esteira coletora.",
+  objective:
+    "Dividir o lote sucessivamente até subproblemas unitários e recompor a esteira principal através da confluência ordenada de ramais alimentando a esteira coletora.",
+  instructions: [
+    {
+      icon: "✂️",
+      title: "Divisão Estrutural",
+      description:
+        "A partição binária divide o lote sucessivamente até subvetores unitários. A divisão isolada não ordena nem altera os valores das cargas.",
+    },
+    {
+      icon: "🔀",
+      title: "Confluência de Ramais",
+      description:
+        "A ordenação ocorre na intercalação: dois subvetores previamente ordenados alimentam a esteira coletora temporária (buffer auxiliar).",
+    },
+    {
+      icon: "👀",
+      title: "Inspeção Exclusiva das Frentes",
+      description:
+        "O operador inspeciona apenas as duas cargas situadas na frente de cada ramal (dois ponteiros), colhendo sempre a menor carga para o buffer.",
+    },
+    {
+      icon: "⚖️",
+      title: "Regra Mandatória de Estabilidade",
+      description:
+        "Em caso de empate (cargas com valores iguais), escolha sempre a carga do Ramal Esquerdo para preservar a estabilidade e a ordem relativa original dos itens.",
+    },
+    {
+      icon: "🌊",
+      title: "Drenagem da Cauda Restante",
+      description:
+        "Quando um ramal se esgota, todas as cargas do outro ramal já são maiores e são transferidas em lote para a esteira coletora sem novas comparações.",
+    },
+    {
+      icon: "🏷️",
+      title: "Marcação ORD vs Selo OK",
+      description:
+        "Ao preencher o buffer, as cargas voltam à esteira principal. Subvetores intermediários recebem marcação ORD (ordenação local); o selo definitivo OK surge apenas ao concluir a raiz.",
+    },
+    {
+      icon: "✍️",
+      title: "Escritas Físicas vs Comparações",
+      description:
+        "Escritas na esteira coletora (buffer) e cópias de retorno para a esteira principal são operações físicas distintas da comparação de valores. O algoritmo requer buffer auxiliar temporário O(n).",
+    },
+  ],
+  highlights: [
+    {
+      label: "MÉTODO",
+      value: "Divisão e Confluência",
+      variant: "cyan",
+    },
+    {
+      label: "COMPARAÇÕES",
+      value: "Ótimo Θ(n log n)",
+      variant: "purple",
+    },
+    {
+      label: "BUFFER AUXILIAR",
+      value: "O(n) Esteira Coletora",
+      variant: "emerald",
+    },
+  ],
+  particularities: [
+    "A esteira coletora (buffer) é temporária e reutilizada a cada ciclo de intercalação.",
+    "Decisões incorretas paralisam a esteira e explicam a invariante sem reiniciar a atividade.",
+  ],
+  startLabel: "INICIAR TUTORIAL GUIADO",
+  startVariant: "primary",
+};
+
 export const BRIEFING_CATALOG: Record<BriefingModeId, ProtocolModeBriefing> = {
   "bubble-canonical": BUBBLE_CANONICAL_BRIEFING,
   "bubble-early-exit": BUBBLE_EARLY_EXIT_BRIEFING,
   "selection-canonical": SELECTION_CANONICAL_BRIEFING,
   "insertion-canonical": INSERTION_CANONICAL_BRIEFING,
+  "merge-canonical": MERGE_CANONICAL_BRIEFING,
 };
 
 /**

@@ -14,6 +14,7 @@ export type BoxRole =
 interface NumberedBoxProps {
   value: number;
   index: number;
+  elementLabel?: string;
   selected?: boolean;
   disabled?: boolean;
   sorted?: boolean;
@@ -28,6 +29,7 @@ interface NumberedBoxProps {
 export default function NumberedBox({
   value,
   index,
+  elementLabel,
   selected = false,
   disabled = false,
   sorted = false,
@@ -249,10 +251,18 @@ export default function NumberedBox({
 
         {/* Value */}
         <span
-          className={`${s.text} font-bold ${roleStyles.text}`}
+          className={`${s.text} font-bold ${roleStyles.text} flex items-baseline justify-center gap-0.5`}
           style={{ fontFamily: "'Orbitron', sans-serif" }}
         >
           {value}
+          {elementLabel && (
+            <span
+              className="text-xs font-mono font-semibold opacity-90 text-cyan-300"
+              style={{ fontFamily: "'Space Mono', monospace" }}
+            >
+              {elementLabel}
+            </span>
+          )}
         </span>
 
         {/* Bottom label */}

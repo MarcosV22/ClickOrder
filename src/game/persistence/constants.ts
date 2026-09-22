@@ -4,6 +4,7 @@ export const CURRENT_SCHEMA_VERSION = 4;
 export const DEFAULT_MAX_PHASES = 3;
 export const SELECTION_MAX_PHASES = 3;
 export const INSERTION_TOTAL_PRACTICES = 3;
+export const MERGE_TOTAL_PRACTICES = 3;
 
 /**
  * Identificadores canônicos e imutáveis de ExerciseSets suportados pela plataforma.
@@ -25,4 +26,10 @@ export const INSERTION_EXERCISE_SETS = Object.freeze({
   BASIC: "insertion.practice.basic",
   INTERMEDIATE: "insertion.practice.intermediate",
   ADVANCED: "insertion.practice.advanced",
+} as const);
+
+export const MERGE_EXERCISE_SETS = Object.freeze({
+  BASIC: "merge.practice.basic",
+  INTERMEDIATE: "merge.practice.intermediate",
+  ADVANCED: "merge.practice.advanced",
 } as const);

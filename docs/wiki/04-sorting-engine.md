@@ -30,8 +30,8 @@ A plataforma divide seus motores de ordenação em 6 módulos curriculares canô
 | :--- | :--- | :--- | :---: | :--- |
 | **01. Bubble Sort** | `src/game/sorting/bubbleSortEngine.ts` | FSM sequencial estrita de pares adjacentes $[j, j+1]$ e passada externa $i$ | `IMPLEMENTADO` | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |
 | **02. Selection Sort** | `src/game/sorting/selection/selectionSortEngine.ts` | FSM bimodal estrita `INSPECT` (scanner) e `COMMIT` (transferência) | `IMPLEMENTADO` | [`modules/selection-sort.md`](./modules/selection-sort.md) |
-| **03. Insertion Sort** | `src/game/sorting/insertion/insertionSortEngine.ts` | FSM de deslocamentos (`COMPARE_AND_SHIFT`, `INSERT_READY`, `COMPLETED`) com vaga física | `EM IMPLEMENTAÇÃO (P2.2-B)` | [`modules/insertion-sort.md`](./modules/insertion-sort.md) |
-| **04. Merge Sort** | `src/game/sorting/merge/` (Futuro P3.1) | FSM de divisão binária em sub-esteiras e intercalação ordenada com dois ponteiros | `FUTURO` | [`modules/merge-sort.md`](./modules/merge-sort.md) |
+| **03. Insertion Sort** | `src/game/sorting/insertion/insertionSortEngine.ts` | FSM de deslocamentos (`COMPARE_AND_SHIFT`, `INSERT_READY`, `COMPLETED`) com vaga física | `IMPLEMENTADO` | [`modules/insertion-sort.md`](./modules/insertion-sort.md) |
+| **04. Merge Sort** | `src/game/sorting/merge/` | FSM Top-Down pós-ordem com pilha explícita, dois ponteiros de confluência e buffer auxiliar | `ESTAÇÃO E SELETOR IMPLEMENTADOS (P3.1-D)` | [`modules/merge-sort.md`](./modules/merge-sort.md) |
 | **05. Quick Sort** | `src/game/sorting/quick/` (Futuro P3.2) | FSM de seleção de pivô e particionamento bilateral Lomuto/Hoare | `FUTURO` | [`modules/quick-sort.md`](./modules/quick-sort.md) |
 | **06. Heap Sort** | `src/game/sorting/heap/` (Futuro P3.3) | FSM de construção de max-heap, afundamento (*sift-down*) e extração da raiz | `FUTURO` | [`modules/heap-sort.md`](./modules/heap-sort.md) |
 
@@ -120,10 +120,54 @@ export interface InsertionSortState {
 
 ---
 
-## 6. Requisitos de Conformidade para Novas Engines (Module Standard)
+## 6. A Engine de Merge Sort (`src/game/sorting/merge/`)
+
+### 6.1. Estrutura de Estado Imutável
+```typescript
+export interface MergeSortState {
+  readonly initialValues: readonly MergeElement[];
+  readonly values: readonly MergeElement[];
+  readonly buffer: readonly (MergeElement | null)[];
+  readonly activeInterval: MergeIntervalContext | null;
+  readonly p1: number;
+  readonly p2: number;
+  readonly k: number;
+  readonly phase: MergePhase;
+  readonly tasks: readonly MergeTask[];
+  readonly comparisons: number;
+  readonly writesInBuffer: number;
+  readonly writesInMain: number;
+  readonly totalWrites: number;
+  readonly errors: number;
+  readonly hintsUsed: number;
+  readonly history: readonly MergeStepRecord[];
+  readonly completed: boolean;
+}
+```
+
+### 6.2. Funções Puras Principais
+- `initMergeSortState(rawInput)`: Instancia o estado imutável com identidades persistentes (`MergeElement`). Trata entradas vazias ou unitárias como concluídas imediatamente com zero comparações e zero escritas. Para $n \ge 2$, dispara `advanceAutomaticSteps` até a primeira decisão interativa (`COMPARE_HEADS`);
+- `getExpectedMergeStep(state)`: Retorna os metadados contextuais da ação esperada (`DISPATCH_LEFT` vs `DISPATCH_RIGHT` em `COMPARE_HEADS`, ou `DRAIN_REMAINDER` em `DRAIN_READY`) e aplica formalmente a regra de desempate estável na esquerda;
+- `executeMergeStep(state, decision)`: Executa a decisão do estudante diferenciando rigorosamente **erros conceituais** (`errors += 1`, estado retido, zero avanço ou escrita) de **ações inválidas por fase** (`errors` inalterado). Após uma ação correta, avança deterministicamente pelos passos automáticos até o próximo estado interativo ou `COMPLETED`;
+- `deriveMergeFramesFromHistory(initialValues, history)`: Transforma a lista de eventos brutos de histórico em uma sequência canônica de `MergeVisualStepFrame` para consumo pelo Replay e pela UI. Essa derivação percorre sequencialmente os $m$ eventos do histórico ($m \in O(n \log n)$), possuindo complexidade temporal $O(m)$ e gerando a lista de quadros em memória;
+- **Acesso a quadros preparados vs. Derivação a frio:** A indexação direta sobre a lista de quadros pré-computados (`frames[stepIndex]`) é uma operação $O(1)$ imediata em tempo. Já a função utilitária avulsa `reconstructMergeStepAt(initialValues, history, stepIndex)` executa `deriveMergeFramesFromHistory` internamente a frio quando chamada isoladamente (custo $O(m)$), não devendo ser invocada repetidamente em laços sem reaproveitar a lista derivada;
+- `reconstructMergeStateFromHistory(initialValues, history)`: Helper puro de reconstrução e auditoria factual que reproduz o vetor final, contadores e lista completa de quadros visuais sem reexecutar decisões de ordenação da engine;
+- `getMergeSortScore(state)`: Calcula a Pontuação do Protocolo canônica baseada em erros e dicas consumidas.
+
+### 6.3. Memória do Histórico e Snapshots
+- **Espaço Auxiliar Algorítmico:** Estritamente $O(n)$ células físicas na esteira coletora temporária alocada em cada ciclo de intercalação.
+- **Armazenamento de Snapshots na Sessão:** O histórico grava $m \in O(n \log n)$ eventos imutáveis (`MergeStepRecord[]`), cada qual retendo uma cópia rasa do array `valuesSnapshot` ($n$ referências) e, durante a intercalação ativa, `bufferSnapshot` (até $n$ referências). Como todas as instâncias de `MergeElement` são imutáveis e compartilhadas por ponteiro (zero clonagem profunda de dados), o heap retém estritamente ponteiros aos elementos existentes. Contabilizando vetores principais e buffers:
+  - $n=4$ ($m \approx 12\text{--}16$ eventos): $\approx 100\text{--}130$ referências a elementos;
+  - $n=5$ ($m \approx 18\text{--}22$ eventos): $\approx 180\text{--}240$ referências a elementos;
+  - $n=6$ ($m \approx 24\text{--}28$ eventos): $\approx 280\text{--}340$ referências a elementos.
+  Esse total de referências rasas ocupa menos de 2 KB de memória heap, garantindo performance instantânea e estabilidade de coleta de lixo, dispensando recalculo algorítmico ou redesenhos desnecessários do histórico.
+
+---
+
+## 7. Requisitos de Conformidade para Novas Engines (Module Standard)
 
 Qualquer nova engine algorítmica a ser implementada na plataforma deve obedecer aos seguintes critérios:
 1. **Zero Acoplamento com React:** Arquivos localizados em `src/game/sorting/<algoritmo>/` contendo exclusivamente TypeScript puro sem JSX ou hooks;
 2. **Histórico Auditável (`history`):** Cada operação atômica deve produzir um registro discriminado com metadados suficientes para reconstrução determinística de quadros de replay;
-3. **Invariantes Explícitas:** Funções públicas que retornam explicitamente elementos já consolidados (`getSortedIndices` / `getInsertionOrderedIndices`) e expectativas do passo corrente;
+3. **Invariantes Explícitas:** Funções públicas que retornam explicitamente elementos já consolidados e expectativas do passo corrente;
 4. **Cobertura de Testes com Vitest:** Mínimo de 15 cenários de teste unitário, incluindo vetores vazios, unitários, ordenados, decrescentes e com valores duplicados.

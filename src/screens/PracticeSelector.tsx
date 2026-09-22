@@ -77,6 +77,17 @@ const MODULE_THEMES: Partial<Record<ModuleId, ModuleThemeConfig>> = {
     titleGradient: "from-amber-300 via-cyan-400 to-emerald-400",
     cardBorderHover: "hover:border-amber-400/50",
   },
+  merge: {
+    name: "MERGE SORT",
+    subtitle: "DIVISÃO DE FLUXOS E INTERCALAÇÃO ORDENADA",
+    primaryColor: "blue",
+    badgeBorder: "border-blue-500/30",
+    badgeBg: "bg-blue-950/40",
+    badgeText: "text-blue-300",
+    glowColor: "rgba(37,99,235,0.15)",
+    titleGradient: "from-blue-300 via-cyan-400 to-sky-300",
+    cardBorderHover: "hover:border-blue-400/50",
+  },
 };
 
 export default function PracticeSelector({

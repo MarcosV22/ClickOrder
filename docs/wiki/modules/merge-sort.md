@@ -1,9 +1,9 @@
 # Módulo 04 — Merge Sort
 
 > **Documento canônico do módulo curricular:** Especificação integral de design pedagógico, mecânico e computacional do Módulo de Merge Sort da plataforma **Sorting Station**.  
-> **Status de Implementação:** `ESPECIFICAÇÃO DE DESIGN PROPOSTA (P3.1-A)` (Design pedagógico, mecânica cinestésica, FSM, pseudocódigo, métricas, casos curados e contratos arquiteturais documentados; aguarda aprovação para início da engine P3.1-B; código algorítmico não iniciado).  
-> **Data de Atualização:** 21/09/2026 (Marco P3.1-A / ADR 0023 Proposto — Revisão 2)  
-> **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`ADR 0021`](../../adr/0021-module-exercise-persistence-schema-v4.md), [`ADR 0022`](../../adr/0022-canonical-exercise-module-standardization.md), [`ADR 0023`](../../adr/0023-merge-sort-pedagogical-mechanical-design.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md), [`05-ux-design-system.md`](../05-ux-design-system.md), [`07-backend-and-persistence.md`](../07-backend-and-persistence.md), [`10-roadmap.md`](../10-roadmap.md), [`12-pedagogy-and-academic-traceability.md`](../12-pedagogy-and-academic-traceability.md).
+> **Status de Implementação:** `ESTAÇÃO DE INTERCALAÇÃO E SELETOR IMPLEMENTADOS (P3.1-D)` (Engine pura, constraints procedurais com confronto real de duplicatas, tutorial guiado, demonstração canônica, briefing oficial, Estação Desktop-First `MergeGameScreen.tsx`, Seletor de Práticas `PracticeSelector` com 3 práticas canônicas $n=4, 5, 6$, `ResultScreen` segregando escritas no buffer e no principal, navegação completa e 68 testes unitários/comportamentais do módulo homologados no Vitest; Replay retrospectivo e persistência Schema v4 pública aguardam P3.1-E e P3.1-F; Merge permanece indisponível no Hub público).  
+> **Data de Atualização:** 22/09/2026 (Marco P3.1-D / ADR 0023 Atualizado)  
+> **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`ADR 0021`](../../adr/0021-module-exercise-persistence-schema-v4.md), [`ADR 0022`](../../adr/0022-canonical-exercise-module-standardization.md), [`ADR 0023`](../../adr/0023-merge-sort-pedagogical-mechanical-design.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md), [`05-ux-design-system.md`](../05-ux-design-system.md), [`07-backend-and-persistence.md`](../07-backend-and-persistence.md), [`08-testing-and-quality.md`](../08-testing-and-quality.md), [`10-roadmap.md`](../10-roadmap.md), [`12-pedagogy-and-academic-traceability.md`](../12-pedagogy-and-academic-traceability.md).
 
 ---
 
@@ -13,7 +13,7 @@
 - **Identificador de Sistema (`moduleId`):** `merge`
 - **Rótulo Diegético na Interface:** `PROTOCOLO: MERGE SORT // ESTEIRAS CONVERGENTES E INTERCALAÇÃO`
 - **Subtítulo Diegético:** *Divisão de Fluxos e Intercalação Ordenada*
-- **Status Factual:** `ESPECIFICAÇÃO DE DESIGN PROPOSTA (P3.1-A)` (Aguardando homologação de design; código algorítmico não iniciado)
+- **Status Factual:** `ESTAÇÃO DE INTERCALAÇÃO E SELETOR IMPLEMENTADOS (P3.1-D)` (Engine pura, constraints, tutorial, demonstração, briefing, Estação Desktop-First `MergeGameScreen.tsx`, integração curricular e 68 testes do módulo)
 - **Classificação Curricular:** Algoritmo Avançado de Divisão e Conquista Assintoticamente Ótimo
 - **Complexidade Temporal:**
   - **Melhor Caso:** $\Theta(n \log n)$ comparações ($\approx \lceil \frac{n}{2} \rceil \log_2 n$)
@@ -141,9 +141,14 @@ export interface MergeElement {
 - **Regra de Desempate:** Se $E[p_1].value == D[p_2].value$, a decisão correta é **obrigatoriamente despachar o elemento do Ramal Esquerdo ($p_1$)**.
 - Como $p_1$ possuía índice original menor que $p_2$, priorizar a esquerda preserva a ordem relativa original, garantindo estabilidade formal.
 
-### 4.4. Recorrência Exata de Escritas
+### 4.4. Buffer Auxiliar vs Memória Educacional de Snapshots
+Fica expressamente diferenciado na arquitetura:
+1. **Espaço Auxiliar do Algoritmo:** Estritamente **$O(n)$ posições/células**, correspondendo à capacidade máxima da esteira coletora temporária alocada a cada intercalação para acomodar até $n$ cargas antes do retorno à esteira principal.
+2. **Memória de Infraestrutura Educacional:** $O(n \log n)$ snapshots gerados pelo histórico imutável (`MergeStepRecord[]`), armazenados na memória de sessão da plataforma para viabilizar replay retrospectivo sem recálculo, auditoria factual e scaffolding formativo.
+
+### 4.5. Recorrência Exata de Escritas
 A métrica de **Escritas** ($W(n)$) computa a movimentação de dados:
-1. $1$ escrita no buffer por elemento ao descer da frente de um ramal;
+1. $1$ escrita no buffer por elemento ao descer da frente de um ramal ou ao ser drenado da cauda remanescente;
 2. $1$ escrita no vetor principal por elemento ao retornar do buffer para $A[left \dots right]$.
 - Em cada intercalação de intervalo $L$, ocorrem exatamente $L$ escritas no buffer e $L$ escritas no vetor principal ($2L$ escritas).
 - **Recorrência:**
@@ -176,7 +181,7 @@ A variante Top-Down com travessia pós-ordem à esquerda foi selecionada por ali
 
 ---
 
-## 6. Pseudocódigo Canônico (18 Linhas — `MERGE_SORT_PSEUDOCODE`)
+## 6. Pseudocódigo Canônico (30 Linhas — `MERGE_SORT_PSEUDOCODE`)
 
 ```text
  1. procedimento mergeSort(A, inicio, fim)
@@ -189,26 +194,36 @@ A variante Top-Down com travessia pós-ordem à esquerda foi selecionada por ali
  8. fim procedimento
  9. 
 10. procedimento intercalar(A, inicio, meio, fim)
-11.   p1 ← inicio, p2 ← meio + 1, k ← 0
-12.   enquanto p1 ≤ meio e p2 ≤ fim faça
-13.     se A[p1].value ≤ A[p2].value então
-14.       Buffer[k] ← A[p1]; p1 ← p1 + 1
-15.     senão
-16.       Buffer[k] ← A[p2]; p2 ← p2 + 1
-17.     fim se; k ← k + 1
-18.   fim enquanto
-19.   copiar elementos restantes de A[p1..meio] ou A[p2..fim] para Buffer
-20.   copiar Buffer[0..k-1] de volta para A[inicio..fim]
-21. fim procedimento
+11.   Buffer ← alocar buffer de tamanho (fim - inicio + 1)
+12.   p1 ← inicio, p2 ← meio + 1, k ← 0
+13.   enquanto p1 ≤ meio e p2 ≤ fim faça
+14.     se A[p1].value ≤ A[p2].value então
+15.       Buffer[k] ← A[p1]; p1 ← p1 + 1
+16.     senão
+17.       Buffer[k] ← A[p2]; p2 ← p2 + 1
+18.     fim se
+19.     k ← k + 1
+20.   fim enquanto
+21.   enquanto p1 ≤ meio faça
+22.     Buffer[k] ← A[p1]; p1 ← p1 + 1; k ← k + 1
+23.   fim enquanto
+24.   enquanto p2 ≤ fim faça
+25.     Buffer[k] ← A[p2]; p2 ← p2 + 1; k ← k + 1
+26.   fim enquanto
+27.   para idx de 0 até (fim - inicio) faça
+28.     A[inicio + idx] ← Buffer[idx]
+29.   fim para
+30. fim procedimento
 ```
 
-### Mapeamento com a FSM:
+### Mapeamento com a FSM da Engine:
 - `DIVIDE_AUTOMATIC`: Linhas 2–5 (`se inicio < fim`, cálculo de `meio` e chamadas recursivas);
-- `COMPARE_HEADS`: Linhas 12–13 (`enquanto...`, teste relacional `A[p1].value ≤ A[p2].value`);
-- `DISPATCH_LEFT`: Linha 14 (`Buffer[k] ← A[p1]; p1 ← p1 + 1; k ← k + 1`);
-- `DISPATCH_RIGHT`: Linha 16 (`Buffer[k] ← A[p2]; p2 ← p2 + 1; k ← k + 1`);
-- `DRAIN_READY`: Linha 19 (`copiar elementos restantes... para Buffer`);
-- `COPY_BACK_AUTOMATIC`: Linha 20 (`copiar Buffer... de volta para A[inicio..fim]`).
+- `MERGE_INIT`: Linhas 11–12 (alocação do buffer temporário e inicialização dos ponteiros $p_1, p_2, k=0$);
+- `COMPARE_HEADS`: Linhas 13–14 (`enquanto...`, teste relacional `A[p1].value ≤ A[p2].value`);
+- `DISPATCH_LEFT`: Linha 15 (`Buffer[k] ← A[p1]; p1 ← p1 + 1; k ← k + 1`);
+- `DISPATCH_RIGHT`: Linha 17 (`Buffer[k] ← A[p2]; p2 ← p2 + 1; k ← k + 1`);
+- `DRAIN_READY`: Linhas 21–26 (drenagem dos remanescentes com $k \leftarrow k + 1$);
+- `COPY_BACK_AUTOMATIC`: Linhas 27–29 (cópia de retorno de todos os elementos para a esteira principal).
 
 ---
 
@@ -340,11 +355,19 @@ Ao concluir uma prática, a tela [`ResultScreen.tsx`](../../src/screens/ResultSc
 
 ---
 
-## 16. Replay e Inspeção Retrospectiva
+## 16. Replay, Inspeção Retrospectiva e Memória do Histórico
 
-- Derivação pura de quadros a partir do array imutável de `MergeStepRecord`, gravados com snapshots **POST-event**.
-- Os eventos em lote (`DRAIN` e `COPY_BACK`) contêm sequências estruturadas de elementos, permitindo animação fluida no Replay sem que a UI precise inventar estados intermediários.
-- Rótulos diegéticos ($X_a, X_b$) permanecem visíveis para auditoria de estabilidade.
+- **Derivação Pura de Quadros Visuais (`MergeVisualStepFrame`):**
+  - A função pura `deriveMergeFramesFromHistory(initialValues, history)` deriva a esteira de quadros visuais para Replay e Auditoria sem reexecutar a ordenação.
+  - Cada quadro contém: `stepIndex`, `stepNumber`, `type`, `phase`, `activeInterval` ($[left..right]$, corte $mid$, profundidade e flag de raiz), ponteiros $(p_1, p_2, k)$, `values` snapshot, `buffer` snapshot, `explanation` diegética factual e contadores cumulativos (`cumulativeComparisons`, `cumulativeWritesInBuffer`, `cumulativeWritesInMain`, `cumulativeTotalWrites`).
+  - Acesso temporal em $O(1)$ a qualquer momento histórico via `reconstructMergeStepAt(initialValues, history, stepIndex)`.
+- **Análise Rigorosa da Memória do Histórico:**
+  - *Espaço Auxiliar do Algoritmo:* Estritamente **$O(n)$ células físicas** na esteira coletora temporária.
+  - *Retenção de Snapshots na Sessão:* O histórico grava $m \in O(n \log n)$ eventos imutáveis (`MergeStepRecord[]`), cada qual retendo uma cópia rasa do array `valuesSnapshot` de comprimento $n$.
+  - *Custo Total de Referências:* $O(m \cdot n) = O(n^2 \log n)$ referências de objetos no heap de execução durante a sessão.
+  - *Imutabilidade e Compartilhamento:* As instâncias de `MergeElement` são compartilhadas por referência entre os snapshots (zero duplicação profunda de dados). Para os tamanhos curriculares da plataforma ($n \in [4, 6]$), o histórico totaliza apenas ~50 a 180 referências de ponteiros, dispensando desnormalizações complexas ou overhead de reprocessamento.
+- **Auditoria Factual:** `reconstructMergeStateFromHistory` reconstrói os valores finais e totalizadores diretamente da entrada inicial e da lista de eventos gravados.
+- Rótulos diegéticos estáveis ($X_a, X_b$) permanecem fixos em cada elemento desde a geração até a conclusão, permitindo verificação explícita da invariante de estabilidade no Replay.
 
 ---
 

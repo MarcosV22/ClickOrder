@@ -36,4 +36,5 @@ export type BriefingModeId =
   | "bubble-canonical"
   | "bubble-early-exit"
   | "selection-canonical"
-  | "insertion-canonical";
+  | "insertion-canonical"
+  | "merge-canonical";
