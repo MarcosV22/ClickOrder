@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import ReplayScreen from "./ReplayScreen";
 import SelectionReplayScreen from "./SelectionReplayScreen";
 import InsertionReplayScreen from "./InsertionReplayScreen";
+import MergeReplayScreen from "./MergeReplayScreen";
 import {
   getDemonstrationExecution,
   type DemonstrationProtocol,
@@ -63,6 +64,19 @@ export default function DemonstrationScreen({
         initialArray={execution.initialArray}
         history={execution.history}
         mode="demonstration"
+        onBackToResult={onBack}
+        onStartTraining={onStartTraining}
+      />
+    );
+  }
+
+  if (execution.protocol === "merge") {
+    return (
+      <MergeReplayScreen
+        initialArray={execution.initialArray}
+        history={execution.history}
+        mode="demonstration"
+        practiceTitle="DEMONSTRAÇÃO • MERGE SORT"
         onBackToResult={onBack}
         onStartTraining={onStartTraining}
       />

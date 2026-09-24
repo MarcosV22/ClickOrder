@@ -20,10 +20,13 @@ import PracticeSetCompleteScreen from "./screens/PracticeSetCompleteScreen";
 import PracticeSelector from "./screens/PracticeSelector";
 import DemonstrationScreen from "./screens/DemonstrationScreen";
 import InsertionReplayScreen from "./screens/InsertionReplayScreen";
+import MergeReplayScreen from "./screens/MergeReplayScreen";
+import MergeTutorialScreen from "./screens/MergeTutorialScreen";
 import MergeGameScreen, {
   type MergePracticeCompleteData,
 } from "./screens/MergeGameScreen";
 import { generateMergePracticeArray } from "./game/sorting/merge/mergeConstraints";
+import type { MergeElement, MergeStepRecord } from "./game/sorting/merge";
 import type { ProtocolId } from "./screens/protocolCatalog";
 import type { DemonstrationProtocol } from "./game/demonstration";
 import { PhaseResult } from "./game/campaign/campaignSummary";
@@ -38,6 +41,7 @@ import {
   BUBBLE_EXERCISE_SETS,
   SELECTION_EXERCISE_SETS,
   INSERTION_EXERCISE_SETS,
+  MERGE_EXERCISE_SETS,
   type GameSaveSchema,
   type ModuleId,
 } from "./game/persistence";
@@ -71,6 +75,7 @@ type Screen =
   | "tutorial"
   | "selection-tutorial"
   | "insertion-tutorial"
+  | "merge-tutorial"
   | "briefing"
   | "practice-selector"
   | "game"
@@ -82,7 +87,8 @@ type Screen =
   | "demonstration"
   | "campaign-complete"
   | "selection-campaign-complete"
-  | "insertion-practice-complete";
+  | "insertion-practice-complete"
+  | "merge-practice-complete";
 
 type GameMode = "CAMPAIGN" | "CHALLENGE" | "SELECTION" | "INSERTION" | "MERGE";
 
@@ -131,6 +137,8 @@ export interface MergeGameResult extends BaseGameResult {
   writesInMain: number;
   totalWrites: number;
   practiceTitle: string;
+  initialElements: readonly MergeElement[];
+  history: readonly MergeStepRecord[];
 }
 
 export type GameResult =
@@ -143,9 +151,15 @@ export interface AppProps {
   initialScreen?: Screen;
   initialModule?: ModuleId;
   initialLevel?: PracticeLevel;
+  initialDemonstrationProtocol?: DemonstrationProtocol;
 }
 
-export default function App({ initialScreen, initialModule, initialLevel }: AppProps = {}) {
+export default function App({
+  initialScreen,
+  initialModule,
+  initialLevel,
+  initialDemonstrationProtocol,
+}: AppProps = {}) {
   const [saveData, setSaveData] = useState<GameSaveSchema>(() =>
     loadGameProgress(undefined, TOTAL_PHASES, SELECTION_TOTAL_PHASES)
   );
@@ -153,10 +167,15 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
   const [briefingModeId, setBriefingModeId] =
     useState<BriefingModeId>("bubble-canonical");
   const [challengeScenarioIndex, setChallengeScenarioIndex] = useState<number>(0);
+  const isDev = Boolean(import.meta.env?.DEV);
+
   const [screen, setScreen] = useState<Screen>(() => {
     if (initialScreen) return initialScreen;
-    if (typeof window !== "undefined") {
+    if (isDev && typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
+      if (params.get("screen") === "merge-practice") {
+        return "merge-practice";
+      }
       if (params.get("module") === "merge") {
         return "practice-selector";
       }
@@ -168,7 +187,7 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
 
   // Estado do Modo Demonstração Educacional (P2.1-G-D / P2.2-E)
   const [demonstrationProtocol, setDemonstrationProtocol] =
-    useState<DemonstrationProtocol>("bubble");
+    useState<DemonstrationProtocol>(() => initialDemonstrationProtocol ?? "bubble");
   const [demonstrationReturnScreen, setDemonstrationReturnScreen] =
     useState<"home" | "briefing">("home");
 
@@ -215,7 +234,7 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
   // Módulo ativo no Seletor de Práticas
   const [selectorModule, setSelectorModule] = useState<ModuleId>(() => {
     if (initialModule) return initialModule;
-    if (typeof window !== "undefined") {
+    if (isDev && typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (params.get("module") === "merge") {
         return "merge";
@@ -253,6 +272,8 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
       hintsUsed: data.hintsUsed,
       finalArray: data.finalArray,
       initialArray: data.initialArray,
+      initialElements: data.initialElements,
+      history: data.history,
       score: data.score,
       elapsedTimeMs: data.elapsedTimeMs,
       practiceTitle: data.practiceTitle,
@@ -268,6 +289,26 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
       }
       return [...prev, data];
     });
+
+    const exerciseSetId =
+      data.level === "basic"
+        ? MERGE_EXERCISE_SETS.BASIC
+        : data.level === "intermediate"
+          ? MERGE_EXERCISE_SETS.INTERMEDIATE
+          : MERGE_EXERCISE_SETS.ADVANCED;
+
+    const updated = recordExerciseCompletion(
+      saveData,
+      "merge",
+      exerciseSetId,
+      {
+        score: data.score,
+        errors: data.errors,
+        hintsUsed: data.hintsUsed,
+        elapsedTimeMs: data.elapsedTimeMs,
+      }
+    );
+    setSaveData(updated);
 
     setScreen("result");
   };
@@ -508,6 +549,13 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
     handleStartInsertionPractice("basic");
   };
 
+  const handleMergeTutorialComplete = () => {
+    const updated = recordTutorialCompletion(saveData, "merge", undefined, 3);
+    setSaveData(updated);
+    setSelectorModule("merge");
+    handleStartMergePractice("basic");
+  };
+
   const handleNextPhase = () => {
     // Fluxo Merge Sort
     if (result?.protocol === "merge") {
@@ -521,7 +569,8 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
       if (nextLevel !== null) {
         handleStartMergePractice(nextLevel);
       } else {
-        handleOpenPracticeSelector("merge");
+        setResult(null);
+        setScreen("merge-practice-complete");
       }
       return;
     }
@@ -634,7 +683,23 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
     setScreen("briefing");
   };
 
+  const handleSelectMerge = () => {
+    setGameMode("MERGE");
+    setBriefingModeId("merge-canonical");
+    setBriefingReturnScreen("home");
+    setScreen("briefing");
+  };
+
   const handleBriefingStart = () => {
+    if (briefingModeId === "merge-canonical") {
+      if (!isModuleTutorialCompleted(saveData, "merge")) {
+        setScreen("merge-tutorial");
+      } else {
+        handleOpenPracticeSelector("merge");
+      }
+      return;
+    }
+
     if (briefingModeId === "insertion-canonical") {
       if (!isModuleTutorialCompleted(saveData, "insertion")) {
         setScreen("insertion-tutorial");
@@ -674,10 +739,12 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
     setPhase(1);
     setSelectionPhase(1);
     setInsertionLevel("basic");
+    setMergeLevel("basic");
     setResult(null);
     setPhaseResults([]);
     setSelectionPhaseResults([]);
     setInsertionPracticeResults([]);
+    setMergePracticeResults([]);
   };
 
   const handleRestartProtocol = () => {
@@ -737,6 +804,25 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
             : "advanced";
         handleStartInsertionPractice(startLevel);
       }
+    } else if (demonstrationProtocol === "merge") {
+      if (!isModuleTutorialCompleted(saveData, "merge")) {
+        setScreen("merge-tutorial");
+      } else {
+        const startLevel: PracticeLevel = !isExerciseSetCompleted(
+          saveData,
+          "merge",
+          MERGE_EXERCISE_SETS.BASIC
+        )
+          ? "basic"
+          : !isExerciseSetCompleted(
+              saveData,
+              "merge",
+              MERGE_EXERCISE_SETS.INTERMEDIATE
+            )
+            ? "intermediate"
+            : "advanced";
+        handleStartMergePractice(startLevel);
+      }
     }
   };
 
@@ -784,6 +870,8 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
               handleSelectSelection();
             } else if (protocolId === "insertion") {
               handleSelectInsertion();
+            } else if (protocolId === "merge") {
+              handleSelectMerge();
             }
           }}
           onOpenTutorial={(protocolId) => {
@@ -793,6 +881,8 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
               setScreen("selection-tutorial");
             } else if (protocolId === "insertion") {
               setScreen("insertion-tutorial");
+            } else if (protocolId === "merge") {
+              setScreen("merge-tutorial");
             }
           }}
           onOpenDemonstration={(protocolId) =>
@@ -812,11 +902,13 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
           onBack={() => setScreen(briefingReturnScreen)}
           onOpenDemonstration={() =>
             handleOpenDemonstration(
-              briefingModeId === "insertion-canonical"
-                ? "insertion"
-                : briefingModeId === "selection-canonical"
-                  ? "selection"
-                  : "bubble",
+              briefingModeId === "merge-canonical"
+                ? "merge"
+                : briefingModeId === "insertion-canonical"
+                  ? "insertion"
+                  : briefingModeId === "selection-canonical"
+                    ? "selection"
+                    : "bubble",
               "briefing"
             )
           }
@@ -831,12 +923,10 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
             if (selectorModule === "bubble") setScreen("tutorial");
             else if (selectorModule === "selection") setScreen("selection-tutorial");
             else if (selectorModule === "insertion") setScreen("insertion-tutorial");
+            else if (selectorModule === "merge") setScreen("merge-tutorial");
           }}
-          onOpenDemonstration={
-            selectorModule !== "merge"
-              ? () =>
-                  handleOpenDemonstration(selectorModule as ProtocolId, "home")
-              : undefined
+          onOpenDemonstration={() =>
+            handleOpenDemonstration(selectorModule as ProtocolId, "home")
           }
           onReturnHome={handleReturnHome}
           onStartChallenge={
@@ -859,6 +949,12 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
       {screen === "insertion-tutorial" && (
         <InsertionTutorialScreen
           onComplete={handleInsertionTutorialComplete}
+          onBack={() => setScreen("home")}
+        />
+      )}
+      {screen === "merge-tutorial" && (
+        <MergeTutorialScreen
+          onComplete={handleMergeTutorialComplete}
           onBack={() => setScreen("home")}
         />
       )}
@@ -965,9 +1061,7 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
           onOpenSelector={() =>
             handleOpenPracticeSelector(result.protocol as ModuleId)
           }
-          onViewReplay={
-            result.protocol !== "merge" ? () => setScreen("replay") : undefined
-          }
+          onViewReplay={() => setScreen("replay")}
           variant={result.protocol === "bubble" ? (result.variant ?? activeVariant) : undefined}
           earlyExitTriggered={result.protocol === "bubble" ? result.earlyExitTriggered : undefined}
           terminationPass={result.protocol === "bubble" ? result.terminationPass : undefined}
@@ -996,6 +1090,13 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
             initialArray={result.initialArray}
             history={result.history}
             practiceTitle={result.practiceDefinition.title}
+            onBackToResult={() => setScreen("result")}
+          />
+        ) : result.protocol === "merge" ? (
+          <MergeReplayScreen
+            initialElements={result.initialElements}
+            history={result.history}
+            practiceTitle={result.practiceTitle}
             onBackToResult={() => setScreen("result")}
           />
         ) : null
@@ -1038,6 +1139,19 @@ export default function App({ initialScreen, initialModule, initialLevel }: AppP
             handleStartInsertionPractice("basic");
           }}
           onOpenSelector={() => handleOpenPracticeSelector("insertion")}
+          onReturnHome={handleReturnHome}
+        />
+      )}
+      {screen === "merge-practice-complete" && (
+        <PracticeSetCompleteScreen
+          moduleId="merge"
+          saveData={saveData}
+          practiceResults={mergePracticeResults}
+          onRepeatPractices={() => {
+            setMergePracticeResults([]);
+            handleStartMergePractice("basic");
+          }}
+          onOpenSelector={() => handleOpenPracticeSelector("merge")}
           onReturnHome={handleReturnHome}
         />
       )}

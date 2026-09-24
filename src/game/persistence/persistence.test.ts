@@ -29,6 +29,7 @@ import {
   BUBBLE_EXERCISE_SETS,
   SELECTION_EXERCISE_SETS,
   INSERTION_EXERCISE_SETS,
+  MERGE_EXERCISE_SETS,
   type StorageAdapter,
   type GameSaveSchema,
   type GameSaveSchemaV4,
@@ -1401,6 +1402,154 @@ describe("Persistence Layer (P1.6 - P2.2-F)", () => {
       );
       expect(isExerciseSetCompleted(state, "insertion", INSERTION_EXERCISE_SETS.INTERMEDIATE)).toBe(true);
       expect(isModuleTutorialCompleted(state, "insertion")).toBe(true);
+    });
+  });
+
+  describe("11. Persistência Canônica do Merge Sort no Schema v4 (P3.1-F)", () => {
+    it("inicializa modules.merge com defaults corretos sem poluição paralela", () => {
+      const data = createDefaultSaveData();
+      expect(data.modules.merge).toBeDefined();
+      expect(data.modules.merge?.completedTutorial).toBe(false);
+      expect(data.modules.merge?.exerciseSets).toEqual({});
+      expect(isModuleTutorialCompleted(data, "merge")).toBe(false);
+      expect(isModuleRegularPracticeCompleted(data, "merge")).toBe(false);
+    });
+
+    it("desbloqueia práticas de forma determinística sequencial", () => {
+      let state = createDefaultSaveData();
+      // Prática Básica sempre aberta
+      expect(isExerciseSetUnlocked(state, "merge", MERGE_EXERCISE_SETS.BASIC)).toBe(true);
+      // Prática Intermediária bloqueada inicialmente
+      expect(isExerciseSetUnlocked(state, "merge", MERGE_EXERCISE_SETS.INTERMEDIATE)).toBe(false);
+      // Prática Avançada bloqueada inicialmente
+      expect(isExerciseSetUnlocked(state, "merge", MERGE_EXERCISE_SETS.ADVANCED)).toBe(false);
+
+      // Conclui Prática Básica
+      state = recordExerciseCompletion(
+        state,
+        "merge",
+        MERGE_EXERCISE_SETS.BASIC,
+        { score: 100, errors: 0, hintsUsed: 0, elapsedTimeMs: 12000 }
+      );
+      expect(isExerciseSetCompleted(state, "merge", MERGE_EXERCISE_SETS.BASIC)).toBe(true);
+      expect(isExerciseSetUnlocked(state, "merge", MERGE_EXERCISE_SETS.INTERMEDIATE)).toBe(true);
+      expect(isExerciseSetUnlocked(state, "merge", MERGE_EXERCISE_SETS.ADVANCED)).toBe(false);
+
+      // Conclui Prática Intermediária
+      state = recordExerciseCompletion(
+        state,
+        "merge",
+        MERGE_EXERCISE_SETS.INTERMEDIATE,
+        { score: 90, errors: 1, hintsUsed: 0, elapsedTimeMs: 18000 }
+      );
+      expect(isExerciseSetCompleted(state, "merge", MERGE_EXERCISE_SETS.INTERMEDIATE)).toBe(true);
+      expect(isExerciseSetUnlocked(state, "merge", MERGE_EXERCISE_SETS.ADVANCED)).toBe(true);
+      expect(isModuleRegularPracticeCompleted(state, "merge")).toBe(false);
+
+      // Conclui Prática Avançada
+      state = recordExerciseCompletion(
+        state,
+        "merge",
+        MERGE_EXERCISE_SETS.ADVANCED,
+        { score: 85, errors: 2, hintsUsed: 1, elapsedTimeMs: 25000 }
+      );
+      expect(isExerciseSetCompleted(state, "merge", MERGE_EXERCISE_SETS.ADVANCED)).toBe(true);
+      // Módulo agora 3/3 completo
+      expect(isModuleRegularPracticeCompleted(state, "merge")).toBe(true);
+    });
+
+    it("assegura que saves v4 legados sem a chave merge continuam carregando sem corromper outros módulos", () => {
+      // Simula save v4 criado antes do Merge Sort
+      const legacyV4Raw = {
+        schemaVersion: 4,
+        lastUpdated: "2026-09-20T12:00:00.000Z",
+        modules: {
+          bubble: {
+            completedTutorial: true,
+            exerciseSets: {
+              [BUBBLE_EXERCISE_SETS.BASIC]: {
+                completed: true,
+                completedAt: "2026-09-20T12:05:00.000Z",
+                bestRecord: {
+                  completed: true,
+                  completedAt: "2026-09-20T12:05:00.000Z",
+                  bestScore: 95,
+                  bestScoreErrors: 0,
+                  bestScoreHintsUsed: 0,
+                  bestScoreElapsedTimeMs: 10000,
+                },
+              },
+            },
+          },
+          selection: {
+            completedTutorial: true,
+            exerciseSets: {},
+          },
+          insertion: {
+            completedTutorial: false,
+            exerciseSets: {},
+          },
+        },
+        preferences: { soundEnabled: true, reducedMotion: false, highContrast: false },
+      };
+
+      const result = validateAndMigrateSaveData(legacyV4Raw);
+      expect(result.schemaVersion).toBe(4);
+      // Preserva módulo bubble intocado
+      expect(result.modules.bubble?.completedTutorial).toBe(true);
+      expect(result.modules.bubble?.exerciseSets[BUBBLE_EXERCISE_SETS.BASIC]?.bestRecord?.bestScore).toBe(95);
+      // Inicializa defensivamente merge
+      expect(result.modules.merge).toBeDefined();
+      expect(result.modules.merge?.completedTutorial).toBe(false);
+      expect(isExerciseSetUnlocked(result, "merge", MERGE_EXERCISE_SETS.BASIC)).toBe(true);
+    });
+
+    it("mantém estrito isolamento: gravar merge não altera bubble, selection ou insertion", () => {
+      let state = createDefaultSaveData();
+      state = recordExerciseCompletion(
+        state,
+        "bubble",
+        BUBBLE_EXERCISE_SETS.BASIC,
+        { score: 100, errors: 0, hintsUsed: 0, elapsedTimeMs: 8000 }
+      );
+      state = recordExerciseCompletion(
+        state,
+        "insertion",
+        INSERTION_EXERCISE_SETS.BASIC,
+        { score: 98, errors: 0, hintsUsed: 0, elapsedTimeMs: 9000 }
+      );
+
+      // Grava no Merge
+      state = recordExerciseCompletion(
+        state,
+        "merge",
+        MERGE_EXERCISE_SETS.BASIC,
+        { score: 90, errors: 1, hintsUsed: 0, elapsedTimeMs: 14000 }
+      );
+
+      expect(state.modules.bubble?.exerciseSets[BUBBLE_EXERCISE_SETS.BASIC]?.bestRecord?.bestScore).toBe(100);
+      expect(state.modules.insertion?.exerciseSets[INSERTION_EXERCISE_SETS.BASIC]?.bestRecord?.bestScore).toBe(98);
+      expect(state.modules.merge?.exerciseSets[MERGE_EXERCISE_SETS.BASIC]?.bestRecord?.bestScore).toBe(90);
+    });
+
+    it("preserva independência entre tutorial do Merge e conjuntos de prática", () => {
+      let state = createDefaultSaveData();
+      expect(isModuleTutorialCompleted(state, "merge")).toBe(false);
+
+      // Conclui prática sem ter concluído tutorial
+      state = recordExerciseCompletion(
+        state,
+        "merge",
+        MERGE_EXERCISE_SETS.BASIC,
+        { score: 100, errors: 0, hintsUsed: 0, elapsedTimeMs: 15000 }
+      );
+      expect(isExerciseSetCompleted(state, "merge", MERGE_EXERCISE_SETS.BASIC)).toBe(true);
+      expect(isModuleTutorialCompleted(state, "merge")).toBe(false);
+
+      // Conclui tutorial factualmente
+      state = recordTutorialCompletion(state, "merge", undefined, 3);
+      expect(isModuleTutorialCompleted(state, "merge")).toBe(true);
+      expect(isExerciseSetCompleted(state, "merge", MERGE_EXERCISE_SETS.BASIC)).toBe(true);
     });
   });
 });

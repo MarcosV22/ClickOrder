@@ -10,3 +10,5 @@ export * from "./mergePedagogy";
 export * from "./mergeTutorialGuide";
 export * from "./practiceCatalog";
 export * from "./mergePseudocode";
+export * from "./mergeReplayModel";
+export * from "./mergeReplayPseudocode";

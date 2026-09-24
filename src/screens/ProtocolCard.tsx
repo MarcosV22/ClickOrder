@@ -41,7 +41,9 @@ export default function ProtocolCard({
                 ? "#00f5ff"
                 : metadata.theme.primaryColor === "amber"
                   ? "#f59e0b"
-                  : "#8b5cf6",
+                  : metadata.theme.primaryColor === "blue"
+                    ? "#3b82f6"
+                    : "#8b5cf6",
           }}
         />
       )}

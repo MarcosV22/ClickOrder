@@ -9,9 +9,10 @@ import {
   BUBBLE_EXERCISE_SETS,
   SELECTION_EXERCISE_SETS,
   INSERTION_EXERCISE_SETS,
+  MERGE_EXERCISE_SETS,
 } from "../game/persistence/constants";
 
-export type ProtocolId = "bubble" | "selection" | "insertion";
+export type ProtocolId = "bubble" | "selection" | "insertion" | "merge";
 
 export type ProtocolStatus = "available" | "coming_soon";
 
@@ -27,7 +28,7 @@ export interface ProtocolMetadata {
   readonly demonstrationLabel: string;
   readonly totalPhases: number;
   readonly theme: {
-    readonly primaryColor: "cyan" | "purple" | "amber";
+    readonly primaryColor: "cyan" | "purple" | "amber" | "blue";
     readonly accentGlow: string;
     readonly borderClass: string;
     readonly borderHoverClass: string;
@@ -120,6 +121,33 @@ export const PROTOCOL_CATALOG: readonly ProtocolMetadata[] = Object.freeze([
       practiceBadgeClass: "bg-amber-950/30 border-amber-500/20 text-amber-300/90",
     },
   },
+  {
+    id: "merge",
+    name: "MERGE SORT",
+    metaphor: "DIVISÃO E CONFLUÊNCIA DE RAMAIS",
+    shortDescription:
+      "Divida o lote em subvetores e recombine com dois ponteiros alimentando a esteira coletora.",
+    practiceItems: Object.freeze([
+      "Intercalação com dois ponteiros",
+      "Esteira coletora (buffer O(n))",
+      "Desempate com estabilidade (≤)",
+    ]),
+    status: "available",
+    statusLabel: "DISPONÍVEL",
+    demonstrationStatus: "available",
+    demonstrationLabel: "DEMONSTRAÇÃO",
+    totalPhases: 3,
+    theme: {
+      primaryColor: "blue",
+      accentGlow: "rgba(59, 130, 246, 0.15)",
+      borderClass: "border-blue-500/30",
+      borderHoverClass: "hover:border-blue-400/60",
+      badgeBgClass: "bg-blue-950/40 border-blue-500/30",
+      badgeTextClass: "text-blue-400",
+      titleGradientClass: "from-blue-300 via-cyan-400 to-sky-300",
+      practiceBadgeClass: "bg-blue-950/30 border-blue-500/20 text-blue-300/90",
+    },
+  },
 ]);
 
 export interface ProtocolProgressSummary {
@@ -145,6 +173,11 @@ const MODULE_REGULAR_EXERCISES: Record<ProtocolId, readonly string[]> = Object.f
     INSERTION_EXERCISE_SETS.BASIC,
     INSERTION_EXERCISE_SETS.INTERMEDIATE,
     INSERTION_EXERCISE_SETS.ADVANCED,
+  ],
+  merge: [
+    MERGE_EXERCISE_SETS.BASIC,
+    MERGE_EXERCISE_SETS.INTERMEDIATE,
+    MERGE_EXERCISE_SETS.ADVANCED,
   ],
 });
 

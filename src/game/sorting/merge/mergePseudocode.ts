@@ -1,7 +1,15 @@
 /**
- * Pseudocódigo Canônico do Merge Sort (Intercalação Top-Down com Buffer Auxiliar).
+ * Resumo Operacional da Rotina de Intercalação do Merge Sort (`intercalar`).
  *
  * Módulo puro, sem dependências de UI ou DOM.
+ *
+ * NOTA DE ARQUITETURA E CURRÍCULO:
+ * Estas 7 linhas constituem o Resumo Operacional da sub-rotina de confluência
+ * (`intercalar`), correspondendo exatamente às operações realizadas pelo estudante
+ * na Estação de Intercalação (P3.1-D).
+ * O algoritmo canônico completo do Merge Sort Top-Down (com 30 linhas abrangendo
+ * divisão recursiva, casos-base, chamadas recursivas e confluência) está previsto
+ * para o Marco P3.1-E (Replay Retrospectivo Pedagógico).
  */
 
 import type { PseudocodeLine } from "../../replay/replayPseudocode";
@@ -15,7 +23,8 @@ export type MergePseudocodeLineId =
   | "DRAIN_REMAINDER"
   | "COPY_BACK";
 
-export const MERGE_SORT_PSEUDOCODE: readonly PseudocodeLine<MergePseudocodeLineId>[] =
+/** Resumo operacional de 7 linhas focado na sub-rotina de intercalação */
+export const MERGE_INTERCALATION_SUMMARY_PSEUDOCODE: readonly PseudocodeLine<MergePseudocodeLineId>[] =
   Object.freeze([
     Object.freeze({
       id: "PROCEDURE_MERGE",
@@ -60,3 +69,6 @@ export const MERGE_SORT_PSEUDOCODE: readonly PseudocodeLine<MergePseudocodeLineI
       text: "copiar Buffer[0..len-1] para A[left..right]",
     }),
   ]);
+
+/** Alias para compatibilidade com importações existentes */
+export const MERGE_SORT_PSEUDOCODE = MERGE_INTERCALATION_SUMMARY_PSEUDOCODE;

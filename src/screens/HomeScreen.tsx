@@ -152,8 +152,8 @@ export default function HomeScreen({
           </div>
         </div>
 
-        {/* Protocols Grid (3 symmetric cards) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full mt-2">
+        {/* Protocols Grid (symmetric 4 cards) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 w-full mt-2">
           {PROTOCOL_CATALOG.map((metadata) => {
             const summary = getProtocolProgressSummary(metadata.id, saveData);
             return (

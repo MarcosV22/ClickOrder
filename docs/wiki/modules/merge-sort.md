@@ -1,8 +1,8 @@
 # Módulo 04 — Merge Sort
 
 > **Documento canônico do módulo curricular:** Especificação integral de design pedagógico, mecânico e computacional do Módulo de Merge Sort da plataforma **Sorting Station**.  
-> **Status de Implementação:** `ESTAÇÃO DE INTERCALAÇÃO E SELETOR IMPLEMENTADOS (P3.1-D)` (Engine pura, constraints procedurais com confronto real de duplicatas, tutorial guiado, demonstração canônica, briefing oficial, Estação Desktop-First `MergeGameScreen.tsx`, Seletor de Práticas `PracticeSelector` com 3 práticas canônicas $n=4, 5, 6$, `ResultScreen` segregando escritas no buffer e no principal, navegação completa e 68 testes unitários/comportamentais do módulo homologados no Vitest; Replay retrospectivo e persistência Schema v4 pública aguardam P3.1-E e P3.1-F; Merge permanece indisponível no Hub público).  
-> **Data de Atualização:** 22/09/2026 (Marco P3.1-D / ADR 0023 Atualizado)  
+> **Status de Implementação:** `IMPLEMENTADO E INTEGRADO (P3.1-F) — Homologação visual manual pendente` (Engine pura, constraints procedurais com confronto real de duplicatas, tutorial guiado com FSM autônoma e desempate estável em `[4a, 1, 3, 4b]`, demonstração canônica observacional `[7, 2, 5, 3]`, briefing oficial, Estação Desktop-First `MergeGameScreen.tsx`, Seletor de Práticas `PracticeSelector` com 3 práticas canônicas $n=4, 5, 6$, `ResultScreen` segregando escritas no buffer e no principal, Replay retrospectivo puro com pseudocódigo canônico sincronizado de 30 linhas e frentes fáticas passadas, persistência canônica Schema v4 em `saveData.modules["merge"]`, tela de conclusão de conjunto `PracticeSetCompleteScreen` e ativação pública com status `available` no Hub de Protocolos. 528 testes automatizados verdes no Vitest em 39 arquivos).  
+> **Data de Atualização:** 24/09/2026 (Marco P3.1-F Integração Final e Ativação / ADR 0023 Consolidado)  
 > **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`ADR 0021`](../../adr/0021-module-exercise-persistence-schema-v4.md), [`ADR 0022`](../../adr/0022-canonical-exercise-module-standardization.md), [`ADR 0023`](../../adr/0023-merge-sort-pedagogical-mechanical-design.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md), [`05-ux-design-system.md`](../05-ux-design-system.md), [`07-backend-and-persistence.md`](../07-backend-and-persistence.md), [`08-testing-and-quality.md`](../08-testing-and-quality.md), [`10-roadmap.md`](../10-roadmap.md), [`12-pedagogy-and-academic-traceability.md`](../12-pedagogy-and-academic-traceability.md).
 
 ---
@@ -13,7 +13,7 @@
 - **Identificador de Sistema (`moduleId`):** `merge`
 - **Rótulo Diegético na Interface:** `PROTOCOLO: MERGE SORT // ESTEIRAS CONVERGENTES E INTERCALAÇÃO`
 - **Subtítulo Diegético:** *Divisão de Fluxos e Intercalação Ordenada*
-- **Status Factual:** `ESTAÇÃO DE INTERCALAÇÃO E SELETOR IMPLEMENTADOS (P3.1-D)` (Engine pura, constraints, tutorial, demonstração, briefing, Estação Desktop-First `MergeGameScreen.tsx`, integração curricular e 68 testes do módulo)
+- **Status Factual:** `IMPLEMENTADO E INTEGRADO (P3.1-F) — Homologação visual manual pendente` (Engine pura, tutorial, demonstração, briefing, estação de práticas, replay com pseudocódigo sincronizado, persistência v4 e ativação no Hub)
 - **Classificação Curricular:** Algoritmo Avançado de Divisão e Conquista Assintoticamente Ótimo
 - **Complexidade Temporal:**
   - **Melhor Caso:** $\Theta(n \log n)$ comparações ($\approx \lceil \frac{n}{2} \rceil \log_2 n$)
@@ -225,6 +225,19 @@ A variante Top-Down com travessia pós-ordem à esquerda foi selecionada por ali
 - `DRAIN_READY`: Linhas 21–26 (drenagem dos remanescentes com $k \leftarrow k + 1$);
 - `COPY_BACK_AUTOMATIC`: Linhas 27–29 (cópia de retorno de todos os elementos para a esteira principal).
 
+### 6.1. Resumo Operacional da Sub-rotina de Intercalação (7 Linhas na UI de Prática)
+A tela de prática da Estação de Intercalação exibe em tempo real o **resumo operacional** focado estritamente na sub-rotina `intercalar(...)`:
+```text
+ 1. intercalar(A, left, mid, right)
+ 2.   p1 ← left, p2 ← mid + 1, k ← 0
+ 3.   enquanto p1 ≤ mid e p2 ≤ right faça
+ 4.     se A[p1] ≤ A[p2] então Buffer[k++] ← A[p1++]
+ 5.     senão Buffer[k++] ← A[p2++]
+ 6.   drenar restante de p1 ou p2 para Buffer
+ 7.   copiar Buffer[0..len-1] para A[left..right]
+```
+- **Relação com o Algoritmo Canônico:** Esse resumo de 7 linhas sintetiza a mecânica local da estação ativa (linhas 10 a 30 do pseudocódigo completo), garantindo foco visual na confluência sem poluir a área de triagem durante a prática ativa. O algoritmo canônico completo de 30 linhas com depuração síncrona passo a passo será disponibilizado no sub-marco **P3.1-E** no painel de Replay Retrospectivo.
+
 ---
 
 ## 7. Métricas Factuais Adequadas ao Algoritmo
@@ -357,15 +370,26 @@ Ao concluir uma prática, a tela [`ResultScreen.tsx`](../../src/screens/ResultSc
 
 ## 16. Replay, Inspeção Retrospectiva e Memória do Histórico
 
-- **Derivação Pura de Quadros Visuais (`MergeVisualStepFrame`):**
-  - A função pura `deriveMergeFramesFromHistory(initialValues, history)` deriva a esteira de quadros visuais para Replay e Auditoria sem reexecutar a ordenação.
-  - Cada quadro contém: `stepIndex`, `stepNumber`, `type`, `phase`, `activeInterval` ($[left..right]$, corte $mid$, profundidade e flag de raiz), ponteiros $(p_1, p_2, k)$, `values` snapshot, `buffer` snapshot, `explanation` diegética factual e contadores cumulativos (`cumulativeComparisons`, `cumulativeWritesInBuffer`, `cumulativeWritesInMain`, `cumulativeTotalWrites`).
-  - Acesso temporal em $O(1)$ a qualquer momento histórico via `reconstructMergeStepAt(initialValues, history, stepIndex)`.
+- **Modelo Funcional Puro de Replay (`src/game/sorting/merge/mergeReplayModel.ts`):**
+  - Implementa a função pura `buildMergeReplayFrames(initialValues, history)` com invariante formal:
+    $$\text{frames.length} = 1 + \text{history.length}$$
+  - **Quadro 0 (Estado Inicial Factual):** Representa o vetor original imediatamente antes do primeiro micro-passo algorítmico, com `stepNumber = 0`, `stepIndex = -1`, `frameType = "INITIAL"`, buffer vazio e telemetria algorítmica rigorosamente zerada (`cumulativeComparisons: 0`, `cumulativeWritesInBuffer: 0`, `cumulativeWritesInMain: 0`, `cumulativeTotalWrites: 0`).
+  - **Quadros 1 a $N$:** Reconstrução determinística direta e imutável a partir dos eventos factuais registrados (`DIVIDE`, `MERGE_INIT`, `DISPATCH`, `DRAIN`, `COPY_BACK`). Não há reexecução da engine (`initMergeSortState`, `executeMergeStep` ou `runMergeDemonstration`) nem reconstituição estocástica por semente.
+  - **Consistência Temporal e Retrocesso:** Os subintervalos ordenados `sortedIntervals` e badges diegéticos (`ORD`/`OK`) acumulam-se exclusivamente a partir de eventos `COPY_BACK` ocorridos até aquele instante temporal. Ao retroceder, intervalos e badges futuros são removidos deterministicamente.
+- **Pseudocódigo Canônico Completo de 30 Linhas (`src/game/sorting/merge/mergeReplayPseudocode.ts`):**
+  - Implementa a definição canônica de 30 linhas documentada no ADR 0023, espelhando fielmente os limites inclusivos $[inicio..fim]$, a partição recursiva $meio = \lfloor (inicio + fim) / 2 \rfloor$, alocação explícita de buffer, desempate estável em favor do ramal esquerdo ($A[p1].value \le A[p2].value$) e cópia de retorno.
+  - A função pura `getMergePseudocodeHighlight(frame)` mapeia cada quadro factual da tentativa para linha primária (`primaryLineNumber`), escopo de execução (`activeLineNumbers`) e badges relacionais avaliados em tempo real (`VERDADEIRO`, `FALSO`, `DRENAGEM RAMAL E/D`, `CÓPIA RETORNO`).
+- **Tela de Replay (`src/screens/MergeReplayScreen.tsx`) e Painel (`MergeSortPseudocodePanel.tsx`):**
+  - Controles temporais completos: `INÍCIO` (|◀), `ANTERIOR` (←), `REPRODUZIR/PAUSAR` (▶/⏸), `PRÓXIMO` (→), `FIM` (▶|) e seletor de velocidade (`0.5x`, `1x`, `2x`).
+  - Cancelamento estrito de callbacks e timers na pausa, seek manual, término da fita ou desmontagem.
+  - Suporte acessível a `prefers-reduced-motion` (inicia pausado, navegação discreta manual frame a frame sem animações forçadas).
+  - Atalhos de teclado (`ArrowLeft`, `ArrowRight`, `Home`, `End`, `Space`) com proteção defensiva para elementos interativos focados (botões, inputs e contenteditable preservam sua ativação nativa).
+  - Botão `VER EXECUÇÃO` ativo em `ResultScreen.tsx` conduzindo para `MergeReplayScreen.tsx` e retornando via `← VOLTAR AO RESULTADO` sem recalcular resultados ou corromper a persistência.
 - **Análise Rigorosa da Memória do Histórico:**
   - *Espaço Auxiliar do Algoritmo:* Estritamente **$O(n)$ células físicas** na esteira coletora temporária.
   - *Retenção de Snapshots na Sessão:* O histórico grava $m \in O(n \log n)$ eventos imutáveis (`MergeStepRecord[]`), cada qual retendo uma cópia rasa do array `valuesSnapshot` de comprimento $n$.
-  - *Custo Total de Referências:* $O(m \cdot n) = O(n^2 \log n)$ referências de objetos no heap de execução durante a sessão.
-  - *Imutabilidade e Compartilhamento:* As instâncias de `MergeElement` são compartilhadas por referência entre os snapshots (zero duplicação profunda de dados). Para os tamanhos curriculares da plataforma ($n \in [4, 6]$), o histórico totaliza apenas ~50 a 180 referências de ponteiros, dispensando desnormalizações complexas ou overhead de reprocessamento.
+  - *Custo Total de Cópias na Gravação:* $O(m \cdot n) = O(n^2 \log n)$ cópias rasas de referências no heap durante a sessão.
+  - *Imutabilidade e Compartilhamento:* As instâncias de `MergeElement` são compartilhadas por referência entre os snapshots (zero clonagem profunda de dados de carga). O heap total da aplicação é dominado pela árvore virtual do React e reconciliação da DOM, dispensando reexecução algorítmica.
 - **Auditoria Factual:** `reconstructMergeStateFromHistory` reconstrói os valores finais e totalizadores diretamente da entrada inicial e da lista de eventos gravados.
 - Rótulos diegéticos estáveis ($X_a, X_b$) permanecem fixos em cada elemento desde a geração até a conclusão, permitindo verificação explícita da invariante de estabilidade no Replay.
 
@@ -374,10 +398,15 @@ Ao concluir uma prática, a tela [`ResultScreen.tsx`](../../src/screens/ResultSc
 ## 17. Persistência e Progresso
 
 Schema v4 canônico ([`ADR 0021`](../../adr/0021-module-exercise-persistence-schema-v4.md)):
-- `merge.practice.basic`: Prática Básica ($n=4$);
-- `merge.practice.intermediate`: Prática Intermediária ($n=5$);
-- `merge.practice.advanced`: Prática Avançada ($n=6$).
-- Desbloqueio progressivo derivado deterministicamente; persistência em escrita atômica única com `completedTutorial`.
+- Contrato estrutural: `saveData.modules["merge"].exerciseSets[exerciseSetId]` com as chaves canônicas:
+  - `MERGE_EXERCISE_SETS.BASIC`: `"merge.practice.basic"`
+  - `MERGE_EXERCISE_SETS.INTERMEDIATE`: `"merge.practice.intermediate"`
+  - `MERGE_EXERCISE_SETS.ADVANCED`: `"merge.practice.advanced"`
+- **Gravação Única e Atômica:** Cada conclusão de prática é persistida exclusivamente via `recordExerciseCompletion(saveData, "merge", exerciseSetId, { score, errors, hintsUsed, elapsedTimeMs })`, gravando o melhor recorde e preservando dados de outros módulos intactos.
+- **Independência Factual do Tutorial:** O campo `saveData.modules["merge"].completedTutorial` é registrado exclusivamente pelo evento factual de conclusão de ponta a ponta na tela `MergeTutorialScreen.tsx` via `recordTutorialCompletion(saveData, "merge", undefined, 3)`. Abrir, reiniciar ou abandonar o tutorial não o marca como concluído.
+- **Desbloqueio Sequencial Determinístico:** A Prática Básica está sempre desbloqueada. A Intermediária requer a conclusão factual da Básica. A Avançada requer a conclusão factual da Intermediária. A conclusão curricular regular do módulo (3/3) é atingida quando os três conjuntos constam como completados no save (`isModuleRegularPracticeCompleted(saveData, "merge") === true`).
+- **Resiliência e Migração Defensiva:** Saves criados anteriormente sob Schema v3 ou v4 legado (sem a chave `merge`) são migrados/sanitizados adicionando defensivamente `merge: createDefaultModuleProgress()` com conjuntos vazios e tutorial não concluído, sem redefinir ou corromper os recordes pré-existentes de Bubble, Selection e Insertion.
+- **Ativação Pública no Hub:** Com a conclusão do sub-marco P3.1-F, o Merge Sort tem status oficial `available` em `PROTOCOL_CATALOG`, permitindo acesso livre em produção a partir do Hub (`HomeScreen.tsx`). Atalhos de desenvolvimento (`?screen=merge-practice` e `?module=merge`) continuam protegidos pela flag `import.meta.env.DEV`.
 
 ---
 
@@ -387,10 +416,11 @@ Schema v4 canônico ([`ADR 0021`](../../adr/0021-module-exercise-persistence-sch
   - `1` (ou `ArrowLeft`): `DESPACHAR ESQUERDA`;
   - `2` (ou `ArrowRight`): `DESPACHAR DIREITA`;
   - `3` (ou `D`): `DESPACHAR RESTANTE`.
-- Foco por teclado (`Tab`) ativa normalmente o botão selecionado via `Enter` ou `Espaço`.
+  - *Proteções de Entrada:* Os atalhos são rigorosamente ignorados quando o foco está em campos editáveis (`input`, `textarea`, `contenteditable`) e descartam eventos com `event.repeat === true` para impedir ativações duplicadas.
+- Foco por teclado (`Tab`) ativa normalmente qualquer botão selecionado via `Enter` ou `Espaço`.
 - **Independência de Cor:** Identificadores textuais explícitos (`ESQUERDA`, `DIREITA`, `ORD`, `OK`).
-- **Suporte a `prefers-reduced-motion`:** Transições instantâneas sem interpolação contínua.
-- **Single Scroll Owner:** Sem barras de rolagem aninhadas.
+- **Suporte a `prefers-reduced-motion`:** Apresentação discreta manual passo a passo. Transições automáticas de múltiplos quadros (`DIVIDE`, `MERGE_INIT`, `DRAIN`, `COPY_BACK`) não são descartadas nem executadas sob temporizadores forçados; a interface exibe o controle `PRÓXIMO PASSO AUTOMÁTICO (Passo X de Y)`, garantindo que estudantes que necessitam de movimento reduzido possam inspecionar cada invariante no seu próprio ritmo sem perda de conteúdo pedagógico.
+- **Single Scroll Owner:** Rolagem vertical acessível com dono único de scroll na raiz (`overflow-y-auto`), sem barras aninhadas e sem exigência artificial de rolagem suave (`scroll-smooth`).
 
 ---
 

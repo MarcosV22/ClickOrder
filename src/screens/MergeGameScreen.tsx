@@ -15,6 +15,7 @@ import {
   type MergeSortState,
   type MergeVisualStepFrame,
   type MergeDecision,
+  type MergeStepRecord,
 } from "../game/sorting/merge";
 import {
   generateMergePracticeArray,
@@ -30,6 +31,8 @@ import type { SeedInput } from "../game/generation";
 export interface MergePracticeCompleteData {
   finalArray: readonly number[];
   initialArray: readonly number[];
+  initialElements: readonly MergeElement[];
+  history: readonly MergeStepRecord[];
   comparisons: number;
   writesInBuffer: number;
   writesInMain: number;
@@ -112,11 +115,14 @@ export default function MergeGameScreen({
   const [isActionLocked, setIsActionLocked] = useState<boolean>(false);
   const isActionLockedRef = useRef<boolean>(false);
   const timersRef = useRef<NodeJS.Timeout[]>([]);
+  const presentationIdRef = useRef<number>(0);
 
-  // 7. Rastreamento dos intervalos consolidados com COPY_BACK
-  const locallySortedIntervalsRef = useRef<{ left: number; right: number }[]>(
-    [],
-  );
+  // 7. Apresentação discreta de múltiplos quadros (acessibilidade / reduced motion)
+  const [pendingFrames, setPendingFrames] = useState<
+    readonly MergeVisualStepFrame[]
+  >([]);
+  const [pendingFrameIndex, setPendingFrameIndex] = useState<number>(0);
+  const pendingFinalStateRef = useRef<MergeSortState | null>(null);
 
   // Atualização de tempo descritivo
   useEffect(() => {
@@ -131,6 +137,7 @@ export default function MergeGameScreen({
   // Limpeza de timers no desmonte
   useEffect(() => {
     return () => {
+      presentationIdRef.current++;
       timersRef.current.forEach(clearTimeout);
       timersRef.current = [];
     };
@@ -150,6 +157,8 @@ export default function MergeGameScreen({
       onComplete({
         finalArray,
         initialArray,
+        initialElements,
+        history: finalState.history,
         comparisons: finalState.comparisons,
         writesInBuffer: finalState.writesInBuffer,
         writesInMain: finalState.writesInMain,
@@ -171,6 +180,27 @@ export default function MergeGameScreen({
     [initialElements, level, onComplete, practiceTitle, sessionMetrics.hintsUsed],
   );
 
+  // Avanço manual discreto de quadro (para reduced motion e acessibilidade sem animações contínuas)
+  const handleAdvancePendingFrame = useCallback(() => {
+    if (pendingFrames.length === 0) return;
+    const nextIdx = pendingFrameIndex + 1;
+    if (nextIdx < pendingFrames.length) {
+      setPendingFrameIndex(nextIdx);
+      setDisplayedFrame(pendingFrames[nextIdx]);
+
+      // Se este é o último quadro da sequência:
+      if (nextIdx === pendingFrames.length - 1 && pendingFinalStateRef.current) {
+        const finalState = pendingFinalStateRef.current;
+        setEngineState(finalState);
+        setIsActionLocked(false);
+        isActionLockedRef.current = false;
+        setPendingFrames([]);
+        setPendingFrameIndex(0);
+        pendingFinalStateRef.current = null;
+      }
+    }
+  }, [pendingFrames, pendingFrameIndex]);
+
   // Execução de decisão com apresentação sequencial dos eventos
   const handleDecision = useCallback(
     (decision: MergeDecision) => {
@@ -190,7 +220,8 @@ export default function MergeGameScreen({
         return;
       }
 
-      // Decisão válida! Registrar intervalos consolidados por cópia de retorno
+      // Decisão válida!
+      const currentPresId = ++presentationIdRef.current;
       const prevHistoryLen = stateBefore.history.length;
       const newHistory = result.state.history;
       const allFrames = deriveMergeFramesFromHistory(
@@ -198,16 +229,6 @@ export default function MergeGameScreen({
         newHistory,
       );
       const newFrames = allFrames.slice(prevHistoryLen);
-
-      for (let i = prevHistoryLen; i < newHistory.length; i++) {
-        const rec = newHistory[i];
-        if (rec.type === "COPY_BACK") {
-          locallySortedIntervalsRef.current.push({
-            left: rec.left,
-            right: rec.right,
-          });
-        }
-      }
 
       const feedbackMsg = getMergeStepFeedback(result, stateBefore, decision);
       setFeedback({
@@ -217,10 +238,10 @@ export default function MergeGameScreen({
 
       const prefersReducedMotion =
         typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
 
-      if (prefersReducedMotion || newFrames.length <= 1) {
-        // Apresentação imediata sem timers
+      if (newFrames.length <= 1) {
+        // Apresentação imediata quando há apenas 1 quadro
         const finalFrame = allFrames[allFrames.length - 1] ?? null;
         setDisplayedFrame(finalFrame);
         setEngineState(result.state);
@@ -228,8 +249,21 @@ export default function MergeGameScreen({
         isActionLockedRef.current = false;
 
         if (result.state.completed) {
-          handleComplete(result.state);
+          const tId = setTimeout(() => {
+            if (presentationIdRef.current === currentPresId) {
+              handleComplete(result.state);
+            }
+          }, 600);
+          timersRef.current.push(tId);
         }
+      } else if (prefersReducedMotion) {
+        // Apresentação discreta sem timers contínuos: estudante observa divisão, MERGE_INIT, drenagem e retorno no seu próprio ritmo
+        setIsActionLocked(true);
+        isActionLockedRef.current = true;
+        setDisplayedFrame(newFrames[0]);
+        setPendingFrames(newFrames);
+        setPendingFrameIndex(0);
+        pendingFinalStateRef.current = result.state;
       } else {
         // Apresentação sequencial com bloqueio de decisões até o quadro final
         setIsActionLocked(true);
@@ -237,6 +271,8 @@ export default function MergeGameScreen({
 
         let frameIdx = 0;
         const animateNextFrame = () => {
+          if (presentationIdRef.current !== currentPresId) return;
+
           if (frameIdx < newFrames.length) {
             setDisplayedFrame(newFrames[frameIdx]);
             frameIdx++;
@@ -250,8 +286,10 @@ export default function MergeGameScreen({
 
             if (result.state.completed) {
               const tId = setTimeout(() => {
-                handleComplete(result.state);
-              }, 400);
+                if (presentationIdRef.current === currentPresId) {
+                  handleComplete(result.state);
+                }
+              }, 600);
               timersRef.current.push(tId);
             }
           }
@@ -277,11 +315,14 @@ export default function MergeGameScreen({
 
   // Reinício idempotente da prática
   const handleRestart = useCallback(() => {
+    presentationIdRef.current++;
     timersRef.current.forEach(clearTimeout);
     timersRef.current = [];
     isActionLockedRef.current = false;
     setIsActionLocked(false);
-    locallySortedIntervalsRef.current = [];
+    setPendingFrames([]);
+    setPendingFrameIndex(0);
+    pendingFinalStateRef.current = null;
 
     const freshEngine = initMergeSortState(initialElements);
     setEngineState(freshEngine);
@@ -307,19 +348,48 @@ export default function MergeGameScreen({
     });
   }, [initialElements]);
 
-  // Atalhos de teclado locais (1, 2, 3)
+  // Atalhos de teclado locais com proteção contra ativações duplicadas e respeito a controles focados
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented) return;
+      if (event.defaultPrevented || event.repeat) return;
       const target = event.target as HTMLElement | null;
-      if (
-        target?.tagName === "INPUT" ||
-        target?.tagName === "TEXTAREA" ||
-        target?.isContentEditable
-      ) {
+
+      const elem =
+        target && typeof (target as Element).closest === "function"
+          ? (target as Element)
+          : null;
+
+      const isInteractive = Boolean(
+        elem?.closest("button, a, input, textarea, select, [role='button']") ||
+        (elem as HTMLElement)?.isContentEditable
+      );
+
+      // Se qualquer controle interativo (botões REINICIAR, VOLTAR, etc.) estiver focado,
+      // preserva a ativação nativa de Enter e Espaço, impedindo captura global indevida.
+      if (isInteractive) {
+        if (event.key === " " || event.key === "Enter") {
+          return;
+        }
+        if (
+          elem?.tagName === "INPUT" ||
+          elem?.tagName === "TEXTAREA" ||
+          (elem as HTMLElement)?.isContentEditable
+        ) {
+          return;
+        }
+      }
+
+      // Se houver quadros pendentes para avanço manual (reduced motion):
+      if (pendingFrames.length > 0) {
+        // Atalho '1' avança o quadro pendente; Espaço avança somente se nenhum controle estiver focado
+        if (event.key === "1" || (!isInteractive && event.key === " ")) {
+          event.preventDefault();
+          handleAdvancePendingFrame();
+        }
         return;
       }
 
+      // Atalhos normais de triagem:
       if (event.key === "1") {
         event.preventDefault();
         handleDecision("DISPATCH_LEFT");
@@ -334,9 +404,9 @@ export default function MergeGameScreen({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleDecision]);
+  }, [handleAdvancePendingFrame, handleDecision, pendingFrames.length]);
 
-  // Dados derivados do quadro atual em exibição
+  // Dados derivados do quadro atual em exibição (estritamente desacoplados do estado futuro da engine)
   const currentValues = displayedFrame?.values ?? engineState.values;
   const currentBuffer = displayedFrame?.buffer ?? engineState.buffer;
   const currentInterval =
@@ -345,7 +415,22 @@ export default function MergeGameScreen({
   const p1 = displayedFrame?.p1 ?? engineState.p1;
   const p2 = displayedFrame?.p2 ?? engineState.p2;
   const k = displayedFrame?.k ?? engineState.k;
-  const isCompleted = engineState.completed || currentPhase === "COMPLETED";
+
+  // A conclusão visual depende estritamente do quadro apresentado (OK global não antecipa a animação)
+  const isVisualCompleted = displayedFrame
+    ? displayedFrame.phase === "COMPLETED"
+    : engineState.completed;
+  const isCompleted = isVisualCompleted;
+
+  // Métricas algorítmicas sincronizadas com o displayedFrame
+  const displayedComparisons =
+    displayedFrame?.cumulativeComparisons ?? engineState.comparisons;
+  const displayedWritesInBuffer =
+    displayedFrame?.cumulativeWritesInBuffer ?? engineState.writesInBuffer;
+  const displayedWritesInMain =
+    displayedFrame?.cumulativeWritesInMain ?? engineState.writesInMain;
+  const displayedTotalWrites =
+    displayedFrame?.cumulativeTotalWrites ?? engineState.totalWrites;
 
   // Identificação dos elementos sob os sensores
   const leftHead =
@@ -371,10 +456,19 @@ export default function MergeGameScreen({
   const canDrain =
     !isActionLocked && !isCompleted && currentPhase === "DRAIN_READY";
 
+  // Intervalos consolidados por COPY_BACK que já foram efetivamente apresentados até o quadro atual
+  const presentedHistory = displayedFrame
+    ? engineState.history.slice(0, displayedFrame.stepIndex + 1)
+    : engineState.history;
+
+  const presentedSortedIntervals = presentedHistory
+    .filter((rec) => rec.type === "COPY_BACK")
+    .map((rec) => ({ left: (rec as any).left, right: (rec as any).right }));
+
   // Helper para verificar se um índice do vetor principal está em intervalo já consolidado (ORD)
   const isIndexLocallyOrdered = (idx: number): boolean => {
     if (isCompleted) return false;
-    for (const range of locallySortedIntervalsRef.current) {
+    for (const range of presentedSortedIntervals) {
       if (idx >= range.left && idx <= range.right) {
         // Se este intervalo for o ativo em curso e o elemento já desceu para o buffer, não exibe ORD
         if (
@@ -391,7 +485,7 @@ export default function MergeGameScreen({
     return false;
   };
 
-  // Pontuação estimada atual
+  // Pontuação estimada atual (métrica pedagógica e formativa de sessão)
   const currentScore = calculateProtocolScore({
     errors: engineState.errors,
     hintsUsed: sessionMetrics.hintsUsed,
@@ -449,7 +543,6 @@ export default function MergeGameScreen({
               variant="secondary"
               size="sm"
               onClick={handleRestart}
-              disabled={isActionLocked}
               title="Reiniciar a prática com o mesmo lote"
             >
               REINICIAR
@@ -478,10 +571,11 @@ export default function MergeGameScreen({
               Comparações
             </span>
             <span
+              data-testid="comparisons-count"
               className="text-lg font-bold text-cyan-300"
               style={{ fontFamily: "'Orbitron', sans-serif" }}
             >
-              {engineState.comparisons}
+              {displayedComparisons}
             </span>
           </div>
 
@@ -493,10 +587,11 @@ export default function MergeGameScreen({
               Escritas Buffer
             </span>
             <span
+              data-testid="writes-in-buffer"
               className="text-lg font-bold text-blue-300"
               style={{ fontFamily: "'Orbitron', sans-serif" }}
             >
-              {engineState.writesInBuffer}
+              {displayedWritesInBuffer}
             </span>
           </div>
 
@@ -511,7 +606,7 @@ export default function MergeGameScreen({
               className="text-lg font-bold text-cyan-200"
               style={{ fontFamily: "'Orbitron', sans-serif" }}
             >
-              {engineState.writesInMain}
+              {displayedWritesInMain}
             </span>
           </div>
 
@@ -526,7 +621,7 @@ export default function MergeGameScreen({
               className="text-lg font-bold text-sky-400"
               style={{ fontFamily: "'Orbitron', sans-serif" }}
             >
-              {engineState.totalWrites}
+              {displayedTotalWrites}
             </span>
           </div>
 
@@ -956,7 +1051,7 @@ export default function MergeGameScreen({
               className="text-[10px] text-white/30 tracking-widest uppercase font-mono"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              PSEUDOCÓDIGO — INTERCALAÇÃO (CANÔNICO)
+              PSEUDOCÓDIGO — SUB-ROTINA DE INTERCALAÇÃO (RESUMO OPERACIONAL)
             </span>
             <div className="flex flex-col gap-0.5">
               {MERGE_SORT_PSEUDOCODE.map((item) => {
@@ -995,58 +1090,92 @@ export default function MergeGameScreen({
           aria-label="Ações de Decisão"
           className="w-full panel-border bg-[#070e26]/95 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 sticky bottom-4 z-20 shadow-2xl backdrop-blur-md"
         >
-          {/* Botão 1: Despachar Esquerda */}
-          <GameButton
-            variant="primary"
-            size="lg"
-            onClick={() => handleDecision("DISPATCH_LEFT")}
-            disabled={!canDispatchLeft}
-            className="w-full sm:w-auto min-w-[200px]"
-            title="Despachar a carga do Ramal Esquerdo para a esteira coletora (Atalho 1)"
-          >
-            <div className="flex flex-col items-center">
-              <span>1: DESPACHAR ESQUERDA</span>
-              <span className="text-[10px] font-normal opacity-75">
-                {leftHead ? `Carga ${formatMergeElementLabel(leftHead)}` : "—"}
-              </span>
-            </div>
-          </GameButton>
+          {pendingFrames.length > 0 ? (
+            <GameButton
+              variant="primary"
+              size="lg"
+              onClick={handleAdvancePendingFrame}
+              className="w-full sm:w-auto min-w-[280px] border-cyan-400 bg-cyan-950/70 text-cyan-200"
+              title="Avançar para o próximo passo automático (Atalho: 1 ou Espaço)"
+            >
+              <div className="flex flex-col items-center">
+                <span>PRÓXIMO PASSO AUTOMÁTICO</span>
+                <span className="text-[10px] font-normal opacity-75">
+                  Passo {pendingFrameIndex + 1} de {pendingFrames.length} (Atalho 1 ou Espaço)
+                </span>
+              </div>
+            </GameButton>
+          ) : isCompleted ? (
+            <GameButton
+              variant="primary"
+              size="lg"
+              onClick={() => handleComplete(engineState)}
+              className="w-full sm:w-auto min-w-[240px] border-emerald-400 bg-emerald-950/70 text-emerald-200"
+              title="Visualizar a tela de resultados da prática"
+            >
+              <div className="flex flex-col items-center">
+                <span>VER RESULTADOS</span>
+                <span className="text-[10px] font-normal opacity-75">
+                  Ordenação Concluída com Sucesso!
+                </span>
+              </div>
+            </GameButton>
+          ) : (
+            <>
+              {/* Botão 1: Despachar Esquerda */}
+              <GameButton
+                variant="primary"
+                size="lg"
+                onClick={() => handleDecision("DISPATCH_LEFT")}
+                disabled={!canDispatchLeft}
+                className="w-full sm:w-auto min-w-[200px]"
+                title="Despachar a carga do Ramal Esquerdo para a esteira coletora (Atalho 1)"
+              >
+                <div className="flex flex-col items-center">
+                  <span>1: DESPACHAR ESQUERDA</span>
+                  <span className="text-[10px] font-normal opacity-75">
+                    {leftHead ? `Carga ${formatMergeElementLabel(leftHead)}` : "—"}
+                  </span>
+                </div>
+              </GameButton>
 
-          {/* Botão 2: Despachar Direita */}
-          <GameButton
-            variant="primary"
-            size="lg"
-            onClick={() => handleDecision("DISPATCH_RIGHT")}
-            disabled={!canDispatchRight}
-            className="w-full sm:w-auto min-w-[200px]"
-            title="Despachar a carga do Ramal Direito para a esteira coletora (Atalho 2)"
-          >
-            <div className="flex flex-col items-center">
-              <span>2: DESPACHAR DIREITA</span>
-              <span className="text-[10px] font-normal opacity-75">
-                {rightHead
-                  ? `Carga ${formatMergeElementLabel(rightHead)}`
-                  : "—"}
-              </span>
-            </div>
-          </GameButton>
+              {/* Botão 2: Despachar Direita */}
+              <GameButton
+                variant="primary"
+                size="lg"
+                onClick={() => handleDecision("DISPATCH_RIGHT")}
+                disabled={!canDispatchRight}
+                className="w-full sm:w-auto min-w-[200px]"
+                title="Despachar a carga do Ramal Direito para a esteira coletora (Atalho 2)"
+              >
+                <div className="flex flex-col items-center">
+                  <span>2: DESPACHAR DIREITA</span>
+                  <span className="text-[10px] font-normal opacity-75">
+                    {rightHead
+                      ? `Carga ${formatMergeElementLabel(rightHead)}`
+                      : "—"}
+                  </span>
+                </div>
+              </GameButton>
 
-          {/* Botão 3: Despachar Restante */}
-          <GameButton
-            variant="primary"
-            size="lg"
-            onClick={() => handleDecision("DRAIN_REMAINDER")}
-            disabled={!canDrain}
-            className="w-full sm:w-auto min-w-[200px] border-emerald-500/50 hover:border-emerald-400"
-            title="Drenar cauda remanescente em lote sem comparações (Atalho 3)"
-          >
-            <div className="flex flex-col items-center">
-              <span>3: DESPACHAR RESTANTE</span>
-              <span className="text-[10px] font-normal opacity-75">
-                Drenagem Direta
-              </span>
-            </div>
-          </GameButton>
+              {/* Botão 3: Despachar Restante */}
+              <GameButton
+                variant="primary"
+                size="lg"
+                onClick={() => handleDecision("DRAIN_REMAINDER")}
+                disabled={!canDrain}
+                className="w-full sm:w-auto min-w-[200px] border-emerald-500/50 hover:border-emerald-400"
+                title="Drenar cauda remanescente em lote sem comparações (Atalho 3)"
+              >
+                <div className="flex flex-col items-center">
+                  <span>3: DESPACHAR RESTANTE</span>
+                  <span className="text-[10px] font-normal opacity-75">
+                    Drenagem Direta
+                  </span>
+                </div>
+              </GameButton>
+            </>
+          )}
         </footer>
       </div>
     </div>

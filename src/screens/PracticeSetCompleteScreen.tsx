@@ -121,6 +121,22 @@ const COMPLETE_THEMES: Partial<Record<ModuleId, ModuleCompleteTheme>> = {
     pedagogicalText:
       "O Insertion Sort constrói a partição ordenada progressivamente. Cargas maiores são deslocadas para a direita apenas enquanto forem maiores que a chave suspensa no trilho aéreo, tornando o algoritmo especialmente eficiente para sequências quase ordenadas: O(n) no melhor caso.",
   },
+  merge: {
+    name: "MERGE SORT",
+    subtitle:
+      "Você dominou a mecânica canônica por divisão e confluência: intercalação ordenada com dois ponteiros, buffer auxiliar visível e garantia estrita de estabilidade.",
+    primaryColor: "blue",
+    badgeBorder: "border-blue-500/30",
+    badgeBg: "bg-blue-950/40",
+    badgeText: "text-blue-300",
+    glowClasses: "bg-blue-500/10",
+    titleGradient: "from-blue-300 via-cyan-400 to-sky-300",
+    cardBorder: "border-blue-500/20",
+    movementLabel: "Escritas no Buffer",
+    pedagogicalTitle: "Síntese Conceitual do Merge Sort",
+    pedagogicalText:
+      "O Merge Sort divide recursivamente o lote até subvetores unitários e recombina-os de forma ordenada utilizando um buffer auxiliar O(n). Ao comparar as frentes dos ramais esquerdo e direito, a decisão em empate (≤) prioriza invariavelmente o ramal esquerdo, preservando a estabilidade algorítmica antes da cópia de retorno à esteira principal.",
+  },
 };
 
 function resolvePracticeTitle(item: any, fallbackIdx: number): string {
@@ -163,6 +179,8 @@ export default function PracticeSetCompleteScreen({
   const totalSwaps = rawList.reduce((acc, r) => acc + (r.swaps ?? 0), 0);
   const totalShifts = rawList.reduce((acc, r) => acc + (r.shifts ?? 0), 0);
   const totalInsertions = rawList.reduce((acc, r) => acc + (r.insertions ?? 0), 0);
+  const totalWritesInBuffer = rawList.reduce((acc, r) => acc + (r.writesInBuffer ?? 0), 0);
+  const totalWritesInMain = rawList.reduce((acc, r) => acc + (r.writesInMain ?? 0), 0);
   const totalErrors = rawList.reduce((acc, r) => acc + (r.errors ?? 0), 0);
   const totalHints = rawList.reduce((acc, r) => acc + (r.hintsUsed ?? 0), 0);
   const totalTimeMs = rawList.reduce((acc, r) => acc + (r.elapsedTimeMs ?? 0), 0);
@@ -269,8 +287,33 @@ export default function PracticeSetCompleteScreen({
               </span>
             </div>
 
-            {/* Movimentações: Trocas para Bubble/Selection, Deslocamentos para Insertion */}
-            {moduleId === "insertion" ? (
+            {/* Movimentações: Trocas para Bubble/Selection, Deslocamentos para Insertion, Escritas para Merge */}
+            {moduleId === "merge" ? (
+              <>
+                <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-amber-500/20">
+                  <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
+                    No Buffer
+                  </span>
+                  <span
+                    className="text-2xl font-black text-amber-300"
+                    style={{ fontFamily: "'Orbitron', sans-serif" }}
+                  >
+                    {totalWritesInBuffer}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-teal-500/20">
+                  <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
+                    No Vetor
+                  </span>
+                  <span
+                    className="text-2xl font-black text-teal-400"
+                    style={{ fontFamily: "'Orbitron', sans-serif" }}
+                  >
+                    {totalWritesInMain}
+                  </span>
+                </div>
+              </>
+            ) : moduleId === "insertion" ? (
               <>
                 <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-purple-500/20">
                   <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
@@ -402,30 +445,45 @@ export default function PracticeSetCompleteScreen({
 
                     <div
                       className={`grid ${
-                        moduleId === "insertion" ? "grid-cols-4" : "grid-cols-3"
+                        moduleId === "insertion" || moduleId === "merge" ? "grid-cols-4" : "grid-cols-3"
                       } gap-1 pt-2 border-t border-white/5 text-[10px] font-mono text-white/60 text-center`}
                     >
                       <div>
                         <span className="block text-white/30 text-[9px]">COMP.</span>
                         <span className="text-cyan-300 font-bold">{item.comparisons ?? 0}</span>
                       </div>
-                      <div>
-                        <span className="block text-white/30 text-[9px]">
-                          {moduleId === "insertion"
-                            ? "DESLOC."
-                            : moduleId === "selection"
-                              ? "TRANSF."
-                              : "TROCAS"}
-                        </span>
-                        <span className="text-purple-400 font-bold">
-                          {moduleId === "insertion" ? (item.shifts ?? 0) : (item.swaps ?? 0)}
-                        </span>
-                      </div>
-                      {moduleId === "insertion" && (
-                        <div>
-                          <span className="block text-white/30 text-[9px]">INSERÇÕES</span>
-                          <span className="text-amber-300 font-bold">{item.insertions ?? 0}</span>
-                        </div>
+                      {moduleId === "merge" ? (
+                        <>
+                          <div>
+                            <span className="block text-white/30 text-[9px]">BUFFER</span>
+                            <span className="text-amber-300 font-bold">{item.writesInBuffer ?? 0}</span>
+                          </div>
+                          <div>
+                            <span className="block text-white/30 text-[9px]">VETOR</span>
+                            <span className="text-teal-400 font-bold">{item.writesInMain ?? 0}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div>
+                            <span className="block text-white/30 text-[9px]">
+                              {moduleId === "insertion"
+                                ? "DESLOC."
+                                : moduleId === "selection"
+                                  ? "TRANSF."
+                                  : "TROCAS"}
+                            </span>
+                            <span className="text-purple-400 font-bold">
+                              {moduleId === "insertion" ? (item.shifts ?? 0) : (item.swaps ?? 0)}
+                            </span>
+                          </div>
+                          {moduleId === "insertion" && (
+                            <div>
+                              <span className="block text-white/30 text-[9px]">INSERÇÕES</span>
+                              <span className="text-amber-300 font-bold">{item.insertions ?? 0}</span>
+                            </div>
+                          )}
+                        </>
                       )}
                       <div>
                         <span className="block text-white/30 text-[9px]">ERROS</span>

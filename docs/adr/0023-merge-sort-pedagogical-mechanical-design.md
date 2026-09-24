@@ -1,10 +1,10 @@
-# ADR 0023 — Design Pedagógico e Mecânico do Módulo Merge Sort (P3.1-A / P3.1-B / P3.1-C / P3.1-D)
+# ADR 0023 — Design Pedagógico e Mecânico do Módulo Merge Sort (P3.1-A a P3.1-F)
 
-> **Status:** `ACEITO` (Design pedagógico aprovado em P3.1-A; Engine pura em P3.1-B; Camada pedagógica em P3.1-C; Estação de Intercalação e Seletor homologados em P3.1-D)  
-> **Data:** 22/09/2026 (Marco P3.1-D)  
+> **Status:** `IMPLEMENTADO E INTEGRADO (Homologação visual manual pendente)` (Design pedagógico aprovado em P3.1-A; Engine pura em P3.1-B; Camada pedagógica em P3.1-C; Estação de Intercalação e Seletor em P3.1-D; Replay e Pseudocódigo em P3.1-E; Persistência Schema v4, Tutorial Guiado e Ativação no Hub concluídos em P3.1-F; homologação visual em navegador real pendente)  
+> **Data:** 24/09/2026 (Marco P3.1-F Integração Final e Ativação)  
 > **Autor:** Equipe de Engenharia e Design Pedagógico (Sorting Station)  
 > **Decisões Relacionadas:** [`ADR 0018`](./0018-game-to-educational-platform-transition.md), [`ADR 0019`](./0019-insertion-sort-pedagogical-layer-and-interactive-tutorial.md), [`ADR 0020`](./0020-insertion-interactive-practice-system.md), [`ADR 0021`](./0021-module-exercise-persistence-schema-v4.md), [`ADR 0022`](./0022-canonical-exercise-module-standardization.md).  
-> **Documentos Afetados:** [`docs/wiki/modules/merge-sort.md`](../wiki/modules/merge-sort.md), [`docs/wiki/04-sorting-engine.md`](../wiki/04-sorting-engine.md), [`docs/wiki/08-testing-and-quality.md`](../wiki/08-testing-and-quality.md), [`docs/wiki/10-roadmap.md`](../wiki/10-roadmap.md).
+> **Documentos Afetados:** [`docs/wiki/modules/merge-sort.md`](../wiki/modules/merge-sort.md), [`docs/wiki/04-sorting-engine.md`](../wiki/04-sorting-engine.md), [`docs/wiki/08-testing-and-quality.md`](../wiki/08-testing-and-quality.md), [`docs/wiki/10-roadmap.md`](../wiki/10-roadmap.md), [`docs/wiki/SUMMARY.md`](../wiki/SUMMARY.md).
 
 ---
 
@@ -200,16 +200,20 @@ Ao desempilhar, `DIVIDE(left, mid)` é executado primeiro, garantindo a travessi
 | **Demonstração Canônica [7, 2, 5, 3]** | `HOMOLOGADO` | P3.1-C | `src/game/demonstration/mergeDemonstration.ts` (8 testes verdes) |
 | **Briefing Oficial (merge-canonical)** | `HOMOLOGADO` | P3.1-C | `src/game/briefing/briefingCatalog.ts` (4 testes verdes) |
 | **Reconstrução de Visual Frames** | `HOMOLOGADO` | P3.1-C | `deriveMergeFramesFromHistory` e `reconstructMergeStepAt` em `mergeSortEngine.ts` |
-| **Estação de Intercalação (UI)**| `HOMOLOGADO` | P3.1-D | `src/screens/MergeGameScreen.tsx` desktop-first, confluência de ramais, buffer auxiliar, botoeira com `GameButton` (1/2/3), trava de ação, reduced motion |
-| **Seletor de Práticas e Resultados** | `HOMOLOGADO` | P3.1-D | `PracticeSelector.tsx` (tema merge), `ResultScreen.tsx` com telemetria segregada e roteamento no `App.tsx` |
-| **Suíte de Testes do Fluxo Merge** | `HOMOLOGADO` | P3.1-D | `src/screens/mergePracticeFlow.test.tsx` (15 testes comportamentais verdes; 68 no módulo total) |
-| **Replay Retrospectivo** | `PENDENTE` | P3.1-E | Aguardando sub-marco P3.1-E |
-| **Persistência Schema v4 (`merge.*`)** | `PENDENTE` | P3.1-F | Aguardando sub-marco P3.1-F |
+| **Estação de Intercalação (UI)**| `TECNICAMENTE ACEITO (Homologação visual pendente)` | P3.1-D | `src/screens/MergeGameScreen.tsx` desktop-first, confluência de ramais, buffer auxiliar, botoeira com `GameButton` (1/2/3), trava síncrona com `displayedFrame`, cancelamento com `presentationIdRef`, reduced motion com avanço discreto manual |
+| **Seletor de Práticas e Resultados** | `TECNICAMENTE ACEITO (Homologação visual pendente)` | P3.1-D | `PracticeSelector.tsx` (tema merge), `ResultScreen.tsx` com telemetria segregada e roteamento protegido por `import.meta.env.DEV` no `App.tsx` |
+| **Suíte de Testes do Fluxo Merge** | `HOMOLOGADO` | P3.1-D | `src/screens/mergePracticeFlow.test.tsx` (26 testes comportamentais verdes; 79 no módulo total; 491 no projeto) |
+| **Replay Retrospectivo e Pseudocódigo Canônico de 30 Linhas** | `HOMOLOGADO (Homologação visual pendente)` | P3.1-E | `src/game/sorting/merge/mergeReplayModel.ts`, `mergeReplayPseudocode.ts`, `src/components/MergeSortPseudocodePanel.tsx`, `src/screens/MergeReplayScreen.tsx`, `src/screens/mergeReplayScreen.test.tsx` (invariante 1+N, histórico factual sem reexecução da engine, badges com frentes fáticas passadas, telemetria e pseudocódigo sincronizados) |
+| **Tutorial Guiado com FSM Autônoma** | `HOMOLOGADO (Homologação visual pendente)` | P3.1-F | `src/screens/MergeTutorialScreen.tsx` (vetor `[4a, 1, 3, 4b]`, desempate reflexivo na raiz, retenção em erro, conclusão factual) |
+| **Modo Demonstração Observacional** | `HOMOLOGADO (Homologação visual pendente)` | P3.1-F | `src/screens/DemonstrationScreen.tsx` conectado a `mergeDemonstration.ts` sobre `[7, 2, 5, 3]`, sem gravação de scores |
+| **Persistência Schema v4 (`saveData.modules["merge"]`)** | `HOMOLOGADO` | P3.1-F | `src/game/persistence/` (`merge.practice.basic`, `merge.practice.intermediate`, `merge.practice.advanced`), migração defensiva de saves e isolamento estrito (69 testes verdes) |
+| **Tela de Conclusão do Conjunto (`PracticeSetCompleteScreen`)** | `HOMOLOGADO (Homologação visual pendente)` | P3.1-F | Visual azul, métricas segregadas (Buffer e Vetor Principal), suporte a conclusão 3/3 inter-sessões e reinício pela Prática Básica |
+| **Ativação Pública no Hub de Protocolos** | `HOMOLOGADO (Homologação visual pendente)` | P3.1-F | `src/screens/protocolCatalog.ts` (`merge` como `status: "available"`), card interativo em produção no `HomeScreen.tsx`, 528 testes no projeto |
 
 ---
 
-## 5. Próximos Passos (Transição para P3.1-E)
+## 5. Próximos Passos (Transição para Marco P3.2)
 
-Com a aprovação e homologação técnica de P3.1-A, P3.1-B, P3.1-C e P3.1-D (481 testes verdes em 35 arquivos de teste):
-1. Sub-marco **P3.1-E** (`PRÓXIMO SUB-MARCO`): Replay retrospectivo e pseudocódigo sincronizado de 30 linhas com depurador temporal passo a passo e derivação pura a partir de `deriveMergeFramesFromHistory`;
-2. Sub-marco **P3.1-F**: Persistência Schema v4 (`merge.practice.*`), registro no Hub de Protocolos e ativação pública do Módulo 04.
+Com a aceitação técnica e consolidação de P3.1 de ponta a ponta (P3.1-A até P3.1-F, totalizando 528 testes verdes em 39 arquivos de teste):
+1. **Marco P3.2:** Módulo Quick Sort (P3.2-A: Design pedagógico e mecânico das 20 seções do Module Standard e ADR 0024);
+2. **Homologação Visual Manual:** Roteiro manual consolidado de testes em navegador real cobrindo resoluções 1366x768, 1600x900, 1920x1080 e restrições verticais para `PLATFORM-R1-B` e `P3.1` (`qa-gameplay-checklist.md`).

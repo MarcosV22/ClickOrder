@@ -14,10 +14,20 @@ import {
 
 describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
   describe("1. Catálogo Estático dos Protocolos (PROTOCOL_CATALOG)", () => {
-    it("contém exatamente os três protocolos previstos: bubble, selection e insertion", () => {
+    it("contém exatamente os quatro protocolos previstos: bubble, selection, insertion e merge", () => {
       const ids = PROTOCOL_CATALOG.map((p) => p.id);
-      expect(ids).toEqual(["bubble", "selection", "insertion"]);
-      expect(PROTOCOL_CATALOG).toHaveLength(3);
+      expect(ids).toEqual(["bubble", "selection", "insertion", "merge"]);
+      expect(PROTOCOL_CATALOG).toHaveLength(4);
+    });
+
+    it("declara Merge Sort como disponível, com 3 fases e tema azul", () => {
+      const merge = getProtocolMetadata("merge");
+      expect(merge.id).toBe("merge");
+      expect(merge.name).toBe("MERGE SORT");
+      expect(merge.metaphor).toContain("CONFLUÊNCIA DE RAMAIS");
+      expect(merge.status).toBe("available");
+      expect(merge.statusLabel).toBe("DISPONÍVEL");
+      expect(merge.demonstrationStatus).toBe("available");
     });
 
     it("declara Bubble Sort como disponível, com 3 fases e tema ciano", () => {
@@ -216,10 +226,10 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
   });
 
   describe("3. Roteamento, Acessibilidade e Disponibilidade dos Protocolos", () => {
-    it("garante que todos os 3 protocolos curriculares estão ativos e disponíveis", () => {
+    it("garante que todos os 4 protocolos curriculares estão ativos e disponíveis", () => {
       const availableProtocols = PROTOCOL_CATALOG.filter((p) => p.status === "available");
-      expect(availableProtocols.map((p) => p.id)).toEqual(["bubble", "selection", "insertion"]);
-      expect(availableProtocols).toHaveLength(3);
+      expect(availableProtocols.map((p) => p.id)).toEqual(["bubble", "selection", "insertion", "merge"]);
+      expect(availableProtocols).toHaveLength(4);
     });
 
     it("assegura que Insertion Sort expõe status disponível e demonstração ativa", () => {

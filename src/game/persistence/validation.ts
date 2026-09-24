@@ -388,6 +388,7 @@ export function migrateV3ToV4(
       bubble: bubbleModule,
       selection: selectionModule,
       insertion: insertionModule,
+      merge: createDefaultModuleProgress(),
     }),
   });
 }
@@ -413,7 +414,12 @@ export function sanitizeSaveDataV4(raw: Record<string, unknown>): GameSaveSchema
     const rawMod = rawModules[modId];
     if (!isRecordObject(rawMod)) {
       // Cria estado limpo para os módulos ativos principais
-      if (modId === "bubble" || modId === "selection" || modId === "insertion") {
+      if (
+        modId === "bubble" ||
+        modId === "selection" ||
+        modId === "insertion" ||
+        modId === "merge"
+      ) {
         modules[modId] = createDefaultModuleProgress();
       }
       continue;

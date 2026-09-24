@@ -7,6 +7,7 @@ import {
   BUBBLE_EXERCISE_SETS,
   SELECTION_EXERCISE_SETS,
   INSERTION_EXERCISE_SETS,
+  MERGE_EXERCISE_SETS,
 } from "./constants";
 import { createSafeStorage } from "./storageAdapter";
 import type {
@@ -244,6 +245,17 @@ export function isExerciseSetUnlocked(
     return false;
   }
 
+  if (moduleId === "merge") {
+    if (exerciseSetId === MERGE_EXERCISE_SETS.BASIC) return true;
+    if (exerciseSetId === MERGE_EXERCISE_SETS.INTERMEDIATE) {
+      return isExerciseSetCompleted(saveData, "merge", MERGE_EXERCISE_SETS.BASIC);
+    }
+    if (exerciseSetId === MERGE_EXERCISE_SETS.ADVANCED) {
+      return isExerciseSetCompleted(saveData, "merge", MERGE_EXERCISE_SETS.INTERMEDIATE);
+    }
+    return false;
+  }
+
   return false;
 }
 
@@ -254,6 +266,13 @@ export function isModuleRegularPracticeCompleted(
   saveData: GameSaveSchemaV4,
   moduleId: ModuleId
 ): boolean {
+  if (moduleId === "merge") {
+    return (
+      isExerciseSetCompleted(saveData, "merge", MERGE_EXERCISE_SETS.BASIC) &&
+      isExerciseSetCompleted(saveData, "merge", MERGE_EXERCISE_SETS.INTERMEDIATE) &&
+      isExerciseSetCompleted(saveData, "merge", MERGE_EXERCISE_SETS.ADVANCED)
+    );
+  }
   if (moduleId === "insertion") {
     return (
       isExerciseSetCompleted(saveData, "insertion", INSERTION_EXERCISE_SETS.BASIC) &&

@@ -194,6 +194,7 @@ export function createDefaultSaveData(
       bubble: createDefaultModuleProgress(),
       selection: createDefaultModuleProgress(),
       insertion: createDefaultModuleProgress(),
+      merge: createDefaultModuleProgress(),
     }),
   });
 }
