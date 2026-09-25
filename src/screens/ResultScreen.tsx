@@ -143,7 +143,7 @@ export default function ResultScreen({
         {/* Final array */}
         <div className="w-full panel-border bg-[#080f28]/80 rounded-xl px-4 sm:px-8 py-5">
           <p
-            className="text-center text-[10px] text-white/30 tracking-widest mb-4 uppercase"
+            className="text-center text-xs text-slate-300 font-bold tracking-widest mb-4 uppercase"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             VETOR RESULTANTE CONSOLIDADO
@@ -172,7 +172,7 @@ export default function ResultScreen({
             {/* Bloco de Destaque: PONTUAÇÃO DO PROTOCOLO */}
             <div className="flex flex-col gap-1 pb-3 border-b border-white/10">
               <span
-                className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase"
+                className="text-xs text-cyan-400 font-mono tracking-widest uppercase font-bold"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
                 PONTUAÇÃO DO PROTOCOLO
@@ -185,14 +185,14 @@ export default function ResultScreen({
                   {score ?? 100}
                 </span>
                 <span
-                  className="text-xs text-white/40"
+                  className="text-xs text-slate-300 font-semibold"
                   style={{ fontFamily: "'Space Mono', monospace" }}
                 >
                   / 100
                 </span>
               </div>
               <span
-                className="text-[9px] text-white/40 leading-normal"
+                className="text-xs text-slate-300 leading-normal"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
                 Erros: -10 | Dicas: -5 | Otimizações e tempo não afetam a pontuação
@@ -200,7 +200,7 @@ export default function ResultScreen({
             </div>
 
             <span
-              className="text-[10px] text-white/30 tracking-widest uppercase"
+              className="text-xs text-slate-300 font-bold tracking-widest uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
               MÉTRICAS DA OPERAÇÃO
@@ -296,7 +296,7 @@ export default function ResultScreen({
               ].map((stat) => (
                 <div key={stat.label} className="flex justify-between items-center">
                   <span
-                    className="text-xs text-white/40"
+                    className="text-xs text-slate-300 font-medium"
                     style={{ fontFamily: "'Space Mono', monospace" }}
                   >
                     {stat.label}
@@ -312,18 +312,18 @@ export default function ResultScreen({
             </div>
 
             {isEarlyExit && (
-              <div className="mt-1 p-2.5 rounded-lg border border-cyan-500/20 bg-cyan-950/30 text-[10px] text-cyan-200/90 leading-relaxed font-mono">
+              <div className="mt-1 p-2.5 rounded-lg border border-cyan-500/30 bg-cyan-950/30 text-xs text-cyan-100 leading-relaxed font-sans">
                 <span className="font-bold text-cyan-300 uppercase block mb-1">
                   Nota Pedagógica da Otimização:
                 </span>
                 {earlyExitTriggered
-                  ? "Passada concluída sem trocas. O protocolo detectou que a esteira já está ordenada e encerrou a execução antecipadamente."
+                  ? "Passada concluída sem trocas. O algoritmo detectou que o vetor já está ordenado e encerrou a execução antecipadamente."
                   : "O elemento menor no final exigiu trocas em todas as passadas. O Early Exit não trouxe economia neste cenário (pior caso)."}
               </div>
             )}
 
             {isSelection && (
-              <div className="mt-1 p-2.5 rounded-lg border border-purple-500/30 bg-purple-950/30 text-[11px] text-purple-200/90 leading-relaxed font-mono">
+              <div className="mt-1 p-2.5 rounded-lg border border-purple-500/30 bg-purple-950/30 text-xs text-purple-100 leading-relaxed font-sans">
                 <span className="font-bold text-purple-300 uppercase block mb-1">
                   Nota Pedagógica (Selection Sort):
                 </span>
@@ -332,7 +332,7 @@ export default function ResultScreen({
             )}
 
             {isInsertion && (
-              <div className="mt-1 p-2.5 rounded-lg border border-amber-500/30 bg-amber-950/30 text-[11px] text-amber-200/90 leading-relaxed font-mono">
+              <div className="mt-1 p-2.5 rounded-lg border border-amber-500/30 bg-amber-950/30 text-xs text-amber-100 leading-relaxed font-sans">
                 <span className="font-bold text-amber-300 uppercase block mb-1">
                   Nota Pedagógica (Insertion Sort):
                 </span>
@@ -341,7 +341,7 @@ export default function ResultScreen({
             )}
 
             {isMerge && (
-              <div className="mt-1 p-2.5 rounded-lg border border-blue-500/30 bg-blue-950/30 text-[11px] text-blue-200/90 leading-relaxed font-mono">
+              <div className="mt-1 p-2.5 rounded-lg border border-blue-500/30 bg-blue-950/30 text-xs text-blue-100 leading-relaxed font-sans">
                 <span className="font-bold text-blue-300 uppercase block mb-1">
                   Nota Pedagógica (Merge Sort):
                 </span>
@@ -353,7 +353,7 @@ export default function ResultScreen({
           {/* Pseudocode & Principle Panel */}
           <div className="panel-border bg-[#080f28]/80 rounded-xl p-5 flex flex-col gap-3">
             <span
-              className="text-[10px] text-white/30 tracking-widest uppercase"
+              className="text-xs text-slate-300 font-bold tracking-widest uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
               {isMerge
@@ -402,45 +402,45 @@ export default function ResultScreen({
             </div>
 
             {isInsertion && (
-              <div className="p-3.5 rounded-lg bg-amber-950/30 border border-amber-500/20 flex flex-col gap-2 mt-1">
-                <p className="text-xs text-amber-200/90 leading-relaxed font-mono font-bold">
+              <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/30 flex flex-col gap-2 mt-1">
+                <p className="text-xs sm:text-sm text-amber-200 leading-relaxed font-bold">
                   Insertion Sort mantém uma região ordenada e desloca somente os elementos necessários para abrir espaço à chave.
                 </p>
-                <p className="text-[11px] text-white/60 leading-relaxed font-mono">
-                  A cada passada externa, a chave é isolada e comparada regressivamente com os elementos à sua esquerda na partição ordenada. Os elementos maiores são deslocados uma posição para a direita até encontrar o ponto de encaixe ideal da chave.
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed" style={{ fontFamily: "'Exo 2', sans-serif" }}>
+                  A cada passada, o próximo número vira a chave destacada e é comparado com os elementos da parte ordenada da direita para a esquerda. Elementos maiores deslizam para a direita até abrir a vaga onde a chave é inserida.
                 </p>
               </div>
             )}
 
             {isSelection && (
-              <div className="p-3.5 rounded-lg bg-purple-950/30 border border-purple-500/20 flex flex-col gap-2 mt-1">
-                <p className="text-xs text-purple-200/90 leading-relaxed font-mono font-bold">
+              <div className="p-3.5 rounded-xl bg-purple-950/30 border border-purple-500/30 flex flex-col gap-2 mt-1">
+                <p className="text-xs sm:text-sm text-purple-200 leading-relaxed font-bold">
                   Selection Sort realiza a varredura completa antes de efetuar no máximo uma troca por passada.
                 </p>
-                <p className="text-[11px] text-white/60 leading-relaxed font-mono">
-                  O algoritmo particiona a esteira: a sublista ordenada à esquerda e a desordenada à direita. O scanner inspeciona cada carga para localizar o menor item e, apenas no final da varredura, uma transferência pontual consolida a posição definitiva com o selo OK.
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed" style={{ fontFamily: "'Exo 2', sans-serif" }}>
+                  O algoritmo divide o vetor: a região ordenada à esquerda e a não ordenada à direita. A busca percorre os números restantes para localizar o menor valor e, apenas no final da passada, uma única troca posiciona o menor elemento com o selo OK.
                 </p>
               </div>
             )}
 
             {isMerge && (
-              <div className="p-3.5 rounded-lg bg-blue-950/30 border border-blue-500/20 flex flex-col gap-2 mt-1">
-                <p className="text-xs text-blue-200/90 leading-relaxed font-mono font-bold">
+              <div className="p-3.5 rounded-xl bg-blue-950/30 border border-blue-500/30 flex flex-col gap-2 mt-1">
+                <p className="text-xs sm:text-sm text-blue-200 leading-relaxed font-bold">
                   Merge Sort divide o problema recursivamente e intercala os subvetores com tempo previsível Θ(n log n).
                 </p>
-                <p className="text-[11px] text-white/60 leading-relaxed font-mono">
-                  A intercalação utiliza um buffer auxiliar para acomodar os elementos em ordem estável. Sob chaves iguais nas frentes dos ramais, a priorização estrita do Ramal Esquerdo preserva a ordem relativa original dos itens.
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed" style={{ fontFamily: "'Exo 2', sans-serif" }}>
+                  A intercalação utiliza um vetor auxiliar para acomodar os números em ordem estável. Em caso de empate entre as frentes dos grupos, a escolha da esquerda preserva a ordem relativa original dos elementos (estabilidade).
                 </p>
               </div>
             )}
 
             {!isSelection && !isEarlyExit && !isInsertion && !isMerge && (
-              <div className="p-3.5 rounded-lg bg-cyan-950/30 border border-cyan-500/20 flex flex-col gap-2 mt-1">
-                <p className="text-xs text-cyan-200/90 leading-relaxed font-mono font-bold">
-                  Bubble Sort propaga o maior elemento a cada passada por comparações adjacentes.
+              <div className="p-3.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 flex flex-col gap-2 mt-1">
+                <p className="text-xs sm:text-sm text-cyan-200 leading-relaxed font-bold">
+                  Bubble Sort propaga o maior elemento a cada passada por comparações de vizinhos.
                 </p>
-                <p className="text-[11px] text-white/60 leading-relaxed font-mono">
-                  O algoritmo percorre a esteira comparando pares vizinhos: se o elemento da esquerda for maior, realiza uma troca física adjacente. Ao fim de cada passada, a maior carga da varredura atinge sua posição definitiva consolidada com o selo OK.
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed" style={{ fontFamily: "'Exo 2', sans-serif" }}>
+                  O algoritmo percorre o vetor comparando pares de números vizinhos: se o número da esquerda for maior, realiza a troca. Ao fim de cada passada, o maior número atinge sua posição definitiva consolidada com o selo OK.
                 </p>
               </div>
             )}

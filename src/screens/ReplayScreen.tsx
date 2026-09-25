@@ -164,7 +164,7 @@ export default function ReplayScreen({
                 className="text-xs font-bold text-purple-300 tracking-wider px-3 py-1 rounded border border-purple-500/30 bg-purple-950/40"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                ⇄ TROCA REALIZADA (SWAP)
+                ⇄ TROCA DE POSIÇÕES
               </span>
             )}
             {currentFrame.action === "KEEP" && (
@@ -172,7 +172,7 @@ export default function ReplayScreen({
                 className="text-xs font-bold text-emerald-300 tracking-wider px-3 py-1 rounded border border-emerald-500/30 bg-emerald-950/40"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                = ORDEM MANTIDA (KEEP)
+                = ORDEM MANTIDA (SEM TROCA)
               </span>
             )}
             {currentFrame.earlyExitTriggered && (
@@ -187,7 +187,7 @@ export default function ReplayScreen({
 
           {currentFrame.action !== "INITIAL" && (
             <div
-              className="flex items-center gap-4 text-xs text-white/60 mt-1"
+              className="flex items-center gap-4 text-xs text-slate-200 font-semibold mt-1"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
               <span>
@@ -208,10 +208,9 @@ export default function ReplayScreen({
         {/* Conveyor Belt Display */}
         <div className="w-full panel-border bg-[#080f28]/90 rounded-2xl p-6 flex flex-col items-center gap-4 shadow-2xl shadow-cyan-950/20">
           {/* Conveyor Visual Indicators */}
-          <div className="w-full flex items-center justify-between text-[10px] text-white/30 tracking-widest px-2"
-            style={{ fontFamily: "'Space Mono', monospace" }}>
+          <div className="w-full flex items-center justify-between text-xs text-slate-300 tracking-wider px-2 font-mono font-bold">
             <span>◄ POSIÇÃO 1</span>
-            <span className="text-cyan-400/50">ESTEIRA DE TRIAGEM AUTOMATIZADA</span>
+            <span className="text-cyan-300">VETOR EM ORDENAÇÃO</span>
             <span>POSIÇÃO {initialArray.length} ►</span>
           </div>
 
@@ -245,8 +244,8 @@ export default function ReplayScreen({
           {/* Factual Explanation Callout */}
           <div className="w-full bg-[#0d1635]/80 border border-white/10 rounded-xl px-4 py-2.5 text-center">
             <p
-              className="text-xs text-white/80 leading-relaxed"
-              style={{ fontFamily: "'Space Mono', monospace" }}
+              className="text-xs sm:text-sm text-slate-100 leading-relaxed"
+              style={{ fontFamily: "'Exo 2', sans-serif" }}
             >
               {currentFrame.explanation}
             </p>
@@ -263,7 +262,7 @@ export default function ReplayScreen({
         {/* Replay Timeline Progress Bar */}
         <div className="w-full max-w-xl flex flex-col gap-1.5">
           <div
-            className="flex justify-between items-center text-[10px] text-white/40"
+            className="flex justify-between items-center text-xs text-slate-300 font-semibold"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             <span>PROGRESSO DA EXECUÇÃO</span>

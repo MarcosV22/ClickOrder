@@ -133,27 +133,27 @@ export default function HomeScreen({
           </h1>
 
           <p
-            className="text-sm sm:text-base text-cyan-200/80 tracking-widest uppercase font-semibold text-center max-w-2xl"
-            style={{ fontFamily: "'Space Mono', monospace" }}
+            className="text-sm sm:text-base text-cyan-100 font-medium text-center max-w-2xl leading-relaxed"
+            style={{ fontFamily: "'Exo 2', sans-serif" }}
           >
-            Central de Treinamento de Algoritmos de Ordenação
+            Central de Treinamento e Aprendizado Prático de Algoritmos de Ordenação
           </p>
 
           {/* Directive / Instruction */}
           <div className="mt-4 flex items-center gap-3">
             <div className="w-8 sm:w-16 h-px bg-gradient-to-r from-transparent to-cyan-500/50" />
             <span
-              className="text-xs sm:text-sm text-white/70 font-mono tracking-[0.2em] uppercase font-bold"
+              className="text-xs sm:text-sm text-slate-200 font-mono tracking-wider uppercase font-bold"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              ESCOLHA UM PROTOCOLO
+              ESCOLHA UM ALGORITMO
             </span>
             <div className="w-8 sm:w-16 h-px bg-gradient-to-l from-transparent to-cyan-500/50" />
           </div>
         </div>
 
-        {/* Protocols Grid (symmetric 4 cards) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 w-full mt-2">
+        {/* Protocols Grid (responsive columns to preserve legibility and button layout) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 w-full mt-2">
           {PROTOCOL_CATALOG.map((metadata) => {
             const summary = getProtocolProgressSummary(metadata.id, saveData);
             return (
@@ -177,19 +177,19 @@ export default function HomeScreen({
         </div>
 
         {/* Platform footer telemetry */}
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-4 pt-6 border-t border-white/5 w-full text-center">
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-4 pt-6 border-t border-white/10 w-full text-center">
           <span
-            className="text-[11px] font-mono text-white/40 tracking-wider uppercase"
+            className="text-[11px] font-mono text-slate-300 tracking-wider uppercase font-medium"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             TERMINAL DE ENSINO INTERATIVO DE ALGORITMOS
           </span>
-          <span className="text-white/20 hidden sm:inline">•</span>
+          <span className="text-white/30 hidden sm:inline">•</span>
           <span
-            className="text-[11px] font-mono text-cyan-400/60 tracking-wider uppercase"
+            className="text-[11px] font-mono text-cyan-300 tracking-wider uppercase font-medium"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            METÁFORA FÍSICA CINÉTICA & SINCRONIZAÇÃO DE INVARIANTES
+            VISUALIZAÇÃO PASSO A PASSO & SINCRONIZAÇÃO DE INVARIANTES
           </span>
         </div>
       </div>

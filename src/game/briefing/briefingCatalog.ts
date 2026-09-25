@@ -10,33 +10,33 @@ export const BUBBLE_CANONICAL_BRIEFING: ProtocolModeBriefing = {
   modeName: "TREINAMENTO REGULAR",
   badgeText: "CENTRAL LOGÍSTICA • PROTOCOLO CANÔNICO",
   badgeVariant: "cyan",
-  subtitle: "Varredura sequencial comparando pares de cargas vizinhas na esteira da estação.",
+  subtitle: "Comparação sequencial de pares de números vizinhos no vetor.",
   objective:
-    "Organizar os lotes de cargas em ordem crescente executando todas as comparações canônicas de cada passada até a estabilização completa do vetor.",
+    "Organizar os números em ordem crescente executando todas as comparações canônicas de cada passada até a consolidação completa do vetor.",
   instructions: [
     {
       icon: "⇄",
       title: "Pares Vizinhos",
       description:
-        "O operador inspeciona exclusivamente duas cargas contíguas por vez, avançando da esquerda para a direita na esteira.",
+        "Analise dois números contíguos por vez, avançando da esquerda para a direita no vetor.",
     },
     {
       icon: "🔀",
       title: "Trocar (Esquerda > Direita)",
       description:
-        "Se a carga da esquerda tiver valor maior que a da direita, execute a permuta física entre as caixas.",
+        "Se o número da esquerda for maior que o da direita, realize a troca de posições entre os elementos.",
     },
     {
       icon: "⏸",
       title: "Manter (Esquerda ≤ Direita)",
       description:
-        "Se a carga da esquerda já for menor ou igual à da direita, confirme a preservação das posições sem permutar.",
+        "Se o número da esquerda já for menor ou igual ao da direita, confirme a manutenção das posições sem trocar.",
     },
     {
       icon: "✓",
       title: "Passadas e Consolidação",
       description:
-        "Ao final de cada passada completa pela esteira, a maior carga restante estabiliza em sua posição definitiva com selo OK.",
+        "Ao final de cada passada completa pelo vetor, o maior número restante estabiliza em sua posição definitiva com selo OK.",
     },
   ],
   highlights: [
@@ -52,13 +52,13 @@ export const BUBBLE_CANONICAL_BRIEFING: ProtocolModeBriefing = {
     },
     {
       label: "PROGRESSÃO",
-      value: "3 Fases (4, 5 e 6 Cargas)",
+      value: "3 Fases (4, 5 e 6 Elementos)",
       variant: "emerald",
     },
   ],
   particularities: [
-    "A campanha regular executa todas as comparações teóricas do algoritmo para assegurar a fixação da invariante de laço.",
-    "Cada novo turno iniciado gera um novo lote de cargas via gerador procedural determinístico.",
+    "O treinamento avança por 3 fases com vetores de tamanho crescente, executando todas as comparações canônicas para fixar o conceito da invariante de ordenação.",
+    "Cada novo turno gera um novo conjunto de elementos por meio do gerador procedural.",
   ],
   startLabel: "INICIAR TREINAMENTO",
   startVariant: "primary",
@@ -74,21 +74,21 @@ export const BUBBLE_EARLY_EXIT_BRIEFING: ProtocolModeBriefing = {
   modeName: "MODO DESAFIO (EARLY EXIT)",
   badgeText: "CENTRAL LOGÍSTICA • VARIANTE OTIMIZADA",
   badgeVariant: "amber",
-  subtitle: "Monitoramento analítico de permutas e término antecipado em passadas estáveis.",
+  subtitle: "Detecção de passada sem trocas e término antecipado do algoritmo.",
   objective:
-    "Ordenar o lote de cargas monitorando a ocorrência de trocas: se uma passada inteira for concluída sem nenhuma permuta, a esteira encerra antecipadamente.",
+    "Ordenar os números do vetor monitorando a ocorrência de trocas: se uma passada inteira for concluída sem nenhuma troca, o processo encerra antecipadamente.",
   instructions: [
     {
       icon: "⚡",
       title: "Variante Otimizada",
       description:
-        "Continua operando com comparações entre vizinhos contíguos, monitorando se alguma troca foi necessária na passada.",
+        "Continua comparando números vizinhos contíguos, monitorando se alguma troca foi necessária na passada.",
     },
     {
       icon: "⏹",
       title: "Parada Antecipada",
       description:
-        "Se uma passada inteira for completada sem nenhuma troca, o protocolo detecta que o vetor já está ordenado e encerra o turno.",
+        "Se uma passada inteira for completada sem nenhuma troca, o algoritmo detecta que o vetor já está ordenado e encerra o turno.",
     },
     {
       icon: "⚖",
@@ -100,7 +100,7 @@ export const BUBBLE_EARLY_EXIT_BRIEFING: ProtocolModeBriefing = {
       icon: "★",
       title: "Critério de Pontuação",
       description:
-        "As comparações evitadas servem para análise de complexidade computacional e não alteram a fórmula de pontuação do protocolo.",
+        "As comparações evitadas servem para análise de complexidade computacional e não alteram a pontuação da prática.",
     },
   ],
   highlights: [
@@ -129,7 +129,7 @@ export const BUBBLE_EARLY_EXIT_BRIEFING: ProtocolModeBriefing = {
 };
 
 /**
- * Briefing oficial para o protocolo Selection Sort ("Scanner de Carga Mínima").
+ * Briefing oficial para o protocolo Selection Sort ("Seleção do Menor Número").
  * Foco na separação conceitual entre varredura sem trocas e transferência única pontual.
  */
 export const SELECTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
@@ -138,39 +138,39 @@ export const SELECTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
   modeName: "SCANNER DE CARGA MÍNIMA",
   badgeText: "CENTRAL LOGÍSTICA • NOVO PROTOCOLO",
   badgeVariant: "purple",
-  subtitle: "Varredura seletiva para identificação da menor carga e consolidação na posição alvo.",
+  subtitle: "Busca do menor número em cada passada e posicionamento no início da parte não ordenada.",
   objective:
-    "Escanear a partição não ordenada, registrar o menor elemento e transferi-lo em definitivo para a posição alvo da passada.",
+    "Percorrer a parte não ordenada do vetor, identificar o menor elemento e colocá-lo na posição inicial da passada através de uma troca única.",
   instructions: [
     {
       icon: "🎯",
       title: "Posição Alvo",
       description:
-        "Em cada passada, a posição inicial da partição não ordenada aguarda a menor carga remanescente.",
+        "Em cada passada, a posição inicial da parte não ordenada aguarda o menor número remanescente.",
     },
     {
       icon: "🔍",
-      title: "Varredura do Scanner",
+      title: "Varredura do Menor Elemento",
       description:
-        "O sensor percorre toda a região não ordenada comparando cada caixa com o candidato mínimo atual.",
+        "O sensor de leitura percorre toda a região não ordenada comparando cada elemento com o menor valor encontrado até o momento.",
     },
     {
       icon: "✦",
       title: "Decisão do Candidato",
       description:
-        "NOVO MÍNIMO atualiza o candidato se a carga for menor; MANTER CANDIDATO preserva o atual. Nenhuma troca ocorre na varredura.",
+        "NOVO MÍNIMO atualiza o candidato se o número analisado for menor; MANTER CANDIDATO preserva o atual. Nenhuma troca ocorre durante a busca.",
     },
     {
       icon: "⇄",
       title: "Transferência e Selo OK",
       description:
-        "Ao término da varredura, ocorre no máximo uma transferência para posicionar o menor item e consolidar a posição com selo OK.",
+        "Ao término da varredura, ocorre no máximo uma troca para posicionar o menor item e consolidar a posição com selo OK.",
     },
   ],
   highlights: [
     {
       label: "MÉTODO",
-      value: "Scanner Seletivo",
+      value: "Seleção do Menor Elemento",
       variant: "purple",
     },
     {
@@ -185,17 +185,17 @@ export const SELECTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
     },
   ],
   particularities: [
-    "Durante toda a varredura do scanner, nenhuma movimentação física de caixas ocorre na esteira.",
-    "A transferência ocorre somente após a varredura completa, selando a posição alvo com o selo OK.",
+    "Durante toda a busca pelo menor valor, nenhuma troca de elementos ocorre no vetor.",
+    "A transferência ocorre somente após a varredura completa da passada, consolidando a posição com o selo OK.",
   ],
   startLabel: "INICIAR SELECTION SORT",
   startVariant: "primary",
 };
 
 /**
- * Briefing oficial para o protocolo Insertion Sort ("Desvio e Encaixe de Cargas").
- * Foco na construção da partição ordenada relativa à esquerda, elevação de chave ao trilho aéreo,
- * deslocamento unilateral regressivo (SHIFT) e encaixe na vaga aberta (INSERT).
+ * Briefing oficial para o protocolo Insertion Sort ("Inserção na Parte Ordenada").
+ * Foco na construção da parte ordenada à esquerda, elemento chave,
+ * deslocamento regressivo e inserção na vaga aberta.
  */
 export const INSERTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
   id: "insertion-canonical",
@@ -204,39 +204,39 @@ export const INSERTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
   badgeText: "PLATAFORMA EDUCACIONAL • MÓDULO 03",
   badgeVariant: "amber",
   subtitle:
-    "Construção incremental de partição ordenada através de chave suspensa e deslocamento de cargas.",
+    "Construção progressiva de uma parte ordenada inserindo cada número na posição correta.",
   objective:
-    "Construir progressivamente uma região ordenada à esquerda (ORD): em cada passada, a carga A[i] vira a chave suspensa no trilho aéreo, cargas maiores deslizam para a direita abrindo vaga e a chave é encaixada na posição exata.",
+    "Construir progressivamente uma região ordenada à esquerda (ORD): em cada passada, o elemento A[i] vira a chave destacada, elementos maiores deslizam para a direita abrindo vaga e a chave é inserida na posição exata.",
   instructions: [
     {
       icon: "📌",
       title: "O Que Você Vai Aprender",
       description:
-        "Região ordenada incremental (ORD), elevação de chave ao trilho aéreo, inspeção regressiva (A[j] > chave), deslocamentos sucessivos e a distinção fundamental: SHIFT ≠ TROCA (SWAP).",
+        "Construção de uma parte ordenada passo a passo (ORD), seleção do número-chave, comparação regressiva e a diferença essencial: DESLOCAMENTO ≠ TROCA.",
     },
     {
       icon: "⚙",
       title: "O Que Você Vai Praticar",
       description:
-        "Observar A[j] e a chave suspensa, comandar DESLOCAR CARGA (shift) quando A[j] > chave, reconhecer a condição de parada (A[j] ≤ chave ou início da esteira) e ENCAIXAR CHAVE na vaga.",
+        "Comparar o número em análise com a chave destacada, comandar DESLOCAR quando o número for maior e encaixar a chave na vaga correta.",
     },
     {
       icon: "🛤",
       title: "Como Funciona o Ciclo",
       description:
-        "1. A[i] vira CHAVE e sobe ao trilho aéreo; 2. Uma VAGA é aberta na esteira; 3. O scanner percorre a região ORD da direita para a esquerda; 4. Cargas maiores são deslocadas à direita; 5. A chave encaixa na vaga; 6. A região ORD expande.",
+        "1. O próximo número vira CHAVE; 2. Uma VAGA é aberta no vetor; 3. Compara-se a chave com os elementos do grupo ORD da direita para a esquerda; 4. Elementos maiores deslizam para a direita; 5. A chave é inserida na vaga; 6. A região ORD expande.",
     },
     {
       icon: "⚠️",
-      title: "Avisos Conceituais Vitais",
+      title: "Avisos Importantes",
       description:
-        "SHIFT ≠ TROCA: apenas uma caixa desliza para a vaga vazia. ORD ≠ POSIÇÃO DEFINITIVA: elementos na região ordenada podem deslizar novamente para a direita em passadas futuras.",
+        "DESLOCAMENTO ≠ TROCA: apenas um elemento desliza para a vaga aberta. ORD ≠ POSIÇÃO DEFINITIVA: elementos no grupo ordenado ainda podem deslizar para a direita em passadas futuras.",
     },
   ],
   highlights: [
     {
       label: "MÉTODO",
-      value: "Deslocamento e Encaixe",
+      value: "Deslocamento e Inserção",
       variant: "amber",
     },
     {
@@ -246,12 +246,12 @@ export const INSERTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
     },
     {
       label: "MEMÓRIA",
-      value: "O(1) Trilho Suspenso",
+      value: "O(1) Elemento Chave",
       variant: "emerald",
     },
   ],
   particularities: [
-    "A vaga na esteira é temporária e física: a chave só é encaixada quando todos os elementos maiores tiverem sido deslocados.",
+    "A vaga no vetor é temporária: a chave só é inserida quando todos os elementos maiores tiverem sido deslocados.",
     "A região ORD representa ordenação relativa entre os elementos processados, não indicando posições fixas finais.",
   ],
   startLabel: "INICIAR TUTORIAL GUIADO",
@@ -259,7 +259,7 @@ export const INSERTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
 };
 
 /**
- * Briefing oficial para o protocolo Merge Sort ("Divisão e Confluência").
+ * Briefing oficial para o protocolo Merge Sort ("Divisão e Intercalação").
  * Foco pedagógico: decomposição recursiva, buffer auxiliar, estabilidade sob empate e distinção ORD vs OK.
  */
 export const MERGE_CANONICAL_BRIEFING: ProtocolModeBriefing = {
@@ -268,51 +268,51 @@ export const MERGE_CANONICAL_BRIEFING: ProtocolModeBriefing = {
   modeName: "DIVISÃO E CONFLUÊNCIA",
   badgeText: "PLATAFORMA EDUCACIONAL • MÓDULO 04",
   badgeVariant: "cyan",
-  subtitle: "Decomposição recursiva e intercalação ordenada com dois ponteiros e esteira coletora.",
+  subtitle: "Divisão em grupos menores e intercalação ordenada com dois ponteiros e vetor auxiliar.",
   objective:
-    "Dividir o lote sucessivamente até subproblemas unitários e recompor a esteira principal através da confluência ordenada de ramais alimentando a esteira coletora.",
+    "Dividir o vetor em subproblemas unitários e recompor a ordem combinando os grupos ordenados com um vetor auxiliar temporário (buffer).",
   instructions: [
     {
       icon: "✂️",
       title: "Divisão Estrutural",
       description:
-        "A partição binária divide o lote sucessivamente até subvetores unitários. A divisão isolada não ordena nem altera os valores das cargas.",
+        "A divisão binária reparte o vetor sucessivamente até subvetores unitários. A divisão isolada não ordena nem altera os valores dos elementos.",
     },
     {
       icon: "🔀",
       title: "Confluência de Ramais",
       description:
-        "A ordenação ocorre na intercalação: dois subvetores previamente ordenados alimentam a esteira coletora temporária (buffer auxiliar).",
+        "A ordenação ocorre na intercalação: dois grupos já ordenados (ramais) alimentam o vetor temporário (buffer auxiliar).",
     },
     {
       icon: "👀",
       title: "Inspeção Exclusiva das Frentes",
       description:
-        "O operador inspeciona apenas as duas cargas situadas na frente de cada ramal (dois ponteiros), colhendo sempre a menor carga para o buffer.",
+        "Analise apenas os dois números situados na frente de cada ramal (dois ponteiros), escolhendo sempre o menor para a próxima posição do buffer.",
     },
     {
       icon: "⚖️",
       title: "Regra Mandatória de Estabilidade",
       description:
-        "Em caso de empate (cargas com valores iguais), escolha sempre a carga do Ramal Esquerdo para preservar a estabilidade e a ordem relativa original dos itens.",
+        "Em caso de empate (números com valores iguais), escolha sempre o item do Ramal Esquerdo para preservar a estabilidade e a ordem original dos dados.",
     },
     {
       icon: "🌊",
       title: "Drenagem da Cauda Restante",
       description:
-        "Quando um ramal se esgota, todas as cargas do outro ramal já são maiores e são transferidas em lote para a esteira coletora sem novas comparações.",
+        "Quando um dos grupos terminar, todos os números restantes do outro grupo são copiados diretamente para o buffer sem novas comparações, pois já estão ordenados.",
     },
     {
       icon: "🏷️",
       title: "Marcação ORD vs Selo OK",
       description:
-        "Ao preencher o buffer, as cargas voltam à esteira principal. Subvetores intermediários recebem marcação ORD (ordenação local); o selo definitivo OK surge apenas ao concluir a raiz.",
+        "Ao preencher o buffer, os números voltam ao vetor principal. Subvetores intermediários recebem marcação ORD (ordenação local); o selo definitivo OK surge apenas ao concluir todo o vetor.",
     },
     {
       icon: "✍️",
       title: "Escritas Físicas vs Comparações",
       description:
-        "Escritas na esteira coletora (buffer) e cópias de retorno para a esteira principal são operações físicas distintas da comparação de valores. O algoritmo requer buffer auxiliar temporário O(n).",
+        "Escritas no vetor auxiliar (buffer) e cópias de retorno para o vetor principal são operações distintas da comparação de valores. O algoritmo requer buffer auxiliar temporário O(n).",
     },
   ],
   highlights: [
@@ -328,13 +328,13 @@ export const MERGE_CANONICAL_BRIEFING: ProtocolModeBriefing = {
     },
     {
       label: "BUFFER AUXILIAR",
-      value: "O(n) Esteira Coletora",
+      value: "O(n) Espaço Temporário",
       variant: "emerald",
     },
   ],
   particularities: [
-    "A esteira coletora (buffer) é temporária e reutilizada a cada ciclo de intercalação.",
-    "Decisões incorretas paralisam a esteira e explicam a invariante sem reiniciar a atividade.",
+    "O vetor auxiliar (buffer) é temporário e reutilizado a cada ciclo de intercalação.",
+    "Decisões incorretas paralisam a ação e explicam a invariante sem reiniciar o exercício.",
   ],
   startLabel: "INICIAR TUTORIAL GUIADO",
   startVariant: "primary",

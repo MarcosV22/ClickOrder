@@ -105,9 +105,9 @@ describe("Merge Sort Practice Flow & Intercalation Station (P3.1-D)", () => {
       expect(html).toContain("intercalar(A, left, mid, right)");
 
       // Botoeira de ações
-      expect(html).toContain("1: DESPACHAR ESQUERDA");
-      expect(html).toContain("2: DESPACHAR DIREITA");
-      expect(html).toContain("3: DESPACHAR RESTANTE");
+      expect(html).toContain("1: ESCOLHER DA ESQUERDA");
+      expect(html).toContain("2: ESCOLHER DA DIREITA");
+      expect(html).toContain("3: COPIAR RESTANTES");
     });
 
     it("respeita as regras de layout: single scroll owner e overflow horizontal isolado", () => {
@@ -293,9 +293,9 @@ describe("Merge Sort Practice Flow & Intercalation Station (P3.1-D)", () => {
       expect(html).toContain("PRÁTICA BÁSICA");
       expect(html).toContain("PRÁTICA INTERMEDIÁRIA");
       expect(html).toContain("PRÁTICA AVANÇADA");
-      expect(html).toContain("4 CARGAS");
-      expect(html).toContain("5 CARGAS");
-      expect(html).toContain("6 CARGAS");
+      expect(html).toContain("4 ELEMENTOS");
+      expect(html).toContain("5 ELEMENTOS");
+      expect(html).toContain("6 ELEMENTOS");
     });
 
     it("renderiza a tela de resultados do Merge Sort com métricas segregadas de escrita", () => {

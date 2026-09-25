@@ -43,12 +43,12 @@ export const PROTOCOL_CATALOG: readonly ProtocolMetadata[] = Object.freeze([
   {
     id: "bubble",
     name: "BUBBLE SORT",
-    metaphor: "PARES VIZINHOS / ESTEIRA DE COMPARAÇÃO",
+    metaphor: "COMPARAÇÃO DE VIZINHOS",
     shortDescription:
-      "Compare cargas vizinhas e execute trocas sucessivas até consolidar a esteira.",
+      "Compare pares de números vizinhos e troque suas posições quando estiverem fora de ordem.",
     practiceItems: Object.freeze([
       "Comparação de vizinhos",
-      "Troca física adjacente",
+      "Troca de posições",
       "Passadas sucessivas",
     ]),
     status: "available",
@@ -70,13 +70,13 @@ export const PROTOCOL_CATALOG: readonly ProtocolMetadata[] = Object.freeze([
   {
     id: "selection",
     name: "SELECTION SORT",
-    metaphor: "SCANNER DE CARGA MÍNIMA",
+    metaphor: "SELEÇÃO DO MENOR NÚMERO",
     shortDescription:
-      "Varra a região não ordenada, identifique a menor carga e transfira-a para a posição alvo.",
+      "Percorra os números não ordenados, encontre o menor valor e coloque-o na posição inicial da passada.",
     practiceItems: Object.freeze([
-      "Varredura da esteira",
-      "Candidato a menor carga",
-      "Transferência pontual no commit",
+      "Busca do menor valor",
+      "Comparação com o menor atual",
+      "Confirmação da posição final",
     ]),
     status: "available",
     statusLabel: "DISPONÍVEL",
@@ -97,12 +97,12 @@ export const PROTOCOL_CATALOG: readonly ProtocolMetadata[] = Object.freeze([
   {
     id: "insertion",
     name: "INSERTION SORT",
-    metaphor: "TRILHO DE INSERÇÃO",
+    metaphor: "INSERÇÃO NA PARTE ORDENADA",
     shortDescription:
-      "Construa progressivamente uma região ordenada inserindo cada nova carga na posição correta.",
+      "Construa uma parte ordenada inserindo cada novo número na posição correta entre os anteriores.",
     practiceItems: Object.freeze([
-      "Região ordenada provisória (ORD)",
-      "Carga-chave sob inspeção",
+      "Parte ordenada à esquerda",
+      "Número em análise (chave)",
       "Deslocamento e inserção",
     ]),
     status: "available",
@@ -124,12 +124,12 @@ export const PROTOCOL_CATALOG: readonly ProtocolMetadata[] = Object.freeze([
   {
     id: "merge",
     name: "MERGE SORT",
-    metaphor: "DIVISÃO E CONFLUÊNCIA DE RAMAIS",
+    metaphor: "DIVISÃO E INTERCALAÇÃO",
     shortDescription:
-      "Divida o lote em subvetores e recombine com dois ponteiros alimentando a esteira coletora.",
+      "Divida o vetor em grupos menores e junte-os em ordem usando um vetor auxiliar.",
     practiceItems: Object.freeze([
-      "Intercalação com dois ponteiros",
-      "Esteira coletora (buffer O(n))",
+      "Comparação entre dois grupos",
+      "Vetor auxiliar temporário",
       "Desempate com estabilidade (≤)",
     ]),
     status: "available",

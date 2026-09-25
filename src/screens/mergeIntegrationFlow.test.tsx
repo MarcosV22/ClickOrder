@@ -54,7 +54,7 @@ describe("Merge Sort Full Integration & Lifecycle Flow (P3.1-F)", () => {
       mount(<App initialScreen="home" />);
 
       expect(container.textContent).toContain("MERGE SORT");
-      expect(container.textContent).toContain("DIVISÃO E CONFLUÊNCIA DE RAMAIS");
+      expect(container.textContent).toContain("DIVISÃO E INTERCALAÇÃO");
 
       // Localiza o botão "INICIAR TREINAMENTO" dentro do card do Merge Sort
       const startButtons = Array.from(container.querySelectorAll("button")).filter((btn) =>
@@ -221,7 +221,7 @@ describe("Merge Sort Full Integration & Lifecycle Flow (P3.1-F)", () => {
 
       // A tela deve refletir a síntese do Merge Sort
       expect(container.textContent).toContain("MÓDULO EDUCACIONAL • MERGE SORT • CURRÍCULO 3/3 CONCLUÍDO");
-      expect(container.textContent).toContain("divisão e confluência");
+      expect(container.textContent).toContain("divisão e intercalação");
       expect(container.textContent).toContain("Síntese Conceitual do Merge Sort");
 
       // Deve mostrar as métricas factuais da sessão (sem inventar métricas das práticas passadas)

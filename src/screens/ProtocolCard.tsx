@@ -22,7 +22,7 @@ export default function ProtocolCard({
 
   return (
     <div
-      className={`relative flex flex-col justify-between rounded-2xl p-6 sm:p-7 backdrop-blur-md transition-all duration-300 border ${
+      className={`relative flex flex-col justify-between h-full rounded-2xl p-6 sm:p-7 backdrop-blur-md transition-all duration-300 border ${
         isAvailable
           ? `${metadata.theme.borderClass} ${metadata.theme.borderHoverClass} bg-[#0c1533]/80 hover:shadow-2xl`
           : "border-white/10 bg-[#080d20]/50 opacity-70"
@@ -49,7 +49,7 @@ export default function ProtocolCard({
       )}
 
       {/* Top section: Badges & Headings */}
-      <div className="flex flex-col gap-4 relative z-10">
+      <div className="flex flex-col gap-4 relative z-10 flex-1">
         {/* Status bar */}
         <div className="flex items-center justify-between gap-2">
           <div
@@ -70,7 +70,7 @@ export default function ProtocolCard({
           </div>
 
           <span
-            className="text-[10px] font-mono tracking-widest text-white/40 uppercase"
+            className="text-[11px] font-mono tracking-wider text-slate-300 font-semibold uppercase"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             {isAvailable ? `${metadata.totalPhases} PRÁTICAS` : "CURRICULAR"}
@@ -83,13 +83,13 @@ export default function ProtocolCard({
             className={`text-2xl sm:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r ${metadata.theme.titleGradientClass}`}
             style={{
               fontFamily: "'Orbitron', sans-serif",
-              filter: isAvailable ? `drop-shadow(0 0 16px ${metadata.theme.accentGlow})` : "none",
+              filter: isAvailable ? `drop-shadow(0 0 12px ${metadata.theme.accentGlow})` : "none",
             }}
           >
             {metadata.name}
           </h2>
           <p
-            className="text-[11px] font-mono uppercase tracking-wider text-white/50 mt-1 font-semibold"
+            className="text-xs font-mono uppercase tracking-wider text-slate-300 mt-1 font-semibold"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             {metadata.metaphor}
@@ -98,16 +98,16 @@ export default function ProtocolCard({
 
         {/* Short pedagogical description */}
         <p
-          className="text-sm text-white/70 leading-relaxed font-sans min-h-[44px]"
+          className="text-sm sm:text-[15px] text-slate-200 leading-relaxed font-sans"
           style={{ fontFamily: "'Exo 2', sans-serif" }}
         >
           {metadata.shortDescription}
         </p>
 
         {/* Practice items */}
-        <div className="flex flex-col gap-2 pt-1 border-t border-white/5">
+        <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
           <span
-            className="text-[10px] uppercase font-mono tracking-widest text-white/40"
+            className="text-[10px] uppercase font-mono tracking-widest text-slate-300 font-semibold"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             O QUE VOCÊ VAI PRATICAR
@@ -116,7 +116,7 @@ export default function ProtocolCard({
             {metadata.practiceItems.map((item) => (
               <span
                 key={item}
-                className={`px-2 py-0.5 rounded text-[11px] font-mono border ${metadata.theme.practiceBadgeClass}`}
+                className={`px-2 py-0.5 rounded text-[11px] font-mono border font-medium ${metadata.theme.practiceBadgeClass}`}
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
                 {item}
@@ -126,18 +126,18 @@ export default function ProtocolCard({
         </div>
 
         {/* Training status / Telemetry */}
-        <div className="flex flex-col gap-2 pt-2 border-t border-white/5">
+        <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
           <span
-            className="text-[10px] uppercase font-mono tracking-widest text-white/40"
+            className="text-[10px] uppercase font-mono tracking-widest text-slate-300 font-semibold"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             STATUS DE TREINAMENTO
           </span>
 
           {isAvailable ? (
-            <div className="grid grid-cols-3 gap-2 bg-[#060b1a]/60 border border-white/10 rounded-lg p-2.5">
+            <div className="grid grid-cols-3 gap-2 bg-[#060b1a]/70 border border-white/10 rounded-lg p-2.5">
               <div className="flex flex-col">
-                <span className="text-[9px] font-mono text-white/40 uppercase">Práticas</span>
+                <span className="text-[10px] font-mono text-slate-300 uppercase font-semibold">Práticas</span>
                 <span
                   className="text-xs font-bold text-white font-mono mt-0.5"
                   style={{ fontFamily: "'Space Mono', monospace" }}
@@ -147,7 +147,7 @@ export default function ProtocolCard({
               </div>
 
               <div className="flex flex-col">
-                <span className="text-[9px] font-mono text-white/40 uppercase">Tutorial</span>
+                <span className="text-[10px] font-mono text-slate-300 uppercase font-semibold">Tutorial</span>
                 <span
                   className={`text-xs font-bold font-mono mt-0.5 ${
                     summary.hasCompletedTutorial ? "text-emerald-400" : "text-amber-400"
@@ -159,7 +159,7 @@ export default function ProtocolCard({
               </div>
 
               <div className="flex flex-col">
-                <span className="text-[9px] font-mono text-white/40 uppercase">Melhor Score</span>
+                <span className="text-[10px] font-mono text-slate-300 uppercase font-semibold">Melhor Score</span>
                 <span
                   className="text-xs font-bold text-cyan-300 font-mono mt-0.5"
                   style={{ fontFamily: "'Space Mono', monospace" }}
@@ -171,7 +171,7 @@ export default function ProtocolCard({
           ) : (
             <div className="p-2.5 rounded-lg border border-dashed border-white/10 bg-black/20 text-center">
               <span
-                className="text-[11px] font-mono text-white/40 italic"
+                className="text-[11px] font-mono text-slate-300 italic"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
                 Protocolo Curricular em Preparação (Marco P2.2)
@@ -181,8 +181,8 @@ export default function ProtocolCard({
         </div>
       </div>
 
-      {/* Bottom section: Actions */}
-      <div className="flex flex-col gap-2.5 pt-5 mt-4 border-t border-white/10 relative z-10">
+      {/* Bottom section: Actions strictly aligned across all cards */}
+      <div className="flex flex-col gap-2.5 pt-5 mt-auto border-t border-white/10 relative z-10">
         {/* Primary CTA */}
         {isAvailable ? (
           <GameButton
@@ -190,7 +190,7 @@ export default function ProtocolCard({
             variant="primary"
             size="md"
             icon="▶"
-            className="w-full"
+            className="w-full font-bold"
           >
             INICIAR TREINAMENTO
           </GameButton>
@@ -199,7 +199,7 @@ export default function ProtocolCard({
             type="button"
             disabled
             aria-disabled="true"
-            className="w-full min-h-[44px] py-2.5 px-4 rounded-lg font-mono text-xs uppercase tracking-wider bg-white/5 border border-white/10 text-white/30 cursor-not-allowed select-none font-bold inline-flex items-center justify-center gap-2"
+            className="w-full min-h-[44px] py-2.5 px-4 rounded-lg font-mono text-xs uppercase tracking-wider bg-white/5 border border-white/10 text-slate-400 cursor-not-allowed select-none font-bold inline-flex items-center justify-center gap-2"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             <span aria-hidden="true">○</span>
@@ -207,56 +207,60 @@ export default function ProtocolCard({
           </button>
         )}
 
-        {/* Secondary CTAs */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Secondary CTAs with flexible wrapping to avoid squeezed labels */}
+        <div className="flex flex-col sm:flex-row gap-2 w-full">
           {/* Tutorial button */}
-          {isAvailable ? (
-            <GameButton
-              onClick={() => onOpenTutorial(metadata.id)}
-              variant="secondary"
-              size="sm"
-              icon="?"
-              className="w-full text-center"
-            >
-              TUTORIAL
-            </GameButton>
-          ) : (
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="w-full min-h-[36px] py-1.5 px-2 rounded-lg font-mono text-[11px] uppercase tracking-wider bg-white/5 border border-white/5 text-white/20 cursor-not-allowed select-none inline-flex items-center justify-center gap-2"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              <span aria-hidden="true">?</span>
-              <span>TUTORIAL</span>
-            </button>
-          )}
+          <div className="flex-1 min-w-0">
+            {isAvailable ? (
+              <GameButton
+                onClick={() => onOpenTutorial(metadata.id)}
+                variant="secondary"
+                size="sm"
+                icon="?"
+                className="w-full text-center px-2 font-bold"
+              >
+                TUTORIAL
+              </GameButton>
+            ) : (
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                className="w-full min-h-[36px] py-1.5 px-2 rounded-lg font-mono text-[11px] uppercase tracking-wider bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed select-none inline-flex items-center justify-center gap-2"
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                <span aria-hidden="true">?</span>
+                <span>TUTORIAL</span>
+              </button>
+            )}
+          </div>
 
           {/* Demonstration button */}
-          {metadata.demonstrationStatus === "available" ? (
-            <GameButton
-              onClick={() => onOpenDemonstration?.(metadata.id)}
-              variant="ghost"
-              size="sm"
-              icon="👁"
-              className="w-full text-center"
-              aria-label={`Ver modo demonstração do protocolo ${metadata.name}`}
-            >
-              {metadata.demonstrationLabel}
-            </GameButton>
-          ) : (
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              title="Modo Demonstração em preparação"
-              className="w-full min-h-[36px] py-1.5 px-2 rounded-lg font-mono text-[11px] uppercase tracking-wider bg-white/5 border border-white/10 text-white/30 cursor-not-allowed select-none inline-flex items-center justify-center gap-2"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              <span>{metadata.demonstrationLabel}</span>
-            </button>
-          )}
+          <div className="flex-1 min-w-0">
+            {metadata.demonstrationStatus === "available" ? (
+              <GameButton
+                onClick={() => onOpenDemonstration?.(metadata.id)}
+                variant="ghost"
+                size="sm"
+                icon="👁"
+                className="w-full text-center px-2 font-bold text-white/90 hover:text-white"
+                aria-label={`Ver modo demonstração do protocolo ${metadata.name}`}
+              >
+                {metadata.demonstrationLabel}
+              </GameButton>
+            ) : (
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                title="Modo Demonstração em preparação"
+                className="w-full min-h-[36px] py-1.5 px-2 rounded-lg font-mono text-[11px] uppercase tracking-wider bg-white/5 border border-white/10 text-slate-500 cursor-not-allowed select-none inline-flex items-center justify-center gap-2"
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                <span>{metadata.demonstrationLabel}</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Optional Bubble-specific early exit / challenge mode */}

@@ -76,7 +76,7 @@ const COMPLETE_THEMES: Partial<Record<ModuleId, ModuleCompleteTheme>> = {
   bubble: {
     name: "BUBBLE SORT",
     subtitle:
-      "Você dominou a mecânica canônica por trocas adjacentes: comparações entre vizinhos, propagação da maior carga para a extremidade direita e consolidação progressiva.",
+      "Você dominou a mecânica canônica por comparações de vizinhos: análise de elementos contíguos, propagação do maior número para a extremidade direita e consolidação progressiva com selo OK.",
     primaryColor: "cyan",
     badgeBorder: "border-cyan-500/30",
     badgeBg: "bg-cyan-950/40",
@@ -84,15 +84,15 @@ const COMPLETE_THEMES: Partial<Record<ModuleId, ModuleCompleteTheme>> = {
     glowClasses: "bg-cyan-500/10",
     titleGradient: "from-cyan-300 via-blue-400 to-purple-400",
     cardBorder: "border-cyan-500/20",
-    movementLabel: "Trocas Adjacentes",
+    movementLabel: "Trocas de Posição",
     pedagogicalTitle: "Síntese Conceitual do Bubble Sort",
     pedagogicalText:
-      "O Bubble Sort opera através de comparações estritamente locais entre pares contíguos. A cada passada, o elemento de maior peso flutua para a direita até atingir sua vaga definitiva. As posições consolidadas formam uma partição imutável que reduz o custo das passadas seguintes.",
+      "O Bubble Sort opera através de comparações locais entre pares contíguos. A cada passada, o maior número flutua para a direita até atingir sua posição definitiva. As posições consolidadas formam uma partição ordenada que reduz o número de comparações das passadas seguintes.",
   },
   selection: {
     name: "SELECTION SORT",
     subtitle:
-      "Você dominou a mecânica canônica por varredura seletiva: localização da menor carga desordenada via scanner e transferência pontual por passada.",
+      "Você dominou a mecânica canônica por varredura seletiva: busca do menor elemento não ordenado e realização de no máximo uma troca por passada.",
     primaryColor: "purple",
     badgeBorder: "border-purple-500/30",
     badgeBg: "bg-purple-950/40",
@@ -100,15 +100,15 @@ const COMPLETE_THEMES: Partial<Record<ModuleId, ModuleCompleteTheme>> = {
     glowClasses: "bg-purple-500/10",
     titleGradient: "from-purple-300 via-cyan-400 to-emerald-400",
     cardBorder: "border-purple-500/20",
-    movementLabel: "Transferências Pontuais",
+    movementLabel: "Trocas (Transferências)",
     pedagogicalTitle: "Síntese Conceitual do Selection Sort",
     pedagogicalText:
-      "O Selection Sort divide a esteira entre uma partição ordenada à esquerda e uma não ordenada à direita. Ele varre todos os itens restantes buscando o menor elemento e realiza no máximo UMA transferência física por passada, minimizando movimentações no cenário prático.",
+      "O Selection Sort divide o vetor entre uma parte ordenada à esquerda e uma não ordenada à direita. Ele percorre todos os números restantes buscando o menor elemento e realiza no máximo UMA troca por passada, consolidando a posição definitiva com o selo OK.",
   },
   insertion: {
     name: "INSERTION SORT",
     subtitle:
-      "Você dominou a mecânica canônica por deslocamento: elevação da chave ao trilho aéreo, comparações regressivas na partição ordenada e encaixe direto na vaga.",
+      "Você dominou a mecânica canônica por deslocamento: seleção da chave destacada, comparações regressivas na parte ordenada e inserção direta na vaga aberta.",
     primaryColor: "amber",
     badgeBorder: "border-amber-500/30",
     badgeBg: "bg-amber-950/40",
@@ -119,12 +119,12 @@ const COMPLETE_THEMES: Partial<Record<ModuleId, ModuleCompleteTheme>> = {
     movementLabel: "Deslocamentos",
     pedagogicalTitle: "Síntese Conceitual do Insertion Sort",
     pedagogicalText:
-      "O Insertion Sort constrói a partição ordenada progressivamente. Cargas maiores são deslocadas para a direita apenas enquanto forem maiores que a chave suspensa no trilho aéreo, tornando o algoritmo especialmente eficiente para sequências quase ordenadas: O(n) no melhor caso.",
+      "O Insertion Sort constrói a região ordenada progressivamente. Elementos maiores deslizam para a direita apenas enquanto forem maiores que a chave destacada, tornando o algoritmo especialmente adaptativo e eficiente para sequências quase ordenadas: O(n) no melhor caso.",
   },
   merge: {
     name: "MERGE SORT",
     subtitle:
-      "Você dominou a mecânica canônica por divisão e confluência: intercalação ordenada com dois ponteiros, buffer auxiliar visível e garantia estrita de estabilidade.",
+      "Você dominou a mecânica canônica por divisão e intercalação: combinação ordenada com dois ponteiros, vetor auxiliar visível e garantia estrita de estabilidade.",
     primaryColor: "blue",
     badgeBorder: "border-blue-500/30",
     badgeBg: "bg-blue-950/40",
@@ -132,10 +132,10 @@ const COMPLETE_THEMES: Partial<Record<ModuleId, ModuleCompleteTheme>> = {
     glowClasses: "bg-blue-500/10",
     titleGradient: "from-blue-300 via-cyan-400 to-sky-300",
     cardBorder: "border-blue-500/20",
-    movementLabel: "Escritas no Buffer",
+    movementLabel: "Escritas no Vetor Auxiliar",
     pedagogicalTitle: "Síntese Conceitual do Merge Sort",
     pedagogicalText:
-      "O Merge Sort divide recursivamente o lote até subvetores unitários e recombina-os de forma ordenada utilizando um buffer auxiliar O(n). Ao comparar as frentes dos ramais esquerdo e direito, a decisão em empate (≤) prioriza invariavelmente o ramal esquerdo, preservando a estabilidade algorítmica antes da cópia de retorno à esteira principal.",
+      "O Merge Sort divide recursivamente o vetor até subproblemas unitários e junta-os de forma ordenada utilizando um vetor auxiliar temporário O(n). Ao comparar as frentes dos grupos esquerdo e direito, a decisão em empate (≤) escolhe invariavelmente o elemento da esquerda, preservando a estabilidade algorítmica antes da cópia de retorno ao vetor principal.",
   },
 };
 
@@ -354,12 +354,12 @@ export default function PracticeSetCompleteScreen({
 
             {/* Erros */}
             <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-white/10">
-              <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
+              <span className="text-xs tracking-wider text-slate-300 uppercase mb-1 font-mono text-center font-bold">
                 Erros
               </span>
               <span
                 className={`text-2xl font-black ${
-                  totalErrors > 0 ? "text-red-400" : "text-white/40"
+                  totalErrors > 0 ? "text-red-400" : "text-slate-400"
                 }`}
                 style={{ fontFamily: "'Orbitron', sans-serif" }}
               >
@@ -369,11 +369,11 @@ export default function PracticeSetCompleteScreen({
 
             {/* Tempo se disponível, senão Dicas */}
             <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-white/10">
-              <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
-                {totalTimeMs > 0 ? "Tempo (Descritivo)" : "Dicas"}
+              <span className="text-xs tracking-wider text-slate-300 uppercase mb-1 font-mono text-center font-bold">
+                {totalTimeMs > 0 ? "Tempo (Total)" : "Dicas"}
               </span>
               <span
-                className="text-xl sm:text-2xl font-black text-white/80"
+                className="text-xl sm:text-2xl font-black text-white/90"
                 style={{ fontFamily: "'Orbitron', sans-serif" }}
               >
                 {totalTimeMs > 0 ? formatElapsedTime(totalTimeMs) : totalHints}
@@ -382,7 +382,7 @@ export default function PracticeSetCompleteScreen({
 
             {/* Média de Pontuação */}
             <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-[#0d1635]/80 border border-emerald-500/20">
-              <span className="text-[9px] tracking-widest text-white/50 uppercase mb-1 font-mono text-center">
+              <span className="text-xs tracking-wider text-slate-300 uppercase mb-1 font-mono text-center font-bold">
                 Pontuação Média
               </span>
               <span
@@ -398,7 +398,7 @@ export default function PracticeSetCompleteScreen({
         {/* Detalhamento de cada Prática Realizada */}
         {rawList.length > 0 && (
           <section className="w-full flex flex-col gap-4" aria-label="Práticas Concluídas">
-            <div className="text-[10px] text-white/40 tracking-widest uppercase text-center font-mono">
+            <div className="text-xs text-slate-300 font-bold tracking-wider uppercase text-center font-mono">
               VETORES CONSOLIDADOS POR NÍVEL
             </div>
 
@@ -509,10 +509,10 @@ export default function PracticeSetCompleteScreen({
         <section
           className={`w-full p-4 rounded-xl ${theme.badgeBg} border ${theme.badgeBorder} flex flex-col gap-2`}
         >
-          <span className={`text-xs font-bold ${theme.badgeText} font-mono uppercase`}>
+          <span className={`text-xs font-bold ${theme.badgeText} font-mono uppercase tracking-wider`}>
             {theme.pedagogicalTitle}
           </span>
-          <p className="text-xs text-white/80 font-mono leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-100 leading-relaxed" style={{ fontFamily: "'Exo 2', sans-serif" }}>
             {theme.pedagogicalText}
           </p>
         </section>
@@ -534,7 +534,7 @@ export default function PracticeSetCompleteScreen({
               >
                 MODO DESAFIO: EARLY EXIT
               </h3>
-              <p className="text-xs text-white/70 font-mono">
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed" style={{ fontFamily: "'Exo 2', sans-serif" }}>
                 Com o conjunto regular concluído, experimente a variante otimizada capaz de interromper o laço quando nenhuma troca ocorrer.
               </p>
             </div>

@@ -558,122 +558,412 @@ export default function MergeGameScreen({
           </div>
         </header>
 
-        {/* Faixa de Telemetria Contínua */}
-        <section
-          aria-label="Telemetria da Operação"
-          className="w-full grid grid-cols-2 sm:grid-cols-6 gap-2 bg-[#080f28]/70 border border-white/5 rounded-xl p-3"
-        >
-          <div className="flex flex-col items-center">
-            <span
-              className="text-[9px] text-white/40 uppercase font-mono"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              Comparações
-            </span>
-            <span
-              data-testid="comparisons-count"
-              className="text-lg font-bold text-cyan-300"
-              style={{ fontFamily: "'Orbitron', sans-serif" }}
-            >
-              {displayedComparisons}
-            </span>
-          </div>
+        {/* =========================================================================
+            1. O QUE FAZER AGORA (Instrução do Passo e Dica Pedagógica)
+           ========================================================================= */}
+        <section aria-label="Instrução do Passo Atual" className="w-full flex flex-col gap-2">
+          <InstructionPanel
+            message={feedback.message}
+            type={feedback.type}
+          />
 
-          <div className="flex flex-col items-center">
-            <span
-              className="text-[9px] text-white/40 uppercase font-mono"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              Escritas Buffer
-            </span>
-            <span
-              data-testid="writes-in-buffer"
-              className="text-lg font-bold text-blue-300"
-              style={{ fontFamily: "'Orbitron', sans-serif" }}
-            >
-              {displayedWritesInBuffer}
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <span
-              className="text-[9px] text-white/40 uppercase font-mono"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              Escritas Principal
-            </span>
-            <span
-              className="text-lg font-bold text-cyan-200"
-              style={{ fontFamily: "'Orbitron', sans-serif" }}
-            >
-              {displayedWritesInMain}
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <span
-              className="text-[9px] text-white/40 uppercase font-mono"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              Total Escritas
-            </span>
-            <span
-              className="text-lg font-bold text-sky-400"
-              style={{ fontFamily: "'Orbitron', sans-serif" }}
-            >
-              {displayedTotalWrites}
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <span
-              className="text-[9px] text-white/40 uppercase font-mono"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              Decisões Incorretas
-            </span>
-            <span
-              className={`text-lg font-bold ${engineState.errors > 0 ? "text-amber-400" : "text-white/60"}`}
-              style={{ fontFamily: "'Orbitron', sans-serif" }}
-            >
-              {engineState.errors}
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <span
-              className="text-[9px] text-white/40 uppercase font-mono"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              Pontuação
-            </span>
-            <span
-              className="text-lg font-bold text-emerald-400"
-              style={{ fontFamily: "'Orbitron', sans-serif" }}
-            >
-              {currentScore}
-            </span>
-          </div>
+          {activeHint && (
+            <div className="p-3.5 rounded-xl border border-cyan-500/40 bg-cyan-950/40 text-sm text-cyan-100 flex items-start gap-2.5 shadow-md">
+              <span className="text-cyan-300 font-bold font-mono text-sm">💡 DICA:</span>
+              <p className="flex-1 leading-relaxed" style={{ fontFamily: "'Exo 2', sans-serif" }}>
+                {activeHint}
+              </p>
+            </div>
+          )}
         </section>
 
-        {/* Vetor Principal (Esteira Global) */}
+        {/* =========================================================================
+            2 e 3. ESTAÇÃO DE INTERCALAÇÃO (CONFRONTO DIRETO E VETOR AUXILIAR)
+           ========================================================================= */}
+        {currentInterval && !isCompleted && (
+          <section
+            aria-label="Estação de Intercalação"
+            className="w-full panel-border bg-[#0b1638]/90 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 border-2 border-cyan-500/30 shadow-xl"
+          >
+            {/* Metadados de apoio do subintervalo ativo */}
+            <div className="flex flex-wrap items-center justify-between border-b border-white/10 pb-2 text-[11px] font-mono gap-2">
+              <span className="font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                CONFLUÊNCIA DE RAMAIS • INTERCALAÇÃO ATIVA
+              </span>
+              <span className="text-slate-300 font-medium">
+                Intervalo: [{currentInterval.left}..{currentInterval.right}] | Divisão: mid={currentInterval.mid}
+              </span>
+            </div>
+
+            {/* 2. OS DOIS NÚMEROS A COMPARAR (Destaque Central Imediato) */}
+            <div className="p-4 rounded-xl bg-[#070d22] border border-cyan-500/30 flex flex-col items-center justify-center gap-2 text-center shadow-inner">
+              {currentPhase === "COMPARE_HEADS" && leftHead && rightHead ? (
+                <>
+                  <span className="text-[11px] font-mono text-cyan-300 font-bold uppercase tracking-wider">
+                    COMPARAÇÃO ENTRE AS FRENTES DOS GRUPOS (SENSORES ÓPTICOS EM CONFRONTO ATIVO)
+                  </span>
+                  <div
+                    className="flex items-center justify-center gap-6 sm:gap-10 my-1 text-base sm:text-lg font-bold text-white"
+                    style={{ fontFamily: "'Orbitron', sans-serif" }}
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-xs font-mono text-cyan-300 font-semibold">Grupo da Esquerda</span>
+                      <span className="text-2xl text-cyan-300 px-4 py-1.5 bg-cyan-950/70 rounded-xl border border-cyan-400/50 shadow-sm">
+                        {formatMergeElementLabel(leftHead)}
+                      </span>
+                    </div>
+                    <span className="text-slate-400 font-mono text-xl font-bold">vs</span>
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-xs font-mono text-blue-300 font-semibold">Grupo da Direita</span>
+                      <span className="text-2xl text-blue-300 px-4 py-1.5 bg-blue-950/70 rounded-xl border border-blue-400/50 shadow-sm">
+                        {formatMergeElementLabel(rightHead)}
+                      </span>
+                    </div>
+                  </div>
+                  <p
+                    className="text-xs sm:text-sm text-slate-200 max-w-xl leading-relaxed mt-1"
+                    style={{ fontFamily: "'Exo 2', sans-serif" }}
+                  >
+                    Compare os dois números destacados. Escolha o menor para a próxima posição do vetor auxiliar. Se forem iguais, escolha o da esquerda (estabilidade).
+                  </p>
+                </>
+              ) : currentPhase === "DRAIN_READY" ? (
+                <>
+                  <span className="text-[11px] font-mono text-amber-300 font-bold uppercase tracking-wider">
+                    CÓPIA DOS NÚMEROS RESTANTES
+                  </span>
+                  <p
+                    className="text-xs sm:text-sm text-slate-100 max-w-xl leading-relaxed font-medium"
+                    style={{ fontFamily: "'Exo 2', sans-serif" }}
+                  >
+                    Um dos grupos terminou. Copie os números restantes do outro grupo diretamente para o vetor auxiliar: não são necessárias novas comparações porque aquele grupo já está ordenado.
+                  </p>
+                </>
+              ) : (
+                <span className="text-xs text-slate-300 font-mono">
+                  Sincronizando estado da intercalação...
+                </span>
+              )}
+            </div>
+
+            {/* As filas dos dois grupos (apoio contextual) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* Grupo da Esquerda */}
+              <div
+                className={`flex flex-col gap-2 p-3 rounded-xl border ${
+                  p1 <= currentInterval.mid
+                    ? "border-cyan-500/40 bg-cyan-950/20"
+                    : "border-slate-700 bg-slate-900/30 opacity-60"
+                }`}
+              >
+                <div className="flex justify-between items-center text-[11px] font-mono">
+                  <span className="font-bold text-cyan-300">
+                    RAMAL ESQUERDO (A[{currentInterval.left}..{currentInterval.mid}])
+                  </span>
+                  <span
+                    className={
+                      p1 <= currentInterval.mid
+                        ? "text-cyan-300 font-semibold"
+                        : "text-amber-300 font-semibold"
+                    }
+                  >
+                    {p1 <= currentInterval.mid ? `Frente p1 = #${p1 + 1}` : "GRUPO FINALIZADO"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 overflow-x-auto py-1">
+                  {currentValues
+                    .slice(currentInterval.left, currentInterval.mid + 1)
+                    .map((elem, offset) => {
+                      const absoluteIdx = currentInterval.left + offset;
+                      const isDispatched = absoluteIdx < p1;
+                      const isHead =
+                        absoluteIdx === p1 && currentPhase === "COMPARE_HEADS";
+
+                      return (
+                        <div
+                          key={elem.id}
+                          className={`flex flex-col items-center gap-1 ${
+                            isDispatched
+                              ? "opacity-30"
+                              : isHead
+                                ? "scale-105"
+                                : ""
+                          }`}
+                        >
+                          <NumberedBox
+                            value={elem.value}
+                            elementLabel={elem.label}
+                            index={absoluteIdx}
+                            role={isHead ? "pair" : "default"}
+                            badge={
+                              isHead
+                                ? "FRENTE E"
+                                : isDispatched
+                                  ? "COPIADO"
+                                  : "FILA"
+                            }
+                            disabled={false}
+                            size="sm"
+                          />
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+
+              {/* Grupo da Direita */}
+              <div
+                className={`flex flex-col gap-2 p-3 rounded-xl border ${
+                  p2 <= currentInterval.right
+                    ? "border-blue-500/40 bg-blue-950/20"
+                    : "border-slate-700 bg-slate-900/30 opacity-60"
+                }`}
+              >
+                <div className="flex justify-between items-center text-[11px] font-mono">
+                  <span className="font-bold text-blue-300">
+                    RAMAL DIREITO (A[{currentInterval.mid + 1}..{currentInterval.right}])
+                  </span>
+                  <span
+                    className={
+                      p2 <= currentInterval.right
+                        ? "text-blue-300 font-semibold"
+                        : "text-amber-300 font-semibold"
+                    }
+                  >
+                    {p2 <= currentInterval.right ? `Frente p2 = #${p2 + 1}` : "GRUPO FINALIZADO"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 overflow-x-auto py-1">
+                  {currentValues
+                    .slice(currentInterval.mid + 1, currentInterval.right + 1)
+                    .map((elem, offset) => {
+                      const absoluteIdx = currentInterval.mid + 1 + offset;
+                      const isDispatched = absoluteIdx < p2;
+                      const isHead =
+                        absoluteIdx === p2 && currentPhase === "COMPARE_HEADS";
+
+                      return (
+                        <div
+                          key={elem.id}
+                          className={`flex flex-col items-center gap-1 ${
+                            isDispatched
+                              ? "opacity-30"
+                              : isHead
+                                ? "scale-105"
+                                : ""
+                          }`}
+                        >
+                          <NumberedBox
+                            value={elem.value}
+                            elementLabel={elem.label}
+                            index={absoluteIdx}
+                            role={isHead ? "pair" : "default"}
+                            badge={
+                              isHead
+                                ? "FRENTE D"
+                                : isDispatched
+                                  ? "COPIADO"
+                                  : "FILA"
+                            }
+                            disabled={false}
+                            size="sm"
+                          />
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            </div>
+
+            {/* 3. ONDE O NÚMERO ESCOLHIDO SERÁ COLOCADO (Buffer / Vetor Auxiliar) */}
+            <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
+              <div className="flex justify-between items-center text-[11px] font-mono text-slate-300">
+                <span className="uppercase tracking-wider font-bold text-teal-300 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-teal-400" />
+                  VETOR AUXILIAR TEMPORÁRIO (ESTEIRA COLETORA AUXILIAR B[0..{currentInterval.right - currentInterval.left}])
+                </span>
+                <span className="font-semibold text-slate-200">
+                  Próxima posição: k = {k}
+                </span>
+              </div>
+
+              <div className="w-full overflow-x-auto py-2">
+                <div className="flex items-center justify-center gap-3 min-w-max mx-auto px-2">
+                  {currentBuffer.map((bufElem, slotIdx) => {
+                    const isTarget = slotIdx === k && !isCompleted;
+                    const isFilled = bufElem !== null;
+
+                    return (
+                      <div
+                        key={slotIdx}
+                        className="flex flex-col items-center gap-1"
+                      >
+                        <span
+                          className="text-slate-300 font-mono font-semibold"
+                          style={{
+                            fontFamily: "'Space Mono', monospace",
+                            fontSize: "11px",
+                          }}
+                        >
+                          B[{slotIdx}]
+                        </span>
+
+                        {isFilled ? (
+                          <NumberedBox
+                            value={bufElem.value}
+                            elementLabel={bufElem.label}
+                            index={slotIdx}
+                            role="ordered"
+                            badge="ORDEM"
+                            disabled={false}
+                            size="md"
+                          />
+                        ) : (
+                          <div
+                            className={`w-20 h-20 rounded-xl flex flex-col items-center justify-center border-2 border-dashed transition-all ${
+                              isTarget
+                                ? "border-cyan-400 bg-cyan-950/40 text-cyan-200 shadow-md"
+                                : "border-slate-700 bg-slate-900/40 text-slate-400"
+                            }`}
+                          >
+                            <span className="text-[10px] font-mono tracking-wider font-bold">
+                              {isTarget ? "ALVO (k)" : "VAGO"}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <p
+                className="text-xs text-slate-300 font-mono text-center"
+              >
+                * Ao completar o intervalo, todos os elementos são copiados de volta para o vetor principal com marcação ORD (ou OK na ordenação completa).
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* =========================================================================
+            4. OS BOTÕES DA DECISÃO (Ação Imediata e Acessível)
+           ========================================================================= */}
+        <footer
+          aria-label="Ações de Decisão"
+          className="w-full panel-border bg-[#070e26]/95 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 sticky bottom-4 z-20 shadow-2xl backdrop-blur-md"
+        >
+          {pendingFrames.length > 0 ? (
+            <GameButton
+              variant="primary"
+              size="lg"
+              onClick={handleAdvancePendingFrame}
+              className="w-full sm:w-auto min-w-[280px] border-cyan-400 bg-cyan-950/70 text-cyan-200"
+              title="Avançar para o próximo passo automático (Atalho: 1 ou Espaço)"
+            >
+              <div className="flex flex-col items-center">
+                <span>PRÓXIMO PASSO AUTOMÁTICO</span>
+                <span className="text-[10px] font-normal opacity-75">
+                  Passo {pendingFrameIndex + 1} de {pendingFrames.length} (Atalho 1 ou Espaço)
+                </span>
+              </div>
+            </GameButton>
+          ) : isCompleted ? (
+            <GameButton
+              variant="primary"
+              size="lg"
+              onClick={() => handleComplete(engineState)}
+              className="w-full sm:w-auto min-w-[240px] border-emerald-400 bg-emerald-950/70 text-emerald-200"
+              title="Visualizar a tela de resultados da prática"
+            >
+              <div className="flex flex-col items-center">
+                <span>VER RESULTADOS</span>
+                <span className="text-[10px] font-normal opacity-75">
+                  Ordenação Concluída com Sucesso!
+                </span>
+              </div>
+            </GameButton>
+          ) : (
+            <>
+              {/* Botão 1: Escolher Esquerda */}
+              <GameButton
+                variant="primary"
+                size="lg"
+                onClick={() => handleDecision("DISPATCH_LEFT")}
+                disabled={!canDispatchLeft}
+                className="w-full sm:w-auto min-w-[200px]"
+                title="Escolher o elemento do grupo da esquerda (Atalho 1)"
+              >
+                <div className="flex flex-col items-center">
+                  <span>1: ESCOLHER DA ESQUERDA</span>
+                  <span className="text-[10px] font-normal opacity-75">
+                    {leftHead ? `Elemento ${formatMergeElementLabel(leftHead)}` : "—"}
+                  </span>
+                </div>
+              </GameButton>
+
+              {/* Botão 2: Escolher Direita */}
+              <GameButton
+                variant="primary"
+                size="lg"
+                onClick={() => handleDecision("DISPATCH_RIGHT")}
+                disabled={!canDispatchRight}
+                className="w-full sm:w-auto min-w-[200px]"
+                title="Escolher o elemento do grupo da direita (Atalho 2)"
+              >
+                <div className="flex flex-col items-center">
+                  <span>2: ESCOLHER DA DIREITA</span>
+                  <span className="text-[10px] font-normal opacity-75">
+                    {rightHead
+                      ? `Elemento ${formatMergeElementLabel(rightHead)}`
+                      : "—"}
+                  </span>
+                </div>
+              </GameButton>
+
+              {/* Botão 3: Copiar Restantes */}
+              <GameButton
+                variant="primary"
+                size="lg"
+                onClick={() => handleDecision("DRAIN_REMAINDER")}
+                disabled={!canDrain}
+                className="w-full sm:w-auto min-w-[200px] border-emerald-500/50 hover:border-emerald-400"
+                title="Copiar os elementos restantes sem comparações (Atalho 3)"
+              >
+                <div className="flex flex-col items-center">
+                  <span>3: COPIAR RESTANTES</span>
+                  <span className="text-[10px] font-normal opacity-75">
+                    Cópia Direta
+                  </span>
+                </div>
+              </GameButton>
+            </>
+          )}
+        </footer>
+
+        {/* =========================================================================
+            5. CONTEXTO DO VETOR, PSEUDOCÓDIGO E MÉTRICAS
+           ========================================================================= */}
+        {/* Vetor Principal (Visão Geral e Legenda de Estados) */}
         <section
           aria-label="Esteira Principal"
-          className="w-full panel-border bg-[#091129]/80 rounded-xl px-4 py-4 flex flex-col gap-2"
+          className="w-full panel-border bg-[#091129]/80 rounded-2xl px-4 py-4 flex flex-col gap-3"
         >
-          <div className="flex items-center justify-between text-[11px] font-mono text-white/40 px-1">
-            <span className="uppercase tracking-widest flex items-center gap-2">
+          <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 px-1">
+            <span className="uppercase tracking-wider flex items-center gap-2 font-bold text-cyan-200">
               <span className="w-2 h-2 rounded-full bg-cyan-400 inline-block animate-pulse" />
               ESTEIRA PRINCIPAL (A[0..{initialElements.length - 1}])
             </span>
             {currentInterval ? (
-              <span className="text-cyan-300">
-                Intercalando Subintervalo: [{currentInterval.left}..
-                {currentInterval.right}] | Corte: mid={currentInterval.mid}
+              <span className="text-cyan-300 font-semibold">
+                Subintervalo: [{currentInterval.left}..{currentInterval.right}] | Divisão: mid={currentInterval.mid}
               </span>
             ) : isCompleted ? (
               <span className="text-emerald-400 font-bold">
-                ✓ TODAS AS CARGAS CONSOLIDADAS (STATUS OK)
+                ✓ TODOS OS NÚMEROS CONSOLIDADOS (STATUS OK)
               </span>
             ) : (
               <span>Aguardando partição</span>
@@ -717,11 +1007,11 @@ export default function MergeGameScreen({
                 const badge = isCompleted
                   ? "OK"
                   : isP1
-                    ? "SENSOR E"
+                    ? "FRENTE E"
                     : isP2
-                      ? "SENSOR D"
+                      ? "FRENTE D"
                       : isDispatched
-                        ? "COLETADO"
+                        ? "COPIADO"
                         : isLocallyOrdered
                           ? "ORD"
                           : inActiveRange
@@ -747,308 +1037,30 @@ export default function MergeGameScreen({
               })}
             </div>
           </div>
+
+          {/* Legenda explícita de distinção de estados */}
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2 border-t border-white/10 text-xs text-slate-300">
+            <span className="flex items-center gap-1.5">
+              <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-400/40 text-emerald-300 font-mono font-bold text-[10px]">OK</span>
+              <span>Posição final consolidada (vetor completo)</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="px-1.5 py-0.5 rounded bg-teal-950/80 border border-teal-400/40 text-teal-300 font-mono font-bold text-[10px]">ORD</span>
+              <span>Grupo ordenado localmente</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-400/40 text-amber-300 font-mono font-bold text-[10px]">FRENTE</span>
+              <span>Número sendo comparado</span>
+            </span>
+          </div>
         </section>
 
-        {/* Estação de Intercalação: Ramais Convergentes + Sensor Óptico + Buffer Auxiliar */}
-        {currentInterval && !isCompleted && (
-          <section
-            aria-label="Estação de Intercalação"
-            className="w-full panel-border bg-[#0b1638]/90 rounded-xl p-5 flex flex-col gap-4 border-2 border-blue-500/20"
-          >
-            {/* Título da Confluência */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-2">
-              <span
-                className="text-xs font-mono font-bold tracking-widest text-blue-300 uppercase flex items-center gap-2"
-                style={{ fontFamily: "'Space Mono', monospace" }}
-              >
-                CONFLUÊNCIA DE RAMAIS (PÁTIO DE TRIAGEM)
-              </span>
-              <span
-                className="text-[10px] text-white/40 font-mono"
-                style={{ fontFamily: "'Space Mono', monospace" }}
-              >
-                Subvetor E: A[{currentInterval.left}..{currentInterval.mid}] ⇄
-                Subvetor D: A[{currentInterval.mid + 1}..{currentInterval.right}]
-              </span>
-            </div>
-
-            {/* Janelas dos Dois Ramais */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Ramal Esquerdo */}
-              <div
-                className={`flex flex-col gap-2 p-3 rounded-lg border ${
-                  p1 <= currentInterval.mid
-                    ? "border-cyan-500/40 bg-cyan-950/20"
-                    : "border-slate-700 bg-slate-900/30 opacity-60"
-                }`}
-              >
-                <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="font-bold text-cyan-300">
-                    RAMAL ESQUERDO (A[{currentInterval.left}..
-                    {currentInterval.mid}])
-                  </span>
-                  <span
-                    className={
-                      p1 <= currentInterval.mid
-                        ? "text-cyan-400 font-bold"
-                        : "text-amber-400 font-bold"
-                    }
-                  >
-                    {p1 <= currentInterval.mid
-                      ? `Frente p1 = #${p1 + 1}`
-                      : "RAMAL ESGOTADO"}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 overflow-x-auto py-1">
-                  {currentValues
-                    .slice(currentInterval.left, currentInterval.mid + 1)
-                    .map((elem, offset) => {
-                      const absoluteIdx = currentInterval.left + offset;
-                      const isDispatched = absoluteIdx < p1;
-                      const isHead =
-                        absoluteIdx === p1 && currentPhase === "COMPARE_HEADS";
-
-                      return (
-                        <div
-                          key={elem.id}
-                          className={`flex flex-col items-center gap-1 ${
-                            isDispatched
-                              ? "opacity-30"
-                              : isHead
-                                ? "scale-105"
-                                : ""
-                          }`}
-                        >
-                          <NumberedBox
-                            value={elem.value}
-                            elementLabel={elem.label}
-                            index={absoluteIdx}
-                            role={isHead ? "pair" : "default"}
-                            badge={
-                              isHead
-                                ? "FRENTE E"
-                                : isDispatched
-                                  ? "DESPACHADO"
-                                  : "FILA"
-                            }
-                            disabled={false}
-                            size="sm"
-                          />
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-
-              {/* Ramal Direito */}
-              <div
-                className={`flex flex-col gap-2 p-3 rounded-lg border ${
-                  p2 <= currentInterval.right
-                    ? "border-blue-500/40 bg-blue-950/20"
-                    : "border-slate-700 bg-slate-900/30 opacity-60"
-                }`}
-              >
-                <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="font-bold text-blue-300">
-                    RAMAL DIREITO (A[{currentInterval.mid + 1}..
-                    {currentInterval.right}])
-                  </span>
-                  <span
-                    className={
-                      p2 <= currentInterval.right
-                        ? "text-blue-400 font-bold"
-                        : "text-amber-400 font-bold"
-                    }
-                  >
-                    {p2 <= currentInterval.right
-                      ? `Frente p2 = #${p2 + 1}`
-                      : "RAMAL ESGOTADO"}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 overflow-x-auto py-1">
-                  {currentValues
-                    .slice(currentInterval.mid + 1, currentInterval.right + 1)
-                    .map((elem, offset) => {
-                      const absoluteIdx = currentInterval.mid + 1 + offset;
-                      const isDispatched = absoluteIdx < p2;
-                      const isHead =
-                        absoluteIdx === p2 && currentPhase === "COMPARE_HEADS";
-
-                      return (
-                        <div
-                          key={elem.id}
-                          className={`flex flex-col items-center gap-1 ${
-                            isDispatched
-                              ? "opacity-30"
-                              : isHead
-                                ? "scale-105"
-                                : ""
-                          }`}
-                        >
-                          <NumberedBox
-                            value={elem.value}
-                            elementLabel={elem.label}
-                            index={absoluteIdx}
-                            role={isHead ? "pair" : "default"}
-                            badge={
-                              isHead
-                                ? "FRENTE D"
-                                : isDispatched
-                                  ? "DESPACHADO"
-                                  : "FILA"
-                            }
-                            disabled={false}
-                            size="sm"
-                          />
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            </div>
-
-            {/* Painel do Sensor Óptico de Confluência */}
-            <div className="p-3 rounded-lg bg-[#070d22] border border-cyan-500/20 flex flex-col items-center justify-center gap-1 text-center">
-              {currentPhase === "COMPARE_HEADS" && leftHead && rightHead ? (
-                <>
-                  <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">
-                    SENSORES ÓPTICOS EM CONFRONTO ATIVO
-                  </span>
-                  <div
-                    className="flex items-center gap-4 text-sm font-bold text-white"
-                    style={{ fontFamily: "'Orbitron', sans-serif" }}
-                  >
-                    <span className="text-cyan-300">
-                      Ramal E [{formatMergeElementLabel(leftHead)}]
-                    </span>
-                    <span className="text-white/40 font-mono">vs</span>
-                    <span className="text-blue-300">
-                      Ramal D [{formatMergeElementLabel(rightHead)}]
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-white/50 font-mono">
-                    Critério: Despachar o menor valor. Em empate (==), despachar
-                    OBRIGATORIAMENTE o Ramal Esquerdo para estabilidade!
-                  </span>
-                </>
-              ) : currentPhase === "DRAIN_READY" ? (
-                <>
-                  <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest">
-                    DRENAGEM DIRETA DE CAUDA
-                  </span>
-                  <p className="text-xs text-white/80 font-mono">
-                    Um dos ramais foi totalmente colhido. As cargas restantes
-                    já são maiores que as despachadas e estão ordenadas entre si.
-                  </p>
-                  <span className="text-[10px] text-emerald-400 font-mono font-bold">
-                    Acione "Despachar Restante" (3) para transferi-las em lote
-                    com 0 comparações.
-                  </span>
-                </>
-              ) : (
-                <span className="text-xs text-white/40 font-mono">
-                  Processando eventos automáticos da estação...
-                </span>
-              )}
-            </div>
-
-            {/* Esteira Coletora Temporária (Buffer Auxiliar) */}
-            <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-              <div className="flex justify-between items-center text-[10px] font-mono text-white/40">
-                <span className="uppercase tracking-widest text-blue-300">
-                  ESTEIRA COLETORA AUXILIAR (BUFFER TEMPORÁRIO B[0..
-                  {currentInterval.right - currentInterval.left}])
-                </span>
-                <span>
-                  Alocação de Memória Auxiliar:{" "}
-                  {currentInterval.right - currentInterval.left + 1} posições
-                </span>
-              </div>
-
-              <div className="w-full overflow-x-auto py-2">
-                <div className="flex items-center justify-center gap-3 min-w-max mx-auto px-2">
-                  {currentBuffer.map((bufElem, slotIdx) => {
-                    const isTarget = slotIdx === k && !isCompleted;
-                    const isFilled = bufElem !== null;
-
-                    return (
-                      <div
-                        key={slotIdx}
-                        className="flex flex-col items-center gap-1"
-                      >
-                        <span
-                          className="text-white/30 font-mono"
-                          style={{
-                            fontFamily: "'Space Mono', monospace",
-                            fontSize: "10px",
-                          }}
-                        >
-                          B[{slotIdx}]
-                        </span>
-
-                        {isFilled ? (
-                          <NumberedBox
-                            value={bufElem.value}
-                            elementLabel={bufElem.label}
-                            index={slotIdx}
-                            role="ordered"
-                            badge="ORDEM"
-                            disabled={false}
-                            size="md"
-                          />
-                        ) : (
-                          <div
-                            className={`w-20 h-20 rounded-lg flex flex-col items-center justify-center border-2 border-dashed transition-all ${
-                              isTarget
-                                ? "border-cyan-400 bg-cyan-950/40 animate-pulse text-cyan-300"
-                                : "border-slate-700 bg-slate-900/40 text-slate-600"
-                            }`}
-                          >
-                            <span className="text-[9px] font-mono tracking-widest">
-                              {isTarget ? "PRÓXIMO" : "VAGO"}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <span className="text-[10px] text-white/30 font-mono text-center">
-                * Ao completar o preenchimento, o buffer será copiado de volta
-                para A[{currentInterval.left}..{currentInterval.right}] com
-                status ORD (ou OK na raiz).
-              </span>
-            </div>
-          </section>
-        )}
-
-        {/* Painel de Pseudocódigo e Feedback */}
+        {/* Pseudocódigo e Métricas em grade */}
         <section className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Instruções e Feedback Pedagógico */}
-          <div className="flex flex-col gap-3">
-            <InstructionPanel
-              message={feedback.message}
-              type={feedback.type}
-            />
-
-            {activeHint && (
-              <div className="p-3 rounded-lg border border-cyan-500/30 bg-cyan-950/30 text-[11px] font-mono text-cyan-200">
-                <span className="font-bold text-cyan-300 block mb-0.5">
-                  Dica de Triagem:
-                </span>
-                {activeHint}
-              </div>
-            )}
-          </div>
-
           {/* Pseudocódigo Canônico */}
-          <div className="panel-border bg-[#080f28]/80 rounded-xl p-4 flex flex-col gap-2">
+          <div className="panel-border bg-[#080f28]/80 rounded-2xl p-4 flex flex-col gap-2">
             <span
-              className="text-[10px] text-white/30 tracking-widest uppercase font-mono"
+              className="text-[11px] text-slate-300 tracking-wider uppercase font-mono font-bold"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
               PSEUDOCÓDIGO — SUB-ROTINA DE INTERCALAÇÃO (RESUMO OPERACIONAL)
@@ -1067,10 +1079,10 @@ export default function MergeGameScreen({
                 return (
                   <div
                     key={item.id}
-                    className={`px-2 py-0.5 rounded text-[10px] leading-relaxed transition-colors ${
+                    className={`px-2 py-0.5 rounded text-xs leading-relaxed transition-colors ${
                       isActive
-                        ? "bg-blue-950/60 text-blue-300 font-bold border-l-2 border-blue-400"
-                        : "text-white/40"
+                        ? "bg-blue-950/60 text-blue-200 font-bold border-l-2 border-blue-400"
+                        : "text-slate-400"
                     }`}
                     style={{
                       fontFamily: "'Space Mono', monospace",
@@ -1083,100 +1095,101 @@ export default function MergeGameScreen({
               })}
             </div>
           </div>
+
+          {/* Faixa de Telemetria / Métricas */}
+          <div
+            aria-label="Telemetria da Operação"
+            className="panel-border bg-[#080f28]/80 rounded-2xl p-4 flex flex-col justify-between gap-3"
+          >
+            <span
+              className="text-[11px] text-slate-300 tracking-wider uppercase font-mono font-bold"
+              style={{ fontFamily: "'Space Mono', monospace" }}
+            >
+              MÉTRICAS DA OPERAÇÃO
+            </span>
+
+            <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-col items-center p-2 rounded-lg bg-[#0d1635]/80 border border-white/5">
+                <span className="text-[10px] text-slate-300 uppercase font-mono font-semibold">
+                  Comparações
+                </span>
+                <span
+                  data-testid="comparisons-count"
+                  className="text-lg font-bold text-cyan-300"
+                  style={{ fontFamily: "'Orbitron', sans-serif" }}
+                >
+                  {displayedComparisons}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center p-2 rounded-lg bg-[#0d1635]/80 border border-white/5">
+                <span className="text-[10px] text-slate-300 uppercase font-mono font-semibold">
+                  Escritas Buffer
+                </span>
+                <span
+                  data-testid="writes-in-buffer"
+                  className="text-lg font-bold text-blue-300"
+                  style={{ fontFamily: "'Orbitron', sans-serif" }}
+                >
+                  {displayedWritesInBuffer}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center p-2 rounded-lg bg-[#0d1635]/80 border border-white/5">
+                <span className="text-[10px] text-slate-300 uppercase font-mono font-semibold">
+                  Escritas Principal
+                </span>
+                <span
+                  data-testid="writes-in-main"
+                  className="text-lg font-bold text-cyan-200"
+                  style={{ fontFamily: "'Orbitron', sans-serif" }}
+                >
+                  {displayedWritesInMain}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center p-2 rounded-lg bg-[#0d1635]/80 border border-white/5">
+                <span className="text-[10px] text-slate-300 uppercase font-mono font-semibold">
+                  Total Escritas
+                </span>
+                <span
+                  className="text-lg font-bold text-sky-400"
+                  style={{ fontFamily: "'Orbitron', sans-serif" }}
+                >
+                  {displayedTotalWrites}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center p-2 rounded-lg bg-[#0d1635]/80 border border-white/5">
+                <span className="text-[10px] text-slate-300 uppercase font-mono font-semibold">
+                  Decisões Incorretas
+                </span>
+                <span
+                  className={`text-lg font-bold ${engineState.errors > 0 ? "text-amber-400" : "text-slate-300"}`}
+                  style={{ fontFamily: "'Orbitron', sans-serif" }}
+                >
+                  {engineState.errors}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center p-2 rounded-lg bg-[#0d1635]/80 border border-white/5">
+                <span className="text-[10px] text-slate-300 uppercase font-mono font-semibold">
+                  Pontuação
+                </span>
+                <span
+                  className="text-lg font-bold text-emerald-400"
+                  style={{ fontFamily: "'Orbitron', sans-serif" }}
+                >
+                  {currentScore}
+                </span>
+              </div>
+            </div>
+
+            <div className="text-[10px] text-slate-400 font-mono text-center">
+              Complexidade teórica: Θ(n log n) comparações • O(n) espaço auxiliar
+            </div>
+          </div>
         </section>
-
-        {/* Botoeira Inferior de Decisões do Estudante (Single Scroll Owner - Rolagem Acessível) */}
-        <footer
-          aria-label="Ações de Decisão"
-          className="w-full panel-border bg-[#070e26]/95 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 sticky bottom-4 z-20 shadow-2xl backdrop-blur-md"
-        >
-          {pendingFrames.length > 0 ? (
-            <GameButton
-              variant="primary"
-              size="lg"
-              onClick={handleAdvancePendingFrame}
-              className="w-full sm:w-auto min-w-[280px] border-cyan-400 bg-cyan-950/70 text-cyan-200"
-              title="Avançar para o próximo passo automático (Atalho: 1 ou Espaço)"
-            >
-              <div className="flex flex-col items-center">
-                <span>PRÓXIMO PASSO AUTOMÁTICO</span>
-                <span className="text-[10px] font-normal opacity-75">
-                  Passo {pendingFrameIndex + 1} de {pendingFrames.length} (Atalho 1 ou Espaço)
-                </span>
-              </div>
-            </GameButton>
-          ) : isCompleted ? (
-            <GameButton
-              variant="primary"
-              size="lg"
-              onClick={() => handleComplete(engineState)}
-              className="w-full sm:w-auto min-w-[240px] border-emerald-400 bg-emerald-950/70 text-emerald-200"
-              title="Visualizar a tela de resultados da prática"
-            >
-              <div className="flex flex-col items-center">
-                <span>VER RESULTADOS</span>
-                <span className="text-[10px] font-normal opacity-75">
-                  Ordenação Concluída com Sucesso!
-                </span>
-              </div>
-            </GameButton>
-          ) : (
-            <>
-              {/* Botão 1: Despachar Esquerda */}
-              <GameButton
-                variant="primary"
-                size="lg"
-                onClick={() => handleDecision("DISPATCH_LEFT")}
-                disabled={!canDispatchLeft}
-                className="w-full sm:w-auto min-w-[200px]"
-                title="Despachar a carga do Ramal Esquerdo para a esteira coletora (Atalho 1)"
-              >
-                <div className="flex flex-col items-center">
-                  <span>1: DESPACHAR ESQUERDA</span>
-                  <span className="text-[10px] font-normal opacity-75">
-                    {leftHead ? `Carga ${formatMergeElementLabel(leftHead)}` : "—"}
-                  </span>
-                </div>
-              </GameButton>
-
-              {/* Botão 2: Despachar Direita */}
-              <GameButton
-                variant="primary"
-                size="lg"
-                onClick={() => handleDecision("DISPATCH_RIGHT")}
-                disabled={!canDispatchRight}
-                className="w-full sm:w-auto min-w-[200px]"
-                title="Despachar a carga do Ramal Direito para a esteira coletora (Atalho 2)"
-              >
-                <div className="flex flex-col items-center">
-                  <span>2: DESPACHAR DIREITA</span>
-                  <span className="text-[10px] font-normal opacity-75">
-                    {rightHead
-                      ? `Carga ${formatMergeElementLabel(rightHead)}`
-                      : "—"}
-                  </span>
-                </div>
-              </GameButton>
-
-              {/* Botão 3: Despachar Restante */}
-              <GameButton
-                variant="primary"
-                size="lg"
-                onClick={() => handleDecision("DRAIN_REMAINDER")}
-                disabled={!canDrain}
-                className="w-full sm:w-auto min-w-[200px] border-emerald-500/50 hover:border-emerald-400"
-                title="Drenar cauda remanescente em lote sem comparações (Atalho 3)"
-              >
-                <div className="flex flex-col items-center">
-                  <span>3: DESPACHAR RESTANTE</span>
-                  <span className="text-[10px] font-normal opacity-75">
-                    Drenagem Direta
-                  </span>
-                </div>
-              </GameButton>
-            </>
-          )}
-        </footer>
       </div>
     </div>
   );

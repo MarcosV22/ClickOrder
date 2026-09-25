@@ -243,15 +243,15 @@ export default function MergeTutorialScreen({
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-teal-400" />
               <span
-                className="text-xs font-mono tracking-widest text-teal-300 uppercase font-bold"
+                className="text-xs font-mono tracking-wider text-teal-300 uppercase font-bold"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                ESTEIRA COLETORA • BUFFER O(n)
+                VETOR AUXILIAR TEMPORÁRIO (ESTEIRA COLETORA)
               </span>
             </div>
 
-            <span className="text-[11px] font-mono text-white/60">
-              Posição coletora k = {engineState.k}
+            <span className="text-[11px] font-mono text-slate-300 font-semibold">
+              Posição alvo k = {engineState.k}
             </span>
           </div>
 
@@ -269,7 +269,7 @@ export default function MergeTutorialScreen({
                     >
                       <div className="h-4 flex items-center justify-center">
                         {isCurrentTarget && (
-                          <span className="text-[9px] font-mono text-amber-300 font-bold">
+                          <span className="text-[10px] font-mono text-amber-300 font-bold">
                             k ↓
                           </span>
                         )}
@@ -288,16 +288,16 @@ export default function MergeTutorialScreen({
                           className={`w-12 h-14 rounded-lg border-2 border-dashed flex items-center justify-center transition-colors ${
                             isCurrentTarget
                               ? "border-amber-400/80 bg-amber-950/20"
-                              : "border-white/10 bg-white/5"
+                              : "border-white/20 bg-white/5"
                           }`}
                         >
-                          <span className="text-[10px] font-mono text-white/20">
+                          <span className="text-[11px] font-mono text-slate-400 font-semibold">
                             vazio
                           </span>
                         </div>
                       )}
 
-                      <span className="text-[9px] font-mono text-white/30">
+                      <span className="text-[10px] font-mono text-slate-300 font-semibold">
                         [{bIdx}]
                       </span>
                     </div>
@@ -305,7 +305,7 @@ export default function MergeTutorialScreen({
                 },
               )
             ) : (
-              <span className="text-xs font-mono text-white/40 italic py-3">
+              <span className="text-xs font-mono text-slate-400 italic py-3">
                 Buffer inativo fora das fases de intercalação
               </span>
             )}
@@ -323,7 +323,10 @@ export default function MergeTutorialScreen({
             <div className="flex items-center gap-2 text-amber-300 text-xs font-mono font-bold">
               <span>? DICA PEDAGÓGICA</span>
             </div>
-            <p className="text-xs text-amber-100/90 leading-relaxed font-mono">
+            <p
+              className="text-sm text-amber-100 leading-relaxed"
+              style={{ fontFamily: "'Exo 2', sans-serif" }}
+            >
               {stepInfo.hint}
             </p>
           </section>
@@ -340,23 +343,27 @@ export default function MergeTutorialScreen({
                 <span className="text-emerald-400 text-base sm:text-lg font-bold block mb-1">
                   ✓ TUTORIAL CONCLUÍDO COM SUCESSO!
                 </span>
-                <p className="text-xs text-white/80 font-mono leading-relaxed mb-2.5">
-                  Você dominou o ciclo canônico do Merge Sort:
+                <p
+                  className="text-sm text-slate-100 leading-relaxed mb-2.5"
+                  style={{ fontFamily: "'Exo 2', sans-serif" }}
+                >
+                  Você dominou os conceitos essenciais do Merge Sort:
                 </p>
-                <ul className="text-left text-xs font-mono text-emerald-200/90 space-y-1 list-disc list-inside">
+                <ul
+                  className="text-left text-xs sm:text-sm text-emerald-200 space-y-1.5 list-disc list-inside font-medium"
+                  style={{ fontFamily: "'Exo 2', sans-serif" }}
+                >
                   <li>
-                    Divisão recursiva até subproblemas unitários ordenados;
+                    Divisão sucessiva até grupos unitários de 1 elemento;
                   </li>
                   <li>
-                    Intercalação ordenada com dois ponteiros independentes (p1,
-                    p2);
+                    Intercalação ordenada com dois ponteiros nas frentes dos grupos;
                   </li>
                   <li>
-                    Resolução de empates estáveis (≤) priorizando sempre o Ramal
-                    Esquerdo;
+                    Resolução de empates priorizando o grupo da esquerda (estabilidade);
                   </li>
                   <li>
-                    Drenagem direta dos ramais remanescentes e cópia de retorno.
+                    Cópia direta dos números restantes sem necessidade de novas comparações.
                   </li>
                 </ul>
               </div>
@@ -382,7 +389,7 @@ export default function MergeTutorialScreen({
                   icon="⇦"
                   className="flex-1 border-teal-500/50 text-teal-200 hover:border-teal-400 shadow-lg shadow-teal-950/40"
                 >
-                  DESPACHAR ESQUERDA
+                  ESCOLHER DA ESQUERDA
                 </GameButton>
 
                 <GameButton
@@ -393,7 +400,7 @@ export default function MergeTutorialScreen({
                   icon="⇨"
                   className="flex-1 border-sky-500/50 text-sky-200 hover:border-sky-400 shadow-lg shadow-sky-950/40"
                 >
-                  DESPACHAR DIREITA
+                  ESCOLHER DA DIREITA
                 </GameButton>
 
                 <GameButton
@@ -404,7 +411,7 @@ export default function MergeTutorialScreen({
                   icon="⇓"
                   className="flex-1 border-indigo-500/50 text-indigo-200 hover:border-indigo-400 shadow-lg shadow-indigo-950/40"
                 >
-                  DRENAR RESTANTE
+                  COPIAR RESTANTES
                 </GameButton>
               </div>
 

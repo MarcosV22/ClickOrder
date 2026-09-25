@@ -46,7 +46,7 @@ interface ModuleThemeConfig {
 const MODULE_THEMES: Partial<Record<ModuleId, ModuleThemeConfig>> = {
   bubble: {
     name: "BUBBLE SORT",
-    subtitle: "ORDENAÇÃO POR COMPARAÇÃO ADJACENTE",
+    subtitle: "ORDENAÇÃO POR COMPARAÇÃO DE VIZINHOS",
     primaryColor: "cyan",
     badgeBorder: "border-cyan-500/30",
     badgeBg: "bg-cyan-950/40",
@@ -57,7 +57,7 @@ const MODULE_THEMES: Partial<Record<ModuleId, ModuleThemeConfig>> = {
   },
   selection: {
     name: "SELECTION SORT",
-    subtitle: "VARREDURA E TRANSFERÊNCIA PONTUAL",
+    subtitle: "VARREDURA E SELEÇÃO DO MENOR ELEMENTO",
     primaryColor: "purple",
     badgeBorder: "border-purple-500/30",
     badgeBg: "bg-purple-950/40",
@@ -68,7 +68,7 @@ const MODULE_THEMES: Partial<Record<ModuleId, ModuleThemeConfig>> = {
   },
   insertion: {
     name: "INSERTION SORT",
-    subtitle: "TRILHO DE SUSPENSÃO E DESLOCAMENTO",
+    subtitle: "CONSTRUÇÃO DA PARTE ORDENADA E DESLOCAMENTO",
     primaryColor: "amber",
     badgeBorder: "border-amber-500/30",
     badgeBg: "bg-amber-950/40",
@@ -79,7 +79,7 @@ const MODULE_THEMES: Partial<Record<ModuleId, ModuleThemeConfig>> = {
   },
   merge: {
     name: "MERGE SORT",
-    subtitle: "DIVISÃO DE FLUXOS E INTERCALAÇÃO ORDENADA",
+    subtitle: "DIVISÃO EM GRUPOS E INTERCALAÇÃO ORDENADA",
     primaryColor: "blue",
     badgeBorder: "border-blue-500/30",
     badgeBg: "bg-blue-950/40",
@@ -221,10 +221,10 @@ export default function PracticeSelector({
                     )}
 
                     <span
-                      className="text-xs font-mono font-bold text-white/60 uppercase"
+                      className="text-xs font-mono font-bold text-slate-300 uppercase"
                       style={{ fontFamily: "'Space Mono', monospace" }}
                     >
-                      {state.definition.size} CARGAS
+                      {state.definition.size} ELEMENTOS
                     </span>
                   </div>
 
@@ -236,7 +236,7 @@ export default function PracticeSelector({
                       {state.definition.title}
                     </h2>
                     <p
-                      className="text-xs text-white/60 mt-1 leading-relaxed"
+                      className="text-xs text-slate-300 mt-1 leading-relaxed"
                       style={{ fontFamily: "'Exo 2', sans-serif" }}
                     >
                       {state.definition.description}
@@ -244,40 +244,40 @@ export default function PracticeSelector({
                   </div>
 
                   {/* Objetivo Pedagógico */}
-                  <div className="pt-2 border-t border-white/5">
+                  <div className="pt-2 border-t border-white/10">
                     <span
-                      className="text-[9px] uppercase font-mono tracking-widest text-white/40 block mb-1"
+                      className="text-xs uppercase font-mono tracking-wider text-cyan-300 font-bold block mb-1"
                       style={{ fontFamily: "'Space Mono', monospace" }}
                     >
                       OBJETIVO DA PRÁTICA:
                     </span>
                     <p
-                      className="text-[11px] text-white/70 leading-relaxed font-mono"
-                      style={{ fontFamily: "'Space Mono', monospace" }}
+                      className="text-xs text-slate-200 leading-relaxed"
+                      style={{ fontFamily: "'Exo 2', sans-serif" }}
                     >
                       {state.definition.pedagogicalObjective}
                     </p>
                   </div>
 
-                  {/* Telemetria se já concluída */}
+                  {/* Resultados se já concluída */}
                   {isCompleted && (
-                    <div className="mt-2 p-2.5 rounded-lg bg-[#060b1a]/80 border border-emerald-500/20 flex flex-col gap-1">
-                      <div className="flex items-center justify-between text-[10px] font-mono">
-                        <span className="text-white/50 uppercase">Melhor Score:</span>
+                    <div className="mt-2 p-2.5 rounded-lg bg-[#060b1a]/80 border border-emerald-500/30 flex flex-col gap-1">
+                      <div className="flex items-center justify-between text-xs font-mono">
+                        <span className="text-slate-300 uppercase font-semibold">Melhor Score:</span>
                         <span className="font-bold text-emerald-300">
                           {state.bestScore !== undefined ? `${state.bestScore} PTS` : "—"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-[10px] font-mono">
-                        <span className="text-white/50 uppercase">Erros / Dicas:</span>
-                        <span className="text-white/70">
+                      <div className="flex items-center justify-between text-xs font-mono">
+                        <span className="text-slate-300 uppercase font-semibold">Erros / Dicas:</span>
+                        <span className="text-slate-200">
                           {state.bestErrors ?? 0} err • {state.bestHints ?? 0} dic
                         </span>
                       </div>
                       {state.bestTimeMs !== undefined && (
-                        <div className="flex items-center justify-between text-[10px] font-mono">
-                          <span className="text-white/50 uppercase">Tempo:</span>
-                          <span className="text-white/70">
+                        <div className="flex items-center justify-between text-xs font-mono">
+                          <span className="text-slate-300 uppercase font-semibold">Tempo:</span>
+                          <span className="text-slate-200">
                             {formatElapsedTime(state.bestTimeMs)}
                           </span>
                         </div>

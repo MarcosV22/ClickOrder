@@ -147,26 +147,26 @@ export default function NumberedBox({
         };
       case "sorted":
         return {
-          bg: "bg-emerald-950 box-glow-idle",
-          border: "1px solid rgba(16,185,129,0.3)",
-          text: "text-emerald-400",
-          badgeColor: "text-emerald-500/70",
+          bg: "bg-emerald-950/90 box-glow-idle",
+          border: "1px solid rgba(16,185,129,0.5)",
+          text: "text-emerald-300",
+          badgeColor: "text-emerald-300 font-bold",
           pulse: false,
         };
       case "ordered":
         return {
-          bg: "bg-emerald-950/40",
-          border: "1px dashed rgba(16,185,129,0.5)",
+          bg: "bg-emerald-950/50",
+          border: "1px dashed rgba(16,185,129,0.7)",
           text: "text-emerald-300",
-          badgeColor: "text-emerald-400 font-bold",
+          badgeColor: "text-emerald-300 font-bold",
           pulse: false,
         };
       case "pair":
         return {
-          bg: "bg-cyan-950 animate-pulse-border",
+          bg: "bg-cyan-950/90 animate-pulse-border",
           border: "2px solid #00f5ff",
-          text: "text-cyan-300 glow-cyan",
-          badgeColor: "text-cyan-400",
+          text: "text-cyan-200 glow-cyan",
+          badgeColor: "text-cyan-300 font-bold",
           pulse: true,
         };
       case "default":
@@ -177,7 +177,7 @@ export default function NumberedBox({
             : "bg-[#0f1e4a] box-glow-idle hover:bg-[#162460] hover:scale-105",
           border: "1px solid rgba(42,74,158,0.8)",
           text: "text-white",
-          badgeColor: "text-white/20",
+          badgeColor: "text-slate-400 font-medium",
           pulse: false,
         };
     }
@@ -186,28 +186,28 @@ export default function NumberedBox({
   const getRoleDescription = (r: BoxRole): string => {
     switch (r) {
       case "target-min":
-        return "posição alvo e candidato mínimo";
+        return "posição alvo e menor número";
       case "target":
         return "posição alvo (i)";
       case "min":
-        return "candidato mínimo";
+        return "menor número candidato";
       case "scan-min":
-        return "scanner ativo e candidato mínimo";
+        return "posição em análise e menor número";
       case "scan":
-        return "scanner ativo de inspeção (j)";
+        return "posição em análise (j)";
       case "ordered-scan":
-        return "carga na partição ordenada sob inspeção (j)";
+        return "número na parte ordenada sob análise (j)";
       case "ordered":
-        return "na partição relativamente ordenada";
+        return "no grupo localmente ordenado";
       case "key":
         return "chave suspensa no trilho aéreo";
       case "sorted":
-        return "consolidada na posição correta";
+        return "em sua posição final ordenada";
       case "pair":
-        return "em comparação adjacente";
+        return "em comparação direta";
       case "default":
       default:
-        return "não consolidada";
+        return "não ordenado";
     }
   };
 
@@ -226,8 +226,8 @@ export default function NumberedBox({
     >
       {/* Box number label above */}
       <span
-        className="text-white/30 font-mono"
-        style={{ fontFamily: "'Space Mono', monospace", fontSize: "10px" }}
+        className="text-slate-300 font-mono font-bold"
+        style={{ fontFamily: "'Space Mono', monospace", fontSize: "11px" }}
       >
         #{index + 1}
       </span>
@@ -251,13 +251,13 @@ export default function NumberedBox({
 
         {/* Value */}
         <span
-          className={`${s.text} font-bold ${roleStyles.text} flex items-baseline justify-center gap-0.5`}
+          className={`${s.text} font-bold ${roleStyles.text} flex items-baseline justify-center gap-1`}
           style={{ fontFamily: "'Orbitron', sans-serif" }}
         >
           {value}
           {elementLabel && (
             <span
-              className="text-xs font-mono font-semibold opacity-90 text-cyan-300"
+              className="text-[11px] font-mono font-bold text-cyan-200 bg-[#060b1a]/80 px-1 py-0.2 rounded border border-cyan-400/40"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
               {elementLabel}
@@ -267,7 +267,7 @@ export default function NumberedBox({
 
         {/* Bottom label */}
         <span
-          className={`absolute bottom-1.5 text-[9px] font-mono tracking-widest ${roleStyles.badgeColor}`}
+          className={`absolute bottom-1.5 text-[9px] font-mono font-bold tracking-widest ${roleStyles.badgeColor}`}
           style={{ fontFamily: "'Space Mono', monospace" }}
         >
           {displayBadge}

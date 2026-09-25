@@ -52,9 +52,9 @@ describe("Practice Flow & Presentation Integration (PLATFORM-R1-B)", () => {
       expect(html).toContain("PRÁTICA BÁSICA");
       expect(html).toContain("PRÁTICA INTERMEDIÁRIA");
       expect(html).toContain("PRÁTICA AVANÇADA");
-      expect(html).toContain("4 CARGAS");
-      expect(html).toContain("5 CARGAS");
-      expect(html).toContain("6 CARGAS");
+      expect(html).toContain("4 ELEMENTOS");
+      expect(html).toContain("5 ELEMENTOS");
+      expect(html).toContain("6 ELEMENTOS");
       // Não exibe Early Exit no Selection
       expect(html).not.toContain("EARLY EXIT");
     });
@@ -157,7 +157,7 @@ describe("Practice Flow & Presentation Integration (PLATFORM-R1-B)", () => {
       expect(html).toContain("CONJUNTO DE PRÁTICAS");
       expect(html).toContain("CONCLUÍDO!");
       expect(html).toContain("BUBBLE SORT");
-      expect(html).toContain("Trocas Adjacentes");
+      expect(html).toContain("Trocas de Posição");
       expect(html).toContain("31"); // 6 + 10 + 15 comparações
       expect(html).toContain("13"); // 3 + 4 + 6 trocas
       expect(html).toContain("95"); // média (100 + 90 + 95) / 3 = 95
@@ -190,7 +190,7 @@ describe("Practice Flow & Presentation Integration (PLATFORM-R1-B)", () => {
       );
 
       expect(html).toContain("SELECTION SORT");
-      expect(html).toContain("Transferências Pontuais");
+      expect(html).toContain("Trocas (Transferências)");
       expect(html).toContain("SELETOR DE PRÁTICAS");
       expect(html).not.toContain("EARLY EXIT");
     });

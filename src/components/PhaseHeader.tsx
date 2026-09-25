@@ -53,7 +53,7 @@ export default function PhaseHeader({
           />
         ))}
         <span
-          className="ml-2 text-[11px] sm:text-xs text-white/60 tracking-wider font-mono font-bold uppercase"
+          className="ml-2 text-[11px] sm:text-xs text-slate-200 tracking-wider font-mono font-bold uppercase"
           style={{ fontFamily: "'Space Mono', monospace" }}
         >
           {practiceTitle ?? `PRÁTICA ${currentStep}/${totalSteps}`}
@@ -68,7 +68,7 @@ export default function PhaseHeader({
             variant="ghost"
             size="sm"
             icon="☰"
-            className="hidden sm:inline-flex text-[11px] text-white/60 hover:text-white"
+            className="hidden sm:inline-flex text-[11px] text-slate-300 hover:text-white"
           >
             SELETOR
           </GameButton>
@@ -76,7 +76,7 @@ export default function PhaseHeader({
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           <span
-            className="text-[11px] text-emerald-400/80 tracking-widest hidden sm:inline"
+            className="text-[11px] text-emerald-300 font-semibold tracking-wider hidden sm:inline"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             SISTEMA ATIVO

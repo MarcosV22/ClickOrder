@@ -42,23 +42,23 @@ export function getMergeStepFeedback(
       const isTie = rightElem !== null && leftElem.value === rightElem.value;
 
       if (isTie) {
-        return `Excelente! Ambas as cargas possuem valor ${leftElem.value}. Você priorizou corretamente a carga do Ramal Esquerdo (${formatMergeElementLabel(leftElem)}), preservando a estabilidade da ordenação!`;
+        return `Excelente! Os dois números têm valor ${leftElem.value}. Você escolheu o elemento da esquerda (${formatMergeElementLabel(leftElem)}), mantendo a estabilidade da ordenação!`;
       }
-      return `Muito bem! Carga menor ${formatMergeElementLabel(leftElem)} do Ramal Esquerdo colhida para a esteira coletora.`;
+      return `Correto! O menor número (${formatMergeElementLabel(leftElem)}) foi copiado do grupo da esquerda para o vetor auxiliar.`;
     }
 
     if (decision === "DISPATCH_RIGHT") {
       const rightElem = stateBefore.values[stateBefore.p2];
-      return `Muito bem! Carga menor ${formatMergeElementLabel(rightElem)} do Ramal Direito colhida para a esteira coletora.`;
+      return `Correto! O menor número (${formatMergeElementLabel(rightElem)}) foi copiado do grupo da direita para o vetor auxiliar.`;
     }
 
     if (decision === "DRAIN_REMAINDER") {
       const remainingBranch =
         stateBefore.activeInterval &&
         stateBefore.p1 <= stateBefore.activeInterval.mid
-          ? "Esquerdo"
-          : "Direito";
-      return `Perfeito! O ramal oposto foi totalmente colhido. As cargas restantes do Ramal ${remainingBranch} foram drenadas diretamente para a esteira coletora sem necessidade de novas comparações!`;
+          ? "esquerda"
+          : "direita";
+      return `Perfeito! O outro grupo terminou. Os números restantes do grupo da ${remainingBranch} foram copiados para o vetor auxiliar sem necessidade de novas comparações, pois já estão ordenados!`;
     }
   }
 
@@ -70,22 +70,22 @@ export function getMergeStepFeedback(
       const isTie = leftElem.value === rightElem.value;
 
       if (isTie) {
-        return `Atenção à Regra de Estabilidade: Ambas as cargas possuem valor ${leftElem.value}. No Merge Sort, em caso de empate, é obrigatório colher a carga do Ramal Esquerdo (${formatMergeElementLabel(leftElem)}) para preservar a ordem relativa original.`;
+        return `Atenção à Estabilidade: ambos os números têm valor ${leftElem.value}. No Merge Sort, em caso de empate, escolha sempre o número do grupo da esquerda (${formatMergeElementLabel(leftElem)}) para manter a ordem original.`;
       }
 
       if (decision === "DISPATCH_LEFT") {
-        return `Atenção na Confluência: A carga do Ramal Esquerdo (${formatMergeElementLabel(leftElem)}) é MAIOR que a do Ramal Direito (${formatMergeElementLabel(rightElem)}). O Merge Sort exige sempre colher a menor carga para o buffer.`;
+        return `Atenção: o número da esquerda (${formatMergeElementLabel(leftElem)}) é MAIOR que o da direita (${formatMergeElementLabel(rightElem)}). Escolha sempre o menor número para a próxima posição do vetor auxiliar.`;
       }
 
       if (decision === "DISPATCH_RIGHT") {
-        return `Atenção na Confluência: A carga do Ramal Direito (${formatMergeElementLabel(rightElem)}) é MAIOR que a do Ramal Esquerdo (${formatMergeElementLabel(leftElem)}). O Merge Sort exige sempre colher a menor carga para o buffer.`;
+        return `Atenção: o número da direita (${formatMergeElementLabel(rightElem)}) é MAIOR que o da esquerda (${formatMergeElementLabel(leftElem)}). Escolha sempre o menor número para a próxima posição do vetor auxiliar.`;
       }
     }
   }
 
   return (
     result.errorReason ??
-    "Esta ação não é permitida no estado atual da confluência de esteiras."
+    "Esta ação não é permitida no estado atual da intercalação."
   );
 }
 
@@ -94,31 +94,20 @@ export function getMergeStepFeedback(
  */
 export function getMergeContextualHint(state: MergeSortState): string {
   if (state.completed || state.phase === "COMPLETED") {
-    return "Ordenação concluída! Todas as cargas foram consolidadas em ordem crescente na esteira principal com status OK.";
+    return "Ordenação concluída! Todos os números foram organizados em ordem crescente no vetor principal com status OK.";
   }
 
   const expected = getExpectedMergeStep(state);
   if (!expected) {
-    return "Acompanhe as esteiras convergentes para intercalar as cargas ordenadamente.";
+    return "Acompanhe a intercalação para juntar os grupos em ordem.";
   }
 
   if (state.phase === "DRAIN_READY") {
-    return "Um dos ramais já foi totalmente colhido. Como o outro ramal já está ordenado, comande a Drenagem para transferir o restante sem novas comparações.";
+    return "Um dos grupos terminou. Copie os números restantes do outro grupo diretamente para o vetor auxiliar: não são necessárias novas comparações porque aquele grupo já está ordenado.";
   }
 
   if (state.phase === "COMPARE_HEADS" && expected.leftElement && expected.rightElement) {
-    const leftVal = expected.leftElement.value;
-    const rightVal = expected.rightElement.value;
-
-    if (leftVal === rightVal) {
-      return `Empate detectado (${leftVal} = ${rightVal})! Lembre-se da regra de estabilidade: quando os valores forem iguais, colha sempre a carga do Ramal Esquerdo.`;
-    }
-
-    if (leftVal < rightVal) {
-      return `Compare as frentes: Ramal Esquerdo (${leftVal}) versus Ramal Direito (${rightVal}). Identifique a menor carga para despachar à esteira coletora.`;
-    }
-
-    return `Compare as frentes: Ramal Esquerdo (${leftVal}) versus Ramal Direito (${rightVal}). Identifique a menor carga para despachar à esteira coletora.`;
+    return "Compare os dois números destacados: escolha o menor para a próxima posição do vetor auxiliar. Se os dois forem iguais, escolha o da esquerda (estabilidade).";
   }
 
   return expected.explanation;

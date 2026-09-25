@@ -24,7 +24,7 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
       const merge = getProtocolMetadata("merge");
       expect(merge.id).toBe("merge");
       expect(merge.name).toBe("MERGE SORT");
-      expect(merge.metaphor).toContain("CONFLUÊNCIA DE RAMAIS");
+      expect(merge.metaphor).toContain("DIVISÃO E INTERCALAÇÃO");
       expect(merge.status).toBe("available");
       expect(merge.statusLabel).toBe("DISPONÍVEL");
       expect(merge.demonstrationStatus).toBe("available");
@@ -34,7 +34,7 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
       const bubble = getProtocolMetadata("bubble");
       expect(bubble.id).toBe("bubble");
       expect(bubble.name).toBe("BUBBLE SORT");
-      expect(bubble.metaphor).toContain("PARES VIZINHOS");
+      expect(bubble.metaphor).toContain("COMPARAÇÃO DE VIZINHOS");
       expect(bubble.status).toBe("available");
       expect(bubble.statusLabel).toBe("DISPONÍVEL");
       expect(bubble.demonstrationStatus).toBe("available");
@@ -42,36 +42,36 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
       expect(bubble.totalPhases).toBe(3);
       expect(bubble.theme.primaryColor).toBe("cyan");
       expect(bubble.practiceItems).toContain("Comparação de vizinhos");
-      expect(bubble.practiceItems).toContain("Troca física adjacente");
+      expect(bubble.practiceItems).toContain("Troca de posições");
     });
 
     it("declara Selection Sort como disponível, com 3 fases e tema púrpura", () => {
       const selection = getProtocolMetadata("selection");
       expect(selection.id).toBe("selection");
       expect(selection.name).toBe("SELECTION SORT");
-      expect(selection.metaphor).toContain("SCANNER DE CARGA MÍNIMA");
+      expect(selection.metaphor).toContain("SELEÇÃO DO MENOR NÚMERO");
       expect(selection.status).toBe("available");
       expect(selection.statusLabel).toBe("DISPONÍVEL");
       expect(selection.demonstrationStatus).toBe("available");
       expect(selection.demonstrationLabel).toBe("DEMONSTRAÇÃO");
       expect(selection.totalPhases).toBe(3);
       expect(selection.theme.primaryColor).toBe("purple");
-      expect(selection.practiceItems).toContain("Varredura da esteira");
-      expect(selection.practiceItems).toContain("Transferência pontual no commit");
+      expect(selection.practiceItems).toContain("Busca do menor valor");
+      expect(selection.practiceItems).toContain("Confirmação da posição final");
     });
 
     it("declara Insertion Sort como disponível, com status available e tema âmbar", () => {
       const insertion = getProtocolMetadata("insertion");
       expect(insertion.id).toBe("insertion");
       expect(insertion.name).toBe("INSERTION SORT");
-      expect(insertion.metaphor).toContain("TRILHO DE INSERÇÃO");
+      expect(insertion.metaphor).toContain("INSERÇÃO NA PARTE ORDENADA");
       expect(insertion.status).toBe("available");
       expect(insertion.statusLabel).toBe("DISPONÍVEL");
       expect(insertion.demonstrationStatus).toBe("available");
       expect(insertion.demonstrationLabel).toBe("DEMONSTRAÇÃO");
       expect(insertion.totalPhases).toBe(3);
       expect(insertion.theme.primaryColor).toBe("amber");
-      expect(insertion.practiceItems).toContain("Região ordenada provisória (ORD)");
+      expect(insertion.practiceItems).toContain("Parte ordenada à esquerda");
     });
 
     it("faz fallback defensivo para Bubble Sort se id desconhecido for passado", () => {

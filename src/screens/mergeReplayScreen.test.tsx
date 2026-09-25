@@ -81,8 +81,8 @@ describe("Merge Sort Retrospective Replay & Synchronized Pseudocode (P3.1-E)", (
       />,
     );
 
-    // Título e indicador de auditoria
-    expect(container.textContent).toContain("AUDITORIA TÉCNICA // MODO REPLAY");
+    // Título e indicador do modo replay
+    expect(container.textContent).toContain("MODO REPLAY // REVISÃO DA TENTATIVA");
     expect(container.textContent).toContain("PRÁTICA BÁSICA");
     expect(container.textContent).toContain("ESTADO INICIAL");
     expect(container.textContent).toContain("PASSO 0 /");

@@ -410,4 +410,62 @@ Toda tela com conteúdo potencialmente superior ao viewport **DEVE**:
    - Cada tela deve possuir um único ancestral responsável pela rolagem vertical (`overflow-y-auto overflow-x-hidden`), padronizado diretamente no nó raiz da tela.
    - É estritamente proibido criar múltiplos containers com `overflow-y-auto` concorrentes na mesma tela ou aninhar containers com `overflow-hidden` rígidos que compitam com o scroll da aplicação.
 
+---
+
+## 11. Diretriz de Linguagem Pedagógica e Hierarquia Visual
+
+Consolidada na **Revisão Transversal de Legibilidade Visual e Linguagem Pedagógica** antes do módulo Quick Sort, esta diretriz estabelece os padrões inegociáveis para garantir que o estudante aprenda os algoritmos sem decifrar metáforas industriais opacas ou enfrentar atritos de contraste e hierarquia visual.
+
+### 11.1. Inventário e Desindustrialização de Termos
+
+A plataforma preserva a atmosfera diegética da estação espacial, mas adota **linguagem pedagógica direta e objetiva** nos comandos, orientações e feedbacks:
+
+| Termo Industrial Anterior | Termo Pedagógico Canônico | Contexto / Justificativa |
+| :--- | :--- | :--- |
+| `despachar` | **escolher** ou **copiar** | "Escolher" na decisão entre opções ativas; "Copiar" ao transferir elemento para o vetor auxiliar/buffer. |
+| `drenar` / `drenagem` | **copiar os números restantes** | Deixa explícito ao estudante que o grupo remanescente já está ordenado e não exige novas comparações. |
+| `ramal` | **grupo** (`Grupo da Esquerda` / `Grupo da Direita`) | Substitui a metáfora de ramais ferroviários por conjuntos conceituais de divisão e conquista. |
+| `carga` / `cargas` | **número(s)** ou **elemento(s)** | Termo técnico real do domínio de estruturas de dados e vetores. |
+| `confluência` | **intercalação** / **juntar os grupos em ordem** | Preserva a terminologia científica com explicação imediata do objetivo. |
+| `sensor` / `scanner` | **destaque**, **posição em análise** ou **leitura** | Remove terminologia de maquinário fabril mantendo a clareza da frente de leitura dos ponteiros. |
+| `commit` | **confirmar a posição** / **trocar para a posição inicial** | Linguagem direta de ação algorítmica. |
+| `telemetria` | **métricas** ou **resultados** | Facilita a interpretação dos dados da tentativa (comparações, trocas, escritas e tempo). |
+
+**Termos Técnicos Preservados:** Vetor, pivô, intercalação, comparação, estabilidade e vetor auxiliar são termos canônicos fundamentais da computação que devem ser mantidos, acompanhados de explicações simples no primeiro contato e nos feedbacks guiados.
+
+### 11.2. Diretrizes de Tipografia, Escala e Contraste (WCAG 2.1 AA)
+1. **Fonte de Leitura Contínua (`Exo 2`):**
+   - É obrigatório utilizar `'Exo 2', sans-serif` para todas as explicações, regras, instruções em painéis e feedbacks de erro/sucesso.
+   - É estritamente proibido utilizar fontes decorativas (`Orbitron`) ou monoespaçadas (`Space Mono`) para blocos de texto contínuos superiores a 2 linhas.
+   - A escala tipográfica para instruções e textos explicativos em desktop deve adotar a referência de aproximadamente **16px** (`text-sm sm:text-base` ou `text-xs sm:text-sm` em notas densas), com entrelinha confortável (`leading-relaxed`).
+2. **Eliminação de Contrastes Fracos:**
+   - Proibido o uso de `text-white/40` ou `text-white/50` para rótulos legíveis e informações secundárias essenciais.
+   - Utilizar no mínimo `text-slate-300` (contraste $> 7:1$ sobre `#060b1a` e `#080f28`), garantindo conformidade com WCAG 2.1 AA e AAA para textos normais.
+3. **Mitigação de Ofuscamento sobre Números:**
+   - Redução dos halos e sombras de texto (`text-shadow`) em classes `.glow-cyan` e `.glow-purple` para um raio máximo de 4px com opacidade atenuada, eliminando a perda de definição das arestas numéricas em telas escuras.
+   - Distinção nítida e independente entre valor numérico (`Orbitron font-bold`), identificador de duplicata (badge nítido `bg-[#060b1a]/80 text-cyan-200 border border-cyan-400/40`), índice (`#index+1` em `text-slate-300 font-bold`) e estado do elemento (papel semântico `BoxRole`).
+
+### 11.3. Organização do Hub e Cartões de Protocolo
+- **Alinhamento Nivelado dos Grupos de Ação:** Cartões de protocolo utilizam `flex-col justify-between h-full` com container de botões ancorado ao rodapé via `mt-auto pt-5`, garantindo que os botões de todos os cards da grade fiquem perfeitamente alinhados na mesma linha horizontal.
+- **Botões Secundários Flexíveis:** As ações de "TUTORIAL" e "DEMONSTRAÇÃO" utilizam quebra adaptativa `flex-col sm:flex-row gap-2` com `w-full` quando necessário, prevenindo corte de texto ou rótulos espremidos.
+- **Grid Responsivo de Protocolos:**
+  - Viewports médias (1280px e 1366px): `grid-cols-1 md:grid-cols-2`, priorizando espaço lateral e leitura confortável dos 4 módulos em duas fileiras de 2 cards;
+  - Viewports amplas (1920px+): `2xl:grid-cols-4`, exibindo a visão panorâmica integrada do currículo.
+
+### 11.4. Hierarquia Visual Estrita da Estação de Prática (Merge Sort)
+A prática de ordenação deve seguir estritamente a ordem cognitiva de tomada de decisão em 5 níveis verticais:
+1. **O que fazer agora:** Painel de instrução ativo no topo com tag de estado (`[INSTRUÇÃO]`, `[ATENÇÃO]`, `[CORRETO]`, `[ERRO]`), acompanhado de dica contextual que explica a regra sem queimar a resposta;
+2. **Os dois números a comparar:** Painel de confronto focado e central, destacando em cards nítidos o valor e identidade da frente do Grupo da Esquerda vs Grupo da Direita;
+3. **Onde o número escolhido será colocado:** Vetor Auxiliar Temporário (buffer), exibindo os slots já preenchidos e destacando com nitidez o slot alvo `k` que receberá o próximo elemento;
+4. **Os botões da decisão:** Ações imediatas posicionadas diretamente sob o confronto e buffer:
+   - `1: ESCOLHER DA ESQUERDA`
+   - `2: ESCOLHER DA DIREITA`
+   - `3: COPIAR RESTANTES`
+5. **Contexto de Apoio:** Vetor principal posicionado na parte inferior com legenda explícita (`ORD` = subgrupo ordenado localmente vs `OK` = posição final consolidada), pseudocódigo canônico com linha sincronizada e métricas factuais consolidadas.
+
+### 11.5. Homologação Visual e Viewports de Validação
+- As viewports canônicas de teste são: **1366×768** (laptop comum), **1920×1080** (desktop full HD) e **1280×650** (janela de navegador reduzida com barra de ferramentas).
+- Em ambientes de execução automatizada em terminal (sem motor de renderização de navegador com display gráfico aberto), qualquer validação visual deve ser formalmente registrada como **pendente de homologação e conferência visual com o usuário**, sendo expressamente proibido declarar problemas visuais como resolvidos apenas pela inspeção de regras CSS.
+
+
 

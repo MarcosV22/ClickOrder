@@ -55,13 +55,13 @@ body {
   z-index: 10;
 }
 
-/* Glow effects */
+/* Glow effects - toned down for legibility of numbers and tokens */
 .glow-cyan {
-  text-shadow: 0 0 8px #00f5ff, 0 0 20px rgba(0, 245, 255, 0.4);
+  text-shadow: 0 0 4px rgba(0, 245, 255, 0.4);
 }
 
 .glow-purple {
-  text-shadow: 0 0 8px #8b5cf6, 0 0 20px rgba(139, 92, 246, 0.4);
+  text-shadow: 0 0 4px rgba(139, 92, 246, 0.4);
 }
 
 .box-glow-selected {

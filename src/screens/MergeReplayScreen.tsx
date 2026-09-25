@@ -226,7 +226,7 @@ export default function MergeReplayScreen({
             >
               {mode === "demonstration"
                 ? "MODO DEMONSTRAÇÃO // EXECUÇÃO CANÔNICA"
-                : "AUDITORIA TÉCNICA // MODO REPLAY RETROSPECTIVO"}
+                : "MODO REPLAY // REVISÃO DA TENTATIVA"}
             </span>
             <span
               className="text-lg font-black text-white tracking-tight"
@@ -259,7 +259,7 @@ export default function MergeReplayScreen({
         <div className="flex flex-col items-center gap-2 text-center w-full">
           <div className="flex flex-wrap items-center justify-center gap-3">
             <span
-              className="text-sm font-bold text-white/60 tracking-wider px-3 py-1 rounded border border-white/10 bg-white/5 font-mono"
+              className="text-sm font-bold text-slate-200 tracking-wider px-3 py-1 rounded border border-white/20 bg-white/5 font-mono"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
               PASSO {currentFrame.stepNumber} / {currentFrame.totalSteps}
@@ -295,7 +295,7 @@ export default function MergeReplayScreen({
 
           {/* Telemetria de Métricas Algorítmicas do Frame */}
           <div
-            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-white/70 mt-1 font-mono bg-[#030614]/70 px-4 py-2 rounded-lg border border-white/10"
+            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-200 mt-1 font-mono bg-[#030614]/70 px-4 py-2 rounded-lg border border-white/10 font-semibold"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             <span>
@@ -322,38 +322,38 @@ export default function MergeReplayScreen({
 
         {/* Estação Visual: Esteira Principal e Buffer Auxiliar */}
         <div className="w-full panel-border bg-[#080f28]/90 rounded-2xl p-6 flex flex-col items-center gap-6 shadow-2xl shadow-teal-950/20 relative overflow-hidden">
-          {/* Subheader da Confluência de Ramais */}
+          {/* Subheader da Intercalação de Grupos */}
           {currentFrame.activeInterval && (
-            <div className="w-full flex flex-wrap items-center justify-between pb-3 border-b border-white/10 text-xs font-mono text-white/60">
+            <div className="w-full flex flex-wrap items-center justify-between pb-3 border-b border-white/10 text-xs font-mono text-slate-300">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
                 <span className="text-teal-300 font-bold uppercase">
-                  CONFLUÊNCIA ATIVA: [{currentFrame.activeInterval.left}..
+                  INTERCALAÇÃO ATIVA: [{currentFrame.activeInterval.left}..
                   {currentFrame.activeInterval.right}]
                 </span>
                 <span>(meio = {currentFrame.activeInterval.mid})</span>
               </div>
               <div className="flex items-center gap-4 text-[11px]">
-                <span className="text-teal-300">
-                  Ramal E: [{currentFrame.activeInterval.left}..
+                <span className="text-teal-300 font-semibold">
+                  Grupo E: [{currentFrame.activeInterval.left}..
                   {currentFrame.activeInterval.mid}]
                 </span>
-                <span className="text-sky-300">
-                  Ramal D: [{currentFrame.activeInterval.mid + 1}..
+                <span className="text-sky-300 font-semibold">
+                  Grupo D: [{currentFrame.activeInterval.mid + 1}..
                   {currentFrame.activeInterval.right}]
                 </span>
               </div>
             </div>
           )}
 
-          {/* ESTEIRA PRINCIPAL (VETOR DE CARGAS) */}
+          {/* VETOR PRINCIPAL */}
           <div className="w-full flex flex-col items-center gap-2">
             <div
-              className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-teal-400/80 uppercase"
+              className="flex items-center gap-2 text-xs font-mono tracking-wider text-teal-300 uppercase font-bold"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-              <span>ESTEIRA PRINCIPAL DE CARGAS</span>
+              <span>VETOR PRINCIPAL A[0..{currentFrame.values.length - 1}]</span>
             </div>
 
             <div className="flex flex-wrap items-end justify-center gap-3 sm:gap-4 py-2">
@@ -364,7 +364,7 @@ export default function MergeReplayScreen({
 
                 return (
                   <div key={element.id} className="flex flex-col items-center gap-1.5">
-                    {/* Indicador de Sensor Óptico */}
+                    {/* Indicador de Frente de Leitura */}
                     <div className="h-4 flex items-center justify-center text-[10px] font-mono font-bold">
                       {isP1 && (
                         <span className="text-teal-300 animate-pulse">▼ p1 (E)</span>
@@ -383,8 +383,8 @@ export default function MergeReplayScreen({
                       size="md"
                     />
 
-                    {/* Índice da posição na esteira */}
-                    <span className="text-[10px] font-mono text-white/40">
+                    {/* Índice da posição no vetor */}
+                    <span className="text-xs font-mono text-slate-300 font-bold">
                       #{idx}
                     </span>
                   </div>
@@ -393,15 +393,15 @@ export default function MergeReplayScreen({
             </div>
           </div>
 
-          {/* BUFFER AUXILIAR DE INTERCALAÇÃO (ESTEIRA COLETORA) */}
+          {/* VETOR AUXILIAR TEMPORÁRIO (ESTEIRA COLETORA) */}
           {(currentFrame.activeInterval || currentFrame.buffer.length > 0) && (
             <div className="w-full flex flex-col items-center gap-2 pt-4 border-t border-dashed border-white/10">
               <div
-                className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-amber-400/80 uppercase"
+                className="flex items-center gap-2 text-xs font-mono tracking-wider text-amber-300 uppercase font-bold"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                <span>BUFFER TEMPORÁRIO DE INTERCALAÇÃO</span>
+                <span>VETOR AUXILIAR TEMPORÁRIO B</span>
               </div>
 
               <div className="flex flex-wrap items-end justify-center gap-3 py-2">
@@ -428,12 +428,12 @@ export default function MergeReplayScreen({
                             size="sm"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-lg border border-dashed border-white/20 bg-white/5 flex items-center justify-center text-white/20 text-xs font-mono">
+                          <div className="w-12 h-12 rounded-lg border border-dashed border-white/20 bg-white/5 flex items-center justify-center text-slate-400 text-xs font-mono font-bold">
                             {kIdx}
                           </div>
                         )}
 
-                        <span className="text-[9px] font-mono text-white/30">
+                        <span className="text-xs font-mono text-slate-300 font-semibold">
                           B[{kIdx}]
                         </span>
                       </div>
@@ -452,8 +452,8 @@ export default function MergeReplayScreen({
             className="w-full panel-border bg-[#030614]/80 rounded-xl p-3.5 border border-white/10 focus:outline-none focus:ring-1 focus:ring-teal-400/50"
           >
             <p
-              className="text-xs text-white/80 leading-relaxed font-mono"
-              style={{ fontFamily: "'Space Mono', monospace" }}
+              className="text-xs sm:text-sm text-slate-100 leading-relaxed"
+              style={{ fontFamily: "'Exo 2', sans-serif" }}
             >
               {currentFrame.explanation}
             </p>
@@ -466,7 +466,7 @@ export default function MergeReplayScreen({
         {/* Linha do Tempo e Barra de Progresso */}
         <div className="w-full max-w-xl flex flex-col gap-1.5">
           <div
-            className="flex justify-between items-center text-[10px] text-white/40 font-mono"
+            className="flex justify-between items-center text-xs text-slate-300 font-semibold font-mono"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
             <span>PROGRESSO DA EXECUÇÃO</span>

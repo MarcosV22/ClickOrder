@@ -117,24 +117,24 @@ export default function ProtocolModeBriefingScreen({
         </header>
 
         {/* Main Content Cards Container */}
-        <div className="w-full flex flex-col gap-3 sm:gap-3.5">
+        <div className="w-full flex flex-col gap-3 sm:gap-4">
           {/* Card 1: Objetivo */}
           <section
-            className="bg-[#0d1635]/90 border border-[#2a4a9e]/60 rounded-xl p-3.5 sm:p-4 shadow-lg"
+            className="bg-[#0d1635]/90 border border-[#2a4a9e]/60 rounded-xl p-4 sm:p-5 shadow-lg"
             aria-labelledby="briefing-objective-title"
           >
-            <div className="flex items-center gap-2 mb-1.5">
+            <div className="flex items-center gap-2 mb-2">
               <span className={isAmber ? "text-amber-400" : "text-cyan-400"}>◈</span>
               <h2
                 id="briefing-objective-title"
-                className="text-xs font-mono font-bold tracking-widest text-white/80 uppercase"
+                className="text-xs sm:text-sm font-mono font-bold tracking-wider text-slate-200 uppercase"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                Objetivo Operacional
+                Objetivo do Módulo
               </h2>
             </div>
             <p
-              className="text-xs sm:text-sm text-white/90 leading-relaxed"
+              className="text-sm sm:text-base text-slate-100 leading-relaxed font-normal"
               style={{ fontFamily: "'Exo 2', sans-serif" }}
             >
               {briefing.objective}
@@ -143,44 +143,44 @@ export default function ProtocolModeBriefingScreen({
 
           {/* Card 2: Instruções / Como Operar (Grid 2x2) */}
           <section aria-labelledby="briefing-instructions-title">
-            <div className="flex items-center gap-2 mb-1.5 px-1">
+            <div className="flex items-center gap-2 mb-2 px-1">
               <span className={isAmber ? "text-amber-400" : "text-cyan-400"}>◈</span>
               <h2
                 id="briefing-instructions-title"
-                className="text-xs font-mono font-bold tracking-widest text-white/80 uppercase"
+                className="text-xs sm:text-sm font-mono font-bold tracking-wider text-slate-200 uppercase"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                Procedimento na Esteira
+                Como Funciona o Algoritmo
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
               {briefing.instructions.map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#0d1635]/70 border border-[#1e3570]/60 rounded-lg p-3 sm:p-3.5 flex items-start gap-3 hover:border-cyan-500/40 transition-colors"
+                  className="bg-[#0d1635]/80 border border-[#1e3570]/80 rounded-xl p-3.5 sm:p-4 flex items-start gap-3.5 hover:border-cyan-500/50 transition-colors shadow-sm"
                 >
                   {item.icon && (
                     <div
-                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded flex items-center justify-center font-bold text-xs sm:text-sm bg-[#111e47] border ${
+                      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center font-bold text-sm sm:text-base bg-[#111e47] border ${
                         isAmber
-                          ? "border-amber-500/30 text-amber-300"
-                          : "border-cyan-500/30 text-cyan-300"
-                      } flex-shrink-0`}
+                          ? "border-amber-500/40 text-amber-300"
+                          : "border-cyan-500/40 text-cyan-300"
+                      } flex-shrink-0 mt-0.5`}
                       style={{ fontFamily: "'Space Mono', monospace" }}
                       aria-hidden="true"
                     >
                       {item.icon}
                     </div>
                   )}
-                  <div className="flex flex-col">
+                  <div className="flex flex-col flex-1 min-w-0">
                     <h3
-                      className="text-xs sm:text-sm font-bold text-white font-mono tracking-wide"
+                      className="text-sm sm:text-[15px] font-bold text-white font-mono tracking-wide"
                       style={{ fontFamily: "'Space Mono', monospace" }}
                     >
                       {item.title}
                     </h3>
                     <p
-                      className="text-[11px] sm:text-xs text-white/70 leading-relaxed mt-0.5"
+                      className="text-xs sm:text-[14px] text-slate-200 leading-relaxed mt-1"
                       style={{ fontFamily: "'Exo 2', sans-serif" }}
                     >
                       {item.description}
@@ -194,26 +194,26 @@ export default function ProtocolModeBriefingScreen({
           {/* Card 3: Particularidades do Modo (se houver) */}
           {briefing.particularities && briefing.particularities.length > 0 && (
             <section
-              className={`rounded-xl p-3 sm:p-3.5 border ${
+              className={`rounded-xl p-3.5 sm:p-4 border ${
                 isAmber
-                  ? "bg-amber-950/20 border-amber-500/30 text-amber-200/90"
-                  : "bg-cyan-950/20 border-cyan-500/30 text-cyan-200/90"
+                  ? "bg-amber-950/30 border-amber-500/40 text-amber-100"
+                  : "bg-cyan-950/30 border-cyan-500/40 text-cyan-100"
               }`}
               aria-labelledby="briefing-particularities-title"
             >
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center gap-2 mb-2">
                 <span className={isAmber ? "text-amber-400 font-bold" : "text-cyan-400 font-bold"}>
                   {isAmber ? "⚡" : "ℹ"}
                 </span>
                 <h2
                   id="briefing-particularities-title"
-                  className="text-xs font-mono font-bold tracking-widest uppercase text-white/80"
+                  className="text-xs sm:text-sm font-mono font-bold tracking-wider uppercase text-slate-200"
                   style={{ fontFamily: "'Space Mono', monospace" }}
                 >
                   Particularidades Deste Modo
                 </h2>
               </div>
-              <ul className="list-disc list-inside space-y-1 text-[11px] sm:text-xs leading-relaxed opacity-90 pl-1">
+              <ul className="list-disc list-inside space-y-1.5 text-xs sm:text-[14px] leading-relaxed pl-1 font-medium text-slate-200">
                 {briefing.particularities.map((rule, idx) => (
                   <li key={idx} style={{ fontFamily: "'Exo 2', sans-serif" }}>
                     {rule}
@@ -224,17 +224,17 @@ export default function ProtocolModeBriefingScreen({
           )}
 
           {/* Highlights Strip */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-2.5 w-full">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 w-full">
             {briefing.highlights.map((item, idx) => {
               const valColor =
                 highlightColorClasses[item.variant ?? "cyan"] ?? "text-white";
               return (
                 <div
                   key={idx}
-                  className="bg-[#0d1635]/80 border border-[#1e3570]/60 rounded-lg p-2 sm:p-2.5 text-center flex flex-col justify-center"
+                  className="bg-[#0d1635]/90 border border-[#1e3570]/80 rounded-xl p-2.5 sm:p-3 text-center flex flex-col justify-center"
                 >
                   <span
-                    className="text-[9px] sm:text-[10px] font-mono tracking-widest text-white/50 uppercase"
+                    className="text-[10px] sm:text-[11px] font-mono tracking-wider text-slate-300 uppercase font-semibold"
                     style={{ fontFamily: "'Space Mono', monospace" }}
                   >
                     {item.label}
