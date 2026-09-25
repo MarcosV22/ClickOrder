@@ -104,53 +104,32 @@ export default function ProtocolCard({
           {metadata.shortDescription}
         </p>
 
-        {/* Practice items */}
-        <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
+        {/* Training status / Telemetry (stacked rows to avoid collision) */}
+        <div className="flex flex-col gap-2 pt-3 border-t border-white/10">
           <span
             className="text-[10px] uppercase font-mono tracking-widest text-slate-300 font-semibold"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            O QUE VOCÊ VAI PRATICAR
-          </span>
-          <div className="flex flex-wrap gap-1.5">
-            {metadata.practiceItems.map((item) => (
-              <span
-                key={item}
-                className={`px-2 py-0.5 rounded text-[11px] font-mono border font-medium ${metadata.theme.practiceBadgeClass}`}
-                style={{ fontFamily: "'Space Mono', monospace" }}
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Training status / Telemetry */}
-        <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-          <span
-            className="text-[10px] uppercase font-mono tracking-widest text-slate-300 font-semibold"
-            style={{ fontFamily: "'Space Mono', monospace" }}
-          >
-            STATUS DE TREINAMENTO
+            STATUS DE APRENDIZADO
           </span>
 
           {isAvailable ? (
-            <div className="grid grid-cols-3 gap-2 bg-[#060b1a]/70 border border-white/10 rounded-lg p-2.5">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-mono text-slate-300 uppercase font-semibold">Práticas</span>
+            <div className="flex flex-col gap-2 bg-[#060b1a]/80 border border-white/10 rounded-xl p-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-mono text-slate-300">Práticas:</span>
                 <span
-                  className="text-xs font-bold text-white font-mono mt-0.5"
+                  className="font-bold text-white font-mono"
                   style={{ fontFamily: "'Space Mono', monospace" }}
                 >
-                  {summary.completedPhases} / {summary.totalPhases}
+                  {summary.completedPhases} de {summary.totalPhases} concluídas
                 </span>
               </div>
 
-              <div className="flex flex-col">
-                <span className="text-[10px] font-mono text-slate-300 uppercase font-semibold">Tutorial</span>
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-mono text-slate-300">Tutorial guiado:</span>
                 <span
-                  className={`text-xs font-bold font-mono mt-0.5 ${
-                    summary.hasCompletedTutorial ? "text-emerald-400" : "text-amber-400"
+                  className={`font-bold font-mono ${
+                    summary.hasCompletedTutorial ? "text-emerald-400" : "text-amber-300"
                   }`}
                   style={{ fontFamily: "'Space Mono', monospace" }}
                 >
@@ -158,23 +137,23 @@ export default function ProtocolCard({
                 </span>
               </div>
 
-              <div className="flex flex-col">
-                <span className="text-[10px] font-mono text-slate-300 uppercase font-semibold">Melhor Score</span>
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-mono text-slate-300">Melhor pontuação:</span>
                 <span
-                  className="text-xs font-bold text-cyan-300 font-mono mt-0.5"
+                  className="font-bold text-cyan-300 font-mono"
                   style={{ fontFamily: "'Space Mono', monospace" }}
                 >
-                  {summary.bestScore !== undefined ? `${summary.bestScore}/100` : "—"}
+                  {summary.bestScore !== undefined ? `${summary.bestScore} / 100` : "—"}
                 </span>
               </div>
             </div>
           ) : (
-            <div className="p-2.5 rounded-lg border border-dashed border-white/10 bg-black/20 text-center">
+            <div className="p-3 rounded-xl border border-dashed border-white/10 bg-black/20 text-center">
               <span
-                className="text-[11px] font-mono text-slate-300 italic"
+                className="text-xs font-mono text-slate-300 italic"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                Protocolo Curricular em Preparação (Marco P2.2)
+                Módulo curricular em preparação
               </span>
             </div>
           )}
@@ -182,7 +161,7 @@ export default function ProtocolCard({
       </div>
 
       {/* Bottom section: Actions strictly aligned across all cards */}
-      <div className="flex flex-col gap-2.5 pt-5 mt-auto border-t border-white/10 relative z-10">
+      <div className="flex flex-col gap-2.5 pt-4 mt-auto border-t border-white/10 relative z-10">
         {/* Primary CTA */}
         {isAvailable ? (
           <GameButton
@@ -207,17 +186,17 @@ export default function ProtocolCard({
           </button>
         )}
 
-        {/* Secondary CTAs with flexible wrapping to avoid squeezed labels */}
-        <div className="flex flex-col sm:flex-row gap-2 w-full">
+        {/* Secondary CTAs stacked to prevent narrow squeezed buttons */}
+        <div className="flex flex-col gap-2 w-full">
           {/* Tutorial button */}
-          <div className="flex-1 min-w-0">
+          <div className="w-full">
             {isAvailable ? (
               <GameButton
                 onClick={() => onOpenTutorial(metadata.id)}
                 variant="secondary"
                 size="sm"
                 icon="?"
-                className="w-full text-center px-2 font-bold"
+                className="w-full text-center px-3 font-bold"
               >
                 TUTORIAL
               </GameButton>
@@ -236,14 +215,14 @@ export default function ProtocolCard({
           </div>
 
           {/* Demonstration button */}
-          <div className="flex-1 min-w-0">
+          <div className="w-full">
             {metadata.demonstrationStatus === "available" ? (
               <GameButton
                 onClick={() => onOpenDemonstration?.(metadata.id)}
                 variant="ghost"
                 size="sm"
                 icon="👁"
-                className="w-full text-center px-2 font-bold text-white/90 hover:text-white"
+                className="w-full text-center px-3 font-bold text-white/90 hover:text-white"
                 aria-label={`Ver modo demonstração do protocolo ${metadata.name}`}
               >
                 {metadata.demonstrationLabel}
@@ -278,36 +257,12 @@ export default function ProtocolCard({
               </GameButton>
             ) : (
               <div
-                className="w-full text-[10px] text-white/35 font-mono text-center py-1.5 px-2 rounded bg-black/30 border border-white/5"
+                className="w-full text-[11px] text-slate-400/60 font-mono text-center py-1.5 px-2 rounded bg-black/30 border border-white/5"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
                 🔒 DESAFIO: Conclua as 3 práticas do Bubble
               </div>
             )}
-          </div>
-        )}
-
-        {/* Selection slot placeholder to maintain strict vertical symmetry */}
-        {metadata.id === "selection" && (
-          <div className="pt-1">
-            <div
-              className="w-full text-[10px] text-purple-400/50 font-mono text-center py-1.5 px-2 rounded bg-purple-950/20 border border-purple-500/10"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              ◈ SELECTION SORT: FSM BIMODAL
-            </div>
-          </div>
-        )}
-
-        {/* Insertion badge slot to maintain strict vertical symmetry */}
-        {metadata.id === "insertion" && (
-          <div className="pt-1">
-            <div
-              className="w-full text-[10px] text-amber-400/60 font-mono text-center py-1.5 px-2 rounded bg-amber-950/20 border border-amber-500/15"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              ◈ INSERTION SORT: TRILHO PROGRESSIVO
-            </div>
           </div>
         )}
       </div>

@@ -246,12 +246,12 @@ export default function MergeTutorialScreen({
                 className="text-xs font-mono tracking-wider text-teal-300 uppercase font-bold"
                 style={{ fontFamily: "'Space Mono', monospace" }}
               >
-                VETOR AUXILIAR TEMPORÁRIO (ESTEIRA COLETORA)
+                VETOR AUXILIAR TEMPORÁRIO B
               </span>
             </div>
 
             <span className="text-[11px] font-mono text-slate-300 font-semibold">
-              Posição alvo k = {engineState.k}
+              Próxima posição k = {engineState.k}
             </span>
           </div>
 

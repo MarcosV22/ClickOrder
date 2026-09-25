@@ -70,7 +70,7 @@ describe("Merge Sort Full Integration & Lifecycle Flow (P3.1-F)", () => {
 
       // Deve estar na tela de Briefing do Merge Sort
       expect(container.textContent).toContain("PROTOCOLO: MERGE SORT");
-      expect(container.textContent).toContain("DIVISÃO E CONFLUÊNCIA");
+      expect(container.textContent).toContain("DIVISÃO E INTERCALAÇÃO");
     });
   });
 
@@ -85,7 +85,7 @@ describe("Merge Sort Full Integration & Lifecycle Flow (P3.1-F)", () => {
       mount(<MergeTutorialScreen onComplete={onComplete} onBack={onBack} />);
 
       expect(container.textContent).toContain("TUTORIAL GUIADO • MERGE SORT");
-      expect(container.textContent).toContain("ESTEIRA COLETORA");
+      expect(container.textContent).toContain("VETOR AUXILIAR TEMPORÁRIO B");
 
       // Clicar em reiniciar não chama onComplete
       const restartBtn = Array.from(container.querySelectorAll("button")).find((btn) =>

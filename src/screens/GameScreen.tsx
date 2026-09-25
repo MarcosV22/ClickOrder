@@ -97,8 +97,8 @@ export default function GameScreen({
     type: "info" | "warning" | "success" | "error";
   }>(() => ({
     text: initialExpected
-      ? `Compare as caixas #${initialExpected.leftIndex + 1} e #${initialExpected.rightIndex + 1} (valores ${initialExpected.leftValue} e ${initialExpected.rightValue}). O que o algoritmo deve fazer?`
-      : "Ordene as caixas em ordem crescente.",
+      ? `Compare os dois números vizinhos (${initialExpected.leftValue} e ${initialExpected.rightValue}). Se estiverem fora de ordem, troque. Se já estiverem ordenados, avance.`
+      : "Compare os dois números vizinhos. Se estiverem fora de ordem, troque. Se já estiverem ordenados, avance.",
     type: "info",
   }));
 
@@ -215,8 +215,8 @@ export default function GameScreen({
           if (result.state.completed) {
             isActionLockedRef.current = true;
             const completionText = result.state.earlyExitTriggered
-              ? "Passada concluída sem trocas. O protocolo detectou que a esteira já está ordenada e encerrou a execução antecipadamente."
-              : "Protocolo concluído! Todas as caixas foram ordenadas com sucesso.";
+              ? "Passada concluída sem trocas. O algoritmo detectou que o vetor já está ordenado e encerrou a execução antecipadamente."
+              : "Ordenação concluída! Todos os números foram ordenados com sucesso.";
             setMessage({
               text: completionText,
               type: "success",
@@ -231,7 +231,7 @@ export default function GameScreen({
             const nextExpected = getExpectedComparison(result.state);
             if (nextExpected) {
               setMessage({
-                text: `Troca efetuada! Agora compare as caixas #${nextExpected.leftIndex + 1} e #${nextExpected.rightIndex + 1} (${nextExpected.leftValue} e ${nextExpected.rightValue}).`,
+                text: `Troca realizada! Agora compare os números vizinhos #${nextExpected.leftIndex + 1} e #${nextExpected.rightIndex + 1} (${nextExpected.leftValue} e ${nextExpected.rightValue}).`,
                 type: "info",
               });
             }
@@ -253,8 +253,8 @@ export default function GameScreen({
         if (result.state.completed) {
           isActionLockedRef.current = true;
           const completionText = result.state.earlyExitTriggered
-            ? "Passada concluída sem trocas. O protocolo detectou que a esteira já está ordenada e encerrou a execução antecipadamente."
-            : "Protocolo concluído! Todas as caixas foram ordenadas com sucesso.";
+            ? "Passada concluída sem trocas. O algoritmo detectou que o vetor já está ordenado e encerrou a execução antecipadamente."
+            : "Ordenação concluída! Todos os números foram ordenados com sucesso.";
           setMessage({
             text: completionText,
             type: "success",
@@ -268,7 +268,7 @@ export default function GameScreen({
           const nextExpected = getExpectedComparison(result.state);
           if (nextExpected) {
             setMessage({
-              text: `Ordem mantida! Agora compare as caixas #${nextExpected.leftIndex + 1} e #${nextExpected.rightIndex + 1} (${nextExpected.leftValue} e ${nextExpected.rightValue}).`,
+              text: `Ordem mantida! Agora compare os números vizinhos #${nextExpected.leftIndex + 1} e #${nextExpected.rightIndex + 1} (${nextExpected.leftValue} e ${nextExpected.rightValue}).`,
               type: "info",
             });
           }
@@ -308,8 +308,8 @@ export default function GameScreen({
 
     setShowHint(true);
     const hintText = currentExpected.shouldSwap
-      ? `DICA: Observe as caixas #${currentExpected.leftIndex + 1} (${currentExpected.leftValue}) e #${currentExpected.rightIndex + 1} (${currentExpected.rightValue}). Como ${currentExpected.leftValue} > ${currentExpected.rightValue}, o Bubble Sort exige a TROCA.`
-      : `DICA: Observe as caixas #${currentExpected.leftIndex + 1} (${currentExpected.leftValue}) e #${currentExpected.rightIndex + 1} (${currentExpected.rightValue}). Como ${currentExpected.leftValue} ≤ ${currentExpected.rightValue}, a ordem já está correta. Escolha MANTER.`;
+      ? `DICA: Observe os números #${currentExpected.leftIndex + 1} (${currentExpected.leftValue}) e #${currentExpected.rightIndex + 1} (${currentExpected.rightValue}). Como ${currentExpected.leftValue} > ${currentExpected.rightValue}, o Bubble Sort exige a TROCA.`
+      : `DICA: Observe os números #${currentExpected.leftIndex + 1} (${currentExpected.leftValue}) e #${currentExpected.rightIndex + 1} (${currentExpected.rightValue}). Como ${currentExpected.leftValue} ≤ ${currentExpected.rightValue}, a ordem já está correta. Escolha MANTER.`;
 
     setMessage({
       text: hintText,
@@ -344,12 +344,12 @@ export default function GameScreen({
     const exp = getExpectedComparison(fresh);
     if (exp) {
       setMessage({
-        text: `Reiniciado. Compare as caixas #${exp.leftIndex + 1} e #${exp.rightIndex + 1} (${exp.leftValue} e ${exp.rightValue}). O que o algoritmo deve fazer?`,
+        text: `Reiniciado. Compare os dois números vizinhos (${exp.leftValue} e ${exp.rightValue}). Se estiverem fora de ordem, troque. Se já estiverem ordenados, avance.`,
         type: "info",
       });
     } else {
       setMessage({
-        text: "Ordene as caixas em ordem crescente.",
+        text: "Compare os dois números vizinhos. Se estiverem fora de ordem, troque. Se já estiverem ordenados, avance.",
         type: "info",
       });
     }
@@ -365,12 +365,12 @@ export default function GameScreen({
 
     if (index === currentExpected.leftIndex || index === currentExpected.rightIndex) {
       setMessage({
-        text: `Caixa #${index + 1} (valor ${gameState.currentValues[index]}) está ativa no par sob comparação. Escolha TROCAR ou MANTER abaixo.`,
+        text: `Número #${index + 1} (valor ${gameState.currentValues[index]}) está ativo no par sob comparação. Escolha TROCAR ou MANTER abaixo.`,
         type: "info",
       });
     } else if (sortedIndices.includes(index)) {
       setMessage({
-        text: `A caixa #${index + 1} (valor ${gameState.currentValues[index]}) já está consolidada em sua posição definitiva (OK).`,
+        text: `O número #${index + 1} (valor ${gameState.currentValues[index]}) já está consolidado em sua posição definitiva (OK).`,
         type: "info",
       });
     } else {
@@ -421,7 +421,7 @@ export default function GameScreen({
               className="text-xs px-2.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-mono tracking-wider uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              {effectivePracticeTitle} • {gameState.arrayLength} CARGAS
+              {effectivePracticeTitle} • {gameState.arrayLength} NÚMEROS
             </span>
             <span
               className="text-xs px-2.5 py-0.5 rounded bg-purple-950/40 border border-purple-500/30 text-purple-300 font-mono tracking-wider uppercase"
@@ -507,7 +507,7 @@ export default function GameScreen({
                 </span>
               </>
             ) : (
-              <span className="text-emerald-400">Todas as cargas em ordem</span>
+              <span className="text-emerald-400">Todos os números em ordem</span>
             )}
           </div>
         </div>
@@ -520,16 +520,16 @@ export default function GameScreen({
           {/* Conveyor label */}
           <div className="flex justify-between mb-3 px-2">
             <span
-              className="text-[9px] text-white/20 tracking-widest"
+              className="text-[9px] text-white/40 tracking-widest uppercase font-mono"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              ESTEIRA A-04
+              VETOR PRINCIPAL A
             </span>
             <span
-              className="text-[9px] text-white/20 tracking-widest"
+              className="text-[9px] text-white/40 tracking-widest uppercase font-mono"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              CAPACIDADE: {gameState.arrayLength}/8 PKG
+              TAMANHO: {gameState.arrayLength} ITENS
             </span>
           </div>
 

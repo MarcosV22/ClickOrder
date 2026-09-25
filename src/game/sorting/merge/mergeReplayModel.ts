@@ -211,8 +211,8 @@ export function buildMergeReplayFrames(
         isRootMerge = activeContext?.isRootMerge ?? false;
         actionLabel =
           step.source === "LEFT"
-            ? "DESPACHO RAMAL ESQUERDO"
-            : "DESPACHO RAMAL DIREITO";
+            ? "ESCOLHA DO GRUPO DA ESQUERDA"
+            : "ESCOLHA DO GRUPO DA DIREITA";
 
         comparedP1 = step.source === "LEFT" ? step.p1 - 1 : step.p1;
         comparedP2 = step.source === "RIGHT" ? step.p2 - 1 : step.p2;

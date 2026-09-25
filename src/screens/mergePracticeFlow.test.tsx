@@ -92,13 +92,12 @@ describe("Merge Sort Practice Flow & Intercalation Station (P3.1-D)", () => {
       expect(html).toContain("Decisões Incorretas");
       expect(html).toContain("Pontuação");
 
-      // Esteira principal e pátio de triagem
-      expect(html).toContain("ESTEIRA PRINCIPAL");
-      expect(html).toContain("CONFLUÊNCIA DE RAMAIS");
-      expect(html).toContain("RAMAL ESQUERDO");
-      expect(html).toContain("RAMAL DIREITO");
-      expect(html).toContain("SENSORES ÓPTICOS EM CONFRONTO ATIVO");
-      expect(html).toContain("ESTEIRA COLETORA AUXILIAR");
+      // Vetor principal e área de intercalação
+      expect(html).toContain("VETOR PRINCIPAL");
+      expect(html).toContain("JUNTAR OS GRUPOS EM ORDEM");
+      expect(html).toContain("GRUPO DA ESQUERDA");
+      expect(html).toContain("GRUPO DA DIREITA");
+      expect(html).toContain("VETOR AUXILIAR TEMPORÁRIO B");
 
       // Pseudocódigo canônico operacional
       expect(html).toContain("PSEUDOCÓDIGO — SUB-ROTINA DE INTERCALAÇÃO (RESUMO OPERACIONAL)");
@@ -107,7 +106,7 @@ describe("Merge Sort Practice Flow & Intercalation Station (P3.1-D)", () => {
       // Botoeira de ações
       expect(html).toContain("1: ESCOLHER DA ESQUERDA");
       expect(html).toContain("2: ESCOLHER DA DIREITA");
-      expect(html).toContain("3: COPIAR RESTANTES");
+      expect(html).toContain("3: COPIAR OS RESTANTES");
     });
 
     it("respeita as regras de layout: single scroll owner e overflow horizontal isolado", () => {

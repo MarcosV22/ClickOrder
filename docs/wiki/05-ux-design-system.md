@@ -446,24 +446,46 @@ A plataforma preserva a atmosfera diegética da estação espacial, mas adota **
    - Distinção nítida e independente entre valor numérico (`Orbitron font-bold`), identificador de duplicata (badge nítido `bg-[#060b1a]/80 text-cyan-200 border border-cyan-400/40`), índice (`#index+1` em `text-slate-300 font-bold`) e estado do elemento (papel semântico `BoxRole`).
 
 ### 11.3. Organização do Hub e Cartões de Protocolo
-- **Alinhamento Nivelado dos Grupos de Ação:** Cartões de protocolo utilizam `flex-col justify-between h-full` com container de botões ancorado ao rodapé via `mt-auto pt-5`, garantindo que os botões de todos os cards da grade fiquem perfeitamente alinhados na mesma linha horizontal.
-- **Botões Secundários Flexíveis:** As ações de "TUTORIAL" e "DEMONSTRAÇÃO" utilizam quebra adaptativa `flex-col sm:flex-row gap-2` com `w-full` quando necessário, prevenindo corte de texto ou rótulos espremidos.
+- **Alinhamento Nivelado dos Grupos de Ação:** Cartões de protocolo utilizam `flex-col justify-between h-full` com container de botões ancorado ao rodapé via `mt-auto pt-5`, garantindo alinhamento horizontal consistente em toda a grade.
+- **Eliminação de Colisões e Linhas Empilhadas de Metadados:**
+  - Substituição da divisão artificial em 3 colunas estreitas por linhas empilhadas com espaçamento vertical:
+    - Linha 1: `Práticas: X de Y concluídas`
+    - Linha 2: `Tutorial guiado: CONCLUÍDO / PENDENTE`
+    - Linha 3: `Melhor pontuação: X / 100` (ou `—`)
+  - Essa estrutura elimina a colisão de textos longos (como o badge "CONCLUÍDO") com a coluna de pontuação.
+  - Eliminação de chips repetitivos de objetivos que apenas duplicavam a descrição do módulo.
+  - Botões secundários `TUTORIAL` e `DEMONSTRAÇÃO` empilhados em `flex flex-col gap-2 w-full`, com largura confortável e sem quebras indesejadas de rótulos.
+  - Remoção de jargões técnicos internos como `FSM bimodal` e `Trilho progressivo`, mantendo o Modo Desafio do Bubble exclusivamente onde ele existe de fato.
 - **Grid Responsivo de Protocolos:**
   - Viewports médias (1280px e 1366px): `grid-cols-1 md:grid-cols-2`, priorizando espaço lateral e leitura confortável dos 4 módulos em duas fileiras de 2 cards;
   - Viewports amplas (1920px+): `2xl:grid-cols-4`, exibindo a visão panorâmica integrada do currículo.
 
-### 11.4. Hierarquia Visual Estrita da Estação de Prática (Merge Sort)
-A prática de ordenação deve seguir estritamente a ordem cognitiva de tomada de decisão em 5 níveis verticais:
-1. **O que fazer agora:** Painel de instrução ativo no topo com tag de estado (`[INSTRUÇÃO]`, `[ATENÇÃO]`, `[CORRETO]`, `[ERRO]`), acompanhado de dica contextual que explica a regra sem queimar a resposta;
-2. **Os dois números a comparar:** Painel de confronto focado e central, destacando em cards nítidos o valor e identidade da frente do Grupo da Esquerda vs Grupo da Direita;
-3. **Onde o número escolhido será colocado:** Vetor Auxiliar Temporário (buffer), exibindo os slots já preenchidos e destacando com nitidez o slot alvo `k` que receberá o próximo elemento;
-4. **Os botões da decisão:** Ações imediatas posicionadas diretamente sob o confronto e buffer:
+### 11.4. Briefing Progressivo do Merge Sort (3 Etapas + Detalhes Secundários)
+- Substituição da grade de sete cards sobrecarregados por uma estrutura pedagógica sequencial e clara:
+  1. **Três Etapas Numeradas:**
+     - `1. Divida o vetor`: divisão conceitual até subproblemas de 1 elemento.
+     - `2. Junte os grupos em ordem`: intercalação com comparação dos primeiros elementos livres e cópia para vetor auxiliar.
+     - `3. Repita até ordenar tudo`: reinserção no vetor principal e repetição para grupos maiores até conclusão total.
+  2. **Exemplo Visual Estrutural em HTML:** Demonstração didática sem imagens raster usando o vetor `[4, 1, 3, 2]`, diferenciando a fase de divisão da fase de intercalação.
+  3. **Duas Regras Curtas em Destaque:**
+     - Empate estável: "Números iguais? Escolha o da esquerda para manter a ordem original."
+     - Cópia dos restantes: "Um grupo terminou? Copie os números restantes do outro grupo diretamente."
+  4. **Conceito de Vetor Auxiliar:** Apresentado como espaço temporário de trabalho antes da devolução ao vetor principal.
+  5. **Seção Recolhível de Detalhes:** Uso de `<details>` com "Entenda os detalhes" para métricas secundárias, contagem de escritas físicas e formalismo `ORD` vs `OK`.
+
+### 11.5. Prática Merge Sort: Área Única de Decisão
+A prática de ordenação do Merge Sort foi consolidada em um fluxo direto, sem duplicações de valores:
+1. **Instrução Direta e Regra de Desempate:** Banner superior com indicação da ação imediata do aluno (`"Compare os números destacados. Escolha o menor para a próxima posição do vetor auxiliar."`) e apoio de desempate por estabilidade.
+2. **Eliminação de Caixas Redundantes de Confronto:** Removido o container superior que repetia os números já visíveis nos grupos.
+3. **Dois Grupos com Destaque Nítido:** Grupo da Esquerda e Grupo da Direita apresentados lado a lado, com anel de foco nos ponteiros `p1` e `p2` (`ring-2 ring-cyan-400 bg-cyan-950/60`), sem halos difusos que ofusquem o valor numérico.
+4. **Vetor Auxiliar Temporário B:** Exibição clara dos slots vazios e do slot ativo identificado como `"Próxima posição (k)"`.
+5. **Botões de Decisão Alinhados:** Ações imediatas posicionadas diretamente junto à área de trabalho:
    - `1: ESCOLHER DA ESQUERDA`
    - `2: ESCOLHER DA DIREITA`
-   - `3: COPIAR RESTANTES`
-5. **Contexto de Apoio:** Vetor principal posicionado na parte inferior com legenda explícita (`ORD` = subgrupo ordenado localmente vs `OK` = posição final consolidada), pseudocódigo canônico com linha sincronizada e métricas factuais consolidadas.
+   - `3: COPIAR OS RESTANTES`
+6. **Vetor Principal e Pseudocódigo:** Vetor A com identificação limpa e rastreamento de subvetores em ordenação.
 
-### 11.5. Homologação Visual e Viewports de Validação
+### 11.6. Homologação Visual e Viewports de Validação
 - As viewports canônicas de teste são: **1366×768** (laptop comum), **1920×1080** (desktop full HD) e **1280×650** (janela de navegador reduzida com barra de ferramentas).
 - Em ambientes de execução automatizada em terminal (sem motor de renderização de navegador com display gráfico aberto), qualquer validação visual deve ser formalmente registrada como **pendente de homologação e conferência visual com o usuário**, sendo expressamente proibido declarar problemas visuais como resolvidos apenas pela inspeção de regras CSS.
 

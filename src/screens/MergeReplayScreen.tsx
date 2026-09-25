@@ -393,7 +393,7 @@ export default function MergeReplayScreen({
             </div>
           </div>
 
-          {/* VETOR AUXILIAR TEMPORÁRIO (ESTEIRA COLETORA) */}
+          {/* VETOR AUXILIAR TEMPORÁRIO B */}
           {(currentFrame.activeInterval || currentFrame.buffer.length > 0) && (
             <div className="w-full flex flex-col items-center gap-2 pt-4 border-t border-dashed border-white/10">
               <div

@@ -225,7 +225,7 @@ describe("Merge Sort Retrospective Replay & Synchronized Pseudocode (P3.1-E)", (
     });
 
     expect(container.textContent).toContain("FALSO (1 < 3)");
-    expect(container.textContent).toContain("DESPACHO RAMAL DIREITO");
+    expect(container.textContent).toContain("ESCOLHA DO GRUPO DA DIREITA");
   });
 
   it("gerencia reprodução automática, velocidade e interrupção ao fim da fita", () => {

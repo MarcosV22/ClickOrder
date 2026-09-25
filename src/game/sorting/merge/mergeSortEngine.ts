@@ -359,10 +359,10 @@ export function getExpectedMergeStep(
 
     const isTie = leftElem.value === rightElem.value;
     const explanation = isTie
-      ? `Valores iguais (${leftElem.value}). A regra de estabilidade exige despachar o Ramal Esquerdo para manter a ordem relativa original.`
+      ? `Valores iguais (${leftElem.value}). A regra de estabilidade exige escolher o Grupo da Esquerda para manter a ordem original dos dados.`
       : expectedDecision === "DISPATCH_LEFT"
-        ? `Carga do Ramal Esquerdo (${leftElem.value}) é menor que a do Ramal Direito (${rightElem.value}). Despachar esquerda.`
-        : `Carga do Ramal Direito (${rightElem.value}) é menor que a do Ramal Esquerdo (${leftElem.value}). Despachar direita.`;
+        ? `O número do Grupo da Esquerda (${leftElem.value}) é menor que o do Grupo da Direita (${rightElem.value}). Escolha a esquerda.`
+        : `O número do Grupo da Direita (${rightElem.value}) é menor que o do Grupo da Esquerda (${leftElem.value}). Escolha a direita.`;
 
     return Object.freeze({
       phase: "COMPARE_HEADS",
@@ -384,7 +384,7 @@ export function getExpectedMergeStep(
       expectedDecision: "DRAIN_REMAINDER",
       p1: state.p1,
       p2: state.p2,
-      explanation: `Ramal ${leftExhausted ? "Esquerdo" : "Direito"} esgotado. Acione DESPACHAR RESTANTE para liberar as cargas remanescentes do Ramal ${remainingSource}.`,
+      explanation: `O Grupo da ${leftExhausted ? "Esquerda" : "Direita"} terminou. Copie os números restantes do Grupo da ${remainingSource} para o vetor auxiliar.`,
     });
   }
 
@@ -431,7 +431,7 @@ export function executeMergeStep(
             ? "DISPATCH_LEFT"
             : "DISPATCH_RIGHT",
         errorReason:
-          "Não é possível drenar enquanto ambos os ramais ainda possuem cargas sob os sensores ópticos.",
+          "Não é possível copiar os restantes enquanto ambos os grupos ainda possuem números para comparar.",
       });
     }
 
@@ -445,10 +445,10 @@ export function executeMergeStep(
     // Decisão incorreta pelo operador:
     if (decision !== expectedDecision) {
       const errorReason = isTie
-        ? `Violação de Estabilidade: Ambas as cargas possuem o mesmo valor (${elemLeft.value}). O Merge Sort exige priorizar o Ramal Esquerdo para preservar a ordem relativa original dos itens.`
+        ? `Violação de Estabilidade: Ambos os números possuem o mesmo valor (${elemLeft.value}). O Merge Sort exige priorizar o Grupo da Esquerda para preservar a ordem relativa original dos itens.`
         : decision === "DISPATCH_LEFT"
-          ? `Atenção na Confluência: A carga do Ramal Esquerdo (${elemLeft.value}) é maior que a do Ramal Direito (${elemRight.value}). O Merge Sort exige sempre colher a menor carga.`
-          : `Atenção na Confluência: A carga do Ramal Direito (${elemRight.value}) é maior que a do Ramal Esquerdo (${elemLeft.value}). O Merge Sort exige sempre colher a menor carga.`;
+          ? `Atenção na Intercalação: O número do Grupo da Esquerda (${elemLeft.value}) é maior que o do Grupo da Direita (${elemRight.value}). Escolha sempre o menor número.`
+          : `Atenção na Intercalação: O número do Grupo da Direita (${elemRight.value}) é maior que o do Grupo da Esquerda (${elemLeft.value}). Escolha sempre o menor número.`;
 
       const newStateWithError = Object.freeze({
         ...state,
@@ -487,8 +487,8 @@ export function executeMergeStep(
       bufferSnapshot: Object.freeze(newBuffer),
       valuesSnapshot: state.values,
       explanation: isTie
-        ? `Despachada carga ${chosenElement.value}${chosenElement.label ? ` (${chosenElement.label})` : ""} do Ramal Esquerdo por regra de estabilidade.`
-        : `Despachada carga menor ${chosenElement.value}${chosenElement.label ? ` (${chosenElement.label})` : ""} do Ramal ${decision === "DISPATCH_LEFT" ? "Esquerdo" : "Direito"} para a esteira coletora.`,
+        ? `Copiado número ${chosenElement.value}${chosenElement.label ? ` (${chosenElement.label})` : ""} do Grupo da Esquerda por regra de estabilidade.`
+        : `Copiado número menor ${chosenElement.value}${chosenElement.label ? ` (${chosenElement.label})` : ""} do Grupo da ${decision === "DISPATCH_LEFT" ? "Esquerda" : "Direita"} para o vetor auxiliar.`,
     });
 
     const newWritesInBuffer = state.writesInBuffer + 1;
@@ -523,7 +523,7 @@ export function executeMergeStep(
         isPedagogicalError: false,
         expectedDecision: "DRAIN_REMAINDER",
         errorReason:
-          "Um dos ramais já está esgotado. Acione DESPACHAR RESTANTE para liberar as cargas remanescentes sem novas comparações.",
+          "Um dos grupos já terminou. Copie os números restantes para o vetor auxiliar sem novas comparações.",
       });
     }
 
@@ -563,7 +563,7 @@ export function executeMergeStep(
       k: currentK,
       bufferSnapshot: Object.freeze(newBuffer),
       valuesSnapshot: state.values,
-      explanation: `Drenagem em lote de ${drainedElements.length} carga(s) remanescente(s) do Ramal ${remainingSource === "LEFT" ? "Esquerdo" : "Direito"} para a esteira coletora (custo: 0 comparações).`,
+      explanation: `Cópia dos ${drainedElements.length} número(s) restantes do Grupo da ${remainingSource === "LEFT" ? "Esquerda" : "Direita"} para o vetor auxiliar (sem comparações extras).`,
     });
 
     const newWritesInBuffer = state.writesInBuffer + drainedElements.length;

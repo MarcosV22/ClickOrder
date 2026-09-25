@@ -103,7 +103,7 @@ export default function InsertionGameScreen({
     text: string;
     type: "info" | "warning" | "success" | "error";
   }>(() => ({
-    text: `Prática iniciada com ${initialArray.length} cargas. A primeira carga da esteira já define a partição ordenada. A chave suspensa no trilho aéreo aguarda seu comando.`,
+    text: "Pegue o número da vez e insira-o na posição correta entre os números que já estão ordenados.",
     type: "info",
   }));
 
@@ -365,7 +365,7 @@ export default function InsertionGameScreen({
             <span
               className="text-xs font-bold text-amber-300 tracking-wider uppercase font-mono"
             >
-              {practiceDefinition.title} • {practiceDefinition.size} CARGAS
+              {practiceDefinition.title} • {practiceDefinition.size} NÚMEROS
             </span>
             <p className="text-xs text-white/70 font-mono">
               {practiceDefinition.pedagogicalObjective}
@@ -380,10 +380,10 @@ export default function InsertionGameScreen({
           </div>
         </section>
 
-        {/* 2. Área Visual Integrada: Trilho Aéreo + Esteira Operacional */}
+        {/* 2. Área Visual Integrada: Trilho Aéreo + Vetor Principal */}
         <section
           className="w-full flex flex-col items-center gap-5 p-6 rounded-2xl bg-[#080f28]/95 border border-cyan-500/20 shadow-2xl relative overflow-hidden"
-          aria-label="Área Operacional do Trilho e Esteira"
+          aria-label="Área Operacional do Trilho e Vetor"
         >
           {/* Ambient Glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-28 bg-amber-500/10 blur-[80px] pointer-events-none" />
@@ -410,7 +410,7 @@ export default function InsertionGameScreen({
                     size="lg"
                   />
                   <span className="text-[9px] font-mono font-bold text-amber-400 tracking-wider animate-bounce">
-                    ▼ CARGA ISOLADA
+                    ▼ NÚMERO CHAVE
                   </span>
                 </div>
               ) : (
@@ -421,11 +421,11 @@ export default function InsertionGameScreen({
             </div>
           </div>
 
-          {/* ESTEIRA OPERACIONAL */}
+          {/* VETOR PRINCIPAL */}
           <div className="w-full flex flex-col items-center gap-3">
             <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-cyan-400/80 uppercase">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-              <span>ESTEIRA OPERACIONAL DE CARGAS</span>
+              <span>VETOR PRINCIPAL</span>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 py-2 min-h-[96px]">
@@ -532,7 +532,7 @@ export default function InsertionGameScreen({
           {!gameState.completed && (
             <div className="flex flex-col items-center gap-3 w-full max-w-md">
               <div className="flex items-center gap-3 w-full">
-                {/* Botão DESLOCAR CARGA (Disabled durante INSERT_READY) */}
+                {/* Botão DESLOCAR NÚMERO (Disabled durante INSERT_READY) */}
                 <GameButton
                   onClick={() => handleDecision("SHIFT_RIGHT")}
                   variant="primary"
@@ -545,7 +545,7 @@ export default function InsertionGameScreen({
                   icon="➔"
                   className="flex-1 border-cyan-500/50 text-cyan-200 hover:border-cyan-400 shadow-lg shadow-cyan-950/40 disabled:opacity-40"
                 >
-                  DESLOCAR CARGA
+                  DESLOCAR NÚMERO
                 </GameButton>
 
                 {/* Botão ENCAIXAR CHAVE */}

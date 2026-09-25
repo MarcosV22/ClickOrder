@@ -108,7 +108,7 @@ export default function MergeGameScreen({
   }>({
     type: "info",
     message:
-      "Bem-vindo à Estação de Intercalação! Observe a confluência dos ramais e despache a menor carga para o buffer.",
+      "Junte os grupos em ordem: compare os números destacados e escolha o menor para a próxima posição do vetor auxiliar.",
   });
 
   // 6. Controle síncrono de animação e trava de decisão
@@ -578,76 +578,52 @@ export default function MergeGameScreen({
         </section>
 
         {/* =========================================================================
-            2 e 3. ESTAÇÃO DE INTERCALAÇÃO (CONFRONTO DIRETO E VETOR AUXILIAR)
+            2 e 3. ESTAÇÃO DE INTERCALAÇÃO (ÁREA ÚNICA DE DECISÃO E VETOR AUXILIAR)
            ========================================================================= */}
         {currentInterval && !isCompleted && (
           <section
-            aria-label="Estação de Intercalação"
+            aria-label="Área de Decisão da Intercalação"
             className="w-full panel-border bg-[#0b1638]/90 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 border-2 border-cyan-500/30 shadow-xl"
           >
             {/* Metadados de apoio do subintervalo ativo */}
             <div className="flex flex-wrap items-center justify-between border-b border-white/10 pb-2 text-[11px] font-mono gap-2">
               <span className="font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                CONFLUÊNCIA DE RAMAIS • INTERCALAÇÃO ATIVA
+                JUNTAR OS GRUPOS EM ORDEM • INTERCALAÇÃO ATIVA
               </span>
               <span className="text-slate-300 font-medium">
-                Intervalo: [{currentInterval.left}..{currentInterval.right}] | Divisão: mid={currentInterval.mid}
+                Intervalo: [{currentInterval.left}..{currentInterval.right}] | Meio: mid={currentInterval.mid}
               </span>
             </div>
 
-            {/* 2. OS DOIS NÚMEROS A COMPARAR (Destaque Central Imediato) */}
-            <div className="p-4 rounded-xl bg-[#070d22] border border-cyan-500/30 flex flex-col items-center justify-center gap-2 text-center shadow-inner">
-              {currentPhase === "COMPARE_HEADS" && leftHead && rightHead ? (
-                <>
-                  <span className="text-[11px] font-mono text-cyan-300 font-bold uppercase tracking-wider">
-                    COMPARAÇÃO ENTRE AS FRENTES DOS GRUPOS (SENSORES ÓPTICOS EM CONFRONTO ATIVO)
-                  </span>
-                  <div
-                    className="flex items-center justify-center gap-6 sm:gap-10 my-1 text-base sm:text-lg font-bold text-white"
-                    style={{ fontFamily: "'Orbitron', sans-serif" }}
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-xs font-mono text-cyan-300 font-semibold">Grupo da Esquerda</span>
-                      <span className="text-2xl text-cyan-300 px-4 py-1.5 bg-cyan-950/70 rounded-xl border border-cyan-400/50 shadow-sm">
-                        {formatMergeElementLabel(leftHead)}
-                      </span>
-                    </div>
-                    <span className="text-slate-400 font-mono text-xl font-bold">vs</span>
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-xs font-mono text-blue-300 font-semibold">Grupo da Direita</span>
-                      <span className="text-2xl text-blue-300 px-4 py-1.5 bg-blue-950/70 rounded-xl border border-blue-400/50 shadow-sm">
-                        {formatMergeElementLabel(rightHead)}
-                      </span>
-                    </div>
-                  </div>
+            {/* Instrução Pedagógica Direta e Regra de Desempate */}
+            <div className="p-3.5 rounded-xl bg-[#070e24] border border-cyan-500/30 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left shadow-sm">
+              <div className="flex flex-col gap-0.5">
+                <p
+                  className="text-xs sm:text-sm font-sans font-medium text-slate-100"
+                  style={{ fontFamily: "'Exo 2', sans-serif" }}
+                >
+                  {currentPhase === "COMPARE_HEADS"
+                    ? "Compare os números destacados. Escolha o menor para a próxima posição do vetor auxiliar."
+                    : currentPhase === "DRAIN_READY"
+                      ? `Só restam números no grupo da ${p1 <= currentInterval.mid ? "esquerda" : "direita"}. Copie-os para completar esta etapa.`
+                      : "Sincronizando intercalação..."}
+                </p>
+                {currentPhase === "COMPARE_HEADS" && (
                   <p
-                    className="text-xs sm:text-sm text-slate-200 max-w-xl leading-relaxed mt-1"
+                    className="text-[11px] text-cyan-300/90 font-sans"
                     style={{ fontFamily: "'Exo 2', sans-serif" }}
                   >
-                    Compare os dois números destacados. Escolha o menor para a próxima posição do vetor auxiliar. Se forem iguais, escolha o da esquerda (estabilidade).
+                    Números iguais? Escolha o da esquerda para manter a ordem original.
                   </p>
-                </>
-              ) : currentPhase === "DRAIN_READY" ? (
-                <>
-                  <span className="text-[11px] font-mono text-amber-300 font-bold uppercase tracking-wider">
-                    CÓPIA DOS NÚMEROS RESTANTES
-                  </span>
-                  <p
-                    className="text-xs sm:text-sm text-slate-100 max-w-xl leading-relaxed font-medium"
-                    style={{ fontFamily: "'Exo 2', sans-serif" }}
-                  >
-                    Um dos grupos terminou. Copie os números restantes do outro grupo diretamente para o vetor auxiliar: não são necessárias novas comparações porque aquele grupo já está ordenado.
-                  </p>
-                </>
-              ) : (
-                <span className="text-xs text-slate-300 font-mono">
-                  Sincronizando estado da intercalação...
-                </span>
-              )}
+                )}
+              </div>
+              <div className="shrink-0 px-2.5 py-1 rounded bg-black/40 border border-white/10 text-xs font-mono font-semibold text-slate-200">
+                Próxima posição: <span className="text-teal-300 font-bold">B[{k}]</span>
+              </div>
             </div>
 
-            {/* As filas dos dois grupos (apoio contextual) */}
+            {/* As duas filas dos grupos (Área Principal de Decisão) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {/* Grupo da Esquerda */}
               <div
@@ -659,7 +635,7 @@ export default function MergeGameScreen({
               >
                 <div className="flex justify-between items-center text-[11px] font-mono">
                   <span className="font-bold text-cyan-300">
-                    RAMAL ESQUERDO (A[{currentInterval.left}..{currentInterval.mid}])
+                    GRUPO DA ESQUERDA (A[{currentInterval.left}..{currentInterval.mid}])
                   </span>
                   <span
                     className={
@@ -668,7 +644,7 @@ export default function MergeGameScreen({
                         : "text-amber-300 font-semibold"
                     }
                   >
-                    {p1 <= currentInterval.mid ? `Frente p1 = #${p1 + 1}` : "GRUPO FINALIZADO"}
+                    {p1 <= currentInterval.mid ? `Destaque: p1 = #${p1 + 1}` : "GRUPO FINALIZADO"}
                   </span>
                 </div>
 
@@ -684,12 +660,12 @@ export default function MergeGameScreen({
                       return (
                         <div
                           key={elem.id}
-                          className={`flex flex-col items-center gap-1 ${
+                          className={`flex flex-col items-center gap-1 transition-all ${
                             isDispatched
                               ? "opacity-30"
                               : isHead
-                                ? "scale-105"
-                                : ""
+                                ? "scale-105 rounded-xl ring-2 ring-cyan-400 bg-cyan-950/60 p-0.5"
+                                : "p-0.5"
                           }`}
                         >
                           <NumberedBox
@@ -699,7 +675,7 @@ export default function MergeGameScreen({
                             role={isHead ? "pair" : "default"}
                             badge={
                               isHead
-                                ? "FRENTE E"
+                                ? "DESTAQUE"
                                 : isDispatched
                                   ? "COPIADO"
                                   : "FILA"
@@ -723,7 +699,7 @@ export default function MergeGameScreen({
               >
                 <div className="flex justify-between items-center text-[11px] font-mono">
                   <span className="font-bold text-blue-300">
-                    RAMAL DIREITO (A[{currentInterval.mid + 1}..{currentInterval.right}])
+                    GRUPO DA DIREITA (A[{currentInterval.mid + 1}..{currentInterval.right}])
                   </span>
                   <span
                     className={
@@ -732,7 +708,7 @@ export default function MergeGameScreen({
                         : "text-amber-300 font-semibold"
                     }
                   >
-                    {p2 <= currentInterval.right ? `Frente p2 = #${p2 + 1}` : "GRUPO FINALIZADO"}
+                    {p2 <= currentInterval.right ? `Destaque: p2 = #${p2 + 1}` : "GRUPO FINALIZADO"}
                   </span>
                 </div>
 
@@ -748,12 +724,12 @@ export default function MergeGameScreen({
                       return (
                         <div
                           key={elem.id}
-                          className={`flex flex-col items-center gap-1 ${
+                          className={`flex flex-col items-center gap-1 transition-all ${
                             isDispatched
                               ? "opacity-30"
                               : isHead
-                                ? "scale-105"
-                                : ""
+                                ? "scale-105 rounded-xl ring-2 ring-blue-400 bg-blue-950/60 p-0.5"
+                                : "p-0.5"
                           }`}
                         >
                           <NumberedBox
@@ -763,7 +739,7 @@ export default function MergeGameScreen({
                             role={isHead ? "pair" : "default"}
                             badge={
                               isHead
-                                ? "FRENTE D"
+                                ? "DESTAQUE"
                                 : isDispatched
                                   ? "COPIADO"
                                   : "FILA"
@@ -778,12 +754,12 @@ export default function MergeGameScreen({
               </div>
             </div>
 
-            {/* 3. ONDE O NÚMERO ESCOLHIDO SERÁ COLOCADO (Buffer / Vetor Auxiliar) */}
+            {/* Onde o número escolhido será colocado (Vetor Auxiliar) */}
             <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
               <div className="flex justify-between items-center text-[11px] font-mono text-slate-300">
                 <span className="uppercase tracking-wider font-bold text-teal-300 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-teal-400" />
-                  VETOR AUXILIAR TEMPORÁRIO (ESTEIRA COLETORA AUXILIAR B[0..{currentInterval.right - currentInterval.left}])
+                  VETOR AUXILIAR TEMPORÁRIO B[0..{currentInterval.right - currentInterval.left}]
                 </span>
                 <span className="font-semibold text-slate-200">
                   Próxima posição: k = {k}
@@ -825,12 +801,12 @@ export default function MergeGameScreen({
                           <div
                             className={`w-20 h-20 rounded-xl flex flex-col items-center justify-center border-2 border-dashed transition-all ${
                               isTarget
-                                ? "border-cyan-400 bg-cyan-950/40 text-cyan-200 shadow-md"
+                                ? "border-teal-400 bg-teal-950/40 text-teal-200 shadow-md ring-1 ring-teal-400/50"
                                 : "border-slate-700 bg-slate-900/40 text-slate-400"
                             }`}
                           >
-                            <span className="text-[10px] font-mono tracking-wider font-bold">
-                              {isTarget ? "ALVO (k)" : "VAGO"}
+                            <span className="text-[10px] font-mono tracking-wider font-bold text-center px-1">
+                              {isTarget ? "Próxima posição" : "Vazio"}
                             </span>
                           </div>
                         )}
@@ -840,9 +816,7 @@ export default function MergeGameScreen({
                 </div>
               </div>
 
-              <p
-                className="text-xs text-slate-300 font-mono text-center"
-              >
+              <p className="text-xs text-slate-300 font-mono text-center">
                 * Ao completar o intervalo, todos os elementos são copiados de volta para o vetor principal com marcação ORD (ou OK na ordenação completa).
               </p>
             </div>
@@ -934,7 +908,7 @@ export default function MergeGameScreen({
                 title="Copiar os elementos restantes sem comparações (Atalho 3)"
               >
                 <div className="flex flex-col items-center">
-                  <span>3: COPIAR RESTANTES</span>
+                  <span>3: COPIAR OS RESTANTES</span>
                   <span className="text-[10px] font-normal opacity-75">
                     Cópia Direta
                   </span>
@@ -949,13 +923,13 @@ export default function MergeGameScreen({
            ========================================================================= */}
         {/* Vetor Principal (Visão Geral e Legenda de Estados) */}
         <section
-          aria-label="Esteira Principal"
+          aria-label="Vetor Principal"
           className="w-full panel-border bg-[#091129]/80 rounded-2xl px-4 py-4 flex flex-col gap-3"
         >
           <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 px-1">
             <span className="uppercase tracking-wider flex items-center gap-2 font-bold text-cyan-200">
               <span className="w-2 h-2 rounded-full bg-cyan-400 inline-block animate-pulse" />
-              ESTEIRA PRINCIPAL (A[0..{initialElements.length - 1}])
+              VETOR PRINCIPAL (A[0..{initialElements.length - 1}])
             </span>
             {currentInterval ? (
               <span className="text-cyan-300 font-semibold">
@@ -970,7 +944,7 @@ export default function MergeGameScreen({
             )}
           </div>
 
-          {/* Esteira com overflow-x isolado */}
+          {/* Vetor com overflow-x isolado */}
           <div className="w-full overflow-x-auto py-2">
             <div className="flex items-center justify-center gap-3 min-w-max mx-auto px-2">
               {currentValues.map((elem, idx) => {
@@ -1006,17 +980,15 @@ export default function MergeGameScreen({
 
                 const badge = isCompleted
                   ? "OK"
-                  : isP1
-                    ? "FRENTE E"
-                    : isP2
-                      ? "FRENTE D"
-                      : isDispatched
-                        ? "COPIADO"
-                        : isLocallyOrdered
-                          ? "ORD"
-                          : inActiveRange
-                            ? "LOTE"
-                            : undefined;
+                  : isP1 || isP2
+                    ? "DESTAQUE"
+                    : isDispatched
+                      ? "COPIADO"
+                      : isLocallyOrdered
+                        ? "ORD"
+                        : inActiveRange
+                          ? "LOTE"
+                          : undefined;
 
                 return (
                   <div

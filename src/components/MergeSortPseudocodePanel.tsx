@@ -140,7 +140,7 @@ export default function MergeSortPseudocodePanel({
           if (line.lineNumber === 21 && highlight.conditionResult === "DRAIN_LEFT") {
             badge = (
               <span className="ml-2 text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold tracking-wider">
-                DRENAGEM RAMAL E (D ESGOTADO)
+                CÓPIA RESTANTES GRUPO E (D ESGOTADO)
               </span>
             );
           }
@@ -148,7 +148,7 @@ export default function MergeSortPseudocodePanel({
           if (line.lineNumber === 24 && highlight.conditionResult === "DRAIN_RIGHT") {
             badge = (
               <span className="ml-2 text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold tracking-wider">
-                DRENAGEM RAMAL D (E ESGOTADO)
+                CÓPIA RESTANTES GRUPO D (E ESGOTADO)
               </span>
             );
           }

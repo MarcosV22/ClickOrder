@@ -136,7 +136,7 @@ export const SELECTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
   id: "selection-canonical",
   protocolName: "PROTOCOLO: SELECTION SORT",
   modeName: "SCANNER DE CARGA MÍNIMA",
-  badgeText: "CENTRAL LOGÍSTICA • NOVO PROTOCOLO",
+  badgeText: "PLATAFORMA EDUCACIONAL • MÓDULO 02",
   badgeVariant: "purple",
   subtitle: "Busca do menor número em cada passada e posicionamento no início da parte não ordenada.",
   objective:
@@ -164,7 +164,7 @@ export const SELECTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
       icon: "⇄",
       title: "Transferência e Selo OK",
       description:
-        "Ao término da varredura, ocorre no máximo uma troca para posicionar o menor item e consolidar a posição com selo OK.",
+        "Ao término da varredura, ocorre no máximo uma troca para posicionar o menor número e consolidar a posição com selo OK.",
     },
   ],
   highlights: [
@@ -265,60 +265,36 @@ export const INSERTION_CANONICAL_BRIEFING: ProtocolModeBriefing = {
 export const MERGE_CANONICAL_BRIEFING: ProtocolModeBriefing = {
   id: "merge-canonical",
   protocolName: "PROTOCOLO: MERGE SORT",
-  modeName: "DIVISÃO E CONFLUÊNCIA",
+  modeName: "DIVISÃO E INTERCALAÇÃO",
   badgeText: "PLATAFORMA EDUCACIONAL • MÓDULO 04",
   badgeVariant: "cyan",
-  subtitle: "Divisão em grupos menores e intercalação ordenada com dois ponteiros e vetor auxiliar.",
+  subtitle: "Divida o vetor em grupos menores e junte-os em ordem usando um vetor auxiliar temporário.",
   objective:
-    "Dividir o vetor em subproblemas unitários e recompor a ordem combinando os grupos ordenados com um vetor auxiliar temporário (buffer).",
+    "Dividir o vetor até subproblemas unitários e recombinar os grupos em ordem crescente através da intercalação com vetor auxiliar temporário.",
   instructions: [
     {
-      icon: "✂️",
-      title: "Divisão Estrutural",
+      icon: "1",
+      title: "Divida o vetor",
       description:
-        "A divisão binária reparte o vetor sucessivamente até subvetores unitários. A divisão isolada não ordena nem altera os valores dos elementos.",
+        "Separe os números em grupos menores até cada grupo ter um único número. Dividir ainda não coloca os números em ordem.",
     },
     {
-      icon: "🔀",
-      title: "Confluência de Ramais",
+      icon: "2",
+      title: "Junte os grupos em ordem",
       description:
-        "A ordenação ocorre na intercalação: dois grupos já ordenados (ramais) alimentam o vetor temporário (buffer auxiliar).",
+        "Compare o primeiro número ainda não utilizado de cada grupo. Copie o menor para o vetor auxiliar e continue.",
     },
     {
-      icon: "👀",
-      title: "Inspeção Exclusiva das Frentes",
+      icon: "3",
+      title: "Repita até ordenar tudo",
       description:
-        "Analise apenas os dois números situados na frente de cada ramal (dois ponteiros), escolhendo sempre o menor para a próxima posição do buffer.",
-    },
-    {
-      icon: "⚖️",
-      title: "Regra Mandatória de Estabilidade",
-      description:
-        "Em caso de empate (números com valores iguais), escolha sempre o item do Ramal Esquerdo para preservar a estabilidade e a ordem original dos dados.",
-    },
-    {
-      icon: "🌊",
-      title: "Drenagem da Cauda Restante",
-      description:
-        "Quando um dos grupos terminar, todos os números restantes do outro grupo são copiados diretamente para o buffer sem novas comparações, pois já estão ordenados.",
-    },
-    {
-      icon: "🏷️",
-      title: "Marcação ORD vs Selo OK",
-      description:
-        "Ao preencher o buffer, os números voltam ao vetor principal. Subvetores intermediários recebem marcação ORD (ordenação local); o selo definitivo OK surge apenas ao concluir todo o vetor.",
-    },
-    {
-      icon: "✍️",
-      title: "Escritas Físicas vs Comparações",
-      description:
-        "Escritas no vetor auxiliar (buffer) e cópias de retorno para o vetor principal são operações distintas da comparação de valores. O algoritmo requer buffer auxiliar temporário O(n).",
+        "Depois de juntar um par de grupos, copie o resultado para o vetor principal. Repita o processo com grupos maiores até ordenar todo o vetor.",
     },
   ],
   highlights: [
     {
       label: "MÉTODO",
-      value: "Divisão e Confluência",
+      value: "Divisão e Intercalação",
       variant: "cyan",
     },
     {
@@ -327,14 +303,14 @@ export const MERGE_CANONICAL_BRIEFING: ProtocolModeBriefing = {
       variant: "purple",
     },
     {
-      label: "BUFFER AUXILIAR",
+      label: "VETOR AUXILIAR",
       value: "O(n) Espaço Temporário",
       variant: "emerald",
     },
   ],
   particularities: [
-    "O vetor auxiliar (buffer) é temporário e reutilizado a cada ciclo de intercalação.",
-    "Decisões incorretas paralisam a ação e explicam a invariante sem reiniciar o exercício.",
+    "Números iguais? Escolha o da esquerda para manter a ordem original.",
+    "Um grupo terminou? Copie os números restantes do outro. Eles já estão em ordem.",
   ],
   startLabel: "INICIAR TUTORIAL GUIADO",
   startVariant: "primary",

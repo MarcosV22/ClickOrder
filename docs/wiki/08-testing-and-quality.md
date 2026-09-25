@@ -12,7 +12,7 @@
 Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Insertion Sort e Schema v4)**, a infraestrutura de testes automatizados do projeto cobre 100% da lógica pura de domínio, FSMs de ordenação (Bubble, Selection e Insertion Sort), tutoriais, conjuntos de prática progressiva, agregação de resultados, geração procedural Mulberry32, briefing, telemetria de sessão, replay da execução, pseudocódigo sincronizado, modo demonstração e persistência Schema v4:
 
 - **Framework de Testes Implementado:** **Vitest** (`vitest ^5.0.0`) instalado como dependência de desenvolvimento canônica via `pnpm add -D vitest`.
-- **Arquivos de Teste Ativos (39 arquivos, 528 testes automatizados aprovados 100% verde):**
+- **Arquivos de Teste Ativos (39 arquivos, 529 testes automatizados aprovados 100% verde):**
   1. `src/screens/mergeIntegrationFlow.test.tsx` (7 testes - Fluxo de Integração do Merge Sort: Hub, Tutorial com conclusão factual, Demonstração observacional sem efeitos colaterais, Gravação canônica v4, Conclusão inter-sessões 3/3 e Ação de Repetição)
   2. `src/screens/mergePracticeFlow.test.tsx` (26 testes - Estação de Intercalação Desktop-First, Confluência de Ramais, Buffer Auxiliar, Despacho Estável com Prioridade Esquerda, Drenagem Sem Comparações, Ações Bloqueadas, Telemetria Segregada de Escritas, Roteamento no App e Fallback Procedural de Duplicatas)
   3. `src/screens/mergeReplayScreen.test.tsx` (8 testes - Replay de Merge Sort com pseudocódigo de 30 linhas sincronizado, frentes fáticas passadas e controles de transporte temporal)

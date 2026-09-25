@@ -102,7 +102,7 @@ export default function SelectionGameScreen({
     type: "info" | "warning" | "success" | "error";
   }>(() => ({
     text: initialExpected
-      ? `Varredura iniciada. Compare a carga #${initialExpected.j + 1} (${initialExpected.scannerValue}) com o candidato mínimo #${initialExpected.minIndex + 1} (${initialExpected.currentMinValue}).`
+      ? "Encontre o menor número da parte ainda não ordenada e confirme a troca para a posição correta."
       : "Iniciando ordenação por seleção.",
     type: "info",
   }));
@@ -205,20 +205,20 @@ export default function SelectionGameScreen({
         const canSwap = result.state.minIndex !== result.state.i;
         setMessage({
           text: canSwap
-            ? `Varredura da passada ${result.state.i + 1} concluída! Menor carga #${result.state.minIndex + 1} (${result.state.currentValues[result.state.minIndex]}) identificada. Confirme a transferência para a posição alvo #${result.state.i + 1}.`
-            : `Varredura da passada ${result.state.i + 1} concluída! A menor carga já ocupa a posição alvo #${result.state.i + 1}. Confirme a consolidação.`,
+            ? `Varredura da passada ${result.state.i + 1} concluída! Menor número #${result.state.minIndex + 1} (${result.state.currentValues[result.state.minIndex]}) identificado. Confirme a troca para a posição #${result.state.i + 1}.`
+            : `Varredura da passada ${result.state.i + 1} concluída! O menor número já ocupa a posição #${result.state.i + 1}. Confirme a consolidação.`,
           type: "success",
         });
       } else if (decision === "SELECT_NEW_MIN") {
         const newMinVal = result.state.currentValues[result.state.minIndex];
         setMessage({
-          text: `Novo candidato mínimo registrado: carga #${result.state.minIndex + 1} (valor ${newMinVal}).`,
+          text: `Novo candidato mínimo registrado: número #${result.state.minIndex + 1} (valor ${newMinVal}).`,
           type: "success",
         });
       } else {
         const keepVal = result.state.currentValues[result.state.minIndex];
         setMessage({
-          text: `Candidato mínimo preservado: carga #${result.state.minIndex + 1} (valor ${keepVal}).`,
+          text: `Candidato mínimo preservado: número #${result.state.minIndex + 1} (valor ${keepVal}).`,
           type: "success",
         });
       }
@@ -227,8 +227,8 @@ export default function SelectionGameScreen({
       setGameState(result.state);
       const formativeMsg =
         result.expectedDecision === "SELECT_NEW_MIN"
-          ? "A carga inspecionada é menor que o candidato atual. Atualize o mínimo."
-          : "A carga inspecionada não é menor. Mantenha o candidato atual.";
+          ? "O número em análise é menor que o candidato atual. Atualize o mínimo."
+          : "O número em análise não é menor. Mantenha o candidato atual.";
 
       setMessage({
         text: formativeMsg,
@@ -257,7 +257,7 @@ export default function SelectionGameScreen({
       setShowHint(false);
 
       setMessage({
-        text: `Transferindo menor carga #${minIdx + 1} para a posição alvo #${targetIdx + 1}...`,
+        text: `Trocando menor número #${minIdx + 1} para a posição #${targetIdx + 1}...`,
         type: "info",
       });
 
@@ -271,7 +271,7 @@ export default function SelectionGameScreen({
         if (result.state.completed) {
           isActionLockedRef.current = true;
           setMessage({
-            text: "Protocolo Selection Sort concluído! Todas as cargas foram ordenadas com sucesso.",
+            text: "Ordenação concluída! Todos os números foram ordenados com sucesso.",
             type: "success",
           });
           if (completeTimeoutRef.current)
@@ -288,7 +288,7 @@ export default function SelectionGameScreen({
         }
       }, 600);
     } else {
-      // Consolidação direta sem movimentação física de caixas
+      // Consolidação direta sem movimentação física
       const result = commitSelectionPass(gameState);
       setGameState(result.state);
       setShowHint(false);
@@ -296,7 +296,7 @@ export default function SelectionGameScreen({
       if (result.state.completed) {
         isActionLockedRef.current = true;
         setMessage({
-          text: "A menor carga já ocupa a posição alvo. Protocolo Selection Sort concluído!",
+          text: "O menor número já ocupa a posição alvo. Ordenação concluída!",
           type: "success",
         });
         if (completeTimeoutRef.current)
@@ -306,7 +306,7 @@ export default function SelectionGameScreen({
         }, 1200);
       } else {
         setMessage({
-          text: `A menor carga já ocupa a posição alvo. Posição #${targetIdx + 1} consolidada com selo OK!`,
+          text: `O menor número já ocupa a posição alvo. Posição #${targetIdx + 1} consolidada com selo OK!`,
           type: "success",
         });
       }
@@ -326,11 +326,11 @@ export default function SelectionGameScreen({
   const getHintExplanation = (): string => {
     if (gameState.phase === "INSPECT") {
       const exp = getExpectedSelectionInspection(gameState);
-      if (!exp) return "Analise a magnitude das cargas.";
+      if (!exp) return "Analise a magnitude dos números.";
       const isSmaller = exp.isNewMin;
-      return `Comparação formal: A[${exp.j}] (${exp.scannerValue}) < A[${exp.minIndex}] (${exp.currentMinValue}). Como ${exp.scannerValue} ${
+      return `Comparação: A[${exp.j}] (${exp.scannerValue}) < A[${exp.minIndex}] (${exp.currentMinValue}). Como ${exp.scannerValue} ${
         isSmaller ? "<" : "≥"
-      } ${exp.currentMinValue}, a carga inspecionada ${
+      } ${exp.currentMinValue}, o número em análise ${
         isSmaller
           ? "é MENOR que o candidato atual. Ação esperada: NOVO MÍNIMO."
           : "NÃO é menor que o candidato atual. Ação esperada: MANTER CANDIDATO."
@@ -341,11 +341,11 @@ export default function SelectionGameScreen({
       const expCommit = getExpectedSelectionCommit(gameState);
       if (!expCommit) return "Confirme a passada.";
       return expCommit.shouldSwap
-        ? `Varredura concluída. A menor carga encontrada (${expCommit.minValue}) está na posição #${expCommit.minIndex + 1}, enquanto a posição alvo é #${expCommit.i + 1} (${expCommit.targetValue}). Clique em TRANSFERIR MENOR CARGA.`
-        : `Varredura concluída. A menor carga (${expCommit.minValue}) já se encontra na posição alvo #${expCommit.i + 1}. Clique em CONSOLIDAR POSIÇÃO sem permuta.`;
+        ? `Varredura concluída. O menor número encontrado (${expCommit.minValue}) está na posição #${expCommit.minIndex + 1}, enquanto a posição alvo é #${expCommit.i + 1} (${expCommit.targetValue}). Clique em CONFIRMAR TROCA.`
+        : `Varredura concluída. O menor número (${expCommit.minValue}) já se encontra na posição alvo #${expCommit.i + 1}. Clique em CONSOLIDAR POSIÇÃO sem permuta.`;
     }
 
-    return "A esteira está totalmente consolidada.";
+    return "O vetor está totalmente ordenado.";
   };
 
   // --------------------------------------------------------------------------
@@ -370,7 +370,7 @@ export default function SelectionGameScreen({
     const initialExp = getExpectedSelectionInspection(freshState);
     setMessage({
       text: initialExp
-        ? `Exercício reiniciado. Compare a carga #${initialExp.j + 1} (${initialExp.scannerValue}) com o candidato mínimo #${initialExp.minIndex + 1} (${initialExp.currentMinValue}).`
+        ? `Exercício reiniciado. Compare o número #${initialExp.j + 1} (${initialExp.scannerValue}) com o candidato mínimo #${initialExp.minIndex + 1} (${initialExp.currentMinValue}).`
         : "Exercício reiniciado.",
       type: "info",
     });
@@ -437,7 +437,7 @@ export default function SelectionGameScreen({
               className="text-xs px-2.5 py-1 rounded bg-purple-950/60 border border-purple-500/30 text-purple-300 tracking-wider font-bold uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              {effectivePracticeTitle} • {gameState.arrayLength} CARGAS
+              {effectivePracticeTitle} • {gameState.arrayLength} NÚMEROS
             </span>
             <span
               className="text-xs text-white/50 font-mono"
@@ -562,7 +562,7 @@ export default function SelectionGameScreen({
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded bg-cyan-500/30 border border-cyan-400" />
-              SCAN (Sensor j)
+              SCAN (Posição j)
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded bg-emerald-500/30 border border-emerald-500" />
@@ -689,7 +689,7 @@ export default function SelectionGameScreen({
                 }`}
               >
                 {gameState.minIndex !== gameState.i
-                  ? "TRANSFERIR MENOR CARGA"
+                  ? "CONFIRMAR TROCA"
                   : "CONSOLIDAR POSIÇÃO"}
               </GameButton>
 

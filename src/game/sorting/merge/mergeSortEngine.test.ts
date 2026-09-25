@@ -407,7 +407,7 @@ describe("Merge Sort Pure Engine (P3.1-B)", () => {
       expect(res.state.errors).toBe(1);
       expect(res.state.comparisons).toBe(0);
       expect(res.state.writesInBuffer).toBe(0);
-      expect(res.errorReason).toContain("Atenção na Confluência");
+      expect(res.errorReason).toContain("Atenção na Intercalação");
     });
 
     it("deve permitir múltiplos erros consecutivos sem inflar métricas ao acertar", () => {
