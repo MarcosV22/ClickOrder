@@ -160,19 +160,33 @@ export default function App({
   initialLevel,
   initialDemonstrationProtocol,
 }: AppProps = {}) {
+  const isDev = Boolean(import.meta.env?.DEV);
   const [saveData, setSaveData] = useState<GameSaveSchema>(() =>
     loadGameProgress(undefined, TOTAL_PHASES, SELECTION_TOTAL_PHASES)
   );
   const [gameMode, setGameMode] = useState<GameMode>("CAMPAIGN");
   const [briefingModeId, setBriefingModeId] =
-    useState<BriefingModeId>("bubble-canonical");
+    useState<BriefingModeId>(() => {
+      if (isDev && typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const mod = params.get("module");
+        if (mod === "bubble") return "bubble-canonical";
+        if (mod === "bubble-early-exit") return "bubble-early-exit";
+        if (mod === "selection") return "selection-canonical";
+        if (mod === "insertion") return "insertion-canonical";
+        if (mod === "merge") return "merge-canonical";
+      }
+      return "bubble-canonical";
+    });
   const [challengeScenarioIndex, setChallengeScenarioIndex] = useState<number>(0);
-  const isDev = Boolean(import.meta.env?.DEV);
 
   const [screen, setScreen] = useState<Screen>(() => {
     if (initialScreen) return initialScreen;
     if (isDev && typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
+      if (params.get("screen") === "briefing") {
+        return "briefing";
+      }
       if (params.get("screen") === "merge-practice") {
         return "merge-practice";
       }

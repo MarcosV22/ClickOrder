@@ -1,7 +1,7 @@
 # Sorting Station – Sumário Operacional da Plataforma
 
 > **Status da Documentação:** Ativo / Canônico  
-> **Data da Última Revisão:** 25/09/2026 (Correção e Refinamento de UX, Legibilidade Visual e Linguagem Pedagógica)  
+> **Data da Última Revisão:** 25/09/2026 (Padronização Canônica de Explicações Ilustradas e Alinhamento Estrutural do Hub)  
 > **Governança:** [`AGENTS.md`](../../AGENTS.md) e [`ADR 0018`](../adr/0018-game-to-educational-platform-transition.md).  
 > 
 > *Este documento é o ponto de entrada operacional e mapa de navegação canônico da Wiki. Ele não substitui a leitura das páginas temáticas detalhadas correspondentes ao escopo da tarefa.*
@@ -189,7 +189,7 @@ A próxima prioridade oficial de implementação de software é:
 | **Design System, tokens e acessibilidade** | [`05-ux-design-system.md`](./05-ux-design-system.md) |
 | **Ambiente Figma Make e scripts operacionais** | [`06-development-environment.md`](./06-development-environment.md) |
 | **Persistência Schema v4 e migração v3->v4** | [`07-backend-and-persistence.md`](./07-backend-and-persistence.md) |
-| **Suíte de testes Vitest (529 testes) e DoD** | [`08-testing-and-quality.md`](./08-testing-and-quality.md) |
+| **Suíte de testes Vitest (535 testes) e DoD** | [`08-testing-and-quality.md`](./08-testing-and-quality.md) |
 | **Build, deploy e empacotamento** | [`09-build-deploy.md`](./09-build-deploy.md) |
 | **Roadmap canônico da plataforma e legado histórico** | [`10-roadmap.md`](./10-roadmap.md) |
 | **Governança de ADRs e índice de decisões 0001 a 0023** | [`11-architecture-decisions.md`](./11-architecture-decisions.md) |

@@ -25,7 +25,7 @@ export default function MergeTutorialScreen({
     text: string;
     type: "info" | "warning" | "success" | "error";
   }>({
-    text: "Bem-vindo ao Treinamento do Merge Sort! O lote [4a, 1, 3, 4b] foi introduzido na estação. A metade esquerda foi dividida em subproblemas unitários. Compare as frentes para iniciar a confluência.",
+    text: "Bem-vindo ao Treinamento do Merge Sort! O vetor [4a, 1, 3, 4b] foi preparado para ordenação. A primeira metade foi dividida em grupos de 1 elemento. Compare os dois números destacados para iniciar a intercalação.",
     type: "info",
   });
 

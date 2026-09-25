@@ -153,7 +153,7 @@ export default function HomeScreen({
         </div>
 
         {/* Protocols Grid (responsive columns to preserve legibility and button layout) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 w-full mt-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 w-full mt-2 items-start">
           {PROTOCOL_CATALOG.map((metadata) => {
             const summary = getProtocolProgressSummary(metadata.id, saveData);
             return (

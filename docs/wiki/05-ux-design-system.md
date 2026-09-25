@@ -445,20 +445,22 @@ A plataforma preserva a atmosfera diegética da estação espacial, mas adota **
    - Redução dos halos e sombras de texto (`text-shadow`) em classes `.glow-cyan` e `.glow-purple` para um raio máximo de 4px com opacidade atenuada, eliminando a perda de definição das arestas numéricas em telas escuras.
    - Distinção nítida e independente entre valor numérico (`Orbitron font-bold`), identificador de duplicata (badge nítido `bg-[#060b1a]/80 text-cyan-200 border border-cyan-400/40`), índice (`#index+1` em `text-slate-300 font-bold`) e estado do elemento (papel semântico `BoxRole`).
 
-### 11.3. Organização do Hub e Cartões de Protocolo
-- **Alinhamento Nivelado dos Grupos de Ação:** Cartões de protocolo utilizam `flex-col justify-between h-full` com container de botões ancorado ao rodapé via `mt-auto pt-5`, garantindo alinhamento horizontal consistente em toda a grade.
-- **Eliminação de Colisões e Linhas Empilhadas de Metadados:**
-  - Substituição da divisão artificial em 3 colunas estreitas por linhas empilhadas com espaçamento vertical:
-    - Linha 1: `Práticas: X de Y concluídas`
-    - Linha 2: `Tutorial guiado: CONCLUÍDO / PENDENTE`
-    - Linha 3: `Melhor pontuação: X / 100` (ou `—`)
-  - Essa estrutura elimina a colisão de textos longos (como o badge "CONCLUÍDO") com a coluna de pontuação.
-  - Eliminação de chips repetitivos de objetivos que apenas duplicavam a descrição do módulo.
-  - Botões secundários `TUTORIAL` e `DEMONSTRAÇÃO` empilhados em `flex flex-col gap-2 w-full`, com largura confortável e sem quebras indesejadas de rótulos.
-  - Remoção de jargões técnicos internos como `FSM bimodal` e `Trilho progressivo`, mantendo o Modo Desafio do Bubble exclusivamente onde ele existe de fato.
-- **Grid Responsivo de Protocolos:**
-  - Viewports médias (1280px e 1366px): `grid-cols-1 md:grid-cols-2`, priorizando espaço lateral e leitura confortável dos 4 módulos em duas fileiras de 2 cards;
-  - Viewports amplas (1920px+): `2xl:grid-cols-4`, exibindo a visão panorâmica integrada do currículo.
+### 11.3. Organização Estrutural do Hub e Arquitetura de 4 Regiões nos Cartões
+- **Arquitetura de 4 Regiões no `ProtocolCard.tsx`:**
+  Para eliminar desalinhamentos verticais causados por particularidades de módulos (como o bloco exclusivo de Modo Desafio do Bubble Sort), o cartão de protocolo é formalmente dividido em 4 regiões estruturais sequenciais:
+  1. **Região 1 (Conteúdo do Protocolo):** Contém a barra de status/chip de práticas, título do algoritmo em degradê, metáfora diegética e descrição pedagógica direta. Possui altura mínima padronizada (`min-h-[148px]`), garantindo que variações de tamanho de texto entre os algoritmos não desloquem os blocos seguintes.
+  2. **Região 2 (Progresso e Metadados):** Painel de status de aprendizado estruturado em 3 linhas empilhadas com espaçamento vertical:
+     - Linha 1: `Práticas: X de Y concluídas`
+     - Linha 2: `Tutorial guiado: CONCLUÍDO / PENDENTE`
+     - Linha 3: `Melhor pontuação: X / 100` (ou `—`)
+  3. **Região 3 (Ações Comuns Padronizadas):** Bloco delimitado por borda superior divisória (`pt-4 mt-3 border-t border-white/10`), contendo rigorosamente os três botões comuns a todos os módulos:
+     - `INICIAR TREINAMENTO` (botão primário roxo/gradiente);
+     - `TUTORIAL` (botão secundário);
+     - `DEMONSTRAÇÃO` (botão secundário).
+     Esses três botões compartilham a exata mesma posição e linha de base horizontal em todos os 4 cards da interface.
+  4. **Região 4 (Atividade Extra / Desafio Exclusivo):** Posicionada **estritamente abaixo** da Região 3. É renderizada condicionalmente apenas quando o módulo possui atividade curricular extra (atualmente exclusivo do Bubble Sort, com o Modo Desafio Early Exit bloqueado/desbloqueado). Por estar isolada abaixo das ações comuns, sua presença jamais distorce ou empurra para cima os botões `INICIAR TREINAMENTO`, `TUTORIAL` e `DEMONSTRAÇÃO`.
+- **Grid Responsivo Nivelado no `HomeScreen.tsx`:**
+  A grade principal de cartões utiliza `grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 w-full items-start`, alinhando os topos dos cartões e assegurando paridade horizontal pixel-perfect tanto em 2 colunas quanto em 4 colunas.
 
 ### 11.4. Briefing Progressivo do Merge Sort (3 Etapas + Detalhes Secundários)
 - Substituição da grade de sete cards sobrecarregados por uma estrutura pedagógica sequencial e clara:
@@ -488,6 +490,45 @@ A prática de ordenação do Merge Sort foi consolidada em um fluxo direto, sem 
 ### 11.6. Homologação Visual e Viewports de Validação
 - As viewports canônicas de teste são: **1366×768** (laptop comum), **1920×1080** (desktop full HD) e **1280×650** (janela de navegador reduzida com barra de ferramentas).
 - Em ambientes de execução automatizada em terminal (sem motor de renderização de navegador com display gráfico aberto), qualquer validação visual deve ser formalmente registrada como **pendente de homologação e conferência visual com o usuário**, sendo expressamente proibido declarar problemas visuais como resolvidos apenas pela inspeção de regras CSS.
+- Quando ferramentas de renderização headless (Chrome/Edge headless) estiverem disponíveis, capturas de tela devem ser geradas em arquivos PNG e inspecionadas diretamente antes de submeter o relatório.
+
+### 11.7. Padronização Canônica das Explicações Ilustradas para Todos os Módulos
+O modelo pedagógico visual aprovado para o Merge Sort foi formalizado como **padrão canônico obrigatório** para as telas de briefing de todos os módulos presentes e futuros da plataforma (`ProtocolModeBriefingScreen.tsx`). O padrão é estruturado em **5 camadas sequenciais**:
+
+1. **Etapas Numeradas do Algoritmo:**
+   - Lista vertical de cards com numeração destacada (`1, 2, 3...`), título em caixa-alta mono e explicação concisa de cada passo operacional.
+2. **Exemplo Visual Pequeno em HTML/CSS Puro com Vetores Reais:**
+   - Proibição estrita de imagens raster (PNG, JPG) geradas por IA para diagramas algorítmicos. O diagrama deve ser construído inteiramente com elementos DOM acessíveis, legíveis e independentes de cor.
+   - Apresenta uma passada representativa real, com crachás de decisão e vetor resultante:
+     - **Bubble Sort:** Primeira passada com o vetor `[5, 2, 4, 1]`:
+       - Passo 1: Compara vizinhos `5` e `2` ($5 > 2$) → Troca para `[2, 5, 4, 1]` (crachá `5 > 2 • TROCAR`);
+       - Passo 2: Próximo par `5` e `4` ($5 > 4$) → Troca para `[2, 4, 5, 1]` (crachá `5 > 4 • TROCAR`);
+       - Passo 3: Fim da 1ª passada com `5` e `1` ($5 > 1$) → Troca para `[2, 4, 1, 5 OK]` (crachá `5 OK DEFINITIVO`);
+       - Caixa de avanço sem troca: Demonstra que se o par fosse `[2, 4]`, como $2 \le 4$, não há troca — apenas avanço do leitor (crachá `AVANÇO SEM TROCA`).
+     - **Selection Sort:** Primeira passada com o vetor `[4, 1, 3, 2]`:
+       - Posição alvo destacada no índice `#0` (valor inicial 4);
+       - Fase 1 (Varredura sem trocas): Leitura dos números não ordenados (lê 1 → novo menor = 1; lê 3 → mantém 1; lê 2 → mantém 1) com crachá `SEM TROCAS NO VETOR`;
+       - Fase 2 (Troca única no fim da passada): Troca o menor (1) com o alvo (4), resultando em `[1 OK, 4, 3, 2]` com crachá `CONSOLIDAÇÃO`;
+       - Caso especial: Se o menor já estiver na posição alvo, crachá `ZERO TROCAS` e concessão direta do selo OK.
+     - **Insertion Sort:** Inserção representativa com o vetor `[2, 5, 3, 1]`:
+       - Passo 1 (Chave e deslocamento): Chave `3` suspensa abrindo vaga no vetor `[2, 5, __, 1]`. Compara $5 > 3$ → `5` desliza para a direita (crachá `5 > 3 • DESLOCAR`);
+       - Passo 2 (Encaixe na vaga): Compara $2 \le 3$ → parada do deslocamento. Chave `3` é inserida na vaga, expandindo a partição para `[2, 3, 5]` com crachá `2 ≤ 3 • INSERIR`;
+       - Distinção essencial `ORD` local vs `OK` definitivo: Crachá `ORD LOCAL` esclarecendo que os elementos estão ordenados entre si, mas ainda deslizarão quando o número `1` for inserido na passada subsequente.
+     - **Merge Sort:** Divisão e intercalação estrutural com o vetor `[4, 1, 3, 2]` separando a fase de divisão da fase de intercalação com vetor auxiliar.
+3. **Duas Regras Curtas em Cards Lado a Lado:**
+   - Cards com ícones expressivos e contrastes específicos para decisões binárias:
+     - Bubble: *"Quando trocar?"* ($A[i] > A[i+1]$) vs *"Quando manter?"* ($A[i] \le A[i+1]$);
+     - Selection: *"Nenhuma troca na busca"* vs *"Troca única por passada"*;
+     - Insertion: *"Deslocamento ≠ Troca"* vs *"ORD local vs Selo OK"*;
+     - Merge: *"Números iguais? (Estabilidade)"* vs *"Um grupo terminou? (Cópia direta)"*.
+4. **Destaque do Conceito Central:**
+   - Card único com ícone de lâmpada e síntese da invariante:
+     - Bubble: *"Flutuação e Selo OK"*;
+     - Selection: *"Posição Alvo e Selo OK"*;
+     - Insertion: *"Número-Chave e Vaga Aberta"*;
+     - Merge: *"Vetor Auxiliar Temporário"*.
+5. **Seção Secundária Recolhível (`<details> "Entenda os detalhes técnicos"`):**
+   - Invariantes matemáticas formais, otimizações específicas (ex.: Early Exit no Modo Desafio do Bubble), contagem formal de comparações vs movimentações físicas e régua de destaques analíticos (`highlights`).
 
 
 

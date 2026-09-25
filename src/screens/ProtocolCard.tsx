@@ -22,7 +22,7 @@ export default function ProtocolCard({
 
   return (
     <div
-      className={`relative flex flex-col justify-between h-full rounded-2xl p-6 sm:p-7 backdrop-blur-md transition-all duration-300 border ${
+      className={`relative flex flex-col h-full rounded-2xl p-6 sm:p-7 backdrop-blur-md transition-all duration-300 border ${
         isAvailable
           ? `${metadata.theme.borderClass} ${metadata.theme.borderHoverClass} bg-[#0c1533]/80 hover:shadow-2xl`
           : "border-white/10 bg-[#080d20]/50 opacity-70"
@@ -48,8 +48,8 @@ export default function ProtocolCard({
         />
       )}
 
-      {/* Top section: Badges & Headings */}
-      <div className="flex flex-col gap-4 relative z-10 flex-1">
+      {/* Região 1: Conteúdo (Badges, Título, Metáfora e Descrição Pedagógica) */}
+      <div className="flex flex-col gap-3 relative z-10 min-h-[148px]">
         {/* Status bar */}
         <div className="flex items-center justify-between gap-2">
           <div
@@ -103,65 +103,65 @@ export default function ProtocolCard({
         >
           {metadata.shortDescription}
         </p>
-
-        {/* Training status / Telemetry (stacked rows to avoid collision) */}
-        <div className="flex flex-col gap-2 pt-3 border-t border-white/10">
-          <span
-            className="text-[10px] uppercase font-mono tracking-widest text-slate-300 font-semibold"
-            style={{ fontFamily: "'Space Mono', monospace" }}
-          >
-            STATUS DE APRENDIZADO
-          </span>
-
-          {isAvailable ? (
-            <div className="flex flex-col gap-2 bg-[#060b1a]/80 border border-white/10 rounded-xl p-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-mono text-slate-300">Práticas:</span>
-                <span
-                  className="font-bold text-white font-mono"
-                  style={{ fontFamily: "'Space Mono', monospace" }}
-                >
-                  {summary.completedPhases} de {summary.totalPhases} concluídas
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-mono text-slate-300">Tutorial guiado:</span>
-                <span
-                  className={`font-bold font-mono ${
-                    summary.hasCompletedTutorial ? "text-emerald-400" : "text-amber-300"
-                  }`}
-                  style={{ fontFamily: "'Space Mono', monospace" }}
-                >
-                  {summary.hasCompletedTutorial ? "CONCLUÍDO" : "PENDENTE"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-mono text-slate-300">Melhor pontuação:</span>
-                <span
-                  className="font-bold text-cyan-300 font-mono"
-                  style={{ fontFamily: "'Space Mono', monospace" }}
-                >
-                  {summary.bestScore !== undefined ? `${summary.bestScore} / 100` : "—"}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="p-3 rounded-xl border border-dashed border-white/10 bg-black/20 text-center">
-              <span
-                className="text-xs font-mono text-slate-300 italic"
-                style={{ fontFamily: "'Space Mono', monospace" }}
-              >
-                Módulo curricular em preparação
-              </span>
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* Bottom section: Actions strictly aligned across all cards */}
-      <div className="flex flex-col gap-2.5 pt-4 mt-auto border-t border-white/10 relative z-10">
+      {/* Região 2: Progresso (Metadados e Telemetria em linhas empilhadas) */}
+      <div className="flex flex-col gap-2 pt-3 border-t border-white/10 relative z-10">
+        <span
+          className="text-[10px] uppercase font-mono tracking-widest text-slate-300 font-semibold"
+          style={{ fontFamily: "'Space Mono', monospace" }}
+        >
+          STATUS DE APRENDIZADO
+        </span>
+
+        {isAvailable ? (
+          <div className="flex flex-col gap-2 bg-[#060b1a]/80 border border-white/10 rounded-xl p-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-mono text-slate-300">Práticas:</span>
+              <span
+                className="font-bold text-white font-mono"
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                {summary.completedPhases} de {summary.totalPhases} concluídas
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-mono text-slate-300">Tutorial guiado:</span>
+              <span
+                className={`font-bold font-mono ${
+                  summary.hasCompletedTutorial ? "text-emerald-400" : "text-amber-300"
+                }`}
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                {summary.hasCompletedTutorial ? "CONCLUÍDO" : "PENDENTE"}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-mono text-slate-300">Melhor pontuação:</span>
+              <span
+                className="font-bold text-cyan-300 font-mono"
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                {summary.bestScore !== undefined ? `${summary.bestScore} / 100` : "—"}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="p-3 rounded-xl border border-dashed border-white/10 bg-black/20 text-center">
+            <span
+              className="text-xs font-mono text-slate-300 italic"
+              style={{ fontFamily: "'Space Mono', monospace" }}
+            >
+              Módulo curricular em preparação
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Região 3: Ações Comuns (Alinhadas estritamente entre todos os cards da mesma linha) */}
+      <div className="flex flex-col gap-2.5 pt-4 mt-3 border-t border-white/10 relative z-10">
         {/* Primary CTA */}
         {isAvailable ? (
           <GameButton
@@ -241,31 +241,31 @@ export default function ProtocolCard({
             )}
           </div>
         </div>
-
-        {/* Optional Bubble-specific early exit / challenge mode */}
-        {metadata.id === "bubble" && (
-          <div className="pt-1">
-            {summary.isChallengeUnlocked && onStartChallenge ? (
-              <GameButton
-                onClick={onStartChallenge}
-                variant="primary"
-                size="sm"
-                icon="⚡"
-                className="w-full border-amber-500/50 text-amber-300 hover:border-amber-400 shadow-md shadow-amber-950/20"
-              >
-                MODO DESAFIO (EARLY EXIT)
-              </GameButton>
-            ) : (
-              <div
-                className="w-full text-[11px] text-slate-400/60 font-mono text-center py-1.5 px-2 rounded bg-black/30 border border-white/5"
-                style={{ fontFamily: "'Space Mono', monospace" }}
-              >
-                🔒 DESAFIO: Conclua as 3 práticas do Bubble
-              </div>
-            )}
-          </div>
-        )}
       </div>
+
+      {/* Região 4: Atividade Extra (Exclusiva do Bubble, posicionada estritamente abaixo das ações comuns) */}
+      {metadata.id === "bubble" && (
+        <div className="pt-2.5 mt-2 border-t border-white/5 relative z-10">
+          {summary.isChallengeUnlocked && onStartChallenge ? (
+            <GameButton
+              onClick={onStartChallenge}
+              variant="primary"
+              size="sm"
+              icon="⚡"
+              className="w-full border-amber-500/50 text-amber-300 hover:border-amber-400 shadow-md shadow-amber-950/20"
+            >
+              MODO DESAFIO (EARLY EXIT)
+            </GameButton>
+          ) : (
+            <div
+              className="w-full text-[11px] text-slate-400/60 font-mono text-center py-1.5 px-2 rounded bg-black/30 border border-white/5"
+              style={{ fontFamily: "'Space Mono', monospace" }}
+            >
+              🔒 DESAFIO: Conclua as 3 práticas do Bubble
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
