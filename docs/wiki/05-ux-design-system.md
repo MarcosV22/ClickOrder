@@ -445,22 +445,25 @@ A plataforma preserva a atmosfera diegética da estação espacial, mas adota **
    - Redução dos halos e sombras de texto (`text-shadow`) em classes `.glow-cyan` e `.glow-purple` para um raio máximo de 4px com opacidade atenuada, eliminando a perda de definição das arestas numéricas em telas escuras.
    - Distinção nítida e independente entre valor numérico (`Orbitron font-bold`), identificador de duplicata (badge nítido `bg-[#060b1a]/80 text-cyan-200 border border-cyan-400/40`), índice (`#index+1` em `text-slate-300 font-bold`) e estado do elemento (papel semântico `BoxRole`).
 
-### 11.3. Organização Estrutural do Hub e Arquitetura de 4 Regiões nos Cartões
-- **Arquitetura de 4 Regiões no `ProtocolCard.tsx`:**
-  Para eliminar desalinhamentos verticais causados por particularidades de módulos (como o bloco exclusivo de Modo Desafio do Bubble Sort), o cartão de protocolo é formalmente dividido em 4 regiões estruturais sequenciais:
-  1. **Região 1 (Conteúdo do Protocolo):** Contém a barra de status/chip de práticas, título do algoritmo em degradê, metáfora diegética e descrição pedagógica direta. Possui altura mínima padronizada (`min-h-[148px]`), garantindo que variações de tamanho de texto entre os algoritmos não desloquem os blocos seguintes.
-  2. **Região 2 (Progresso e Metadados):** Painel de status de aprendizado estruturado em 3 linhas empilhadas com espaçamento vertical:
-     - Linha 1: `Práticas: X de Y concluídas`
-     - Linha 2: `Tutorial guiado: CONCLUÍDO / PENDENTE`
-     - Linha 3: `Melhor pontuação: X / 100` (ou `—`)
-  3. **Região 3 (Ações Comuns Padronizadas):** Bloco delimitado por borda superior divisória (`pt-4 mt-3 border-t border-white/10`), contendo rigorosamente os três botões comuns a todos os módulos:
-     - `INICIAR TREINAMENTO` (botão primário roxo/gradiente);
-     - `TUTORIAL` (botão secundário);
-     - `DEMONSTRAÇÃO` (botão secundário).
-     Esses três botões compartilham a exata mesma posição e linha de base horizontal em todos os 4 cards da interface.
-  4. **Região 4 (Atividade Extra / Desafio Exclusivo):** Posicionada **estritamente abaixo** da Região 3. É renderizada condicionalmente apenas quando o módulo possui atividade curricular extra (atualmente exclusivo do Bubble Sort, com o Modo Desafio Early Exit bloqueado/desbloqueado). Por estar isolada abaixo das ações comuns, sua presença jamais distorce ou empurra para cima os botões `INICIAR TREINAMENTO`, `TUTORIAL` e `DEMONSTRAÇÃO`.
-- **Grid Responsivo Nivelado no `HomeScreen.tsx`:**
-  A grade principal de cartões utiliza `grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 w-full items-start`, alinhando os topos dos cartões e assegurando paridade horizontal pixel-perfect tanto em 2 colunas quanto em 4 colunas.
+### 11.3. Organização Estrutural do Hub e Arquitetura de 4 Regiões com CSS Grid Subgrid
+- **Grade Compartilhada no `HomeScreen.tsx` e Subgrid no `ProtocolCard.tsx`:**
+  Para eliminar variações verticais causadas por diferenças no tamanho de texto (como a descrição mais concisa do Merge Sort) ou pela presença de atividades extras (como o bloco de Modo Desafio do Bubble Sort), o Hub e os cartões utilizam uma arquitetura estrutural baseada em **CSS Grid com `subgrid`**:
+  - **Grade Principal (`HomeScreen.tsx`):**
+    Configurada com `grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-x-6 gap-y-4 w-full mt-2`. Foi removido `items-start`, permitindo que os cartões se estendam uniformemente pelas 4 faixas de linhas (`align-self: stretch`).
+  - **Cartão Subgrid (`ProtocolCard.tsx`):**
+    Adota `grid grid-rows-subgrid row-span-4` (com `gridRow: "span 4"`, `display: "grid"`, `gridTemplateRows: "subgrid"` inline), conectando diretamente seus 4 filhos imediatos às linhas da grade pai:
+    1. **Linha 1 — Região 1 (Conteúdo do Protocolo):** Contém chip de disponibilidade e práticas, título do algoritmo em degradê, subtítulo de metáfora diegética e descrição pedagógica direta. A altura da Linha 1 é unificada automaticamente pelo subgrid com base na descrição mais longa da fileira, eliminando alturas mínimas arbitrárias ou textos artificiais de preenchimento.
+    2. **Linha 2 — Região 2 (Progresso e Metadados):** Painel de status de aprendizado estruturado em 3 linhas empilhadas com espaçamento vertical:
+       - Linha 1: `Práticas: X de Y concluídas`
+       - Linha 2: `Tutorial guiado: CONCLUÍDO / PENDENTE`
+       - Linha 3: `Melhor pontuação: X / 100` (ou `—`)
+       Começa rigorosamente no mesmo pixel vertical ($y$) em todos os cartões.
+    3. **Linha 3 — Região 3 (Ações Comuns Padronizadas):** Bloco delimitado por borda superior divisória (`pt-4 border-t border-white/10`), contendo os três botões comuns a todos os módulos:
+       - `INICIAR TREINAMENTO` (botão primário);
+       - `TUTORIAL` (botão secundário);
+       - `DEMONSTRAÇÃO` (botão secundário).
+       Compartilham coordenadas verticais ($y$ e topo) rigorosamente idênticas entre todos os 4 cards em 1920×1080 (Desktop) e entre as duplas em 1366×768 (Laptop).
+    4. **Linha 4 — Região 4 (Atividade Extra / Desafio Exclusivo):** Posicionada **estritamente abaixo** da Região 3 como 4º filho persistente do subgrid em todos os cartões. Renderiza o Modo Desafio no Bubble Sort e permanece como slot vazio de altura zero nos demais módulos (Selection, Insertion, Merge). Na visualização de 4 colunas, o cartão estende seu contorno externo para acompanhar a altura do Bubble, garantindo alinhamento pixel-perfect da base de todos os cartões.
 
 ### 11.4. Briefing Progressivo do Merge Sort (3 Etapas + Detalhes Secundários)
 - Substituição da grade de sete cards sobrecarregados por uma estrutura pedagógica sequencial e clara:

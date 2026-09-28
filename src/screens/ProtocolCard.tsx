@@ -22,13 +22,16 @@ export default function ProtocolCard({
 
   return (
     <div
-      className={`relative flex flex-col h-full rounded-2xl p-6 sm:p-7 backdrop-blur-md transition-all duration-300 border ${
+      className={`relative grid grid-rows-subgrid row-span-4 rounded-2xl p-6 sm:p-7 backdrop-blur-md transition-all duration-300 border ${
         isAvailable
           ? `${metadata.theme.borderClass} ${metadata.theme.borderHoverClass} bg-[#0c1533]/80 hover:shadow-2xl`
           : "border-white/10 bg-[#080d20]/50 opacity-70"
       }`}
       style={{
         boxShadow: isAvailable ? `0 0 35px ${metadata.theme.accentGlow}` : "none",
+        gridRow: "span 4",
+        display: "grid",
+        gridTemplateRows: "subgrid",
       }}
     >
       {/* Ambient background glow inside card */}
@@ -49,7 +52,7 @@ export default function ProtocolCard({
       )}
 
       {/* Região 1: Conteúdo (Badges, Título, Metáfora e Descrição Pedagógica) */}
-      <div className="flex flex-col gap-3 relative z-10 min-h-[148px]">
+      <div className="flex flex-col gap-3 relative z-10">
         {/* Status bar */}
         <div className="flex items-center justify-between gap-2">
           <div
@@ -161,7 +164,7 @@ export default function ProtocolCard({
       </div>
 
       {/* Região 3: Ações Comuns (Alinhadas estritamente entre todos os cards da mesma linha) */}
-      <div className="flex flex-col gap-2.5 pt-4 mt-3 border-t border-white/10 relative z-10">
+      <div className="flex flex-col gap-2.5 pt-4 border-t border-white/10 relative z-10">
         {/* Primary CTA */}
         {isAvailable ? (
           <GameButton
@@ -244,28 +247,30 @@ export default function ProtocolCard({
       </div>
 
       {/* Região 4: Atividade Extra (Exclusiva do Bubble, posicionada estritamente abaixo das ações comuns) */}
-      {metadata.id === "bubble" && (
-        <div className="pt-2.5 mt-2 border-t border-white/5 relative z-10">
-          {summary.isChallengeUnlocked && onStartChallenge ? (
-            <GameButton
-              onClick={onStartChallenge}
-              variant="primary"
-              size="sm"
-              icon="⚡"
-              className="w-full border-amber-500/50 text-amber-300 hover:border-amber-400 shadow-md shadow-amber-950/20"
-            >
-              MODO DESAFIO (EARLY EXIT)
-            </GameButton>
-          ) : (
-            <div
-              className="w-full text-[11px] text-slate-400/60 font-mono text-center py-1.5 px-2 rounded bg-black/30 border border-white/5"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              🔒 DESAFIO: Conclua as 3 práticas do Bubble
-            </div>
-          )}
-        </div>
-      )}
+      <div className="relative z-10">
+        {metadata.id === "bubble" ? (
+          <div className="pt-2.5 border-t border-white/5">
+            {summary.isChallengeUnlocked && onStartChallenge ? (
+              <GameButton
+                onClick={onStartChallenge}
+                variant="primary"
+                size="sm"
+                icon="⚡"
+                className="w-full border-amber-500/50 text-amber-300 hover:border-amber-400 shadow-md shadow-amber-950/20"
+              >
+                MODO DESAFIO (EARLY EXIT)
+              </GameButton>
+            ) : (
+              <div
+                className="w-full text-[11px] text-slate-400/60 font-mono text-center py-1.5 px-2 rounded bg-black/30 border border-white/5"
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                🔒 DESAFIO: Conclua as 3 práticas do Bubble
+              </div>
+            )}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

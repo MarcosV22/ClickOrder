@@ -1,4 +1,5 @@
 import type { ProtocolModeBriefing, BriefingModeId } from "./types";
+import { QUICK_CANONICAL_BRIEFING } from "./quickBriefing";
 
 /**
  * Briefing oficial para a campanha didática do Bubble Sort (Treinamento Regular).
@@ -322,6 +323,7 @@ export const BRIEFING_CATALOG: Record<BriefingModeId, ProtocolModeBriefing> = {
   "selection-canonical": SELECTION_CANONICAL_BRIEFING,
   "insertion-canonical": INSERTION_CANONICAL_BRIEFING,
   "merge-canonical": MERGE_CANONICAL_BRIEFING,
+  "quick-canonical": QUICK_CANONICAL_BRIEFING,
 };
 
 /**

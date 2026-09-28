@@ -32,7 +32,7 @@ A plataforma divide seus motores de ordenação em 6 módulos curriculares canô
 | **02. Selection Sort** | `src/game/sorting/selection/selectionSortEngine.ts` | FSM bimodal estrita `INSPECT` (scanner) e `COMMIT` (transferência) | `IMPLEMENTADO` | [`modules/selection-sort.md`](./modules/selection-sort.md) |
 | **03. Insertion Sort** | `src/game/sorting/insertion/insertionSortEngine.ts` | FSM de deslocamentos (`COMPARE_AND_SHIFT`, `INSERT_READY`, `COMPLETED`) com vaga física | `IMPLEMENTADO` | [`modules/insertion-sort.md`](./modules/insertion-sort.md) |
 | **04. Merge Sort** | `src/game/sorting/merge/` | FSM Top-Down pós-ordem com pilha explícita, dois ponteiros de confluência e buffer auxiliar | `ESTAÇÃO E SELETOR IMPLEMENTADOS (P3.1-D)` | [`modules/merge-sort.md`](./modules/merge-sort.md) |
-| **05. Quick Sort** | `src/game/sorting/quick/` (Futuro P3.2) | FSM de seleção de pivô e particionamento bilateral Lomuto/Hoare | `FUTURO` | [`modules/quick-sort.md`](./modules/quick-sort.md) |
+| **05. Quick Sort** | `src/game/sorting/quick/` (Marco P3.2) | FSM de particionamento de Lomuto com pivô final, pilha explícita LIFO e consolidação $p=i+1$ | `ENGINE PURA IMPLEMENTADA (P3.2-B)` | [`modules/quick-sort.md`](./modules/quick-sort.md) |
 | **06. Heap Sort** | `src/game/sorting/heap/` (Futuro P3.3) | FSM de construção de max-heap, afundamento (*sift-down*) e extração da raiz | `FUTURO` | [`modules/heap-sort.md`](./modules/heap-sort.md) |
 
 ---
@@ -164,7 +164,49 @@ export interface MergeSortState {
 
 ---
 
-## 7. Requisitos de Conformidade para Novas Engines (Module Standard)
+## 7. A Engine de Quick Sort (`src/game/sorting/quick/`) (Marco P3.2-B)
+
+### 7.1. Contrato de Estado e FSM de Particionamento
+Implementada em `src/game/sorting/quick/quickSortEngine.ts` com base no Particionamento de Lomuto, utilizando o último elemento do trecho ativo como pivô ($A[high]$):
+
+```typescript
+export interface QuickSortState {
+  readonly initialValues: readonly QuickElement[];
+  readonly values: readonly QuickElement[];
+  readonly phase: QuickPhase; // "IDLE" | "INSPECT_ELEMENT" | "PARTITION_READY_FOR_PIVOT" | "COMPLETED"
+  readonly activeInterval: QuickIntervalContext | null;
+  readonly pendingIntervals: readonly QuickIntervalContext[];
+  readonly i: number;
+  readonly j: number;
+  readonly pivotIndex: number | null;
+  readonly pivotElement: QuickElement | null;
+  readonly sortedIndices: readonly number[];
+  readonly comparisons: number;
+  readonly swaps: number;
+  readonly writesInArray: number;
+  readonly errors: number;
+  readonly hintsUsed: number;
+  readonly completed: boolean;
+  readonly history: readonly QuickStepRecord[];
+}
+```
+
+### 7.2. Funções Puras Principais
+- `initQuickSortState(rawInput)`: Instancia o estado congelado imutável. Casos vazios e unitários terminam imediatamente com 0 comparações, 0 trocas e 0 escritas; para $n \ge 2$, dispara `advanceAutomaticSteps` e pára no primeiro elemento interativo a classificar;
+- `advanceAutomaticSteps(state)`: Consome intervalos vazios e consolida casos unitários ($low == high$) de forma puramente funcional, sem trabalho do estudante, parando na próxima decisão interativa (`INSPECT_ELEMENT` ou `PARTITION_READY_FOR_PIVOT`) ou em `COMPLETED`;
+- `stepQuickSort(state, decision)`: Transição de estado que valida as decisões pedagógicas do estudante (`LESS_OR_EQUAL`, `GREATER`, `PLACE_PIVOT`). Erros de classificação incrementam `errors` sem mover ponteiros nem alterar métricas algorítmicas; decisões fora de fase são ações impossíveis sem penalidade; acertos incrementam 1 comparação relacional; auto-trocas são omitidas ($i == j$ e $i+1 == high$) sem incrementar trocas ou escritas; trocas entre índices distintos incrementam 1 troca e 2 escritas no vetor (`writesInArray = 2 * swaps`);
+- `swapInArray(array, idx1, idx2)`: Helper puro de permuta imutável com garantia contratual de omissão de auto-troca (`executed: false` se $idx1 == idx2$);
+- `reconstructQuickVisualFrame(record)`: Converte registros pós-evento em frames visuais para Replay retrospectivo e telemetria, sem reexecução algorítmica;
+- `QUICK_SORT_PSEUDOCODE_LINES`: 27 instruções canônicas congeladas em runtime.
+
+### 7.3. Memória e Snapshots
+- **Espaço In-Place da Partição:** $O(1)$ variáveis escalares;
+- **Pilha Explícita de Intervalos Pendentes:** LIFO com processamento esquerdo antes do direito. Diferencia-se: (1) ocupação transitória no snapshot pós-pivô (`PIVOT_POSITIONED`), onde ambos os filhos não-vazios (inclusive unitários, como em `[1, 3, 2]`) são empilhados; (2) consumo imediato durante o avanço automático que resolve casos unitários com `BASE_CASE_RESOLVED`; (3) estado durante a inspeção interativa ativa, onde o intervalo ativo está desempilhado (mantendo no máximo 1 pendente na entrada ordenada). O limite assintótico geral permanece estritamente $O(n)$ de memória de controle no pior caso, sem cotas fechadas não demonstradas formalmente;
+- **Histórico e Snapshots:** Registros imutáveis com snapshots rasos de tamanho $n$. Custo total de referências $O(m \cdot n)$ ponteiros ($m \in \Theta(n \log n)$ caso médio, $m \in \Theta(n^2)$ pior caso). Erros conceituais não geram passos algorítmicos no histórico.
+
+---
+
+## 8. Requisitos de Conformidade para Novas Engines (Module Standard)
 
 Qualquer nova engine algorítmica a ser implementada na plataforma deve obedecer aos seguintes critérios:
 1. **Zero Acoplamento com React:** Arquivos localizados em `src/game/sorting/<algoritmo>/` contendo exclusivamente TypeScript puro sem JSX ou hooks;

@@ -47,7 +47,7 @@ flowchart LR
 | **02. Selection Sort** | [`modules/selection-sort.md`](./modules/selection-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO` | Persistido em Schema v4 (`selection.practice.*`) |
 | **03. Insertion Sort** | [`modules/insertion-sort.md`](./modules/insertion-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO E ATIVADO` | P2.2 integralmente concluído com Schema v4 |
 | **04. Merge Sort** | [`modules/merge-sort.md`](./modules/merge-sort.md) | $\Theta(n \log n)$ | `CAMADA PEDAGÓGICA IMPLEMENTADA` (P3.1-C) | Estação visual de confluência (P3.1-D) |
-| **05. Quick Sort** | [`modules/quick-sort.md`](./modules/quick-sort.md) | $\Theta(n \log n)$ | `FUTURO` (P3.2) | Particionamento bilateral e seleção de pivô |
+| **05. Quick Sort** | [`modules/quick-sort.md`](./modules/quick-sort.md) | $\Theta(n \log n)$ | `ENGINE PURA IMPLEMENTADA` (P3.2-B) | Camada Pedagógica, Tutorial e Demonstração (P3.2-C) |
 | **06. Heap Sort** | [`modules/heap-sort.md`](./modules/heap-sort.md) | $\Theta(n \log n)$ | `FUTURO` (P3.3) | Estrutura de max-heap e afundamento (*sift-down*) |
 | **Laboratório Comparativo**| [`comparison-lab.md`](./comparison-lab.md) | Multi-algoritmo | `BLOQUEADO` | Aguarda conclusão dos 6 módulos |
 
@@ -107,13 +107,15 @@ flowchart LR
 
 ---
 
-### Marco 3: MÓDULO QUICK SORT (P3.2) — `FUTURO`
-- **Objetivo:** Segundo módulo log-linear, demonstrando particionamento in-place em torno de pivô.
-- **Entregáveis:**
-  1. Destaque luminoso do pivô na esteira com farol indicador;
-  2. Particionamento bilateral Lomuto com esteiras para menores e maiores;
-  3. Fixação definitiva do pivô na fronteira entre as metades;
-  4. Casos especiais curados demonstrando degeneração para $O(n^2)$ e caso balanceado $O(n \log n)$.
+### Marco 3: MÓDULO QUICK SORT (P3.2) — `EM ANDAMENTO (P3.2-C Concluído)`
+- **Objetivo:** Segundo módulo log-linear, demonstrando ordenação in-place por particionamento de Lomuto em torno de pivô final com consolidação definitiva $p = i+1$.
+- **Sub-marcos:**
+  - **P3.2-A: Design Pedagógico e Mecânico (`CONCLUÍDO / APROVADO`):** Especificação completa das 20 seções do Module Standard ([`modules/quick-sort.md`](./modules/quick-sort.md)) e proposta formalizada no [`ADR 0024`](../adr/0024-quick-sort-pedagogical-mechanical-design.md) (Particionamento de Lomuto com pivô no fim $A[high]$, limites inclusivos, invariante de 4 regiões contíguas ainda não necessariamente ordenadas, selamento com selo esmeralda `OK DEFINITIVO` no índice $p = i+1$, pilha explícita LIFO com pior caso $O(n)$, agência do aluno em `Menor ou igual ao pivô`, `Maior que o pivô` e confirmação pedagógica `Colocar o pivô na posição final`, convenção métrica sem auto-trocas, $W(n) = 2 \times S(n)$ e evidência visual de não-estabilidade com o vetor `[4a, 4b, 1, 2, 3]`).
+  - **P3.2-B: Engine Pura e FSM (`CONCLUÍDO`):** Implementação funcional de `src/game/sorting/quick/quickSortEngine.ts`, tipos contratuais em `types.ts`, ponto de entrada em `index.ts` e suíte exaustiva de testes unitários no Vitest (`quickSortEngine.test.ts`, 31 testes 100% verdes; 566 testes na plataforma). Invariantes testadas: casos base unitário e vazio com métricas zeradas, contagem de comparações relacionais estritas por acerto ($C(n)$), trocas físicas reais ($pos_1 \neq pos_2$) excluindo auto-trocas, não-estabilidade com inversão de duplicatas em `[4a, 4b, 1, 2, 3]`, preservação de ordem em `[4a, 1, 4b, 2, 3]` demonstrando ausência de garantia, processamento esquerdo antes do direito (*left-first*), imutabilidade de posições definitivas, avanço automático puramente funcional de partições vazias e unitárias, retenção de estado em erros sem penalização algorítmica, tratamento de ações impossíveis sem penalidade, reconstrução factual de snapshots via helper e limites de acúmulo da pilha explícita.
+  - **P3.2-C: Camada Pedagógica, Tutorial e Demonstração (`CONCLUÍDO`):** Constraints procedurais (`quickConstraints.ts`) para os 3 níveis (básico $n=4$, intermediário $n=5$, avançado $n=6$ com confronto real de igualdade verificado via engine pura, determinismo de sementes e fallbacks curados), catálogo data-driven de práticas (`practiceCatalog.ts`), camada pedagógica com feedback formativo imediato, scaffolding de dicas em 3 níveis e precedência estrita de realce visual (`quickPedagogy.ts`), tutorial guiado sobre o vetor canônico `[4a, 4b, 1, 2, 3]` com retenção em erro e comprovação formal de instabilidade por inversão final (`quickTutorialGuide.ts`: 6 comparações, 3 trocas, 6 escritas), modo de demonstração autônoma sobre `[5, 2, 4, 1, 3]` (`quickDemonstration.ts`: 6 comparações, 5 trocas, 10 escritas) integrado ao despachante universal e briefing oficial ilustrado no padrão aprovado (`quickBriefing.ts` e `ProtocolModeBriefingScreen.tsx`) com 3 passos, exemplo visual de partição local vs execução completa, cards de regras, instabilidade e detalhes técnicos recolhíveis. Total consolidado da plataforma: 582 testes verdes em 45 arquivos.
+  - **P3.2-D: Estação de Particionamento e Seletor de Práticas (`FUTURO / PRÓXIMO PASSO`):** Interface `QuickGameScreen.tsx` desktop-first, esteira de 4 regiões com pivô destacado, botoeira com `GameButton` (`1: Menor ou igual ao pivô`, `2: Maior que o pivô`, `3: Colocar o pivô na posição final`), atalhos `1`, `2`, `3`, suporte a `prefers-reduced-motion`, Seletor de Práticas com tema Quick e tela de resultados.
+  - **P3.2-E: Replay e Pseudocódigo Sincronizado (`FUTURO`):** Modelo funcional imutável `src/game/sorting/quick/quickReplayModel.ts` ($1+N$ quadros, derivação pura sem reexecução), pseudocódigo canônico sincronizado de 27 linhas e tela `QuickReplayScreen.tsx` desktop-first com controles temporais e atalhos.
+  - **P3.2-F: Persistência Schema v4, Tutorial Guiado e Ativação no Hub (`FUTURO`):** Persistência sob `saveData.modules["quick"]`, tela de tutorial guiado (`QuickTutorialScreen.tsx`), tela de conclusão de conjunto `PracticeSetCompleteScreen.tsx`, rotas no `App.tsx` e ativação pública com status `available` no Hub de Protocolos.
 
 ---
 

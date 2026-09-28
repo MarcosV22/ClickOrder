@@ -11,6 +11,7 @@ import {
   SELECTION_CANONICAL_BRIEFING,
   INSERTION_CANONICAL_BRIEFING,
   MERGE_CANONICAL_BRIEFING,
+  QUICK_CANONICAL_BRIEFING,
 } from "../game/briefing";
 import { PROTOCOL_CATALOG } from "./protocolCatalog";
 
@@ -122,6 +123,30 @@ describe("Illustrated Briefings & ProtocolCard Layout", () => {
       expect(text).toContain("Um grupo terminou?");
       expect(text).toContain("Vetor auxiliar temporário");
       expect(text).toContain("Entenda os detalhes técnicos");
+    });
+
+    it("deve renderizar a explicação ilustrada do Quick Sort com particionamento, pivô, regras e instabilidade", async () => {
+      await act(async () => {
+        root.render(
+          <ProtocolModeBriefingScreen
+            briefing={QUICK_CANONICAL_BRIEFING}
+            onStart={vi.fn()}
+            onBack={vi.fn()}
+          />
+        );
+      });
+
+      const text = container.textContent || "";
+      expect(text).toContain("Como Funciona o Algoritmo");
+      expect(text).toContain("Exemplo Visual com [5, 2, 4, 1, 3]");
+      expect(text).toContain("Partição Local (Pivô = 3 no fim)");
+      expect(text).toContain("Continuidade e Execução Completa");
+      expect(text).toContain("Pivô no Fim");
+      expect(text).toContain("Números Iguais?");
+      expect(text).toContain("Selo OK Definitivo");
+      expect(text).toContain("Atenção à Instabilidade");
+      expect(text).toContain("Entenda os detalhes técnicos");
+      expect(text).toContain("Particionamento In-Place de Lomuto");
     });
   });
 

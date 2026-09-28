@@ -69,3 +69,27 @@ export const CURATED_MERGE_DEMO_ARRAY: readonly number[] = Object.freeze([
   7, 2, 5, 3,
 ]);
 
+/**
+ * Vetor curado para a demonstração canônica do Quick Sort.
+ *
+ * Características pedagógicas obrigatórias (n = 5 elementos: [5, 2, 4, 1, 3]):
+ * - Partição raiz [0..4] (pivô = 3):
+ *   1. 5 > 3 -> avanço sem troca;
+ *   2. 2 <= 3 -> troca 5 com 2 -> [2, 5, 4, 1, 3];
+ *   3. 4 > 3 -> avanço sem troca;
+ *   4. 1 <= 3 -> troca 5 com 1 -> [2, 1, 4, 5, 3];
+ *   5. fecha pivô 3 -> troca 4 com 3 -> [2, 1, 3, 5, 4]. Pivô 3 selado no índice 2 com OK DEFINITIVO.
+ * - Subpartição esquerda [0..1] (pivô = 1):
+ *   6. 2 > 1 -> avanço sem troca;
+ *   7. fecha pivô 1 -> troca 2 com 1 -> [1, 2, 3, 5, 4]. Pivô 1 selado no índice 0; unitário 2 selado no índice 1.
+ * - Subpartição direita [3..4] (pivô = 4):
+ *   8. 5 > 4 -> avanço sem troca;
+ *   9. fecha pivô 4 -> troca 5 com 4 -> [1, 2, 3, 4, 5]. Pivô 4 selado no índice 3; unitário 5 selado no índice 4.
+ * - Resultado final: [1, 2, 3, 4, 5]
+ * - Total de métricas: exatamente 6 comparações, 5 trocas físicas e 10 escritas no vetor.
+ */
+export const CURATED_QUICK_DEMO_ARRAY: readonly number[] = Object.freeze([
+  5, 2, 4, 1, 3,
+]);
+
+

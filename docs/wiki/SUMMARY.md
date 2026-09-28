@@ -1,7 +1,7 @@
 # Sorting Station – Sumário Operacional da Plataforma
 
 > **Status da Documentação:** Ativo / Canônico  
-> **Data da Última Revisão:** 25/09/2026 (Padronização Canônica de Explicações Ilustradas e Alinhamento Estrutural do Hub)  
+> **Data da Última Revisão:** 28/09/2026 (Módulo Quick Sort P3.2-C: Camada Pedagógica, Tutorial Guiado e Demonstração Concluídos)  
 > **Governança:** [`AGENTS.md`](../../AGENTS.md) e [`ADR 0018`](../adr/0018-game-to-educational-platform-transition.md).  
 > 
 > *Este documento é o ponto de entrada operacional e mapa de navegação canônico da Wiki. Ele não substitui a leitura das páginas temáticas detalhadas correspondentes ao escopo da tarefa.*
@@ -51,8 +51,8 @@ A plataforma possui um currículo oficial congelado em **6 Módulos de Algoritmo
 | **01. Bubble Sort** | `IMPLEMENTADO E PADRONIZADO (PLATFORM-R1-B / REVISÃO PEDAGÓGICA)` | Engine pura (`bubbleSortEngine.ts`), FSM sequencial estrita, tutorial guiado (`[3, 1, 2]`), demonstração autônoma (`[5, 2, 4, 1]`), Seletor de Práticas (`PracticeSelector`), conjunto canônico de 3 práticas procedurais (`basic`: 4 elementos, `intermediate`: 5 elementos, `advanced`: 6 elementos), Caso Especial Curricular / Desafio Early Exit desacoplado (desbloqueado pelo Schema v4), replay retrospectivo com pseudocódigo sincronizado de 9/14 linhas, e conclusão via `PracticeSetCompleteScreen`. Linguagem pedagógica direta e alto contraste aplicados em toda a interface. Persistido em Schema v4 (`bubble.practice.*`). | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |
 | **02. Selection Sort** | `IMPLEMENTADO E PADRONIZADO (PLATFORM-R1-B / REVISÃO PEDAGÓGICA)` | Engine pura (`selectionSortEngine.ts`), FSM bimodal `INSPECT`/`COMMIT`, constraints procedurais, briefing oficial, tutorial guiado (`[4, 1, 3]`), demonstração autônoma, Seletor de Práticas (`PracticeSelector`), conjunto canônico de 3 práticas procedurais (`basic`: 4 elementos, `intermediate`: 5 elementos, `advanced`: 6 elementos) com animação de longa distância preservando mecânica singular de varredura seletiva e troca única por passada, replay com pseudocódigo sincronizado de 13 linhas, e conclusão via `PracticeSetCompleteScreen`. Linguagem desindustrializada e alto contraste. Persistido em Schema v4 (`selection.practice.*`). | [`modules/selection-sort.md`](./modules/selection-sort.md) |
 | **03. Insertion Sort** | `IMPLEMENTADO E ATIVADO (P2.2-F / REVISÃO PEDAGÓGICA)` | Engine pura (`insertionSortEngine.ts`), FSM de deslocamentos (*shifts*), constraints procedurais, briefing oficial, tutorial guiado (`[4, 2, 3]`), demonstração canônica autônoma (`[6, 3, 5, 2, 7]`), práticas interativas progressivas (`basic`, `intermediate`, `advanced`), `PracticeSetCompleteScreen`, `ResultScreen` com telemetria clara de deslocamentos e inserções, replay retrospectivo puro (`insertionReplayModel.ts`), pseudocódigo sincronizado de 11 linhas (`InsertionSortPseudocodePanel.tsx`), persistência no Schema v4 orientada a exercícios e ativado publicamente no catálogo do Hub com status `available`. | [`modules/insertion-sort.md`](./modules/insertion-sort.md) |
-| **04. Merge Sort** | `IMPLEMENTADO, INTEGRADO E REVISADO (P3.1-F / REVISÃO PEDAGÓGICA) — Homologação visual manual pendente` | Estação Desktop-First com área única de decisão (`MergeGameScreen.tsx`), botoeira de ação imediata (`1: ESCOLHER DA ESQUERDA`, `2: ESCOLHER DA DIREITA`, `3: COPIAR OS RESTANTES`), briefing progressivo em 3 etapas com detalhes secundários recolhíveis, dois grupos lado a lado sem caixas redundantes de confronto, destaque nítido nos ponteiros `p1` e `p2` sem ofuscamento, buffer temporário intermediário (`Vetor Auxiliar B`), esteira principal com legenda explícita `ORD` (ordenado localmente) vs `OK` (posição final consolidada), Seletor de Práticas (`PracticeSelector` com tema merge e 3 práticas $n=4, 5, 6$), `ResultScreen` com notas pedagógicas diretas, Replay retrospectivo puro (`mergeReplayModel.ts`, invariante $1+N$ quadros, histórico factual sem reexecução algorítmica, telemetria e pseudocódigo canônico de 30 linhas sincronizados em `MergeReplayScreen.tsx` e `MergeSortPseudocodePanel.tsx`), Tutorial guiado com FSM autônoma (`MergeTutorialScreen.tsx`), Modo Demonstração observacional com engine pura, Tela de Conclusão de Conjunto (`PracticeSetCompleteScreen.tsx`), persistência canônica Schema v4 em `saveData.modules["merge"]`, migração defensiva de saves e ativação pública com status `available` no Hub de Protocolos. 529 testes verdes no Vitest (39 arquivos). Homologação visual em navegador real mantida como formalmente pendente até validação pelo usuário. | [`modules/merge-sort.md`](./modules/merge-sort.md) |
-| **05. Quick Sort** | `FUTURO` | Especificação completa no Module Standard; código algorítmico não iniciado (Marco P3.2). | [`modules/quick-sort.md`](./modules/quick-sort.md) |
+| **04. Merge Sort** | `IMPLEMENTADO, INTEGRADO E REVISADO (P3.1-F / REVISÃO PEDAGÓGICA) — Nivelamento do Hub Validado` | Estação Desktop-First com área única de decisão (`MergeGameScreen.tsx`), botoeira de ação imediata (`1: ESCOLHER DA ESQUERDA`, `2: ESCOLHER DA DIREITA`, `3: COPIAR OS RESTANTES`), briefing progressivo em 3 etapas com detalhes secundários recolhíveis, dois grupos lado a lado sem caixas redundantes de confronto, destaque nítido nos ponteiros `p1` e `p2` sem ofuscamento, buffer temporário intermediário (`Vetor Auxiliar B`), esteira principal com legenda explícita `ORD` (ordenado localmente) vs `OK` (posição final consolidada), Seletor de Práticas (`PracticeSelector` com tema merge e 3 práticas $n=4, 5, 6$), `ResultScreen` com notas pedagógicas diretas, Replay retrospectivo puro (`mergeReplayModel.ts`, invariante $1+N$ quadros, histórico factual sem reexecução algorítmica, telemetria e pseudocódigo canônico de 30 linhas sincronizados em `MergeReplayScreen.tsx` e `MergeSortPseudocodePanel.tsx`), Tutorial guiado com FSM autônoma (`MergeTutorialScreen.tsx`), Modo Demonstração observacional com engine pura, Tela de Conclusão de Conjunto (`PracticeSetCompleteScreen.tsx`), persistência canônica Schema v4 em `saveData.modules["merge"]`, migração defensiva de saves e ativação pública com status `available` no Hub de Protocolos. Cartões do Hub equalizados por CSS Grid Subgrid (0px de desalinhamento em 1920×1080 e 1366×768). 535 testes verdes no Vitest (40 arquivos). | [`modules/merge-sort.md`](./modules/merge-sort.md) |
+| **05. Quick Sort** | `CAMADA PEDAGÓGICA E CONTROLADORES ENTREGUES (P3.2-C)` | Engine pura funcional (`quickSortEngine.ts`), constraints procedurais para os 3 níveis (`quickConstraints.ts`), catálogo curricular de 3 práticas (`practiceCatalog.ts`), camada pedagógica e dicas em 3 níveis (`quickPedagogy.ts`), tutorial guiado sobre `[4a, 4b, 1, 2, 3]` com comprovação formal de instabilidade (`quickTutorialGuide.ts`), demonstração canônica sobre `[5, 2, 4, 1, 3]` (`quickDemonstration.ts`) e briefing ilustrado canônico no padrão aprovado (`quickBriefing.ts` e `ProtocolModeBriefingScreen.tsx`). 582 testes verdes no Vitest (45 arquivos). UI e telas interativas pendentes no Marco P3.2-D. | [`modules/quick-sort.md`](./modules/quick-sort.md) |
 | **06. Heap Sort** | `FUTURO` | Especificação completa no Module Standard; código algorítmico não iniciado (Marco P3.3). | [`modules/heap-sort.md`](./modules/heap-sort.md) |
 
 ---
@@ -152,7 +152,7 @@ flowchart TD
 - **Geração Procedural Universal:** Um único gerador PRNG Mulberry32 determinístico (`arrayGenerator.ts`) atende a todos os algoritmos através de constraints específicas. Nenhum algoritmo possui gerador próprio;
 - **Persistência Desacoplada:** Schema v4 implementado e ativo (`sorting_station_save`), orientado a módulos e conjuntos de exercícios (`exerciseSets`), com pipeline de migração v1->v2->v3->v4 e fallback de leitura da chave legada;
 - **Padronização de Telas e Rolagem Vertical (Scrollable Screen Rule — PLATFORM-UI-H1):** Diretriz canônica eliminando `overflow-hidden` podador de viewports, adotando `min-h-screen`, `overflow-y-auto`, `overflow-x-hidden`, `justify-start` e `pb-16 sm:pb-24` em todas as telas com conteúdo dinâmico, dono único do scroll vertical e acessibilidade via `prefers-reduced-motion`;
-- **Suíte de Testes Automatizados:** **Vitest** com **481 testes unitários** em 35 arquivos com 100% de aprovação.
+- **Suíte de Testes Automatizados:** **Vitest** com **582 testes unitários** em 45 arquivos com 100% de aprovação.
 
 ---
 
@@ -160,15 +160,15 @@ flowchart TD
 
 A próxima prioridade oficial de implementação de software é:
 
-> **Marco P3.1-E — Replay Retrospectivo e Pseudocódigo Sincronizado de 30 linhas do Merge Sort**  
-> Implementação do modelo funcional de replay retrospectivo (`mergeReplayModel.ts`), tela de visualização e reflexão com depurador temporal passo a passo, exibição do pseudocódigo sincronizado de 30 linhas cobrindo divisão, intercalação e cópia de volta, e ancoragem conceitual com as métricas factuais da sessão.
+> **Marco P3.2-D — Estação de Particionamento e Seletor de Práticas do Quick Sort**  
+> Implementação da interface interativa `QuickGameScreen.tsx` desktop-first, esteira de triagem com 4 regiões e destaque nítido do pivô $A[high]$, botoeira tripla com `GameButton` (`1: Menor ou igual ao pivô`, `2: Maior que o pivô`, `3: Colocar o pivô na posição final`), suporte a atalhos de teclado e `prefers-reduced-motion`, Seletor de Práticas com tema visual Quick (`#f97316`) e tela de resultados da prática (`ResultScreen.tsx`).
 
 ---
 
 ## 8. O que é trabalho futuro?
 
 1. **Marco P3.1:** Módulo Merge Sort (**CONCLUÍDO E INTEGRADO NO P3.1-F** — homologação visual manual pendente em navegador);
-2. **Marco P3.2:** Módulo Quick Sort (particionamento Lomuto/Hoare com pivô e recursão);
+2. **Marco P3.2:** Módulo Quick Sort (**EM ANDAMENTO: P3.2-B Engine pura e P3.2-C Camada pedagógica, tutorial e demonstração concluídos**; P3.2-D próximo passo);
 3. **Marco P3.3:** Módulo Heap Sort (Max-Heap, afundamento *sift-down* e extração);
 4. **Marco P3.4:** **Laboratório Comparativo** ([`comparison-lab.md`](./comparison-lab.md)) — **Status: BLOQUEADO até que os 6 módulos estejam implementados**;
 5. **Marco P3.5:** Avaliação Acadêmica e Metodologia Científica com estudantes universitários reais;
@@ -189,10 +189,10 @@ A próxima prioridade oficial de implementação de software é:
 | **Design System, tokens e acessibilidade** | [`05-ux-design-system.md`](./05-ux-design-system.md) |
 | **Ambiente Figma Make e scripts operacionais** | [`06-development-environment.md`](./06-development-environment.md) |
 | **Persistência Schema v4 e migração v3->v4** | [`07-backend-and-persistence.md`](./07-backend-and-persistence.md) |
-| **Suíte de testes Vitest (535 testes) e DoD** | [`08-testing-and-quality.md`](./08-testing-and-quality.md) |
+| **Suíte de testes Vitest (582 testes) e DoD** | [`08-testing-and-quality.md`](./08-testing-and-quality.md) |
 | **Build, deploy e empacotamento** | [`09-build-deploy.md`](./09-build-deploy.md) |
 | **Roadmap canônico da plataforma e legado histórico** | [`10-roadmap.md`](./10-roadmap.md) |
-| **Governança de ADRs e índice de decisões 0001 a 0023** | [`11-architecture-decisions.md`](./11-architecture-decisions.md) |
+| **Governança de ADRs e índice de decisões 0001 a 0024** | [`11-architecture-decisions.md`](./11-architecture-decisions.md) |
 | **Pedagogia, rigor ético e diretrizes para o artigo** | [`12-pedagogy-and-academic-traceability.md`](./12-pedagogy-and-academic-traceability.md) |
 | **Padrão transversal de módulo e taxonomia de exercícios**| [`modules/README.md`](./modules/README.md) |
 | **Módulo 01: Bubble Sort** | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |

@@ -8,8 +8,9 @@ import type { StepRecord } from "../sorting/types";
 import type { SelectionStepRecord } from "../sorting/selection/types";
 import type { InsertionStepRecord } from "../sorting/insertion/types";
 import type { MergeStepRecord } from "../sorting/merge/types";
+import type { QuickStepRecord } from "../sorting/quick/types";
 
-export type DemonstrationProtocol = "bubble" | "selection" | "insertion" | "merge";
+export type DemonstrationProtocol = "bubble" | "selection" | "insertion" | "merge" | "quick";
 
 export interface BubbleDemonstrationExecution {
   readonly protocol: "bubble";
@@ -57,9 +58,21 @@ export interface MergeDemonstrationExecution {
   readonly completed: boolean;
 }
 
+export interface QuickDemonstrationExecution {
+  readonly protocol: "quick";
+  readonly initialArray: readonly number[];
+  readonly finalValues: readonly number[];
+  readonly history: readonly QuickStepRecord[];
+  readonly comparisons: number;
+  readonly swaps: number;
+  readonly writesInArray: number;
+  readonly completed: boolean;
+}
+
 export type DemonstrationExecution =
   | BubbleDemonstrationExecution
   | SelectionDemonstrationExecution
   | InsertionDemonstrationExecution
-  | MergeDemonstrationExecution;
+  | MergeDemonstrationExecution
+  | QuickDemonstrationExecution;
 

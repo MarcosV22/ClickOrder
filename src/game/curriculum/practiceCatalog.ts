@@ -14,6 +14,7 @@ import {
   SELECTION_EXERCISE_SETS,
   INSERTION_EXERCISE_SETS,
   MERGE_EXERCISE_SETS,
+  QUICK_EXERCISE_SETS,
 } from "../persistence/constants";
 import type {
   PracticeDefinition,
@@ -178,11 +179,51 @@ export const MERGE_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.free
   },
 ]);
 
+export const QUICK_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.freeze([
+  {
+    id: QUICK_EXERCISE_SETS.BASIC,
+    moduleId: "quick",
+    level: "basic",
+    title: "PRÁTICA BÁSICA",
+    shortTitle: "BÁSICA",
+    description:
+      "Lote introdutório com 4 elementos sem duplicatas. Identifique o pivô e separe números menores/iguais e maiores.",
+    size: 4,
+    pedagogicalObjective:
+      "Compreender o papel do pivô, comparar cada número pela regra <=, observar trocas quando necessário e fixar o pivô na posição definitiva com selo OK.",
+  },
+  {
+    id: QUICK_EXERCISE_SETS.INTERMEDIATE,
+    moduleId: "quick",
+    level: "intermediate",
+    title: "PRÁTICA INTERMEDIÁRIA",
+    shortTitle: "INTERMEDIÁRIA",
+    description:
+      "Lote com 5 elementos sem duplicatas. Exercite a continuidade da ordenação nos subintervalos restantes.",
+    size: 5,
+    pedagogicalObjective:
+      "Manter o fluxo de particionamento após a partição inicial, aplicando o algoritmo aos trechos restantes até que todos os números recebam o selo OK definitivo.",
+  },
+  {
+    id: QUICK_EXERCISE_SETS.ADVANCED,
+    moduleId: "quick",
+    level: "advanced",
+    title: "PRÁTICA AVANÇADA",
+    shortTitle: "AVANÇADA",
+    description:
+      "Lote completo com 6 elementos contendo exatamente um par de chaves idênticas. Confronto obrigatório de igualdade contra o pivô.",
+    size: 6,
+    pedagogicalObjective:
+      "Confrontar elementos com valor idêntico ao pivô pela regra <= e acompanhar se a ordem relativa das duplicatas se mantém ou se inverte, constatando que o Quick Sort não garante estabilidade.",
+  },
+]);
+
 export const MODULE_PRACTICE_CATALOG: Partial<Record<ModuleId, readonly PracticeDefinition[]>> = Object.freeze({
   bubble: BUBBLE_PRACTICE_CATALOG,
   selection: SELECTION_PRACTICE_CATALOG,
   insertion: INSERTION_PRACTICE_CATALOG,
   merge: MERGE_PRACTICE_CATALOG,
+  quick: QUICK_PRACTICE_CATALOG,
 });
 
 /**

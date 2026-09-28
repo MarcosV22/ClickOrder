@@ -1154,6 +1154,262 @@ export default function ProtocolModeBriefingScreen({
               </details>
             </>
           )}
+
+          {/* ========================================================================= */}
+          {/* CASO 5: QUICK SORT (CANÔNICO)                                             */}
+          {/* ========================================================================= */}
+          {briefing.id === "quick-canonical" && (
+            <>
+              {/* Exemplo Visual Pequeno e Coerente (Partição vs Execução Completa) */}
+              <section
+                className="bg-[#0b1022] border border-amber-500/30 rounded-xl p-4 flex flex-col gap-3 shadow-md"
+                aria-label="Exemplo visual de particionamento e pivô"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-amber-400">✦</span>
+                  <span
+                    className="text-xs font-mono font-bold uppercase tracking-wider text-amber-300"
+                    style={{ fontFamily: "'Space Mono', monospace" }}
+                  >
+                    Exemplo Visual com [5, 2, 4, 1, 3]
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+                  {/* Fase 1: Partição Local em Torno do Pivô */}
+                  <div className="p-3 rounded-lg bg-black/40 border border-white/10 flex flex-col gap-2">
+                    <span className="text-amber-300 font-bold uppercase text-[11px] tracking-wide">
+                      1. Partição Local (Pivô = 3 no fim)
+                    </span>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-slate-400">Trecho:</span>
+                        <span className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded">[5, 2, 4, 1]</span>
+                        <span className="text-slate-400">|</span>
+                        <span className="px-2 py-0.5 bg-amber-500/20 border border-amber-500/40 rounded text-amber-300 font-bold">
+                          [3: PIVÔ]
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-300 leading-snug">
+                        • 2 ≤ 3 e 1 ≤ 3 → vão para a região esquerda.<br />
+                        • 5 &gt; 3 e 4 &gt; 3 → ficam na região direita.<br />
+                        • Troca o pivô 3 com o primeiro dos maiores (4).
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                        <span className="px-1.5 py-0.5 bg-cyan-950/40 border border-cyan-500/30 rounded text-cyan-200">
+                          [2, 1] ≤ 3
+                        </span>
+                        <span className="text-slate-400">+</span>
+                        <span className="px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/40 rounded text-emerald-300 font-bold">
+                          [3: OK DEFINITIVO]
+                        </span>
+                        <span className="text-slate-400">+</span>
+                        <span className="px-1.5 py-0.5 bg-amber-950/40 border border-amber-500/30 rounded text-amber-200">
+                          [5, 4] &gt; 3
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className="text-[11px] text-slate-300 font-sans leading-relaxed"
+                      style={{ fontFamily: "'Exo 2', sans-serif" }}
+                    >
+                      A partição separa os menores/iguais dos maiores e fixa o pivô na posição correta. Note que as duas regiões ainda não estão necessariamente ordenadas internamente.
+                    </span>
+                  </div>
+
+                  {/* Fase 2: Continuidade até a Execução Completa */}
+                  <div className="p-3 rounded-lg bg-amber-950/20 border border-amber-500/30 flex flex-col gap-2">
+                    <span className="text-amber-300 font-bold uppercase text-[11px] tracking-wide">
+                      2. Continuidade e Execução Completa
+                    </span>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-slate-400">Subproblema esquerdo:</span>
+                        <span className="px-1.5 py-0.5 bg-black/40 border border-cyan-500/30 rounded text-cyan-200">
+                          [2, 1] → [1, 2] ✓
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-slate-400">Pivô já fixado:</span>
+                        <span className="px-1.5 py-0.5 bg-black/40 border border-emerald-500/40 rounded text-emerald-300 font-bold">
+                          [3] ✓
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-slate-400">Subproblema direito:</span>
+                        <span className="px-1.5 py-0.5 bg-black/40 border border-amber-500/30 rounded text-amber-200">
+                          [5, 4] → [4, 5] ✓
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                        <span className="px-2 py-0.5 bg-black/60 border border-emerald-500/50 rounded text-emerald-300 font-bold">
+                          Resultado: [1, 2, 3, 4, 5] ✓
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className="text-[11px] text-slate-200 font-sans leading-relaxed"
+                      style={{ fontFamily: "'Exo 2', sans-serif" }}
+                    >
+                      O mesmo processo é aplicado recursivamente aos trechos restantes à esquerda e à direita até que cada elemento receba o selo OK definitivo.
+                    </span>
+                  </div>
+                </div>
+              </section>
+
+              {/* Cards de Regras Importantes Apresentadas Separadamente */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-[#0f172a] border border-amber-500/40 rounded-xl p-3.5 flex flex-col gap-1.5 shadow-md">
+                  <div className="flex items-center gap-2">
+                    <span className="text-amber-400 text-sm font-bold">🎯</span>
+                    <span
+                      className="text-xs font-mono font-bold text-amber-300 uppercase tracking-wide"
+                      style={{ fontFamily: "'Space Mono', monospace" }}
+                    >
+                      Pivô no Fim
+                    </span>
+                  </div>
+                  <p
+                    className="text-xs sm:text-[13px] text-slate-100 leading-relaxed font-sans"
+                    style={{ fontFamily: "'Exo 2', sans-serif" }}
+                  >
+                    O pivô é o número de referência para o corte. Nesta variante, ele é sempre o último número do trecho.
+                  </p>
+                </div>
+
+                <div className="bg-[#0f172a] border border-amber-500/40 rounded-xl p-3.5 flex flex-col gap-1.5 shadow-md">
+                  <div className="flex items-center gap-2">
+                    <span className="text-amber-400 text-sm font-bold">⚖️</span>
+                    <span
+                      className="text-xs font-mono font-bold text-amber-300 uppercase tracking-wide"
+                      style={{ fontFamily: "'Space Mono', monospace" }}
+                    >
+                      Números Iguais?
+                    </span>
+                  </div>
+                  <p
+                    className="text-xs sm:text-[13px] text-slate-100 leading-relaxed font-sans"
+                    style={{ fontFamily: "'Exo 2', sans-serif" }}
+                  >
+                    Números com valor igual ao pivô pertencem obrigatoriamente à região Menor ou Igual (≤).
+                  </p>
+                </div>
+
+                <div className="bg-[#0f172a] border border-amber-500/40 rounded-xl p-3.5 flex flex-col gap-1.5 shadow-md">
+                  <div className="flex items-center gap-2">
+                    <span className="text-amber-400 text-sm font-bold">🔒</span>
+                    <span
+                      className="text-xs font-mono font-bold text-amber-300 uppercase tracking-wide"
+                      style={{ fontFamily: "'Space Mono', monospace" }}
+                    >
+                      Selo OK Definitivo
+                    </span>
+                  </div>
+                  <p
+                    className="text-xs sm:text-[13px] text-slate-100 leading-relaxed font-sans"
+                    style={{ fontFamily: "'Exo 2', sans-serif" }}
+                  >
+                    Ao final da partição, o pivô posicionado recebe o selo OK definitivo e nunca mais é movimentado.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card sobre Instabilidade */}
+              <div className="bg-[#181524] border border-orange-500/35 rounded-xl p-3.5 flex items-start gap-3 shadow-md">
+                <span className="text-orange-400 font-bold text-base mt-0.5">⚠️</span>
+                <div className="flex flex-col gap-1">
+                  <span
+                    className="text-xs font-mono font-bold text-orange-300 uppercase tracking-wide"
+                    style={{ fontFamily: "'Space Mono', monospace" }}
+                  >
+                    Atenção à Instabilidade
+                  </span>
+                  <p
+                    className="text-xs sm:text-[13px] text-slate-100 leading-relaxed font-sans"
+                    style={{ fontFamily: "'Exo 2', sans-serif" }}
+                  >
+                    O Quick Sort opera diretamente sobre o vetor com trocas à distância. Por isso, ele não garante a preservação da ordem relativa original entre números de mesmo valor (algoritmo instável).
+                  </p>
+                </div>
+              </div>
+
+              {/* Seção Secundária: Entenda os Detalhes Técnicos */}
+              <details className="group bg-[#0b1022]/90 border border-white/10 rounded-xl p-3.5 sm:p-4 text-xs shadow-md">
+                <summary className="cursor-pointer font-mono font-bold text-slate-200 flex items-center justify-between uppercase tracking-wider select-none hover:text-amber-300 transition-colors">
+                  <span className="flex items-center gap-2">
+                    <span>🔍</span>
+                    <span>Entenda os detalhes técnicos</span>
+                  </span>
+                  <span className="text-slate-400 group-open:rotate-180 transition-transform font-mono">▼</span>
+                </summary>
+
+                <div className="mt-3 pt-3 border-t border-white/10 flex flex-col gap-3 font-sans text-slate-200 leading-relaxed text-xs sm:text-[13px]">
+                  <div>
+                    <span
+                      className="font-bold text-white font-mono uppercase text-xs block mb-0.5"
+                      style={{ fontFamily: "'Space Mono', monospace" }}
+                    >
+                      • Particionamento In-Place de Lomuto
+                    </span>
+                    <span style={{ fontFamily: "'Exo 2', sans-serif" }}>
+                      Diferente do Merge Sort, o Quick Sort não necessita de vetor auxiliar para combinar elementos. Ele reorganiza os elementos diretamente no próprio vetor com espaço de memória temporária estritamente <strong>O(1)</strong>.
+                    </span>
+                  </div>
+
+                  <div>
+                    <span
+                      className="font-bold text-white font-mono uppercase text-xs block mb-0.5"
+                      style={{ fontFamily: "'Space Mono', monospace" }}
+                    >
+                      • Ponteiros de Partição (i e j)
+                    </span>
+                    <span style={{ fontFamily: "'Exo 2', sans-serif" }}>
+                      O ponteiro <code>j</code> inspeciona os elementos sequencialmente da esquerda para a direita. O ponteiro <code>i</code> delimita o fim da região dos elementos menores ou iguais. Sempre que <code>A[j] ≤ pivô</code>, <code>i</code> avança e ocorre uma troca de <code>A[i]</code> com <code>A[j]</code> (omitida se <code>i == j</code>).
+                    </span>
+                  </div>
+
+                  <div>
+                    <span
+                      className="font-bold text-white font-mono uppercase text-xs block mb-0.5"
+                      style={{ fontFamily: "'Space Mono', monospace" }}
+                    >
+                      • Complexidade e Pilha Explícita
+                    </span>
+                    <span style={{ fontFamily: "'Exo 2', sans-serif" }}>
+                      O caso médio executa em tempo <strong>Θ(n log n)</strong>. No pior caso de partições totalmente desbalanceadas, o algoritmo atinge <strong>Θ(n²)</strong>. Os subproblemas pendentes são controlados por uma pilha LIFO explícita com prioridade esquerdo antes do direito.
+                    </span>
+                  </div>
+
+                  {/* Highlights Strip inside Details */}
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full mt-2 pt-2 border-t border-white/10">
+                    {briefing.highlights.map((item, idx) => {
+                      const valColor =
+                        highlightColorClasses[item.variant ?? "amber"] ?? "text-white";
+                      return (
+                        <div
+                          key={idx}
+                          className="bg-[#0d1635]/90 border border-[#1e3570]/80 rounded-lg p-2 text-center flex flex-col justify-center"
+                        >
+                          <span
+                            className="text-[10px] font-mono tracking-wider text-slate-300 uppercase font-semibold"
+                            style={{ fontFamily: "'Space Mono', monospace" }}
+                          >
+                            {item.label}
+                          </span>
+                          <span
+                            className={`text-xs font-mono font-bold mt-0.5 ${valColor}`}
+                            style={{ fontFamily: "'Space Mono', monospace" }}
+                          >
+                            {item.value}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </details>
+            </>
+          )}
         </div>
 
         {/* Footer Actions */}
