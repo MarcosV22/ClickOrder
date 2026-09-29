@@ -9,6 +9,11 @@ export type BoxRole =
   | "ordered-scan"
   | "pair"
   | "key"
+  | "pivot"
+  | "quick-less"
+  | "quick-greater"
+  | "quick-pending"
+  | "outside"
   | "default";
 
 interface NumberedBoxProps {
@@ -81,6 +86,16 @@ export default function NumberedBox({
         return "PAR";
       case "key":
         return "CHAVE";
+      case "pivot":
+        return "PIVÔ";
+      case "quick-less":
+        return "≤ PIVÔ";
+      case "quick-greater":
+        return "> PIVÔ";
+      case "quick-pending":
+        return "PENDENTE";
+      case "outside":
+        return "EXTERNO";
       case "default":
       default:
         return "PKG";
@@ -169,6 +184,46 @@ export default function NumberedBox({
           badgeColor: "text-cyan-300 font-bold",
           pulse: true,
         };
+      case "pivot":
+        return {
+          bg: "bg-amber-950/80 shadow-lg shadow-amber-900/50",
+          border: "2px solid #f59e0b",
+          text: "text-amber-200",
+          badgeColor: "text-amber-300 font-bold",
+          pulse: true,
+        };
+      case "quick-less":
+        return {
+          bg: "bg-blue-950/70 shadow-md shadow-blue-900/30",
+          border: "2px solid #3b82f6",
+          text: "text-blue-200 glow-blue",
+          badgeColor: "text-blue-300 font-bold",
+          pulse: false,
+        };
+      case "quick-greater":
+        return {
+          bg: "bg-purple-950/70 shadow-md shadow-purple-900/30",
+          border: "2px solid #a855f7",
+          text: "text-purple-200 glow-purple",
+          badgeColor: "text-purple-300 font-bold",
+          pulse: false,
+        };
+      case "quick-pending":
+        return {
+          bg: "bg-slate-900/60",
+          border: "1px dashed rgba(148,163,184,0.4)",
+          text: "text-slate-300",
+          badgeColor: "text-slate-400 font-medium",
+          pulse: false,
+        };
+      case "outside":
+        return {
+          bg: "bg-slate-950/30 opacity-40 grayscale",
+          border: "1px solid rgba(100,116,139,0.25)",
+          text: "text-slate-500",
+          badgeColor: "text-slate-600 font-medium",
+          pulse: false,
+        };
       case "default":
       default:
         return {
@@ -205,6 +260,16 @@ export default function NumberedBox({
         return "em sua posição final ordenada";
       case "pair":
         return "em comparação direta";
+      case "pivot":
+        return "pivô do intervalo de partição";
+      case "quick-less":
+        return "número na região menor ou igual ao pivô";
+      case "quick-greater":
+        return "número na região maior que o pivô";
+      case "quick-pending":
+        return "número aguardando análise no trecho";
+      case "outside":
+        return "número fora do intervalo ativo";
       case "default":
       default:
         return "não ordenado";

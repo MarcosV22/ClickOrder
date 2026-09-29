@@ -12,7 +12,7 @@
 Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Insertion Sort e Schema v4)**, a infraestrutura de testes automatizados do projeto cobre 100% da lógica pura de domínio, FSMs de ordenação (Bubble, Selection e Insertion Sort), tutoriais, conjuntos de prática progressiva, agregação de resultados, geração procedural Mulberry32, briefing, telemetria de sessão, replay da execução, pseudocódigo sincronizado, modo demonstração e persistência Schema v4:
 
 - **Framework de Testes Implementado:** **Vitest** (`vitest ^5.0.0`) instalado como dependência de desenvolvimento canônica via `pnpm add -D vitest`.
-- **Arquivos de Teste Ativos (45 arquivos, 582 testes automatizados aprovados 100% verde):**
+- **Arquivos de Teste Ativos (46 arquivos, 598 testes automatizados aprovados 100% verde):**
   1. `src/screens/illustratedBriefings.test.tsx` (7 testes - Briefings Ilustrados Canônicos para Bubble, Selection, Insertion, Merge e Quick Sort, e integridade estrutural do ProtocolCard)
   2. `src/game/sorting/quick/quickConstraints.test.ts` (5 testes - Constraints procedurais Mulberry32 do Quick Sort para níveis básico, intermediário e avançado, predicado de igualdade via engine real e fallbacks curados)
   3. `src/game/sorting/quick/quickPedagogy.test.ts` (4 testes - Feedback formativo de erro, scaffolding de dicas em 3 níveis e precedência de realce visual)
@@ -58,6 +58,7 @@ Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Ins
   43. `src/game/sorting/insertion/insertionPedagogy.test.ts` (6 testes)
   44. `src/screens/campaignCompleteConfig.test.ts` (3 testes)
   45. `src/game/session/sessionMetrics.test.ts` (5 testes)
+  46. `src/screens/quickPracticeFlow.test.tsx` (16 testes - Interface QuickGameScreen, 4 regiões de Lomuto, feedback de erro e recuperação, igualdade em LESS_OR_EQUAL, avanço sem troca com $i=j$, fechamento do pivô, bloqueio em animações, cancelamento em reinício, apresentação visual da conclusão antes do resultado, acessibilidade por teclado 1/2/3 com foco protegido, modo reduced motion discreto, ResultScreen sem replay e isolamento de dev routing em produção)
 - **Scripts de Teste Canônicos em [`package.json`](../../package.json):**
   - `pnpm run test:run`: Execução única headless da suíte completa;
   - `pnpm test`: Modo watch interativo de desenvolvimento.
@@ -72,7 +73,7 @@ A Pirâmide de Qualidade do Sorting Station possui seus dois primeiros níveis t
 graph TD
     subgraph Piramide_Qualidade ["Pirâmide de Garantia da Qualidade"]
         N1["Nível 1: Checagem Estática & Tipagem\n(tsc, vite build, oxfmt) [ATIVO HOJE]"]
-        N2["Nível 2: Testes Unitários de Domínio & Persistência\n(Vitest: 582 testes em 45 arquivos) [ATIVO HOJE]"]
+        N2["Nível 2: Testes Unitários de Domínio & Persistência\n(Vitest: 598 testes em 46 arquivos) [ATIVO HOJE]"]
         N3["Nível 3: Testes de Integração de FSM & Telas\n(Transições de estado, callbacks, fluxos) [ATIVO HOJE]"]
         N4["Nível 4: Acessibilidade, Responsividade & E2E\n(Teclado, reduced-motion, telas) [PLANEJADO / HOMOLOGAÇÃO MANUAL PENDENTE]"]
 

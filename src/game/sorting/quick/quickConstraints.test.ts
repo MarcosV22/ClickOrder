@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { ArrayGenerationError } from "../../generation";
+import * as arrayGenModule from "../../generation/arrayGenerator";
 import {
   generateQuickPracticeArray,
   hasQuickBalancedRootPartition,
@@ -78,18 +80,45 @@ describe("quickConstraints — Geração Procedural e Validação Pedagógica", 
     expect(hasQuickPivotEqualityComparison(advFallback)).toBe(true);
   });
 
-  it("atribui identidades estáveis a elementos sem alterar valores numéricos", () => {
-    const raw = [20, 10, 20, 30];
-    const elements = assignQuickIdentities(raw);
+  it("força o esgotamento de tentativas no gerador procedural e valida rigorosamente todas as constraints do fallback (especialmente a comparação real de igualdade na Avançada)", () => {
+    // 1. Simula esgotamento de tentativas disparando ArrayGenerationError através do gerador compartilhado
+    const spyAdv = vi.spyOn(arrayGenModule, "generateSortingArray").mockImplementationOnce(() => {
+      throw new ArrayGenerationError("Esgotamento forçado para teste de fallback", { attempts: 120 });
+    });
 
-    expect(elements).toHaveLength(4);
-    expect(elements[0].value).toBe(20);
-    expect(elements[0].labelSuffix).toBe("a");
-    expect(elements[1].value).toBe(10);
-    expect(elements[1].labelSuffix).toBeUndefined();
-    expect(elements[2].value).toBe(20);
-    expect(elements[2].labelSuffix).toBe("b");
-    expect(elements[3].value).toBe(30);
-    expect(elements[3].labelSuffix).toBeUndefined();
+    const advExhausted = generateQuickPracticeArray("advanced", "exhaust-seed-1");
+    expect(advExhausted.result.isFallback).toBe(true);
+    expect(advExhausted.result.values).toEqual(QUICK_FALLBACK_ARRAYS.advanced);
+    expect(advExhausted.result.values).toHaveLength(6);
+    expect(hasExactlyOneDuplicatePair(advExhausted.result.values)).toBe(true);
+    // Validação crucial: confronto real de igualdade contra o pivô na partição
+    expect(hasQuickPivotEqualityComparison(advExhausted.result.values)).toBe(true);
+    expect(advExhausted.elements).toHaveLength(6);
+    const dups = advExhausted.elements.filter((e) => e.labelSuffix !== undefined);
+    expect(dups).toHaveLength(2);
+    expect(dups[0].labelSuffix).toBe("a");
+    expect(dups[1].labelSuffix).toBe("b");
+
+    spyAdv.mockRestore();
+
+    // 2. Testa também para Básica e Intermediária sob esgotamento forçado
+    const spyBasic = vi.spyOn(arrayGenModule, "generateSortingArray").mockImplementationOnce(() => {
+      throw new ArrayGenerationError("Esgotamento básico", { attempts: 60 });
+    });
+    const basicExhausted = generateQuickPracticeArray("basic", "exhaust-basic");
+    expect(basicExhausted.result.isFallback).toBe(true);
+    expect(basicExhausted.result.values).toEqual(QUICK_FALLBACK_ARRAYS.basic);
+    expect(new Set(basicExhausted.result.values).size).toBe(4);
+    spyBasic.mockRestore();
+
+    const spyInter = vi.spyOn(arrayGenModule, "generateSortingArray").mockImplementationOnce(() => {
+      throw new ArrayGenerationError("Esgotamento intermediário", { attempts: 60 });
+    });
+    const interExhausted = generateQuickPracticeArray("intermediate", "exhaust-inter");
+    expect(interExhausted.result.isFallback).toBe(true);
+    expect(interExhausted.result.values).toEqual(QUICK_FALLBACK_ARRAYS.intermediate);
+    expect(new Set(interExhausted.result.values).size).toBe(5);
+    expect(hasQuickBalancedRootPartition(interExhausted.result.values)).toBe(true);
+    spyInter.mockRestore();
   });
 });

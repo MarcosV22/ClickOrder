@@ -88,6 +88,17 @@ const MODULE_THEMES: Partial<Record<ModuleId, ModuleThemeConfig>> = {
     titleGradient: "from-blue-300 via-cyan-400 to-sky-300",
     cardBorderHover: "hover:border-blue-400/50",
   },
+  quick: {
+    name: "QUICK SORT",
+    subtitle: "PARTICIONAMENTO EM TORNO DO PIVÔ",
+    primaryColor: "amber",
+    badgeBorder: "border-amber-500/30",
+    badgeBg: "bg-amber-950/40",
+    badgeText: "text-amber-300",
+    glowColor: "rgba(245,158,11,0.15)",
+    titleGradient: "from-amber-300 via-orange-400 to-yellow-300",
+    cardBorderHover: "hover:border-amber-400/50",
+  },
 };
 
 export default function PracticeSelector({

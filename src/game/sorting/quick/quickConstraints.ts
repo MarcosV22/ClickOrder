@@ -6,6 +6,7 @@
 
 import {
   generateSortingArray,
+  ArrayGenerationError,
   isNotSorted,
   isNotReverseSorted,
   hasNoDuplicates,
@@ -352,15 +353,42 @@ export function generateQuickPracticeArray(
   const allowDuplicates = isAdvanced;
   const maxAttempts = isAdvanced ? 120 : DEFAULT_MAX_ATTEMPTS;
 
-  let result = generateSortingArray({
-    length,
-    minValue,
-    maxValue,
-    allowDuplicates,
-    seed,
-    constraints,
-    maxAttempts,
-  });
+  let result: GeneratedArrayResult;
+  try {
+    result = generateSortingArray({
+      length,
+      minValue,
+      maxValue,
+      allowDuplicates,
+      seed,
+      constraints,
+      maxAttempts,
+    });
+  } catch (err) {
+    if (err instanceof ArrayGenerationError) {
+      const fallbackValues = QUICK_FALLBACK_ARRAYS[level];
+      const normSeed = typeof seed === "number" ? seed : 0;
+      result = {
+        values: [...fallbackValues],
+        seed: seed ?? 0,
+        normalizedSeed: normSeed,
+        attempts: maxAttempts,
+        isFallback: true,
+        config: {
+          length,
+          minValue,
+          maxValue,
+          allowDuplicates,
+          seed: seed ?? 0,
+          normalizedSeed: normSeed,
+          maxAttempts,
+          constraintsCount: constraints.length,
+        },
+      };
+    } else {
+      throw err;
+    }
+  }
 
   // Se a geração por amostragem recorrer a fallback que não satisfaça rigorosamente
   // as constraints específicas do Quick Sort, aplica o fallback curado e auditado do nível.

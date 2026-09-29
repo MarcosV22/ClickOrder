@@ -25,8 +25,13 @@ import MergeTutorialScreen from "./screens/MergeTutorialScreen";
 import MergeGameScreen, {
   type MergePracticeCompleteData,
 } from "./screens/MergeGameScreen";
+import QuickGameScreen, {
+  type QuickPracticeCompleteData,
+} from "./screens/QuickGameScreen";
 import { generateMergePracticeArray } from "./game/sorting/merge/mergeConstraints";
+import { generateQuickPracticeArray } from "./game/sorting/quick/quickConstraints";
 import type { MergeElement, MergeStepRecord } from "./game/sorting/merge";
+import type { QuickElement, QuickStepRecord } from "./game/sorting/quick/types";
 import type { ProtocolId } from "./screens/protocolCatalog";
 import type { DemonstrationProtocol } from "./game/demonstration";
 import { PhaseResult } from "./game/campaign/campaignSummary";
@@ -42,8 +47,10 @@ import {
   SELECTION_EXERCISE_SETS,
   INSERTION_EXERCISE_SETS,
   MERGE_EXERCISE_SETS,
+  QUICK_EXERCISE_SETS,
   type GameSaveSchema,
   type ModuleId,
+  type ModuleProgressV4,
 } from "./game/persistence";
 import {
   CHALLENGE_SCENARIOS,
@@ -82,15 +89,17 @@ type Screen =
   | "selection-game"
   | "insertion-practice"
   | "merge-practice"
+  | "quick-practice"
   | "result"
   | "replay"
   | "demonstration"
   | "campaign-complete"
   | "selection-campaign-complete"
   | "insertion-practice-complete"
-  | "merge-practice-complete";
+  | "merge-practice-complete"
+  | "quick-practice-complete";
 
-type GameMode = "CAMPAIGN" | "CHALLENGE" | "SELECTION" | "INSERTION" | "MERGE";
+type GameMode = "CAMPAIGN" | "CHALLENGE" | "SELECTION" | "INSERTION" | "MERGE" | "QUICK";
 
 const TOTAL_PHASES = BUBBLE_CAMPAIGN_PHASE_LENGTHS.length;
 const SELECTION_TOTAL_PHASES = 3;
@@ -141,11 +150,21 @@ export interface MergeGameResult extends BaseGameResult {
   history: readonly MergeStepRecord[];
 }
 
+export interface QuickGameResult extends BaseGameResult {
+  protocol: "quick";
+  level: PracticeLevel;
+  writesInArray: number;
+  practiceTitle: string;
+  initialElements: readonly QuickElement[];
+  history: readonly QuickStepRecord[];
+}
+
 export type GameResult =
   | BubbleGameResult
   | SelectionGameResult
   | InsertionGameResult
-  | MergeGameResult;
+  | MergeGameResult
+  | QuickGameResult;
 
 export interface AppProps {
   initialScreen?: Screen;
@@ -187,8 +206,17 @@ export default function App({
       if (params.get("screen") === "briefing") {
         return "briefing";
       }
+      if (params.get("screen") === "result") {
+        return "result";
+      }
+      if (params.get("screen") === "quick-practice") {
+        return "quick-practice";
+      }
       if (params.get("screen") === "merge-practice") {
         return "merge-practice";
+      }
+      if (params.get("module") === "quick") {
+        return "practice-selector";
       }
       if (params.get("module") === "merge") {
         return "practice-selector";
@@ -242,14 +270,73 @@ export default function App({
     MergePracticeCompleteData[]
   >([]);
 
+  // Estado da Prática do Quick Sort (Sessão pura em memória P3.2-D)
+  const [quickLevel, setQuickLevel] = useState<PracticeLevel>(() => {
+    if (initialLevel) return initialLevel;
+    if (isDev && typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const lvl = params.get("level");
+      if (lvl === "intermediate" || lvl === "advanced" || lvl === "basic") {
+        return lvl;
+      }
+    }
+    return "basic";
+  });
+  const [quickArray, setQuickArray] = useState<readonly number[]>(() => {
+    let lvl: PracticeLevel = "basic";
+    if (initialLevel) {
+      lvl = initialLevel;
+    } else if (isDev && typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search).get("level");
+      if (p === "intermediate" || p === "advanced" || p === "basic") {
+        lvl = p;
+      }
+    }
+    return generateQuickPracticeArray(lvl).result.values;
+  });
+  const [quickSeed, setQuickSeed] = useState<SeedInput>(() => "");
+  const [quickPracticeResults, setQuickPracticeResults] = useState<
+    QuickPracticeCompleteData[]
+  >([]);
+  const [quickSessionSave, setQuickSessionSave] = useState<ModuleProgressV4>({
+    completedTutorial: false,
+    exerciseSets: {},
+  });
+
   // Resultado unificado
-  const [result, setResult] = useState<GameResult | null>(null);
+  const [result, setResult] = useState<GameResult | null>(() => {
+    if (isDev && typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("screen") === "result" && params.get("module") === "quick") {
+        return {
+          protocol: "quick",
+          level: "basic",
+          practiceTitle: "PRÁTICA BÁSICA",
+          initialArray: [24, 67, 74, 21],
+          finalArray: [21, 24, 67, 74],
+          comparisons: 4,
+          swaps: 2,
+          writesInArray: 4,
+          errors: 0,
+          hintsUsed: 0,
+          score: 100,
+          elapsedTimeMs: 14200,
+          history: [],
+          initialElements: [],
+        } as any;
+      }
+    }
+    return null;
+  });
 
   // Módulo ativo no Seletor de Práticas
   const [selectorModule, setSelectorModule] = useState<ModuleId>(() => {
     if (initialModule) return initialModule;
     if (isDev && typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
+      if (params.get("module") === "quick") {
+        return "quick";
+      }
       if (params.get("module") === "merge") {
         return "merge";
       }
@@ -327,6 +414,89 @@ export default function App({
     setScreen("result");
   };
 
+  const handleStartQuickPractice = (lvl: PracticeLevel = "basic") => {
+    const gen = generateQuickPracticeArray(lvl as any);
+    setQuickArray(gen.result.values);
+    setQuickSeed(gen.result.seed);
+    setQuickLevel(lvl);
+    setResult(null);
+    setScreen("quick-practice");
+  };
+
+  const handleQuickComplete = (data: QuickPracticeCompleteData) => {
+    setResult({
+      protocol: "quick",
+      level: data.level,
+      comparisons: data.comparisons,
+      swaps: data.swaps,
+      writesInArray: data.writesInArray,
+      errors: data.errors,
+      hintsUsed: data.hintsUsed,
+      finalArray: data.finalArray,
+      initialArray: data.initialArray,
+      initialElements: data.initialElements,
+      history: data.history,
+      score: data.score,
+      elapsedTimeMs: data.elapsedTimeMs,
+      practiceTitle: data.practiceTitle,
+      seed: quickSeed,
+    });
+
+    setQuickPracticeResults((prev) => {
+      const idx = prev.findIndex((p) => p.level === data.level);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = data;
+        return copy;
+      }
+      return [...prev, data];
+    });
+
+    const exerciseSetId =
+      data.level === "basic"
+        ? QUICK_EXERCISE_SETS.BASIC
+        : data.level === "intermediate"
+          ? QUICK_EXERCISE_SETS.INTERMEDIATE
+          : QUICK_EXERCISE_SETS.ADVANCED;
+
+    // Atualização estritamente em memória de sessão (sem gravação de localStorage)
+    setQuickSessionSave((prev) => {
+      const prevSets = prev.exerciseSets;
+      const prevRecord = prevSets[exerciseSetId]?.bestRecord;
+      const bestScore = prevRecord
+        ? Math.max(prevRecord.bestScore, data.score)
+        : data.score;
+      const minErrors = prevRecord
+        ? Math.min(prevRecord.bestScoreErrors, data.errors)
+        : data.errors;
+      const minHints = prevRecord
+        ? Math.min(prevRecord.bestScoreHintsUsed, data.hintsUsed)
+        : data.hintsUsed;
+      const bestTimeMs = prevRecord?.bestScoreElapsedTimeMs
+        ? Math.min(prevRecord.bestScoreElapsedTimeMs, data.elapsedTimeMs)
+        : data.elapsedTimeMs;
+
+      return {
+        ...prev,
+        exerciseSets: {
+          ...prevSets,
+          [exerciseSetId]: {
+            completed: true,
+            bestRecord: {
+              completedAt: new Date().toISOString(),
+              bestScore,
+              bestScoreErrors: minErrors,
+              bestScoreHintsUsed: minHints,
+              bestScoreElapsedTimeMs: bestTimeMs,
+            },
+          },
+        },
+      };
+    });
+
+    setScreen("result");
+  };
+
   const handleSelectPracticeLevel = (level: PracticeLevel) => {
     const phaseNumber = level === "basic" ? 1 : level === "intermediate" ? 2 : 3;
 
@@ -352,6 +522,9 @@ export default function App({
     } else if (selectorModule === "merge") {
       setGameMode("MERGE");
       handleStartMergePractice(level);
+    } else if (selectorModule === "quick") {
+      setGameMode("QUICK");
+      handleStartQuickPractice(level);
     }
   };
 
@@ -571,6 +744,24 @@ export default function App({
   };
 
   const handleNextPhase = () => {
+    // Fluxo Quick Sort
+    if (result?.protocol === "quick") {
+      const nextLevel: PracticeLevel | null =
+        result.level === "basic"
+          ? "intermediate"
+          : result.level === "intermediate"
+            ? "advanced"
+            : null;
+
+      if (nextLevel !== null) {
+        handleStartQuickPractice(nextLevel);
+      } else {
+        setResult(null);
+        handleOpenPracticeSelector("quick");
+      }
+      return;
+    }
+
     // Fluxo Merge Sort
     if (result?.protocol === "merge") {
       const nextLevel: PracticeLevel | null =
@@ -653,6 +844,12 @@ export default function App({
 
   const handleRepeat = () => {
     // Mantém estritamente o MESMO vetor e a MESMA seed da rodada
+    if (result?.protocol === "quick") {
+      setResult(null);
+      setScreen("quick-practice");
+      return;
+    }
+
     if (result?.protocol === "merge") {
       setResult(null);
       setScreen("merge-practice");
@@ -858,15 +1055,17 @@ export default function App({
         ? CHALLENGE_SCENARIOS.length
         : TOTAL_PHASES;
   const hasNextPhase =
-    result?.protocol === "merge"
+    result?.protocol === "quick"
       ? result.level !== "advanced"
-      : result?.protocol === "insertion"
-        ? getNextInsertionPracticeLevel(result.level) !== null
-        : result?.protocol === "selection"
-          ? selectionPhase < SELECTION_TOTAL_PHASES
-          : gameMode === "CHALLENGE"
-            ? challengeScenarioIndex < CHALLENGE_SCENARIOS.length - 1
-            : phase < TOTAL_PHASES;
+      : result?.protocol === "merge"
+        ? result.level !== "advanced"
+        : result?.protocol === "insertion"
+          ? getNextInsertionPracticeLevel(result.level) !== null
+          : result?.protocol === "selection"
+            ? selectionPhase < SELECTION_TOTAL_PHASES
+            : gameMode === "CHALLENGE"
+              ? challengeScenarioIndex < CHALLENGE_SCENARIOS.length - 1
+              : phase < TOTAL_PHASES;
   const canonicalComparisons =
     (currentArray.length * (currentArray.length - 1)) / 2;
   const activeVariant: BubbleSortVariant =
@@ -931,7 +1130,17 @@ export default function App({
       {screen === "practice-selector" && (
         <PracticeSelector
           moduleId={selectorModule}
-          saveData={saveData}
+          saveData={
+            selectorModule === "quick"
+              ? ({
+                  ...saveData,
+                  modules: {
+                    ...saveData.modules,
+                    quick: quickSessionSave,
+                  },
+                } as GameSaveSchema)
+              : saveData
+          }
           onSelectPractice={handleSelectPracticeLevel}
           onOpenTutorial={() => {
             if (selectorModule === "bubble") setScreen("tutorial");
@@ -946,6 +1155,16 @@ export default function App({
           onStartChallenge={
             selectorModule === "bubble" ? () => handleSelectChallenge("home") : undefined
           }
+        />
+      )}
+      {screen === "quick-practice" && (
+        <QuickGameScreen
+          key={`quick-practice-${quickLevel}-${quickSeed}`}
+          level={quickLevel as any}
+          initialArray={quickArray.length > 0 ? quickArray : undefined}
+          seed={quickSeed}
+          onComplete={handleQuickComplete}
+          onBackToSelector={() => handleOpenPracticeSelector("quick")}
         />
       )}
       {screen === "tutorial" && (
@@ -1046,8 +1265,11 @@ export default function App({
           writesInBuffer={result.protocol === "merge" ? result.writesInBuffer : undefined}
           writesInMain={result.protocol === "merge" ? result.writesInMain : undefined}
           totalWrites={result.protocol === "merge" ? result.totalWrites : undefined}
+          writesInArray={result.protocol === "quick" ? result.writesInArray : undefined}
           practiceTitle={
-            result.protocol === "merge"
+            result.protocol === "quick"
+              ? result.practiceTitle
+              : result.protocol === "merge"
               ? result.practiceTitle
               : result.protocol === "insertion"
                 ? result.practiceDefinition.title
@@ -1067,7 +1289,15 @@ export default function App({
           hintsUsed={result.hintsUsed}
           score={result.score}
           elapsedTimeMs={result.elapsedTimeMs}
-          phase={currentPhase}
+          phase={
+            result.protocol === "quick"
+              ? result.level === "basic"
+                ? 1
+                : result.level === "intermediate"
+                  ? 2
+                  : 3
+              : currentPhase
+          }
           hasNextPhase={hasNextPhase}
           protocol={result.protocol}
           onNext={handleNextPhase}
@@ -1075,7 +1305,11 @@ export default function App({
           onOpenSelector={() =>
             handleOpenPracticeSelector(result.protocol as ModuleId)
           }
-          onViewReplay={() => setScreen("replay")}
+          onViewReplay={
+            result.protocol === "quick"
+              ? undefined
+              : () => setScreen("replay")
+          }
           variant={result.protocol === "bubble" ? (result.variant ?? activeVariant) : undefined}
           earlyExitTriggered={result.protocol === "bubble" ? result.earlyExitTriggered : undefined}
           terminationPass={result.protocol === "bubble" ? result.terminationPass : undefined}

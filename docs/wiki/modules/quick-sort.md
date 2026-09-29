@@ -188,6 +188,7 @@ O pseudocódigo canônico compara explicitamente os valores numéricos e omite a
 
 - **Propósito:** Apresentação autônoma, correta e fluida da partição de Lomuto com a consolidação definitiva do pivô.
 - **Vetor Canônico Curado:** `[5, 2, 4, 1, 3]` ($n=5$).
+  - *Nota curricular de padronização:* O antigo vetor `[5, 2, 6, 1, 3]` também produzia uma partição raiz perfeitamente equilibrada (2 elementos à esquerda `[2, 1]` e 2 à direita `[5, 6]` em torno do pivô 3). A substituição por `[5, 2, 4, 1, 3]` foi uma padronização curricular para representar uma permutação exata do conjunto contíguo $\{1, 2, 3, 4, 5\}$, preservando rigorosamente as mesmas métricas e propriedades algorítmicas.
 - **Roteiro e Métricas:**
   - Partição raiz $[0 \dots 4]$ com pivô 3: classifica 5 (maior), 2 (troca com 5 no índice 0), 4 (maior), 1 (troca com 5 no índice 1). Troca final do pivô 3 com 4 no índice 2. Pivô 3 consolidado com `OK DEFINITIVO`.
   - Subpartição esquerda $[0 \dots 1]$ (`[2, 1]`): pivô 1, troca com 2. Pivô 1 consolidado em 0. Posição 1 (`[2]`) consolidada como caso unitário.
@@ -454,5 +455,56 @@ No marco **P3.2-C**, foram implementados todos os dados, funções puras e contr
   - **Exemplo Visual Exato em HTML/CSS:** Apresenta a partição local de `[5, 2, 4, 1, 3]` com pivô 3, distinção das regiões `[2, 1] ≤ 3` e `[5, 4] > 3`, selo OK definitivo do pivô posicionado e continuidade recursiva até `[1, 2, 3, 4, 5]`;
   - **Cards Curtos de Regras:** Pivô no Fim, Números Iguais (região $\le$), Selo OK Definitivo e Atenção à Instabilidade;
   - **Seção Secundária Recolhível (`<details>`):** Explicação da complexidade $\Theta(n \log n)$ caso médio vs $\Theta(n^2)$ pior caso, pilha explícita LIFO e invariantes de partição.
+
+---
+
+## 23. Interface de Particionamento e Práticas (Marco P3.2-D Concluído)
+
+No marco **P3.2-D**, a interface de particionamento e o fluxo de exercícios do Quick Sort foram plenamente implementados, testados e validados visualmente no navegador:
+
+### 23.1. Estação de Particionamento Desktop-First (`QuickGameScreen.tsx`)
+- **Single Scroll Owner & Ambient Glow:** Layout vertical centrado com barra superior de navegação e status, container único sem rolagem aninhada e iluminação sutil âmbar/ciano.
+- **Área Única de Vetor Principal:** Vetor horizontal com caixas semânticas `NumberedBox` parametrizadas por papéis diegéticos (`pivot`, `quick-less`, `quick-greater`, `quick-pending`, `outside` e `definitive`). Elementos fora do intervalo ativo permanecem atenuados sem classificação arbitrária por ponteiros.
+- **Destaque de Duplicatas:** Subscritos visuais diegéticos (`[a]`, `[b]`) que preservam a legibilidade do valor numérico principal.
+- **Painel de 4 Regiões de Lomuto:** Faixa estruturada com limites textuais explícitos:
+  1. $\le$ Pivô: exibe intervalo $[low \dots i]$ ou indicador `"vazia"`;
+  2. $>$ Pivô: exibe intervalo $[i+1 \dots j-1]$ ou indicador `"vazia"`;
+  3. Não analisados: exibe $[j \dots high-1]$ ou `"nenhum restante"`;
+  4. Pivô: exibe índice $[high]$ e valor fixado.
+  *Zero caixas fantasmas ou distorções de layout quando regiões estão vazias.*
+- **Pílula de Confronto Contextual:** Painel indicando os valores numéricos exatos em análise (`Elemento: X vs Pivô: Y`) antes da tomada de decisão.
+- **Botoeira de Decisão:** Três botões com anéis de foco visíveis e atalhos mapeados:
+  - `[ 1 ] ≤ MENOR OU IGUAL AO PIVÔ` (ativo quando $j < high$);
+  - `[ 2 ] > MAIOR QUE O PIVÔ` (ativo quando $j < high$);
+  - `[ 3 ] ⤓ COLOCAR O PIVÔ NA POSIÇÃO FINAL` (ativo exclusivamente quando $j = high$, indicando conclusão da varredura).
+- **Painel de Apoio e Telemetria:**
+  - Grade com Comparações, Trocas, Escritas no Vetor, Decisões Incorretas, Dicas e Pontuação do Protocolo;
+  - Lembrete didático da regra pedagógica de troca ($i=j$ avança sem permuta; $i \neq j$ executa 1 troca e 2 escritas);
+  - Pseudocódigo canônico de 27 linhas com linha ativa iluminada em tempo real.
+
+### 23.2. Sincronização Estrita entre Engine e Apresentação
+- **Fila Sequencial de Frames (`frameQueueRef`):** Todas as transições da engine (início de partição, trocas físicas, avanço de ponteiros, consolidação unitária e término) são enfileiradas e apresentadas frame a frame.
+- **Bloqueio de Ações (`isActionLocked`):** Nenhuma entrada de teclado ou clique em botões de decisão é processada enquanto houver animações pendentes.
+- **Desacoplamento Visual:** Vetor, regiões, posições definitivas e pseudocódigo exibem estritamente o `displayedFrame`. A tela de resultados só é acionada após a conclusão visual do último frame.
+- **Cancelamento Atômico de Timers:** Ações de reinício (`REINICIAR`), retorno ao seletor ou desmontagem do componente cancelam callbacks assíncronos e descartam a fila pendente.
+- **Acessibilidade (`prefers-reduced-motion`):** Modo com animações desativadas oferece botão de avanço discreto manual ("AVANÇAR PASSO"), sem transições contínuas e sem perda de telemetria.
+
+### 23.3. Integração com Seletor e Tela de Resultados
+- **Catálogo e Temas (`PracticeSelector.tsx`):** Cartão de Quick Sort com insígnia de partição Lomuto, seletor de níveis (`basic`, `intermediate`, `advanced`) com estado de bloqueio e progresso em memória.
+- **Resultado em Sessão (`ResultScreen.tsx`):** Exibe métricas consolidadas (Comparações, Trocas, Escritas no Vetor específicas do Lomuto, Erros, Dicas e Pontuação), nota pedagógica de partição, pseudocódigo formatado e supressão de botão de Replay até implementação futura.
+- **Persistência em Memória de Desenvolvimento:** Progresso retido na sessão (`quickSessionSave`) compatível com `ModuleProgressV4`, sem simulação indevida de dados gravados no disco.
+- **Roteamento de Desenvolvimento Protegido:** Parâmetros `?screen=quick-practice`, `?level=advanced`, `?module=quick` e `?screen=result&module=quick` isolados via `import.meta.env.DEV` com fallback estrito para tela inicial em produção.
+
+### 23.4. Validação Visual Real no Navegador
+A interface foi validada via Chrome headless com inspeção visual em 3 resoluções e captura de 5 estados obrigatórios:
+1. `01_classificacao_regioes_vazias_1366x768.png`: Início da partição com regiões $\le$ e $>$ vazias, pílula de confronto e elemento ativo em análise;
+2. `02_particao_regioes_preenchidas_1920x1080.png`: Partição com regiões $\le$ e $>$ preenchidas, telemetria em tempo real e pseudocódigo sincronizado;
+3. `03_comparacao_duplicatas_1366x768.png`: Prática Avançada ($n=6$) com identidades visuais de duplicatas ($20a$ vs $20b$) legíveis e sem sobreposição;
+4. `04_colocacao_do_pivo_1280x650.png`: Fechamento de partição com botão 3 habilitado e controles inferiores acessíveis em viewport vertical compacto;
+5. `05_tela_resultado_1920x1080.png`: Consolidação do exercício com telemetria factual completa e ausência de botão de replay falso.
+
+### 23.5. Cobertura de Testes Automatizados (`quickPracticeFlow.test.tsx`)
+Suíte com 16 testes comportamentais cobrindo montagem de tela, ausência de caixas fantasmas, renderização de duplicatas, feedback e recuperação em erros conceituais, aceitação de igualdade em `LESS_OR_EQUAL`, avanço sem troca com $i=j$, habilitação e execução de fechamento do pivô, bloqueio durante animações, cancelamento em reinício, apresentação visual da conclusão antes do resultado, navegação por teclado protegida contra campos de texto e repetições, avanço sob `prefers-reduced-motion` e isolamento de rotas de desenvolvimento em produção. Total do projeto elevado para **598 testes automatizados 100% aprovados em 46 arquivos**.
+
 
 

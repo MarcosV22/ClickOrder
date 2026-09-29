@@ -8,7 +8,20 @@ import {
 } from "../game/replay";
 import { INSERTION_SORT_PSEUDOCODE } from "../game/sorting/insertion";
 import { MERGE_SORT_PSEUDOCODE } from "../game/sorting/merge";
+import { QUICK_SORT_PSEUDOCODE_LINES } from "../game/sorting/quick/quickSortEngine";
 import { formatElapsedTime } from "../game/session";
+
+const QUICK_SORT_RESULT_PSEUDOCODE = QUICK_SORT_PSEUDOCODE_LINES.map((text, idx) => {
+  const trimmed = text.trimStart();
+  const leadingSpaces = text.length - trimmed.length;
+  const indent = Math.floor(leadingSpaces / 2);
+  return {
+    id: `quick-${idx + 1}`,
+    lineNumber: idx + 1,
+    indent,
+    text: trimmed || " ",
+  };
+});
 
 interface ResultScreenProps {
   finalArray: readonly number[];
@@ -19,6 +32,7 @@ interface ResultScreenProps {
   writesInBuffer?: number;
   writesInMain?: number;
   totalWrites?: number;
+  writesInArray?: number;
   errors: number;
   hintsUsed: number;
   score?: number;
@@ -26,7 +40,7 @@ interface ResultScreenProps {
   phase?: number;
   practiceTitle?: string;
   hasNextPhase?: boolean;
-  protocol?: "bubble" | "selection" | "insertion" | "merge";
+  protocol?: "bubble" | "selection" | "insertion" | "merge" | "quick";
   variant?: BubbleSortVariant;
   earlyExitTriggered?: boolean;
   terminationPass?: number;
@@ -47,6 +61,7 @@ export default function ResultScreen({
   writesInBuffer = 0,
   writesInMain = 0,
   totalWrites = 0,
+  writesInArray = 0,
   errors,
   hintsUsed,
   score,
@@ -65,10 +80,11 @@ export default function ResultScreen({
   onViewReplay,
   onOpenSelector,
 }: ResultScreenProps) {
+  const isQuick = protocol === "quick";
   const isMerge = protocol === "merge";
   const isSelection = protocol === "selection";
   const isInsertion = protocol === "insertion";
-  const isEarlyExit = variant === "EARLY_EXIT" && !isSelection && !isInsertion && !isMerge;
+  const isEarlyExit = variant === "EARLY_EXIT" && !isSelection && !isInsertion && !isMerge && !isQuick;
   const effectiveAvoided =
     comparisonsAvoided ?? Math.max(0, canonicalComparisons - comparisons);
   const pseudocodeLines: readonly {
@@ -76,15 +92,17 @@ export default function ResultScreen({
     readonly lineNumber: number;
     readonly indent: number;
     readonly text: string;
-  }[] = isMerge
-    ? MERGE_SORT_PSEUDOCODE
-    : isInsertion
-      ? INSERTION_SORT_PSEUDOCODE
-      : isSelection
-        ? SELECTION_SORT_PSEUDOCODE
-        : isEarlyExit
-          ? BUBBLE_SORT_EARLY_EXIT_PSEUDOCODE
-          : BUBBLE_SORT_PSEUDOCODE;
+  }[] = isQuick
+    ? QUICK_SORT_RESULT_PSEUDOCODE
+    : isMerge
+      ? MERGE_SORT_PSEUDOCODE
+      : isInsertion
+        ? INSERTION_SORT_PSEUDOCODE
+        : isSelection
+          ? SELECTION_SORT_PSEUDOCODE
+          : isEarlyExit
+            ? BUBBLE_SORT_EARLY_EXIT_PSEUDOCODE
+            : BUBBLE_SORT_PSEUDOCODE;
 
   return (
     <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-8 pb-16 sm:pb-24 px-4 sm:px-8 select-none">
@@ -258,6 +276,19 @@ export default function ResultScreen({
                         color: "text-sky-300",
                       },
                     ]
+                  : isQuick
+                  ? [
+                      {
+                        label: "Trocas",
+                        value: String(swaps),
+                        color: "text-purple-300",
+                      },
+                      {
+                        label: "Escritas no Vetor",
+                        value: String(writesInArray ?? (swaps * 2)),
+                        color: "text-amber-300",
+                      },
+                    ]
                   : isInsertion
                   ? [
                       {
@@ -348,6 +379,15 @@ export default function ResultScreen({
                 Merge Sort divide o problema em subvetores independentes e intercala os resultados com estabilidade e espaço auxiliar.
               </div>
             )}
+
+            {isQuick && (
+              <div className="mt-1 p-2.5 rounded-lg border border-amber-500/30 bg-amber-950/30 text-xs text-amber-100 leading-relaxed font-sans">
+                <span className="font-bold text-amber-300 uppercase block mb-1">
+                  Nota Pedagógica (Quick Sort):
+                </span>
+                O particionamento de Lomuto separa os elementos menores ou iguais à esquerda e os maiores à direita do pivô, posicionando o pivô em sua localização definitiva ao final do trecho.
+              </div>
+            )}
           </div>
 
           {/* Pseudocode & Principle Panel */}
@@ -356,22 +396,28 @@ export default function ResultScreen({
               className="text-xs text-slate-300 font-bold tracking-widest uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
-              {isMerge
-                ? "PSEUDOCÓDIGO — MERGE SORT"
-                : isInsertion
-                  ? "PSEUDOCÓDIGO — INSERTION SORT"
-                  : isSelection
-                    ? "PSEUDOCÓDIGO — SELECTION SORT"
-                    : isEarlyExit
-                      ? "PSEUDOCÓDIGO — EARLY EXIT"
-                      : "PSEUDOCÓDIGO — BUBBLE SORT"}
+              {isQuick
+                ? "PSEUDOCÓDIGO — QUICK SORT (LOMUTO)"
+                : isMerge
+                  ? "PSEUDOCÓDIGO — MERGE SORT"
+                  : isInsertion
+                    ? "PSEUDOCÓDIGO — INSERTION SORT"
+                    : isSelection
+                      ? "PSEUDOCÓDIGO — SELECTION SORT"
+                      : isEarlyExit
+                        ? "PSEUDOCÓDIGO — EARLY EXIT"
+                        : "PSEUDOCÓDIGO — BUBBLE SORT"}
             </span>
             <div className="flex flex-col gap-0.5">
               {pseudocodeLines.map((item) => (
                 <div
                   key={item.id}
                   className={`px-2 py-0.5 rounded text-[10px] leading-relaxed ${
-                    isMerge
+                    isQuick
+                      ? item.text.includes("trocar") || item.text.includes("pivo ←") || item.text.includes("≤") || item.text.includes("DEFINITIVO")
+                        ? "bg-amber-950/40 text-amber-300"
+                        : "text-white/40"
+                      : isMerge
                       ? item.id === "COMPARE_CONDITION" ||
                         item.id === "DRAIN_REMAINDER" ||
                         item.id === "COPY_BACK"
@@ -434,7 +480,18 @@ export default function ResultScreen({
               </div>
             )}
 
-            {!isSelection && !isEarlyExit && !isInsertion && !isMerge && (
+            {isQuick && (
+              <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/30 flex flex-col gap-2 mt-1">
+                <p className="text-xs sm:text-sm text-amber-200 leading-relaxed font-bold">
+                  Quick Sort particiona o vetor in-place em torno do pivô e resolve recursivamente os subproblemas.
+                </p>
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed" style={{ fontFamily: "'Exo 2', sans-serif" }}>
+                  A varredura compara cada número do trecho ativo com o pivô. Valores menores ou iguais são agrupados à esquerda e maiores à direita. Ao final da passada, o pivô troca para sua posição definitiva consolidada com o selo OK.
+                </p>
+              </div>
+            )}
+
+            {!isSelection && !isEarlyExit && !isInsertion && !isMerge && !isQuick && (
               <div className="p-3.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 flex flex-col gap-2 mt-1">
                 <p className="text-xs sm:text-sm text-cyan-200 leading-relaxed font-bold">
                   Bubble Sort propaga o maior elemento a cada passada por comparações de vizinhos.
