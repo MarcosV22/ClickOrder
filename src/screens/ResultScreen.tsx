@@ -10,6 +10,7 @@ import { INSERTION_SORT_PSEUDOCODE } from "../game/sorting/insertion";
 import { MERGE_SORT_PSEUDOCODE } from "../game/sorting/merge";
 import { QUICK_SORT_PSEUDOCODE_LINES } from "../game/sorting/quick/quickSortEngine";
 import { formatElapsedTime } from "../game/session";
+import type { ActivityContext, AlgorithmCaseDefinition } from "../game/curriculum";
 
 const QUICK_SORT_RESULT_PSEUDOCODE = QUICK_SORT_PSEUDOCODE_LINES.map((text, idx) => {
   const trimmed = text.trimStart();
@@ -46,6 +47,9 @@ interface ResultScreenProps {
   terminationPass?: number;
   canonicalComparisons?: number;
   comparisonsAvoided?: number;
+  activityContext?: ActivityContext;
+  caseDefinition?: AlgorithmCaseDefinition;
+  caseReflection?: string;
   onNext: () => void;
   onRepeat: () => void;
   onViewReplay?: () => void;
@@ -75,11 +79,18 @@ export default function ResultScreen({
   terminationPass,
   canonicalComparisons = 10,
   comparisonsAvoided,
+  activityContext,
+  caseDefinition,
+  caseReflection,
   onNext,
   onRepeat,
   onViewReplay,
   onOpenSelector,
 }: ResultScreenProps) {
+  const isCase = Boolean(caseDefinition) || activityContext?.type === "case";
+  const effectiveCaseDef =
+    caseDefinition ??
+    (activityContext?.type === "case" ? activityContext.caseDefinition : undefined);
   const isQuick = protocol === "quick";
   const isMerge = protocol === "merge";
   const isSelection = protocol === "selection";
@@ -125,11 +136,21 @@ export default function ResultScreen({
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-emerald-500/20 bg-emerald-950/20 mb-3">
               <span className="text-[10px] text-emerald-400 tracking-widest uppercase font-mono"
                 style={{ fontFamily: "'Space Mono', monospace" }}>
-                {isEarlyExit
-                  ? `MODO DESAFIO — CENÁRIO ${phase} CONCLUÍDO`
-                  : `MÓDULO ${protocol.toUpperCase()} — ${practiceTitle ?? `PRÁTICA ${phase}`} CONCLUÍDA`}
+                {isCase
+                  ? `MÓDULO ${protocol.toUpperCase()} — CASO DO ALGORITMO`
+                  : isEarlyExit
+                    ? `MODO DESAFIO — CENÁRIO ${phase} CONCLUÍDO`
+                    : `MÓDULO ${protocol.toUpperCase()} — ${practiceTitle ?? `PRÁTICA ${phase}`} CONCLUÍDA`}
               </span>
             </div>
+            {isCase && effectiveCaseDef && (
+              <p
+                className="text-xs sm:text-sm font-mono text-cyan-300 font-bold uppercase tracking-wider mb-2"
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                {effectiveCaseDef.title}
+              </p>
+            )}
             <h2
               className="text-4xl font-black text-white tracking-tight"
               style={{
@@ -182,6 +203,41 @@ export default function ResultScreen({
             </div>
           </div>
         </div>
+
+        {/* Painel de Reflexão Pedagógica (Modo Caso do Algoritmo) */}
+        {isCase && (
+          <div className="w-full panel-border bg-[#0a1538]/90 rounded-xl p-5 border border-cyan-500/40 shadow-xl flex flex-col gap-3.5">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span
+                className="text-xs text-cyan-300 font-mono tracking-widest uppercase font-bold"
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                REFLEXÃO PEDAGÓGICA DO CASO
+              </span>
+            </div>
+            {effectiveCaseDef?.learningObjective && (
+              <div className="p-3 rounded-lg bg-cyan-950/40 border border-cyan-500/20">
+                <span className="text-[10px] text-cyan-400/80 font-mono uppercase tracking-wider block mb-1 font-bold">
+                  OBJETIVO DE APRENDIZAGEM:
+                </span>
+                <p className="text-xs sm:text-sm text-cyan-100/90 leading-relaxed font-sans">
+                  {effectiveCaseDef.learningObjective}
+                </p>
+              </div>
+            )}
+            {caseReflection && (
+              <div className="p-3 rounded-lg bg-emerald-950/40 border border-emerald-500/20">
+                <span className="text-[10px] text-emerald-400/80 font-mono uppercase tracking-wider block mb-1 font-bold">
+                  ANÁLISE FACTUAL DA EXECUÇÃO:
+                </span>
+                <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-sans">
+                  {caseReflection}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Stats + Pseudocode */}
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -512,22 +568,29 @@ export default function ResultScreen({
             </GameButton>
           )}
           <GameButton onClick={onRepeat} variant="secondary" size="md" icon="↺">
-            {isEarlyExit ? "REPETIR CENÁRIO" : "REPETIR EXERCÍCIO"}
+            {isCase ? "REPETIR CASO" : isEarlyExit ? "REPETIR CENÁRIO" : "REPETIR EXERCÍCIO"}
           </GameButton>
           {onOpenSelector && (
-            <GameButton onClick={onOpenSelector} variant="secondary" size="md" icon="☰">
-              SELETOR
+            <GameButton
+              onClick={onOpenSelector}
+              variant={isCase ? "primary" : "secondary"}
+              size="md"
+              icon={isCase ? "←" : "☰"}
+            >
+              {isCase ? "VOLTAR AOS CASOS" : "SELETOR"}
             </GameButton>
           )}
-          <GameButton onClick={onNext} variant="primary" size="md" icon="→" iconPosition="right">
-            {hasNextPhase
-              ? isEarlyExit
-                ? "PRÓXIMO CENÁRIO"
-                : "PRÓXIMA PRÁTICA"
-              : isEarlyExit
-                ? "CONCLUIR DESAFIOS"
-                : "CONCLUIR CONJUNTO"}
-          </GameButton>
+          {!isCase && (
+            <GameButton onClick={onNext} variant="primary" size="md" icon="→" iconPosition="right">
+              {hasNextPhase
+                ? isEarlyExit
+                  ? "PRÓXIMO CENÁRIO"
+                  : "PRÓXIMA PRÁTICA"
+                : isEarlyExit
+                  ? "CONCLUIR DESAFIOS"
+                  : "CONCLUIR CONJUNTO"}
+            </GameButton>
+          )}
         </div>
       </div>
     </div>

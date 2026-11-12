@@ -12,7 +12,7 @@
 Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Insertion Sort e Schema v4)**, a infraestrutura de testes automatizados do projeto cobre 100% da lógica pura de domínio, FSMs de ordenação (Bubble, Selection e Insertion Sort), tutoriais, conjuntos de prática progressiva, agregação de resultados, geração procedural Mulberry32, briefing, telemetria de sessão, replay da execução, pseudocódigo sincronizado, modo demonstração e persistência Schema v4:
 
 - **Framework de Testes Implementado:** **Vitest** (`vitest ^5.0.0`) instalado como dependência de desenvolvimento canônica via `pnpm add -D vitest`.
-- **Arquivos de Teste Ativos (46 arquivos, 598 testes automatizados aprovados 100% verde):**
+- **Arquivos de Teste Ativos (50 arquivos, 650 testes automatizados aprovados 100% verde):**
   1. `src/screens/illustratedBriefings.test.tsx` (7 testes - Briefings Ilustrados Canônicos para Bubble, Selection, Insertion, Merge e Quick Sort, e integridade estrutural do ProtocolCard)
   2. `src/game/sorting/quick/quickConstraints.test.ts` (5 testes - Constraints procedurais Mulberry32 do Quick Sort para níveis básico, intermediário e avançado, predicado de igualdade via engine real e fallbacks curados)
   3. `src/game/sorting/quick/quickPedagogy.test.ts` (4 testes - Feedback formativo de erro, scaffolding de dicas em 3 níveis e precedência de realce visual)
@@ -36,20 +36,20 @@ Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Ins
   21. `src/game/replay/selectionReplayPseudocode.test.ts` (9 testes)
   22. `src/game/sorting/insertion/insertionReplayModel.test.ts` (13 testes)
   23. `src/game/briefing/briefing.test.ts` (20 testes)
-  24. `src/game/curriculum/practiceCatalog.test.ts` (11 testes - Catálogo Curricular Transversal com 5 módulos canônicos)
-  25. `src/screens/practiceFlow.test.tsx` (8 testes - Integração de Seletor, Conclusão de Práticas e Cenário Cross-Sessão)
-  26. `src/game/generation/arrayGenerator.test.ts` (31 testes)
+  24. `src/game/curriculum/practiceCatalog.test.ts` (12 testes - Catálogo Curricular Transversal com 5 módulos canônicos e metadados enriquecidos)
+  25. `src/screens/practiceFlow.test.tsx` (9 testes - Integração de Seletor, Conclusão de Práticas, Foco de Aprendizagem e Cenário Cross-Sessão)
+  26. `src/game/generation/arrayGenerator.test.ts` (36 testes - Geração Universal Mulberry32 e Diferenciação Curricular Bubble Sort)
   27. `src/game/sorting/bubbleSortEngine.test.ts` (39 testes)
   28. `src/game/replay/replayModel.test.ts` (11 testes)
   29. `src/game/sorting/selection/selectionCampaign.test.ts` (19 testes)
   30. `src/game/demonstration/demonstration.test.ts` (24 testes)
   31. `src/game/replay/replayPseudocode.test.ts` (12 testes)
-  32. `src/game/sorting/selection/selectionConstraints.test.ts` (16 testes)
+  32. `src/game/sorting/selection/selectionConstraints.test.ts` (20 testes - Constraints procedurais Selection Sort e diferenciação curricular)
   33: `src/game/replay/selectionReplayModel.test.ts` (9 testes)
   34. `src/game/sorting/insertion/insertionReplayPseudocode.test.ts` (8 testes)
   35. `src/game/sorting/selection/selectionTutorialGuide.test.ts` (3 testes)
-  36. `src/game/sorting/insertion/insertionPracticeGameplay.test.ts` (13 testes)
-  37. `src/game/sorting/insertion/insertionConstraints.test.ts` (10 testes)
+  36. `src/game/sorting/insertion/insertionConstraints.test.ts` (14 testes - Constraints procedurais Insertion Sort e diferenciação curricular)
+  37. `src/game/sorting/insertion/insertionPracticeGameplay.test.ts` (13 testes)
   38. `src/game/sorting/insertion/insertionTutorialGuide.test.ts` (3 testes)
   39. `src/game/session/protocolScore.test.ts` (11 testes)
   40. `src/game/sorting/insertion/practiceCatalog.test.ts` (5 testes)
@@ -58,7 +58,11 @@ Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Ins
   43. `src/game/sorting/insertion/insertionPedagogy.test.ts` (6 testes)
   44. `src/screens/campaignCompleteConfig.test.ts` (3 testes)
   45. `src/game/session/sessionMetrics.test.ts` (5 testes)
-  46. `src/screens/quickPracticeFlow.test.tsx` (16 testes - Interface QuickGameScreen, 4 regiões de Lomuto, feedback de erro e recuperação, igualdade em LESS_OR_EQUAL, avanço sem troca com $i=j$, fechamento do pivô, bloqueio em animações, cancelamento em reinício, apresentação visual da conclusão antes do resultado, acessibilidade por teclado 1/2/3 com foco protegido, modo reduced motion discreto, ResultScreen sem replay e isolamento de dev routing em produção)
+  46. `src/screens/quickPracticeFlow.test.tsx` (16 testes - Interface QuickGameScreen)
+  47. `src/game/curriculum/supportConfig.test.ts` (11 testes - Configurações de andaime cognitivo e cores temáticas)
+  48. `src/screens/scaffoldingFading.test.tsx` (5 testes - Testes comportamentais de desvanecimento de suporte visual nas 3 telas)
+  49. `src/game/curriculum/caseCatalog.test.ts` (11 testes - Catálogo canônico de Casos do Algoritmo, casos-piloto Bubble, Selection e Insertion, invariantes de zero PRNG e reflexões factuais puras)
+  50. `src/screens/algorithmCaseFlow.test.tsx` (10 testes - Fluxo integrado de Casos do Algoritmo: seleção em PracticeSelector, cards dedicados, bloqueio/desbloqueio dinâmico, execução com engines reais, ResultScreen em modo caso com reflexão factual e CTAs dedicados, repetição determinística e Replay round-trip)
 - **Scripts de Teste Canônicos em [`package.json`](../../package.json):**
   - `pnpm run test:run`: Execução única headless da suíte completa;
   - `pnpm test`: Modo watch interativo de desenvolvimento.

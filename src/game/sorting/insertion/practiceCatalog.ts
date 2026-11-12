@@ -17,6 +17,8 @@ import type { ArrayConstraintDefinition } from "../../generation";
 
 export type { InsertionPracticeLevel };
 
+import type { PracticeSupportProfile } from "../../curriculum/types";
+
 export type InsertionPracticeId =
   | "insertion.practice.basic"
   | "insertion.practice.intermediate"
@@ -31,6 +33,7 @@ export interface InsertionPracticeDefinition {
   readonly size: number;
   readonly constraints: readonly ArrayConstraintDefinition[];
   readonly pedagogicalObjective: string;
+  readonly supportProfile: PracticeSupportProfile;
 }
 
 /**
@@ -49,6 +52,7 @@ export const INSERTION_PRACTICE_CATALOG: readonly InsertionPracticeDefinition[] 
       constraints: INSERTION_BASIC_CONSTRAINTS,
       pedagogicalObjective:
         "Identificar a condição A[j] > chave, comandar o deslocamento unitário para a vaga e confirmar o encaixe com parada imediata.",
+      supportProfile: "full",
     },
     {
       id: "insertion.practice.intermediate",
@@ -61,6 +65,7 @@ export const INSERTION_PRACTICE_CATALOG: readonly InsertionPracticeDefinition[] 
       constraints: INSERTION_INTERMEDIATE_CONSTRAINTS,
       pedagogicalObjective:
         "Operar múltiplos deslocamentos consecutivos para a direita abrindo espaço na esteira para a chave suspensa.",
+      supportProfile: "reduced",
     },
     {
       id: "insertion.practice.advanced",
@@ -73,6 +78,7 @@ export const INSERTION_PRACTICE_CATALOG: readonly InsertionPracticeDefinition[] 
       constraints: INSERTION_ADVANCED_CONSTRAINTS,
       pedagogicalObjective:
         "Completar o ciclo completo do algoritmo com varreduras longas, paradas condicionais e chegadas à cabeceira da esteira.",
+      supportProfile: "minimal",
     },
   ]);
 

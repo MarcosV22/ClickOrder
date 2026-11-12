@@ -20,6 +20,7 @@ import {
 import {
   resolveConstraint,
   BUBBLE_CAMPAIGN_CONSTRAINTS,
+  getBubblePracticeConstraints,
 } from "./constraints";
 
 export const DEFAULT_MIN_VALUE = 1;
@@ -160,6 +161,21 @@ export function attemptDeterministicFallback(
     p5[mid - 1] = p5[mid];
     p5[mid] = tmp;
     patterns.push(p5);
+  }
+
+  // Padrões pedagógicos curriculares curados para práticas regulares (4, 5, 6)
+  if (length === 4) {
+    patterns.push([baseValues[1], baseValues[0], baseValues[3], baseValues[2]]);
+    patterns.push([baseValues[2], baseValues[0], baseValues[3], baseValues[1]]);
+    patterns.push([baseValues[1], baseValues[3], baseValues[0], baseValues[2]]);
+  } else if (length === 5) {
+    patterns.push([baseValues[2], baseValues[1], baseValues[4], baseValues[0], baseValues[3]]);
+    patterns.push([baseValues[3], baseValues[1], baseValues[4], baseValues[0], baseValues[2]]);
+    patterns.push([baseValues[1], baseValues[3], baseValues[0], baseValues[4], baseValues[2]]);
+  } else if (length === 6) {
+    patterns.push([baseValues[3], baseValues[1], baseValues[5], baseValues[0], baseValues[4], baseValues[2]]);
+    patterns.push([baseValues[4], baseValues[2], baseValues[5], baseValues[0], baseValues[3], baseValues[1]]);
+    patterns.push([baseValues[2], baseValues[4], baseValues[1], baseValues[5], baseValues[0], baseValues[3]]);
   }
 
   // Padrões com duplicatas determinísticas quando allowDuplicates for permitido
@@ -346,24 +362,46 @@ export function generateSortingArray(
 }
 
 /**
- * Função utilitária pura para gerar vetores da campanha normal de Bubble Sort.
- * Fases 1, 2 e 3 geram vetores de tamanho 4, 5 e 6 respectivamente no range 1..99 sem duplicados,
- * garantindo satisfação das restrições BUBBLE_CAMPAIGN_CONSTRAINTS.
+ * Gera deterministicamente um vetor procedural para as atividades práticas de Bubble Sort.
+ * - basic: length = 4 (fundamentação de pares contíguos e propagação inicial do maior elemento)
+ * - intermediate: length = 5 (trocas distribuídas em múltiplas passadas e redução do laço interno)
+ * - advanced: length = 6 (densidade rica, passadas ativas múltiplas e autonomia analítica)
  */
-export function generateBubblePhaseArray(
-  phase: number,
+export function generateBubblePracticeArray(
+  level: "basic" | "intermediate" | "advanced",
   seed?: SeedInput
 ): GeneratedArrayResult {
-  const index =
-    Math.max(1, Math.min(phase, BUBBLE_CAMPAIGN_PHASE_LENGTHS.length)) - 1;
-  const length = BUBBLE_CAMPAIGN_PHASE_LENGTHS[index];
+  const length = level === "basic" ? 4 : level === "intermediate" ? 5 : 6;
+  const constraints = getBubblePracticeConstraints(level);
+
   return generateSortingArray({
     length,
     minValue: DEFAULT_MIN_VALUE,
     maxValue: DEFAULT_MAX_VALUE,
     allowDuplicates: false,
     seed,
-    constraints: BUBBLE_CAMPAIGN_CONSTRAINTS,
+    constraints,
     maxAttempts: DEFAULT_MAX_ATTEMPTS,
   });
+}
+
+/**
+ * Função utilitária pura para gerar vetores das práticas/fases de Bubble Sort.
+ * Fases 1, 2 e 3 geram vetores de tamanho 4, 5 e 6 respectivamente no range 1..99 sem duplicados,
+ * aplicando as restrições curriculares diferenciadas de cada nível.
+ */
+export function generateBubblePhaseArray(
+  phase: number | "basic" | "intermediate" | "advanced",
+  seed?: SeedInput
+): GeneratedArrayResult {
+  const level: "basic" | "intermediate" | "advanced" =
+    typeof phase === "string"
+      ? phase
+      : phase <= 1
+      ? "basic"
+      : phase === 2
+      ? "intermediate"
+      : "advanced";
+
+  return generateBubblePracticeArray(level, seed);
 }

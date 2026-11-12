@@ -24,6 +24,11 @@ import {
   type PhaseSessionMetrics,
 } from "../game/session";
 import type { SeedInput } from "../game/generation";
+import {
+  getPracticeSupportConfig,
+  getSupportProfileColorClasses,
+  type PracticeSupportProfile,
+} from "../game/curriculum";
 
 export interface SelectionPhaseCompleteData {
   protocol: "selection";
@@ -47,6 +52,7 @@ interface SelectionGameScreenProps {
   totalPhases?: number;
   seed?: SeedInput;
   practiceTitle?: string;
+  supportProfile?: PracticeSupportProfile;
   onBackToSelector?: () => void;
   onResetPhase?: () => void;
 }
@@ -60,6 +66,7 @@ export default function SelectionGameScreen({
   totalPhases = 3,
   seed,
   practiceTitle,
+  supportProfile,
   onBackToSelector,
   onResetPhase,
 }: SelectionGameScreenProps) {
@@ -70,6 +77,11 @@ export default function SelectionGameScreen({
       : phase === 2
         ? "PRÁTICA INTERMEDIÁRIA"
         : "PRÁTICA AVANÇADA");
+
+  const effectiveSupportProfile: PracticeSupportProfile =
+    supportProfile ??
+    (phase === 1 ? "full" : phase === 2 ? "reduced" : "minimal");
+  const supportConfig = getPracticeSupportConfig(effectiveSupportProfile);
 
   // --------------------------------------------------------------------------
   // 1. Estado Canônico da Engine (Fonte Única de Verdade Algorítmica)
@@ -102,7 +114,11 @@ export default function SelectionGameScreen({
     type: "info" | "warning" | "success" | "error";
   }>(() => ({
     text: initialExpected
-      ? "Encontre o menor número da parte ainda não ordenada e confirme a troca para a posição correta."
+      ? (supportConfig.showInstructionalPrompt
+          ? "Encontre o menor número da parte ainda não ordenada e confirme a troca para a posição correta."
+          : supportConfig.profile === "reduced"
+            ? "Identifique o menor elemento da subfaixa não ordenada."
+            : "Inspecione os elementos e encontre o menor.")
       : "Iniciando ordenação por seleção.",
     type: "info",
   }));
@@ -211,14 +227,24 @@ export default function SelectionGameScreen({
         });
       } else if (decision === "SELECT_NEW_MIN") {
         const newMinVal = result.state.currentValues[result.state.minIndex];
+        const stepMsg = supportConfig.showInstructionalPrompt
+          ? `Novo candidato mínimo registrado: número #${result.state.minIndex + 1} (valor ${newMinVal}).`
+          : supportConfig.profile === "reduced"
+            ? `Novo mínimo: #${result.state.minIndex + 1} (${newMinVal}).`
+            : `Mínimo atualizado.`;
         setMessage({
-          text: `Novo candidato mínimo registrado: número #${result.state.minIndex + 1} (valor ${newMinVal}).`,
+          text: stepMsg,
           type: "success",
         });
       } else {
         const keepVal = result.state.currentValues[result.state.minIndex];
+        const stepMsg = supportConfig.showInstructionalPrompt
+          ? `Candidato mínimo preservado: número #${result.state.minIndex + 1} (valor ${keepVal}).`
+          : supportConfig.profile === "reduced"
+            ? `Candidato preservado: #${result.state.minIndex + 1} (${keepVal}).`
+            : `Candidato mantido.`;
         setMessage({
-          text: `Candidato mínimo preservado: número #${result.state.minIndex + 1} (valor ${keepVal}).`,
+          text: stepMsg,
           type: "success",
         });
       }
@@ -440,6 +466,12 @@ export default function SelectionGameScreen({
               {effectivePracticeTitle} • {gameState.arrayLength} NÚMEROS
             </span>
             <span
+              className={`text-xs px-2.5 py-1 rounded border font-mono tracking-wider font-bold uppercase ${getSupportProfileColorClasses(effectiveSupportProfile)}`}
+              style={{ fontFamily: "'Space Mono', monospace" }}
+            >
+              {supportConfig.badgeLabel}
+            </span>
+            <span
               className="text-xs text-white/50 font-mono"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
@@ -506,19 +538,27 @@ export default function SelectionGameScreen({
             )}
           </div>
 
-          {/* Textual comparison formula */}
+          {/* Textual comparison formula or evaluation prompt */}
           <div className="text-xs font-bold text-right ml-auto">
             {gameState.phase === "INSPECT" && currentScanValue !== null ? (
-              <span className="text-white/80">
-                Comparação:{" "}
-                <span className="text-cyan-300">
-                  A[{gameState.j}] ({currentScanValue})
-                </span>{" "}
-                &lt;{" "}
-                <span className="text-purple-300">
-                  A[{gameState.minIndex}] ({currentMinValue})
+              supportConfig.showRelationalExpression ? (
+                <span className="text-white/80">
+                  Comparação:{" "}
+                  <span className="text-cyan-300">
+                    A[{gameState.j}] ({currentScanValue})
+                  </span>{" "}
+                  &lt;{" "}
+                  <span className="text-purple-300">
+                    A[{gameState.minIndex}] ({currentMinValue}) ?
+                  </span>
                 </span>
-              </span>
+              ) : (
+                <span className="text-white/40 text-[11px]">
+                  {supportConfig.profile === "reduced"
+                    ? "Inspecione se o scanner é menor que o candidato"
+                    : "Avalie o scanner vs candidato"}
+                </span>
+              )
             ) : gameState.phase === "COMMIT" ? (
               <span className="text-amber-300">
                 {gameState.minIndex !== gameState.i

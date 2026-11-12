@@ -145,52 +145,82 @@ Para qualquer passada $i$ ($0 \le i \le n - 2$):
 
 ---
 
-## 10. Tipos de Exercícios Suportados (PLATFORM-R1-B)
+## 10. Tipos de Exercícios Suportados (PLATFORM-R1-B / LEARNING-R1)
 
-| Tipo de Exercício | Suporte no Módulo | Implementação Concreta no Código |
-| :--- | :---: | :--- |
-| **Introdução / Conceito** | `OBRIGATÓRIO` | `ProtocolModeBriefingScreen.tsx` (`bubble-canonical`, `bubble-early-exit`) |
-| **Demonstração** | `OBRIGATÓRIO` | `DemonstrationScreen.tsx` consumindo `bubbleDemonstration.ts` (`[5, 2, 4, 1]`) |
-| **Tutorial Guiado** | `OBRIGATÓRIO` | `TutorialScreen.tsx` sobre `[3, 1, 2]` |
-| **Seletor de Práticas** | `OBRIGATÓRIO` | `PracticeSelector.tsx` com catálogo curricular transversal (`src/game/curriculum/`) |
-| **Prática Básica** | `OBRIGATÓRIO` | `GameScreen.tsx` (`bubble.practice.basic`: $n=4$ gerado proceduralmente) |
-| **Prática Progressiva** | `OBRIGATÓRIO` | `GameScreen.tsx` (`bubble.practice.intermediate`: $n=5$, `bubble.practice.advanced`: $n=6$) |
-| **Casos do Algoritmo** | `OBRIGATÓRIO` | Modo Desafio (`CHALLENGE_SCENARIOS`: ordenado, quase ordenado, pior caso) |
-| **Desafio** | `OPCIONAL` | Modo Early Exit com telemetria de operações evitadas (desbloqueado após 3 práticas) |
-| **Conclusão de Conjunto** | `OBRIGATÓRIO` | `PracticeSetCompleteScreen.tsx` agregando telemetria e síntese pedagógica |
-| **Prática Livre (Sandbox)**| `OPCIONAL` | Planejado para expansão futura da plataforma |
+> **Expansão Pedagógica Canônica:** Ver especificação completa em [`learning-experience-expansion.md`](../learning-experience-expansion.md).
+
+| Tipo de Exercício | Suporte no Módulo | Implementação Concreta no Código | Mapeamento no Schema v4 |
+| :--- | :---: | :--- | :--- |
+| **Introdução / Conceito** | `OBRIGATÓRIO` | `ProtocolModeBriefingScreen.tsx` (`bubble-canonical`, `bubble-early-exit`) | Volátil (não persistido no Schema v4; acesso livre sob demanda) |
+| **Demonstração** | `OBRIGATÓRIO` | `DemonstrationScreen.tsx` consumindo `bubbleDemonstration.ts` (`[5, 2, 4, 1]`) | Volátil (memória) |
+| **Tutorial Guiado** | `OBRIGATÓRIO` | `TutorialScreen.tsx` sobre `[3, 1, 2]` | `modules.bubble.completedTutorial` |
+| **Seletor de Práticas** | `OBRIGATÓRIO` | `PracticeSelector.tsx` com catálogo curricular transversal (`src/game/curriculum/`) | N/A |
+| **Prática Básica** | `OBRIGATÓRIO` | `GameScreen.tsx` ($n=4$ gerado proceduralmente com suporte máximo) | `bubble.practice.basic` |
+| **Prática Intermediária**| `OBRIGATÓRIO` | `GameScreen.tsx` ($n=5$ com decisões encadeadas) | `bubble.practice.intermediate` |
+| **Prática Avançada** | `OBRIGATÓRIO` | `GameScreen.tsx` ($n=6$ com desvanecimento de andaimes) | `bubble.practice.advanced` |
+| **Casos do Algoritmo** | `OBRIGATÓRIO` | Bateria de 5 casos curados fixos (ordenado, reverso, quase ordenado, tartaruga, duplicatas) | `bubble.case.*` |
+| **Desafio Early Exit** | `OPCIONAL` | Modo Early Exit com telemetria e reflexão comparativa local | `bubble.challenge.early-exit` |
+| **Conclusão de Conjunto** | `OBRIGATÓRIO` | `PracticeSetCompleteScreen.tsx` agregando telemetria e síntese pedagógica | N/A |
+| **Prática Livre (Sandbox)**| `OPCIONAL` | Modo "Nova Entrada" e sandbox livre (Marco LEARNING-R7) | `bubble.sandbox` |
 
 ---
 
-## 11. Casos Pedagógicos Curados Específicos
+## 11. Casos Pedagógicos Curados Específicos (Plano LEARNING-R1)
 
-1. **Caso 1: Vetor Já Ordenado (`[12, 25, 47, 63, 88]`)**  
-   - Propósito: Ilustrar a ausência total de trocas ($0$ trocas) e a economia de 60% das operações na variante Early Exit (4 comparações vs. 10 no canônico).
-2. **Caso 2: Quase Ordenado (`[15, 8, 23, 42, 60]`)**  
-   - Propósito: Uma única troca inicial na Passada 1 seguida por estabilização na Passada 2 (7 comparações com término precoce).
-3. **Caso 3: Elemento Tartaruga / Pior Caso (`[30, 45, 60, 75, 10]`)**  
-   - Propósito: O menor elemento (10) inicia na última posição. Evidencia que valores baixos no final avançam apenas 1 posição por passada, exigindo todas as 10 comparações e anulando os ganhos da heurística.
-4. **Caso 4: Elementos Duplicados (`[4, 2, 4, 1]`)**  
-   - Propósito: Exercitar a estabilidade formal do algoritmo ($4 \le 4 \rightarrow \text{KEEP}$).
-5. **Caso 5: Vetor Estritamente Invertido (`[50, 40, 30, 20]`)**  
-   - Propósito: Pior caso analítico absoluto com todas as comparações resultando em permutas ($6$ trocas para $n=4$).
+1. **Caso 1: Vetor Já Ordenado (`[10, 20, 30, 40, 50]`) — ID: `bubble.case.already-sorted`**  
+   - Propósito: Ilustrar a invariante de não-troca e o contraste de comparações ($10$ no canônico vs $4$ no Early Exit).
+2. **Caso 2: Ordem Reversa (`[50, 40, 30, 20, 10]`) — ID: `bubble.case.reverse`**  
+   - Propósito: Pior caso analítico absoluto com todas as comparações resultando em permutas ($10$ trocas para $n=5$).
+3. **Caso 3: Quase Ordenado (`[10, 30, 20, 40, 50]`) — ID: `bubble.case.nearly-sorted` [HOMOLOGADO EM PRODUÇÃO - LEARNING-R3-A / ADR 0026]**  
+   - Propósito: Apenas uma inversão local. Demonstra empiricamente que o Bubble canônico consome todas as passadas para garantir a invariante (10 comparações e 1 troca). Integrado ao Seletor de Práticas e com reflexão factual pós-execução.
+4. **Caso 4: Elemento Tartaruga (`[20, 30, 40, 50, 10]`) — ID: `bubble.case.turtle-element`**  
+   - Propósito: O menor elemento (10) inicia na última posição, avançando apenas 1 posição por passada e forçando todas as passadas do laço externo.
+5. **Caso 5: Elementos Duplicados e Estabilidade (`[30a, 10, 30b, 20]`) — ID: `bubble.case.duplicates`**  
+   - Propósito: Exercitar a estabilidade formal do algoritmo ($30a \le 30b \rightarrow \text{KEEP}$).
 
 ---
 
 ## 12. Geração Procedural e Constraints do Módulo
 
-- **Gerador:** `generateSortingArray` (PRNG Mulberry32) configurado com constraints procedurais.
-- **Tamanhos Curriculares Canônicos:**
-  - Prática Básica (`bubble.practice.basic`): $n = 4$ elementos;
-  - Prática Intermediária (`bubble.practice.intermediate`): $n = 5$ elementos;
-  - Prática Avançada (`bubble.practice.advanced`): $n = 6$ elementos.
-- **Constraints Matemáticas Obrigatórias:**
-  - `isNotSorted`: impede vetores já ordenados de surgirem na prática regular;
-  - `isNotStrictlyReversed`: impede vetores estritamente decrescentes em práticas iniciais;
-  - `hasAtLeastOneSwap`: garante ao menos uma ação `SWAP`;
-  - `hasAtLeastOneKeep`: garante ao menos uma ação `KEEP` para exercitar discernimento decisório;
-  - Intervalo de valores: $1 \dots 99$ sem números negativos;
-  - Sem elementos repetidos por padrão (`allowDuplicates: false`).
+- **Gerador:** `generateBubblePracticeArray` / `generateSortingArray` (PRNG Mulberry32) configurado com restrições procedurais diferenciadas por nível (Marco LEARNING-R2-A / ADR 0025).
+- **Tamanhos e Perfis Curriculares:**
+  - Prática Básica (`bubble.practice.basic`): $n = 4$ elementos, perfil `foundation`, suporte `full`;
+  - Prática Intermediária (`bubble.practice.intermediate`): $n = 5$ elementos, perfil `mixed-decisions`, suporte `reduced`;
+  - Prática Avançada (`bubble.practice.advanced`): $n = 6$ elementos, perfil `autonomous-complex`, suporte `minimal`.
+- **Constraints Matemáticas Obrigatórias por Nível:**
+  - **Prática Básica (`BUBBLE_BASIC_CONSTRAINTS`):**
+    - `isNotSorted`: impede vetores já ordenados;
+    - `isNotReverseSorted`: impede vetores totalmente invertidos;
+    - `hasAtLeastOneSwap`: garante ao menos um par fora de ordem;
+    - `hasAtLeastOneKeep`: garante ao menos um par em ordem correta;
+    - `bubble-multi-displacement`: garante propagação perceptível de ao menos um elemento por mais de uma posição na esteira.
+  - **Prática Intermediária (`BUBBLE_INTERMEDIATE_CONSTRAINTS`):**
+    - `bubble-swaps-distributed`: trocas necessariamente distribuídas em mais de uma passada;
+    - `bubble-balanced-decisions`: equilíbrio decisório com $\ge 2$ trocas reais e $\ge 2$ manutenções.
+  - **Prática Avançada (`BUBBLE_ADVANCED_CONSTRAINTS`):**
+    - `bubble-advanced-decisions`: densidade rica com $\ge 2$ passadas com trocas, $\ge 3$ trocas totais e $\ge 3$ manutenções, impedindo resoluções prematuras em passada única.
+- **Fallbacks Curados Determinísticos:**
+  - Padrões canônicos fixos para $n=4$ (`[42, 17, 85, 23]`), $n=5$ (`[35, 12, 78, 24, 60]`) e $n=6$ (`[50, 15, 82, 33, 91, 27]`), satisfazendo integralmente todas as restrições pedagógicas de seus respectivos níveis.
+
+### 12.1. Scaffolding Fading na Interface de Gameplay (Marco LEARNING-R2-B)
+A interface interativa do Bubble Sort (`GameScreen.tsx`) integra o modelo transversal de desvanecimento de andaimes cognitivos (`PracticeSupportProfile`):
+- **`full` (Prática Básica):**
+  - Badge temático no cabeçalho: `SUPORTE COMPLETO` (esmeralda);
+  - Pergunta relacional visível: Banner superior destacando formalmente $A[\text{left}] > A[\text{right}] ?$;
+  - **Eliminação de Spoilers:** O antigo crachá pré-avaliado `VERDADEIRO` / `FALSO` foi permanentemente eliminado antes da ação do usuário;
+  - Prompt: *"Analise o par destacado e decida: precisa de troca?"*.
+- **`reduced` (Prática Intermediária):**
+  - Badge temático: `SUPORTE REDUZIDO` (âmbar);
+  - Omissão da pergunta relacional: O banner relacional é omitido para estimular interpretação direta dos números pelo estudante;
+  - Prompt: *"Observe os valores do par destacado e execute a ação correta."*.
+- **`minimal` (Prática Avançada):**
+  - Badge temático: `AUTONOMIA MÁXIMA` (púrpura);
+  - Ausência de andaimes relacionais: Nenhuma dica antecipada sobre a regra é exibida na interface;
+  - Prompt: *"Opere o protocolo com autonomia total."*.
+- **Invariantes Invioláveis:**
+  - O par ativo sob inspeção (`expectedPair`), o realce visual das caixas, o selo de consolidação (`OK`) e a telemetria ($C(n), M(n)$) permanecem idênticos e 100% visíveis em todos os perfis;
+  - O botão `[ ? DICA ]` permanece disponível em todos os perfis;
+  - O feedback formativo detalhado diante de erros conceituais é mantido integralmente em todos os perfis.
 
 ---
 

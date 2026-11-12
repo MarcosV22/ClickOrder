@@ -9,6 +9,11 @@ import {
   hasAtLeastOneDirectInsert,
   hasAtLeastOneShift,
   hasInsertionWithMultipleShifts,
+  hasConditionFalseStopWithShift,
+  hasHeadLandingInAtLeastOnePass,
+  hasDiverseShiftTrajectories,
+  hasHeterogeneousPassCosts,
+  hasModerateShiftsInBasic,
   INSERTION_BASIC_CONSTRAINTS,
   INSERTION_PRACTICE_LENGTHS,
   INSERTION_INTERMEDIATE_CONSTRAINTS,
@@ -59,19 +64,10 @@ describe("Insertion Sort - Procedural Constraints (P2.2-D)", () => {
       expect(intermediate).toBe(INSERTION_INTERMEDIATE_CONSTRAINTS);
       expect(advanced).toBe(INSERTION_ADVANCED_CONSTRAINTS);
 
-      // Nível básico inclui proibição de invertido
+      // Todos os níveis regulares excluem o vetor estritamente reverso (reservado para insertion.case.reverse)
       expect(basic.some((c) => c.id === "insertion-not-reverse-sorted")).toBe(true);
-
-      // Níveis intermediário e avançado exigem múltiplos shifts
-      expect(
-        intermediate.some((c) => c.id === "insertion-multiple-shifts"),
-      ).toBe(true);
-      expect(
-        advanced.some((c) => c.id === "insertion-multiple-shifts"),
-      ).toBe(true);
-
-      // Nível avançado não proíbe artificialmente vetor reverso
-      expect(advanced.some((c) => c.id === "insertion-not-reverse-sorted")).toBe(false);
+      expect(intermediate.some((c) => c.id === "insertion-not-reverse-sorted")).toBe(true);
+      expect(advanced.some((c) => c.id === "insertion-not-reverse-sorted")).toBe(true);
     });
   });
 
@@ -130,6 +126,53 @@ describe("Insertion Sort - Procedural Constraints (P2.2-D)", () => {
       expect(isNotSorted(res.values)).toBe(true);
       expect(hasAtLeastOneShift(res.values)).toBe(true);
       expect(hasInsertionWithMultipleShifts(res.values)).toBe(true);
+    });
+  });
+
+  describe("4. Diferenciação Curricular Procedural do Insertion Sort (LEARNING-R2-A)", () => {
+    it("retorna constraints diferenciadas para basic, intermediate e advanced", () => {
+      const basic = getInsertionPracticeConstraints("basic");
+      const intermediate = getInsertionPracticeConstraints("intermediate");
+      const advanced = getInsertionPracticeConstraints("advanced");
+
+      expect(basic.map((c) => c.id)).toContain("insertion-moderate-shifts");
+      expect(intermediate.map((c) => c.id)).toContain("insertion-condition-stop");
+      expect(intermediate.map((c) => c.id)).toContain("insertion-heterogeneous-costs");
+      expect(advanced.map((c) => c.id)).toContain("insertion-head-landing");
+      expect(advanced.map((c) => c.id)).toContain("insertion-diverse-trajectories");
+    });
+
+    it("gera lotes para Prática Básica (n=4) satisfazendo todas as restrições em 25 seeds", () => {
+      for (let i = 0; i < 25; i++) {
+        const seed = `ins-basic-test-${i * 53 + 11}`;
+        const res = generateInsertionPracticeArray("basic", seed);
+        expect(res.values).toHaveLength(4);
+        for (const c of INSERTION_BASIC_CONSTRAINTS) {
+          expect(c.predicate(res.values), `Seed ${seed} falhou em ${c.id}`).toBe(true);
+        }
+      }
+    });
+
+    it("gera lotes para Prática Intermediária (n=5) satisfazendo todas as restrições em 25 seeds", () => {
+      for (let i = 0; i < 25; i++) {
+        const seed = `ins-inter-test-${i * 59 + 17}`;
+        const res = generateInsertionPracticeArray("intermediate", seed);
+        expect(res.values).toHaveLength(5);
+        for (const c of INSERTION_INTERMEDIATE_CONSTRAINTS) {
+          expect(c.predicate(res.values), `Seed ${seed} falhou em ${c.id}`).toBe(true);
+        }
+      }
+    });
+
+    it("gera lotes para Prática Avançada (n=6) satisfazendo todas as restrições em 25 seeds", () => {
+      for (let i = 0; i < 25; i++) {
+        const seed = `ins-adv-test-${i * 61 + 23}`;
+        const res = generateInsertionPracticeArray("advanced", seed);
+        expect(res.values).toHaveLength(6);
+        for (const c of INSERTION_ADVANCED_CONSTRAINTS) {
+          expect(c.predicate(res.values), `Seed ${seed} falhou em ${c.id}`).toBe(true);
+        }
+      }
     });
   });
 });

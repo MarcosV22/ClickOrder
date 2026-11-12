@@ -399,3 +399,88 @@ O **Modo Demonstração** foi institucionalizado como recurso transversal de obs
 7. **Resultados e Discussão (Seção Futura Condicionada):**
    - *Diretriz Mandatória:* A seção de resultados deve permanecer explicitamente em aberto até a efetiva realização dos testes empíricos com turmas reais de graduação, vedada qualquer inserção de dados estatísticos simulados ou antecipados.
 
+---
+
+## 13. Expansão Pedagógica dos Módulos Centrais (Marco LEARNING-R1)
+
+Em consonância com o documento canônico [`learning-experience-expansion.md`](./learning-experience-expansion.md), o marco **LEARNING-R1** introduz quatro diretrizes epistemológicas e formativas para aprofundar a experiência dos três módulos elementares (**Bubble Sort**, **Selection Sort** e **Insertion Sort**) antes de qualquer expansão para novos algoritmos:
+
+### 13.1. Superação do Gargalo "Tamanho como Substituto de Dificuldade"
+A auditoria pedagógica demonstrou que a progressão anterior baseada apenas no aumento do vetor ($n=4 \rightarrow n=5 \rightarrow n=6$) mantinha a mesma densidade decisória e não desafiava o estudante com novas propriedades algorítmicas. A nova arquitetura pedagógica introduz:
+- **Práticas Regulares com Andaimes Decrescentes (*Fading*):** A Prática Básica fornece suporte pleno; a Intermediária introduz decisões encadeadas; a Avançada reduz pistas visuais e exige interpretação do estado do sistema;
+- **Casos Curados do Algoritmo:** Cada módulo dispõe de 5 cenários curados fixos (vetor ordenado, ordem reversa, quase ordenado, duplicatas/estabilidade, elementos em posições desfavoráveis) projetados para evidenciar empiricamente o melhor caso, o pior caso e a estabilidade.
+
+### 13.2. Padrão Transversal de Feedback Pedagógico em 4 Fases
+Para transformar o feedback de uma resposta binária ("Certo/Errado") em um momento autêntico de aprendizagem, adota-se a estrutura formal:
+$$\text{1. DECISÃO} \longrightarrow \text{2. RESULTADO} \longrightarrow \text{3. EXPLICAÇÃO} \longrightarrow \text{4. PRÓXIMO RACIOCÍNIO}$$
+Esse encadeamento explicita qual invariante foi violada e orienta a atenção do estudante para a regra formal do algoritmo, sem tom punitivo.
+
+### 13.3. Sistema de Dicas Multinível com Preservação de Score
+O mecanismo de dicas evolui para um modelo em duas etapas:
+1. **Nível 1 (Orientação Conceitual):** Relembra a invariante ou objetivo geral daquele passo sem revelar o botão de resposta;
+2. **Nível 2 (Direcionamento Focal):** Realça os elementos específicos sob análise e explicita a relação matemática.
+- **Rigor Avaliativo:** A dedução permanece de 5 pontos por decisão onde a dica foi solicitada (na Pontuação do Protocolo), impedindo penalizações dobradas no mesmo micro-passo.
+
+### 13.4. Diretriz de Redação Acadêmica Não-Presuntiva
+Para garantir a credibilidade científica do artigo e relatórios, toda menção às mecânicas de jogo deve empregar estritamente linguagem não-presuntiva:
+- **Termos Adequados:** *"busca apoiar"*, *"fornece oportunidades para observar"*, *"permite constatar"*, *"visa favorecer a compreensão cinestésica"*;
+- **Termos Vedados:** *"comprovadamente melhora a aprendizagem"*, *"elimina erros conceituais"*, *"é comprovadamente superior ao método tradicional"*, *"garante retenção do conteúdo"*.
+
+---
+
+## 14. Scaffolding Fading e Diferenciação de Suporte (Marco LEARNING-R2-B)
+
+O marco **LEARNING-R2-B** implementa a transição visual e interativa dos perfis de suporte nas práticas regulares dos três módulos centrais (**Bubble Sort**, **Selection Sort** e **Insertion Sort**), fundamentando-se na **Teoria da Carga Cognitiva** (Sweller) e no modelo de **Cognitive Apprenticeship** (Collins, Brown & Newman; Wood, Bruner & Ross):
+
+### 14.1. Fundamentação Teórica
+1. **Modelagem e Scaffolding:** Na etapa inicial de contato com o algoritmo (Prática Básica), o estudante necessita de ancoragem externa explícita para não sobrecarregar a memória de trabalho com a dedução da regra simultaneamente à manipulação física dos elementos. O suporte completo explicita a pergunta relacional e os elementos em foco.
+2. **Fading (Desvanecimento Gradual de Andaimes):** À medida que a regra é internalizada, o suporte instrucional antecipado é gradualmente retirado (Prática Intermediária e Avançada). A retirada dos andaimes promove esforço germane (*germane cognitive load*), estimulando esquemas mentais mais profundos e duradouros.
+3. **Autonomia Operacional:** Na Prática Avançada, o estudante atinge a autonomia máxima, interpretando diretamente a disposição dos dados e decidindo sem lembretes de regra na interface.
+
+### 14.2. Matriz dos Três Perfis de Suporte (`PracticeSupportProfile`)
+
+| Perfil | Nível Didático | Postura Pedagógica do Sistema | Suporte Visível | Exigência Cognitiva do Aluno |
+| :--- | :--- | :--- | :--- | :--- |
+| **`full`** | Prática Básica | *"Eu mostro claramente onde olhar e relembro a regra."* | Destaque do foco + fórmula relacional ($A[j] > A[j+1]?$) + prompt instrutivo | Reconhecer a aplicação direta da regra formal |
+| **`reduced`** | Prática Intermediária | *"Eu mostro o estado relevante, mas o estudante interpreta a regra."* | Destaque do foco factual + prompt aberto | Interpretar o estado dos dados e deduzir a ação necessária |
+| **`minimal`** | Prática Avançada | *"Eu apresento somente o estado algorítmico necessário e o estudante decide autonomamente."* | Destaque factual estrito de índices e caixas ativas | Autonomia decisória total sobre o fluxo do algoritmo |
+
+### 14.3. Invariantes Pedagógicos e Éticos Invioláveis
+Para assegurar a validade pedagógica e evitar práticas disfuncionais de design, foram estabelecidas quatro invariantes absolutas:
+1. **Fading NÃO é Ocultação Factual:** A redução de suporte jamais esconde informações necessárias para a execução determinística do algoritmo. Pointers, índices numéricos, valores das caixas, caixas consolidadas (`OK`) e condições de contorno (como chegada à cabeceira $j = -1$ no Insertion Sort) permanecem 100% visíveis em todos os níveis.
+2. **Feedback Formativo Não Desvanece:** O erro é sempre uma oportunidade pedagógica. Enquanto as pistas *anteriores* à decisão são desvanecidas, o feedback *posterior* a uma escolha incorreta permanece completo, instrutivo e detalhado em todos os perfis.
+3. **Disponibilidade Permanente de Dicas:** O botão de dica (`[ ? DICA ]`) permanece acessível em todos os níveis, garantindo que o estudante bloqueado possa solicitar andaime pontual mediante dedução controlada de score.
+4. **Invariância de Acessibilidade:** Acessibilidade não é andaime pedagógico; é requisito de equidade. Atributos ARIA, papéis semânticos, rótulos de leitor de tela e suporte a navegação por teclado jamais são reduzidos ou alterados em função do perfil de suporte.
+
+---
+
+## 15. Casos do Algoritmo e Síntese Reflexiva Pós-Execução (Marco LEARNING-R3-A)
+
+O marco **LEARNING-R3-A** introduz a infraestrutura curricular para **Casos do Algoritmo** (*Algorithm Cases*), homologando um caso-piloto por módulo central ([`ADR 0026`](../adr/0026-algorithm-case-architecture-and-activity-context.md)).
+
+### 15.1. Distinção Epistemológica: Práticas Procedurais vs. Casos do Algoritmo
+1. **Práticas Regulares (Procedurais / Estocásticas):**
+   - Vetores gerados pseudo-aleatoriamente via PRNG Mulberry32 respeitando predicados de rejeição matemática;
+   - Foco: Desenvolvimento de fluência cinestésica e tomada de decisão sob incerteza;
+   - Variação: Múltiplas execuções fornecem configurações distintas dentro do mesmo perfil pedagógico.
+2. **Casos do Algoritmo (Determinísticos / Curados):**
+   - Vetores estáticos estritos (zero PRNG, sem sementes aleatórias, sem botão de "Nova Entrada");
+   - Foco: Evidenciar propriedades analíticas essenciais (melhor caso, pior caso, invariantes de sensibilidade à entrada e assimetria entre movimentações e comparações);
+   - Invariância: Repetições reproduzem exatamente a mesma entrada e as mesmas transições de estado.
+
+### 15.2. Casos-Piloto e seus Objetivos Conceituais
+- **Bubble Sort — Quase Ordenado (`[10, 30, 20, 40, 50]`):**
+  - *Observação:* Apenas um par adjacente invertido ($30 \leftrightarrow 20$). O aluno realiza uma única permuta física, mas é obrigado a efetuar todas as 10 comparações canônicas para esgotar as passadas.
+  - *Objetivo:* Contrastar o esforço mínimo de reorganização com a redundância assintótica da verificação canônica sem parada antecipada.
+- **Selection Sort — Já Ordenado (`[10, 20, 30, 40, 50]`):**
+  - *Observação:* O vetor encontra-se em ordem crescente. O aluno realiza 0 trocas efetivas (todas as decisões de transferência consolidam a posição $i = \text{minIndex}$).
+  - *Objetivo:* Constatar a insensibilidade à entrada do Selection Sort, que executa invariavelmente $\frac{n(n-1)}{2} = 10$ comparações mesmo na ausência total de desordem.
+- **Insertion Sort — Quase Ordenado (`[10, 20, 40, 30, 50]`):**
+  - *Observação:* Uma única chave fora de posição ($30$). Exige apenas 1 deslocamento (*shift*), enquanto as outras 4 chaves encaixam-se imediatamente sem deslocamentos.
+  - *Objetivo:* Demonstrar a eficiência adaptativa do Insertion Sort, que atinge complexidade próxima de $\Theta(n)$ em entradas quase ordenadas pela interrupção imediata da busca interna.
+
+### 15.3. Síntese Reflexiva Baseada em Fatos Reais
+A reflexão pedagógica exibida na `ResultScreen` em contexto de caso não é um texto estático genérico. Ela é gerada dinamicamente pela função pura `buildReflection(metrics)` a partir dos contadores reais da sessão (`comparisons`, `swaps`, `shifts`, `insertions`), ancorando a teoria na experiência empírica concreta que o estudante acabou de vivenciar.
+
+
+

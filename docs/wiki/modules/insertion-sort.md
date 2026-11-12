@@ -16,7 +16,7 @@
 - **Status Factual:** `IMPLEMENTADO E ATIVADO (P2.2 CONCLUÍDO)` (Engine pura, constraints, briefing, tutorial guiado, práticas proceduralmente calibradas, tela de conclusão do conjunto, ResultScreen com telemetria de shifts/inserts, modelo de replay puro, pseudocódigo sincronizado de 11 linhas, tela unificada de replay/demonstração e persistência Schema v4 ativa; status no catálogo: `available`)
 - **Classificação Curricular:** Algoritmo Elementar de Inserção com Subvetor Ordenado Crescente
 - **Complexidade Temporal:**
-  - **Melhor Caso (Vetor Já Ordenado):** $\Omega(n)$ comparações, $0$ deslocamentos físicos
+  - **Melhor Caso (Vetor Já Ordenado):** $\Theta(n)$ comparações, $0$ deslocamentos físicos
   - **Caso Médio:** $\Theta(n^2)$ comparações, $\Theta(n^2)$ deslocamentos de elementos
   - **Pior Caso (Vetor Invertido):** $\Theta(n^2)$ comparações ($\frac{n(n-1)}{2}$), $\frac{n(n-1)}{2}$ deslocamentos
 - **Complexidade Espacial (Memória Auxiliar):** $O(1)$ (in-place; 1 registrador auxiliar para a chave suspensa)
@@ -193,54 +193,85 @@ Fica aprovada a **Proposta A Refinada**, com as seguintes diretrizes ergonômica
 
 ---
 
-## 10. Tipos de Exercícios Suportados (Taxonomia do Módulo)
+## 10. Tipos de Exercícios Suportados (Taxonomia do Módulo / LEARNING-R1)
 
-| Tipo de Exercício | Suporte | ID Canônico | Artefato Implementado / Status |
-| :--- | :---: | :---: | :--- |
-| **A. Introdução / Conceito** | `OBRIGATÓRIO` | `insertion-canonical` | `ProtocolModeBriefingScreen.tsx` (`IMPLEMENTADO`, P2.2-C) |
-| **B. Demonstração** | `OBRIGATÓRIO` | `insertion-demo` | `insertionDemonstration.ts` puro (`IMPLEMENTADO`, P2.2-C; visual em P2.2-E) |
-| **C. Tutorial Guiado** | `OBRIGATÓRIO` | `insertion-tutorial` | `InsertionTutorialScreen.tsx` sobre vetor `[4, 2, 3]` (`IMPLEMENTADO`, P2.2-C) |
-| **D. Prática Básica** | `OBRIGATÓRIO` | `insertion.practice.basic` | `InsertionGameScreen.tsx` com lote de 4 cargas (`IMPLEMENTADO`, P2.2-D) |
-| **E. Prática Intermediária** | `OBRIGATÓRIO` | `insertion.practice.intermediate` | `InsertionGameScreen.tsx` com lote de 5 cargas (`IMPLEMENTADO`, P2.2-D) |
-| **E. Prática Avançada** | `OBRIGATÓRIO` | `insertion.practice.advanced` | `InsertionGameScreen.tsx` com lote de 6 cargas (`IMPLEMENTADO`, P2.2-D) |
-| **Encerramento do Conjunto** | `OBRIGATÓRIO` | `insertion.practice.set-complete` | `PracticeSetCompleteScreen.tsx` (`IMPLEMENTADO`, P2.2-D) |
-| **F. Casos do Algoritmo** | `OBRIGATÓRIO` | `insertion.cases.*` | Bateria de 8 casos curados fixos (planejado para P2.2-E/F) |
-| **G. Desafio** | `OPCIONAL` | `insertion.challenge` | Modo "Fluxo Contínuo / Inserção Online" (futuro) |
-| **H. Prática Livre (Sandbox)**| `OPCIONAL` | `insertion.sandbox` | Montagem livre de vetor e inspeção aberta (futuro) |
+> **Expansão Pedagógica Canônica:** Ver especificação completa em [`learning-experience-expansion.md`](../learning-experience-expansion.md).
+
+| Tipo de Exercício | Suporte | ID Canônico | Artefato Implementado / Status | Mapeamento no Schema v4 |
+| :--- | :---: | :---: | :--- | :--- |
+| **A. Introdução / Conceito** | `OBRIGATÓRIO` | `insertion-canonical` | `ProtocolModeBriefingScreen.tsx` (`IMPLEMENTADO`, P2.2-C) | Volátil (não persistido no Schema v4; acesso livre sob demanda) |
+| **B. Demonstração** | `OBRIGATÓRIO` | `insertion-demo` | `insertionDemonstration.ts` puro (`IMPLEMENTADO`, P2.2-C; visual em P2.2-E) | Volátil (memória) |
+| **C. Tutorial Guiado** | `OBRIGATÓRIO` | `insertion-tutorial` | `InsertionTutorialScreen.tsx` sobre vetor `[4, 2, 3]` (`IMPLEMENTADO`, P2.2-C) | `modules.insertion.completedTutorial` |
+| **D. Prática Básica** | `OBRIGATÓRIO` | `insertion.practice.basic` | `InsertionGameScreen.tsx` ($n=4$ com vaga única assistida) | `insertion.practice.basic` |
+| **E. Prática Intermediária** | `OBRIGATÓRIO` | `insertion.practice.intermediate` | `InsertionGameScreen.tsx` ($n=5$ com deslocamentos múltiplos) | `insertion.practice.intermediate` |
+| **E. Prática Avançada** | `OBRIGATÓRIO` | `insertion.practice.advanced` | `InsertionGameScreen.tsx` ($n=6$ com autonomia de inserção) | `insertion.practice.advanced` |
+| **Encerramento do Conjunto** | `OBRIGATÓRIO` | `insertion.practice.set-complete` | `PracticeSetCompleteScreen.tsx` (`IMPLEMENTADO`, P2.2-D) | N/A |
+| **F. Casos do Algoritmo** | `OBRIGATÓRIO` | `insertion.case.*` | Bateria de 5 casos curados principais (ordenado, reverso, quase ordenado, cabeceira, duplicatas) | `insertion.case.*` |
+| **G. Desafio Didático** | `OPCIONAL` | `insertion.challenge.zero-shifts` | Desafio "Zero Shifts" em vetores quase ordenados | `insertion.challenge.zero-shifts` (CANDIDATO - Aguardando Homologação) |
+| **H. Prática Livre (Sandbox)**| `OPCIONAL` | `insertion.sandbox` | Modo "Nova Entrada" e montagem livre (Marco LEARNING-R7) | `insertion.sandbox` |
 
 ---
 
-## 11. Casos Pedagógicos Curados Específicos
+## 11. Casos Pedagógicos Curados Específicos (Plano LEARNING-R1)
 
-1. **Melhor Caso Linear — Já Ordenado:** `[10, 20, 30, 40, 50]`  
-   - *Propriedade:* Demonstrar que $C(n) = n - 1 = 4$ e $\text{shifts} = 0$. Todas as chaves encontram parada imediata em $j = i - 1$.
-2. **Pior Caso Quadrático — Inverso:** `[50, 40, 30, 20, 10]`  
-   - *Propriedade:* Demonstrar o custo máximo assintótico. $C(n) = \frac{n(n-1)}{2} = 10$, $\text{shifts} = 10$. Todas as chaves vão até a cabeceira $j=-1$.
-3. **Quase Ordenado (Adaptabilidade):** `[10, 15, 25, 20, 30]`  
-   - *Propriedade:* Apenas a carga 20 está fora do lugar. O Insertion realiza pouquíssimas operações ($O(n+d)$), superando amplamente o Selection Sort.
-4. **Inserção com Múltiplos Shifts:** `[10, 30, 40, 50, 20]`  
-   - *Propriedade:* Uma onda contínua de 3 deslocamentos sucessivos ($50, 40, 30$), demonstrando a abertura de lacuna no meio do vetor.
-5. **Chave no Início da Esteira:** `[30, 40, 50, 10]`  
-   - *Propriedade:* Força o esvaziamento completo até $j < 0$, ensinando a condição de cabeceira.
-6. **Passada sem Nenhum Shift:** `[10, 30, 20, 40]`  
-   - *Propriedade:* Na passada $i=3$ (chave 40), $A[2]=30 \le 40$, encaixando imediatamente sem mover nenhuma caixa.
-7. **Duplicados e Estabilidade Formal:** `[30a, 10, 30b, 20]`  
-   - *Propriedade:* Ao comparar a chave $30b$ com $30a$, $30a \le 30b$ para o laço, garantindo que $30b$ fique após $30a$.
-8. **Vetor com Mínimo Absoluto na Última Posição:** `[20, 30, 40, 5]`  
-   - *Propriedade:* Mostra como uma única carga desordenada pode "varrer" toda a região ordenada anteriormente consolidada.
+1. **Melhor Caso Linear — Já Ordenado (`[10, 20, 30, 40, 50]`) — ID: `insertion.case.already-sorted`**  
+   - *Propriedade:* Demonstrar que $C(n) = n - 1 = 4$ e $\text{shifts} = 0$. Todas as chaves encontram parada imediata em $j = i - 1$, confirmando empiricamente o melhor caso $\Theta(n)$.
+2. **Pior Caso Quadrático — Ordem Reversa (`[50, 40, 30, 20, 10]`) — ID: `insertion.case.reverse`**  
+   - *Propriedade:* Demonstrar o custo máximo assintótico. $C(n) = \frac{n(n-1)}{2} = 10$, $\text{shifts} = 10$. Todas as chaves viajam até a cabeceira $j < 0$.
+3. **Quase Ordenado (Adaptabilidade) (`[10, 20, 40, 30, 50]`) — ID: `insertion.case.nearly-sorted` [HOMOLOGADO EM PRODUÇÃO - LEARNING-R3-A / ADR 0026]**  
+   - *Propriedade:* Apenas a chave 30 exige 1 shift; as demais pousam diretamente (5 comparações, 1 shift, 4 inserções diretas, 0 swaps). O Insertion realiza pouquíssimas operações, confirmando a complexidade próxima de $\Theta(n)$. Integrado ao Seletor de Práticas e com reflexão factual pós-execução.
+4. **Chave até a Cabeceira (`[30, 40, 50, 10]`) — ID: `insertion.case.head-landing`**  
+   - *Propriedade:* A chave 10 viaja até $j < 0$, demonstrando cinestesicamente a condição de limite esquerdo da esteira.
+5. **Duplicatas e Estabilidade Formal (`[20, 30a, 30b, 10]`) — ID: `insertion.case.duplicates`**  
+   - *Propriedade:* Ao comparar a chave $30b$ com $30a$, a condição $30a \le 30b$ interrompe o laço, garantindo que $30b$ pouse à direita de $30a$.
 
 ---
 
 ## 12. Geração Procedural e Constraints do Módulo
 
-Utiliza exclusivamente a infraestrutura global `generateSortingArray` (PRNG Mulberry32) em `src/game/generation/`:
+- **Gerador:** `generateSortingArray` e predicates puros em `src/game/sorting/insertion/insertionConstraints.ts` (PRNG Mulberry32) configurados com restrições procedurais diferenciadas por nível (Marco LEARNING-R2-A / ADR 0025).
+- **Tamanhos e Perfis Curriculares:**
+  - Prática Básica (`insertion.practice.basic`): $n = 4$ elementos, perfil `foundation`, suporte `full`;
+  - Prática Intermediária (`insertion.practice.intermediate`): $n = 5$ elementos, perfil `mixed-decisions`, suporte `reduced`;
+  - Prática Avançada (`insertion.practice.advanced`): $n = 6$ elementos, perfil `autonomous-complex`, suporte `minimal`.
+- **Constraints Matemáticas Obrigatórias por Nível:**
+  - **Prática Básica (`INSERTION_BASIC_CONSTRAINTS`):**
+    - `isNotSorted`: impede vetores já ordenados;
+    - `isNotReverseSorted`: impede pior caso trivial;
+    - `hasAtLeastOneShift`: garante que ao menos uma chave exige deslocamento;
+    - `hasAtLeastOneDirectInsert`: garante que ao menos uma chave pousa imediatamente sem deslocamento ($A[i-1] \le A[i]$);
+    - `insertion-condition-false-stop` (`hasConditionFalseStopWithShift`): exige que em ao menos uma passada ocorra parada relacional ($A[j] \le \text{chave}$) após pelo menos 1 deslocamento prévio;
+    - `insertion-moderate-shifts` (`hasModerateShiftsInBasic`): controla o volume total de shifts ($1 \le \text{totalShifts} \le 4$), evitando carga mecânica excessiva na introdução.
+  - **Prática Intermediária (`INSERTION_INTERMEDIATE_CONSTRAINTS`):**
+    - `isNotSorted`, `isNotReverseSorted`, `hasAtLeastOneShift`, `hasAtLeastOneDirectInsert`, `insertion-condition-false-stop`;
+    - `insertion-multiple-shifts` (`hasInsertionWithMultipleShifts`): exige ao menos uma passada com múltiplos deslocamentos;
+    - `insertion-heterogeneous-costs` (`hasHeterogeneousPassCosts`): assegura custos de deslocamento variados entre as passadas (sem exigir obrigatoriamente chegada à cabeceira, reservada para o caso curado `insertion.case.head-landing`).
+  - **Prática Avançada (`INSERTION_ADVANCED_CONSTRAINTS`):**
+    - `isNotSorted`, `isNotReverseSorted` (restaurado: exclui o vetor estritamente reverso, reservado para `insertion.case.reverse`), `hasAtLeastOneShift`, `insertion-multiple-shifts`;
+    - `insertion-head-landing` (`hasHeadLandingInAtLeastOnePass`): garante que em ao menos uma passada a chave viaja até a cabeceira da esteira ($j < 0$);
+    - `insertion-diverse-shift-trajectories` (`hasDiverseShiftTrajectories`): exige presença simultânea de passadas com 0 deslocamento (inserção direta), 1 deslocamento único e $\ge 2$ deslocamentos múltiplos.
+- **Fallbacks Curados Determinísticos:**
+  - Padrões canônicos fixos para $n=4$ (`[40, 20, 50, 30]`), $n=5$ (`[50, 20, 60, 10, 40]`) e $n=6$ (`[60, 15, 45, 90, 30, 20]`), satisfazendo integralmente todas as restrições pedagógicas de seus respectivos níveis.
 
-- **Tamanhos Canônicos:** $n=4$ (Básica), $n=5$ (Intermediária), $n=6$ (Avançada). Intervalo $1 \dots 99$ sem duplicatas.
-- **Predicados Matemáticos Puros (`insertionConstraints.ts`):**
-  - `isNotSorted`: Rejeita vetores já ordenados nas práticas regulares (para garantir trabalho mecânico).
-  - `isNotReverseSorted`: Rejeita pior caso absoluto trivial.
-  - `hasAtLeastOneShift`: Garante que pelo menos uma passada exigirá ao menos um deslocamento.
-  - `hasAtLeastOneDirectInsert`: Garante que pelo menos uma passada terá parada imediata sem deslocamentos ($A[i-1] \le A[i]$).
+### 12.1. Scaffolding Fading na Interface de Gameplay (Marco LEARNING-R2-B)
+A interface dedicada do Insertion Sort (`InsertionGameScreen.tsx`) aplica a progressão de andaimes cognitivos (`PracticeSupportProfile`):
+- **`full` (Prática Básica):**
+  - Badge temático no painel de status: `SUPORTE COMPLETO` (esmeralda);
+  - Condição relacional explícita: Container de condição destacando a fórmula exata $A[j] > \text{CHAVE} ?$;
+  - Prompt: *"Compare a carga sob o scanner com a chave suspensa."*.
+- **`reduced` (Prática Intermediária):**
+  - Badge temático: `SUPORTE REDUZIDO` (âmbar);
+  - Omissão da condição relacional: O container de condição oculta a fórmula comparativa e apresenta mensagem interpretativa;
+  - Prompt: *"Avalie se a carga sob o scanner deve ser deslocada ou se a vaga é ideal."*.
+- **`minimal` (Prática Avançada):**
+  - Badge temático: `AUTONOMIA MÁXIMA` (púrpura);
+  - Autonomia plena de decisão: Nenhuma fórmula ou dica de decisão prévia na interface;
+  - Prompt: *"Determine autonomamente a posição correta da chave suspensa."*.
+- **Invariantes Invioláveis:**
+  - **Identificação da Cabeceira ($j = -1$):** A condição de término da esteira ($j = -1 \text{ • CABECEIRA DA ESTEIRA ALCANÇADA}$) permanece sempre explícita em todos os perfis quando $j < 0$, pois constitui um fato algorítmico do laço `while (j >= 0)`;
+  - **Papéis Semânticos e Física da Esteira:** A chave suspensa no trilho aéreo, a vaga única aberta (`hole`), as caixas ordenadas (`ORD`) e a caixa sob scanner (`SCAN`) permanecem 100% visíveis com seus halos em todos os perfis;
+  - O botão `[ ? DICA ]` permanece disponível em todos os perfis;
+  - O feedback formativo detalhado em erros de deslocamento ou encaixe é integral em todos os perfis.
 
 ---
 

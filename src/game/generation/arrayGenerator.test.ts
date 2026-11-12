@@ -2,6 +2,11 @@ import { describe, it, expect } from "vitest";
 import {
   generateSortingArray,
   generateBubblePhaseArray,
+  generateBubblePracticeArray,
+  getBubblePracticeConstraints,
+  BUBBLE_BASIC_CONSTRAINTS,
+  BUBBLE_INTERMEDIATE_CONSTRAINTS,
+  BUBBLE_ADVANCED_CONSTRAINTS,
   BUBBLE_CAMPAIGN_PHASE_LENGTHS,
   ArrayGenerationError,
   isNotSorted,
@@ -365,6 +370,79 @@ describe("Infraestrutura Global de Geração Procedural de Vetores (P1.9)", () =
       // Todos os protocolos futuros recebem a entrada rigorosamente idêntica
       expect(vectorForBubble.values).toEqual(vectorForSelection.values);
       expect(vectorForSelection.values).toEqual(vectorForInsertion.values);
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // 9. Diferenciação Curricular Procedural do Bubble Sort (LEARNING-R2-A)
+  // --------------------------------------------------------------------------
+  describe("9. Diferenciação Curricular Procedural do Bubble Sort (LEARNING-R2-A)", () => {
+    it("deve retornar conjuntos de restrições distintos para basic, intermediate e advanced", () => {
+      const basic = getBubblePracticeConstraints("basic");
+      const intermediate = getBubblePracticeConstraints("intermediate");
+      const advanced = getBubblePracticeConstraints("advanced");
+
+      expect(basic).toBe(BUBBLE_BASIC_CONSTRAINTS);
+      expect(intermediate).toBe(BUBBLE_INTERMEDIATE_CONSTRAINTS);
+      expect(advanced).toBe(BUBBLE_ADVANCED_CONSTRAINTS);
+
+      expect(basic.map((c) => c.id)).toContain("bubble-multi-displacement");
+      expect(intermediate.map((c) => c.id)).toContain("bubble-balanced-decisions");
+      expect(advanced.map((c) => c.id)).toContain("bubble-advanced-decisions");
+    });
+
+    it("gera vetores para Prática Básica (n=4) satisfazendo todas as restrições em 25 seeds", () => {
+      for (let i = 0; i < 25; i++) {
+        const seed = `bubble-basic-eval-${i * 97 + 13}`;
+        const res = generateBubblePracticeArray("basic", seed);
+        expect(res.values).toHaveLength(4);
+        expect(hasNoDuplicates(res.values)).toBe(true);
+
+        for (const constraint of BUBBLE_BASIC_CONSTRAINTS) {
+          expect(
+            constraint.predicate(res.values),
+            `Seed ${seed} falhou na constraint ${constraint.id}`
+          ).toBe(true);
+        }
+      }
+    });
+
+    it("gera vetores para Prática Intermediária (n=5) satisfazendo todas as restrições em 25 seeds", () => {
+      for (let i = 0; i < 25; i++) {
+        const seed = `bubble-inter-eval-${i * 101 + 31}`;
+        const res = generateBubblePracticeArray("intermediate", seed);
+        expect(res.values).toHaveLength(5);
+        expect(hasNoDuplicates(res.values)).toBe(true);
+
+        for (const constraint of BUBBLE_INTERMEDIATE_CONSTRAINTS) {
+          expect(
+            constraint.predicate(res.values),
+            `Seed ${seed} falhou na constraint ${constraint.id}`
+          ).toBe(true);
+        }
+      }
+    });
+
+    it("gera vetores para Prática Avançada (n=6) satisfazendo todas as restrições em 25 seeds", () => {
+      for (let i = 0; i < 25; i++) {
+        const seed = `bubble-adv-eval-${i * 113 + 47}`;
+        const res = generateBubblePracticeArray("advanced", seed);
+        expect(res.values).toHaveLength(6);
+        expect(hasNoDuplicates(res.values)).toBe(true);
+
+        for (const constraint of BUBBLE_ADVANCED_CONSTRAINTS) {
+          expect(
+            constraint.predicate(res.values),
+            `Seed ${seed} falhou na constraint ${constraint.id}`
+          ).toBe(true);
+        }
+      }
+    });
+
+    it("garante determinismo estrito entre chamadas idênticas", () => {
+      const runA = generateBubblePracticeArray("intermediate", "seed-determinism-xyz");
+      const runB = generateBubblePracticeArray("intermediate", "seed-determinism-xyz");
+      expect(runA.values).toEqual(runB.values);
     });
   });
 });

@@ -95,6 +95,94 @@ export const hasMultipleMinUpdatesInAtLeastOnePass: ArrayConstraint = (arr) => {
 };
 
 /**
+ * Análise analítica pura de execução do Selection Sort sobre um vetor.
+ * Módulo puramente funcional, sem efeitos colaterais e sem acoplamento com UI/Engine.
+ */
+export interface SelectionSortAnalysis {
+  readonly totalNewMin: number;
+  readonly totalKeepMin: number;
+  readonly passesWithMultipleUpdates: number;
+  readonly hasNonAdjacentTransfer: boolean;
+  readonly hasInterleavedKeepAndNewMin: boolean;
+}
+
+export function analyzeSelectionSort(arr: readonly number[]): SelectionSortAnalysis {
+  const a = [...arr];
+  const n = a.length;
+  let totalNewMin = 0;
+  let totalKeepMin = 0;
+  let passesWithMultipleUpdates = 0;
+  let hasNonAdjacentTransfer = false;
+  let hasInterleavedKeepAndNewMin = false;
+
+  for (let i = 0; i < n - 1; i++) {
+    let minIdx = i;
+    let updatesInPass = 0;
+    let keepsInPass = 0;
+
+    for (let j = i + 1; j < n; j++) {
+      if (a[j] < a[minIdx]) {
+        minIdx = j;
+        updatesInPass++;
+        totalNewMin++;
+      } else {
+        keepsInPass++;
+        totalKeepMin++;
+      }
+    }
+
+    if (updatesInPass >= 2) {
+      passesWithMultipleUpdates++;
+    }
+
+    if (updatesInPass >= 1 && keepsInPass >= 1) {
+      hasInterleavedKeepAndNewMin = true;
+    }
+
+    if (Math.abs(minIdx - i) >= 2) {
+      hasNonAdjacentTransfer = true;
+    }
+
+    if (minIdx !== i) {
+      const temp = a[i];
+      a[i] = a[minIdx];
+      a[minIdx] = temp;
+    }
+  }
+
+  return {
+    totalNewMin,
+    totalKeepMin,
+    passesWithMultipleUpdates,
+    hasNonAdjacentTransfer,
+    hasInterleavedKeepAndNewMin,
+  };
+}
+
+/**
+ * Predicado puro: Valida se em ao menos uma passada há intercalação de decisões
+ * (ocorrência de ao menos um NOVO MÍNIMO e ao menos um MANTER CANDIDATO na mesma passada).
+ */
+export const hasInterleavedKeepAndNewMin: ArrayConstraint = (arr) => {
+  return analyzeSelectionSort(arr).hasInterleavedKeepAndNewMin;
+};
+
+/**
+ * Predicado puro: Valida se ocorre ao menos uma transferência de elemento não adjacente (|minIndex - i| >= 2).
+ */
+export const hasNonAdjacentCommitTransfer: ArrayConstraint = (arr) => {
+  return analyzeSelectionSort(arr).hasNonAdjacentTransfer;
+};
+
+/**
+ * Predicado puro: Valida riqueza decisória na varredura longa (totalKeepMin >= 3 e totalNewMin >= 2).
+ */
+export const hasRichSelectionDecisions: ArrayConstraint = (arr) => {
+  const res = analyzeSelectionSort(arr);
+  return res.totalKeepMin >= 3 && res.totalNewMin >= 2;
+};
+
+/**
  * Restrições procedurais fundamentais para Selection Sort:
  * 1. Não previamente ordenado;
  * 2. Não completamente invertido;
@@ -125,13 +213,95 @@ export const SELECTION_BASE_CONSTRAINTS: readonly ArrayConstraintDefinition[] = 
 ]);
 
 /**
- * Retorna as constraints apropriadas para a fase informada (1, 2 ou 3).
- * Fases 2 e 3 incorporam a restrição de múltiplas atualizações para aprofundar o discernimento do operador.
+ * Restrições para Prática Básica de Selection Sort (n = 4):
+ */
+export const SELECTION_BASIC_CONSTRAINTS = SELECTION_BASE_CONSTRAINTS;
+
+/**
+ * Restrições para Prática Intermediária de Selection Sort (n = 5):
+ */
+export const SELECTION_INTERMEDIATE_CONSTRAINTS: readonly ArrayConstraintDefinition[] = Object.freeze([
+  ...SELECTION_BASE_CONSTRAINTS,
+  {
+    id: "selection-multiple-min-updates",
+    description:
+      "O vetor deve favorecer ao menos uma passada com múltiplas atualizações do candidato mínimo",
+    predicate: hasMultipleMinUpdatesInAtLeastOnePass,
+  },
+  {
+    id: "selection-interleaved-decisions",
+    description:
+      "O vetor deve propiciar decisões intercaladas de NOVO MÍNIMO e MANTER na mesma passada",
+    predicate: hasInterleavedKeepAndNewMin,
+  },
+]);
+
+/**
+ * Restrições para Prática Avançada de Selection Sort (n = 6):
+ */
+export const SELECTION_ADVANCED_CONSTRAINTS: readonly ArrayConstraintDefinition[] = Object.freeze([
+  {
+    id: "selection-not-sorted",
+    description: "O vetor não deve estar previamente ordenado",
+    predicate: isNotSorted,
+  },
+  {
+    id: "selection-not-reverse-sorted",
+    description: "O vetor não deve estar totalmente invertido",
+    predicate: isNotReverseSorted,
+  },
+  {
+    id: "selection-multiple-min-updates",
+    description:
+      "O vetor deve favorecer ao menos uma passada com múltiplas atualizações do candidato mínimo",
+    predicate: hasMultipleMinUpdatesInAtLeastOnePass,
+  },
+  {
+    id: "selection-non-adjacent-transfer",
+    description:
+      "O vetor deve exigir ao menos uma transferência não adjacente de média ou longa distância",
+    predicate: hasNonAdjacentCommitTransfer,
+  },
+  {
+    id: "selection-rich-decisions",
+    description:
+      "O vetor deve propiciar alternância consistente entre inspeções de manutenção e atualização",
+    predicate: hasRichSelectionDecisions,
+  },
+]);
+
+/**
+ * Níveis curriculares de prática do Selection Sort na plataforma educacional:
+ */
+export type SelectionPracticeLevel = "basic" | "intermediate" | "advanced";
+
+/**
+ * Retorna as constraints pedagógicas para a prática de Selection Sort.
+ */
+export function getSelectionPracticeConstraints(
+  level: SelectionPracticeLevel
+): readonly ArrayConstraintDefinition[] {
+  if (level === "basic") {
+    return SELECTION_BASIC_CONSTRAINTS;
+  }
+  if (level === "intermediate") {
+    return SELECTION_INTERMEDIATE_CONSTRAINTS;
+  }
+  return SELECTION_ADVANCED_CONSTRAINTS;
+}
+
+/**
+ * Retorna as constraints apropriadas para a fase informada (1, 2 ou 3) ou nível de prática.
+ * Mantém retrocompatibilidade estrita com a assinatura e contagem de constraints original para fases numéricas (1=4, 2=5, 3=5).
  */
 export function getSelectionPhaseConstraints(
-  phase: number
+  phaseOrLevel: number | SelectionPracticeLevel
 ): readonly ArrayConstraintDefinition[] {
-  if (phase <= 1) {
+  if (typeof phaseOrLevel === "string") {
+    return getSelectionPracticeConstraints(phaseOrLevel);
+  }
+
+  if (phaseOrLevel <= 1) {
     return SELECTION_BASE_CONSTRAINTS;
   }
 
@@ -147,25 +317,17 @@ export function getSelectionPhaseConstraints(
 }
 
 /**
- * Gera deterministicamente um vetor procedural para as fases da futura campanha de Selection Sort.
- * - Fase 1: length = 4
- * - Fase 2: length = 5
- * - Fase 3: length = 6
- * - range: 1..99
- * - allowDuplicates: false
- *
- * Utiliza o gerador universal generateSortingArray de src/game/generation/.
+ * Gera deterministicamente um vetor procedural para as atividades práticas do Selection Sort.
+ * - basic: length = 4
+ * - intermediate: length = 5
+ * - advanced: length = 6
  */
-export function generateSelectionPhaseArray(
-  phase: number,
+export function generateSelectionPracticeArray(
+  level: SelectionPracticeLevel,
   seed?: SeedInput
 ): GeneratedArrayResult {
-  const clampedPhase = Math.max(
-    1,
-    Math.min(phase, SELECTION_CAMPAIGN_PHASE_LENGTHS.length)
-  );
-  const length = SELECTION_CAMPAIGN_PHASE_LENGTHS[clampedPhase - 1];
-  const constraints = getSelectionPhaseConstraints(clampedPhase);
+  const length = level === "basic" ? 4 : level === "intermediate" ? 5 : 6;
+  const constraints = getSelectionPracticeConstraints(level);
 
   return generateSortingArray({
     length,
@@ -176,4 +338,24 @@ export function generateSelectionPhaseArray(
     constraints,
     maxAttempts: DEFAULT_MAX_ATTEMPTS,
   });
+}
+
+/**
+ * Gera deterministicamente um vetor procedural para as fases/práticas de Selection Sort.
+ * Mantém retrocompatibilidade total com chamadas legadas numéricas (1, 2, 3).
+ */
+export function generateSelectionPhaseArray(
+  phase: number | SelectionPracticeLevel,
+  seed?: SeedInput
+): GeneratedArrayResult {
+  const level: SelectionPracticeLevel =
+    typeof phase === "string"
+      ? phase
+      : phase <= 1
+      ? "basic"
+      : phase === 2
+      ? "intermediate"
+      : "advanced";
+
+  return generateSelectionPracticeArray(level, seed);
 }

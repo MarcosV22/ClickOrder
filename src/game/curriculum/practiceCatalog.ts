@@ -31,8 +31,11 @@ export const BUBBLE_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.fre
     title: "PRÁTICA BÁSICA",
     shortTitle: "BÁSICA",
     description:
-      "Lote introdutório com 4 cargas. Exercite comparações entre pares contíguos e o deslocamento progressivo da maior carga.",
+      "Fundamentação de comparações adjacentes sobre 4 cargas. Exercite pares contíguos e o deslocamento progressivo da maior carga.",
     size: 4,
+    learningFocus: "Comparações locais e propagação da maior carga",
+    generatorProfile: "foundation",
+    supportProfile: "full",
     pedagogicalObjective:
       "Identificar a condição relacional A[j] > A[j+1], aplicar trocas físicas e manter pares já em ordem até a consolidação da primeira extremidade.",
   },
@@ -43,8 +46,11 @@ export const BUBBLE_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.fre
     title: "PRÁTICA INTERMEDIÁRIA",
     shortTitle: "INTERMEDIÁRIA",
     description:
-      "Lote com 5 cargas. Observe a retração do laço interno à medida que as maiores cargas se estabilizam à direita.",
+      "Propagação multissetorial sobre 5 cargas com trocas distribuídas em múltiplas passadas e redução do laço interno.",
     size: 5,
+    learningFocus: "Propagação multissetorial e redução do laço interno",
+    generatorProfile: "mixed-decisions",
+    supportProfile: "reduced",
     pedagogicalObjective:
       "Compreender a redução contínua do número de comparações a cada passada conforme a partição ordenada se expande.",
   },
@@ -55,8 +61,11 @@ export const BUBBLE_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.fre
     title: "PRÁTICA AVANÇADA",
     shortTitle: "AVANÇADA",
     description:
-      "Lote completo com 6 cargas. Domine o ciclo total de ordenação por comparações adjacentes e consolidação final.",
+      "Densidade rica de trocas e consolidação de múltiplas passadas sobre 6 cargas com autonomia analítica e desvanecimento de suporte.",
     size: 6,
+    learningFocus: "Densidade de trocas e estabilização de passadas múltiplas",
+    generatorProfile: "autonomous-complex",
+    supportProfile: "minimal",
     pedagogicalObjective:
       "Executar todas as passadas do algoritmo canônico garantindo estabilidade e verificação da invariante de ordenação.",
   },
@@ -70,8 +79,11 @@ export const SELECTION_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.
     title: "PRÁTICA BÁSICA",
     shortTitle: "BÁSICA",
     description:
-      "Lote introdutório com 4 cargas. Execute a varredura seletiva para localizar o menor item e transferi-lo para a posição alvo.",
+      "Varredura seletiva sobre 4 cargas. Localize o menor item global fora da primeira posição e execute a transferência para a posição alvo.",
     size: 4,
+    learningFocus: "Busca do mínimo global e desacoplamento varredura/commit",
+    generatorProfile: "foundation",
+    supportProfile: "full",
     pedagogicalObjective:
       "Operar a busca do mínimo na partição não ordenada e efetuar no máximo uma transferência pontual ao final da varredura.",
   },
@@ -82,8 +94,11 @@ export const SELECTION_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.
     title: "PRÁTICA INTERMEDIÁRIA",
     shortTitle: "INTERMEDIÁRIA",
     description:
-      "Lote com 5 cargas. Pratique o acompanhamento contínuo e a atualização dinâmica do candidato mínimo ao longo da esteira.",
+      "Acompanhamento contínuo de mínimo fluido sobre 5 cargas com múltiplas atualizações dinâmicas de minIndex e consolidação progressiva.",
     size: 5,
+    learningFocus: "Candidato a mínimo dinâmico e consolidação progressiva",
+    generatorProfile: "mixed-decisions",
+    supportProfile: "reduced",
     pedagogicalObjective:
       "Acompanhar as mudanças do ponteiro minIndex e consolidar elementos de forma ordenada da esquerda para a direita.",
   },
@@ -94,8 +109,11 @@ export const SELECTION_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.
     title: "PRÁTICA AVANÇADA",
     shortTitle: "AVANÇADA",
     description:
-      "Lote completo com 6 cargas. Domine a varredura longa com garantia do número mínimo de trocas físicas.",
+      "Varredura longa sobre 6 cargas com discriminação fina entre candidatos locais, transferências não-adjacentes e número mínimo de trocas físicas.",
     size: 6,
+    learningFocus: "Varredura longa, discriminação fina e transferências variadas",
+    generatorProfile: "autonomous-complex",
+    supportProfile: "minimal",
     pedagogicalObjective:
       "Consolidar a invariante do Selection Sort: partição ordenada crescente à esquerda com exatamente n-1 transferências no máximo.",
   },
@@ -109,8 +127,11 @@ export const INSERTION_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.
     title: "PRÁTICA BÁSICA",
     shortTitle: "BÁSICA",
     description:
-      "Lote introdutório com 4 cargas. Elevação da chave ao trilho aéreo, comparações regressivas e inserção direta na vaga.",
+      "Mecânica da chave suspensa sobre 4 cargas. Elevação ao trilho, deslocamentos unitários controlados e inserção direta na vaga.",
     size: 4,
+    learningFocus: "Elevação da chave, deslocamentos unitários e inserção direta",
+    generatorProfile: "foundation",
+    supportProfile: "full",
     pedagogicalObjective:
       "Identificar a condição A[j] > chave, comandar o deslocamento unitário para a vaga e confirmar o encaixe com parada imediata.",
   },
@@ -121,8 +142,11 @@ export const INSERTION_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.
     title: "PRÁTICA INTERMEDIÁRIA",
     shortTitle: "INTERMEDIÁRIA",
     description:
-      "Lote com 5 cargas. Prática de deslocamentos sucessivos em cadeia na região ordenada da esteira.",
+      "Cadeia de deslocamentos sucessivos sobre 5 cargas com custos de passadas heterogêneos e parada por condição relacional.",
     size: 5,
+    learningFocus: "Deslocamentos em cadeia e inserção condicional",
+    generatorProfile: "mixed-decisions",
+    supportProfile: "reduced",
     pedagogicalObjective:
       "Operar múltiplos deslocamentos consecutivos para a direita abrindo espaço na esteira para a chave suspensa.",
   },
@@ -133,8 +157,11 @@ export const INSERTION_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.
     title: "PRÁTICA AVANÇADA",
     shortTitle: "AVANÇADA",
     description:
-      "Lote completo com 6 cargas. Domínio de cenários complexos com alta densidade de inversões e chegadas à cabeceira.",
+      "Trajetórias heterogêneas completas sobre 6 cargas com inserções diretas, múltiplos deslocamentos e chegada à cabeceira da esteira.",
     size: 6,
+    learningFocus: "Trajetórias heterogêneas e parada por limite de esteira",
+    generatorProfile: "autonomous-complex",
+    supportProfile: "minimal",
     pedagogicalObjective:
       "Completar o ciclo completo do algoritmo com varreduras longas, paradas condicionais e chegadas à cabeceira da esteira.",
   },
@@ -150,6 +177,9 @@ export const MERGE_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.free
     description:
       "Lote introdutório com 4 cargas. Consolidação da mecânica de dois ponteiros, intercalação e drenagem de ramal.",
     size: 4,
+    learningFocus: "Mecânica de dois ponteiros e intercalação de frentes",
+    generatorProfile: "foundation",
+    supportProfile: "full",
     pedagogicalObjective:
       "Comparar frentes de ramais, colher o menor elemento para o buffer auxiliar e drenar a cauda restante quando um ramal esgotar.",
   },
@@ -162,6 +192,9 @@ export const MERGE_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.free
     description:
       "Lote com 5 cargas. Compreensão da divisão assimétrica em subproblemas de 3 e 2 elementos.",
     size: 5,
+    learningFocus: "Divisão assimétrica de subproblemas e intercalação recursiva",
+    generatorProfile: "mixed-decisions",
+    supportProfile: "reduced",
     pedagogicalObjective:
       "Acompanhar a divisão estrutural de tamanho ímpar (3 à esquerda e 2 à direita) e coordenar as intercalações locais e raiz.",
   },
@@ -174,6 +207,9 @@ export const MERGE_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.free
     description:
       "Lote completo com 6 cargas. Domínio de confluências com chaves duplicadas e desempate estável obrigatório na esquerda.",
     size: 6,
+    learningFocus: "Desempate estável obrigatório sob chaves idênticas",
+    generatorProfile: "autonomous-complex",
+    supportProfile: "minimal",
     pedagogicalObjective:
       "Aplicar com rigor a regra de estabilidade canônica (<=): sob valores iguais na frente dos dois ramais, despachar invariavelmente a esquerda.",
   },
@@ -189,6 +225,9 @@ export const QUICK_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.free
     description:
       "Lote introdutório com 4 elementos sem duplicatas. Identifique o pivô e separe números menores/iguais e maiores.",
     size: 4,
+    learningFocus: "Particionamento em torno do pivô e selamento definitivo",
+    generatorProfile: "foundation",
+    supportProfile: "full",
     pedagogicalObjective:
       "Compreender o papel do pivô, comparar cada número pela regra <=, observar trocas quando necessário e fixar o pivô na posição definitiva com selo OK.",
   },
@@ -201,6 +240,9 @@ export const QUICK_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.free
     description:
       "Lote com 5 elementos sem duplicatas. Exercite a continuidade da ordenação nos subintervalos restantes.",
     size: 5,
+    learningFocus: "Recursão nos subintervalos e continuidade da partição",
+    generatorProfile: "mixed-decisions",
+    supportProfile: "reduced",
     pedagogicalObjective:
       "Manter o fluxo de particionamento após a partição inicial, aplicando o algoritmo aos trechos restantes até que todos os números recebam o selo OK definitivo.",
   },
@@ -213,6 +255,9 @@ export const QUICK_PRACTICE_CATALOG: readonly PracticeDefinition[] = Object.free
     description:
       "Lote completo com 6 elementos contendo exatamente um par de chaves idênticas. Confronto obrigatório de igualdade contra o pivô.",
     size: 6,
+    learningFocus: "Confronto de duplicatas e constatação de instabilidade",
+    generatorProfile: "autonomous-complex",
+    supportProfile: "minimal",
     pedagogicalObjective:
       "Confrontar elementos com valor idêntico ao pivô pela regra <= e acompanhar se a ordem relativa das duplicatas se mantém ou se inverte, constatando que o Quick Sort não garante estabilidade.",
   },

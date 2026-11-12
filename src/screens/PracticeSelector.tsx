@@ -16,8 +16,13 @@ import type { GameSaveSchema, ModuleId } from "../game/persistence/types";
 import { isChallengeModeUnlocked } from "../game/persistence/persistenceService";
 import {
   getModulePracticeStates,
+  getModuleCaseStates,
+  getPracticeSupportConfig,
+  getSupportProfileColorClasses,
   type PracticeLevel,
   type PracticeProgressState,
+  type AlgorithmCaseDefinition,
+  type CaseProgressState,
 } from "../game/curriculum";
 import { formatElapsedTime } from "../game/session";
 
@@ -25,6 +30,7 @@ export interface PracticeSelectorProps {
   readonly moduleId: ModuleId;
   readonly saveData: GameSaveSchema | undefined;
   readonly onSelectPractice: (level: PracticeLevel) => void;
+  readonly onSelectCase?: (caseDef: AlgorithmCaseDefinition) => void;
   readonly onOpenTutorial: () => void;
   readonly onOpenDemonstration?: () => void;
   readonly onReturnHome: () => void;
@@ -105,6 +111,7 @@ export default function PracticeSelector({
   moduleId,
   saveData,
   onSelectPractice,
+  onSelectCase,
   onOpenTutorial,
   onOpenDemonstration,
   onReturnHome,
@@ -112,6 +119,7 @@ export default function PracticeSelector({
 }: PracticeSelectorProps) {
   const theme = MODULE_THEMES[moduleId] ?? MODULE_THEMES.bubble!;
   const practiceStates = getModulePracticeStates(saveData, moduleId);
+  const caseStates = getModuleCaseStates(saveData, moduleId);
   const challengeUnlocked =
     moduleId === "bubble"
       ? isChallengeModeUnlocked(saveData as any)
@@ -200,6 +208,7 @@ export default function PracticeSelector({
             const isCompleted = state.status === "completed";
             const isAvailable = state.status === "available";
             const isLocked = state.status === "locked";
+            const supportConfig = getPracticeSupportConfig(state.definition.supportProfile);
 
             return (
               <div
@@ -252,15 +261,26 @@ export default function PracticeSelector({
                     >
                       {state.definition.description}
                     </p>
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded border font-mono tracking-wider font-bold uppercase ${getSupportProfileColorClasses(state.definition.supportProfile)}`}
+                        style={{ fontFamily: "'Space Mono', monospace" }}
+                      >
+                        {supportConfig.badgeLabel}
+                      </span>
+                      <span className="text-[11px] text-white/50 font-mono">
+                        {supportConfig.description}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Objetivo Pedagógico */}
+                  {/* Foco de Aprendizagem */}
                   <div className="pt-2 border-t border-white/10">
                     <span
                       className="text-xs uppercase font-mono tracking-wider text-cyan-300 font-bold block mb-1"
                       style={{ fontFamily: "'Space Mono', monospace" }}
                     >
-                      OBJETIVO DA PRÁTICA:
+                      FOCO DE APRENDIZAGEM:
                     </span>
                     <p
                       className="text-xs text-slate-200 leading-relaxed"
@@ -335,6 +355,191 @@ export default function PracticeSelector({
             );
           })}
         </section>
+
+        {/* Seção Transversal: Casos do Algoritmo */}
+        {caseStates.length > 0 && (
+          <section
+            className="w-full flex flex-col gap-4 pt-2"
+            aria-label="Casos do Algoritmo"
+          >
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                <h2
+                  className="text-lg sm:text-xl font-bold text-white tracking-wide uppercase"
+                  style={{ fontFamily: "'Orbitron', sans-serif" }}
+                >
+                  EXPLORAR CASOS
+                </h2>
+              </div>
+              <p
+                className="text-xs text-white/70 font-mono"
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                Explore situações específicas que revelam propriedades do algoritmo.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full">
+              {caseStates.map((caseState: CaseProgressState) => {
+                const isCaseCompleted = caseState.status === "completed";
+                const isCaseAvailable = caseState.status === "available";
+                const isCaseLocked = caseState.status === "locked";
+
+                return (
+                  <div
+                    key={caseState.definition.id}
+                    className={`relative flex flex-col justify-between rounded-xl p-5 sm:p-6 backdrop-blur-md transition-all duration-300 border ${
+                      isCaseCompleted
+                        ? "border-emerald-500/40 bg-[#09152b]/90 shadow-lg shadow-emerald-950/20"
+                        : isCaseAvailable
+                          ? `border-white/20 bg-[#0c1533]/90 shadow-xl ${theme.cardBorderHover}`
+                          : "border-white/10 bg-[#080d20]/50 opacity-60"
+                    }`}
+                  >
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between gap-2">
+                        {isCaseCompleted ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-emerald-500/40 bg-emerald-950/60 text-emerald-300 text-[10px] font-mono font-bold tracking-wider uppercase">
+                            ✓ CONCLUÍDO
+                          </span>
+                        ) : isCaseAvailable ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-cyan-500/40 bg-cyan-950/60 text-cyan-300 text-[10px] font-mono font-bold tracking-wider uppercase">
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                            DISPONÍVEL
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-white/10 bg-white/5 text-white/40 text-[10px] font-mono tracking-wider uppercase">
+                            BLOQUEADO
+                          </span>
+                        )}
+
+                        <span
+                          className="text-[10px] font-mono uppercase tracking-wider text-cyan-300/80 font-bold"
+                          style={{ fontFamily: "'Space Mono', monospace" }}
+                        >
+                          CASO DETERMINÍSTICO
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3
+                          className="text-base sm:text-lg font-bold text-white tracking-wide"
+                          style={{ fontFamily: "'Orbitron', sans-serif" }}
+                        >
+                          {caseState.definition.title}
+                        </h3>
+                        <p
+                          className="text-xs text-slate-300 mt-1 leading-relaxed"
+                          style={{ fontFamily: "'Exo 2', sans-serif" }}
+                        >
+                          {caseState.definition.description}
+                        </p>
+                      </div>
+
+                      {/* Vetor Inicial do Caso */}
+                      <div className="p-2.5 rounded-lg bg-[#060b1a]/90 border border-white/10 flex items-center justify-between gap-2">
+                        <span
+                          className="text-[10px] font-mono uppercase text-slate-400 tracking-wider font-semibold"
+                          style={{ fontFamily: "'Space Mono', monospace" }}
+                        >
+                          Entrada fixa:
+                        </span>
+                        <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-cyan-300">
+                          [{caseState.definition.initialArray.join(", ")}]
+                        </div>
+                      </div>
+
+                      {/* Objetivo Pedagógico */}
+                      <div className="pt-2 border-t border-white/10">
+                        <span
+                          className="text-[10px] uppercase font-mono tracking-wider text-cyan-300 font-bold block mb-1"
+                          style={{ fontFamily: "'Space Mono', monospace" }}
+                        >
+                          OBJETIVO DE APRENDIZAGEM:
+                        </span>
+                        <p
+                          className="text-xs text-slate-200 leading-relaxed"
+                          style={{ fontFamily: "'Exo 2', sans-serif" }}
+                        >
+                          {caseState.definition.learningObjective}
+                        </p>
+                      </div>
+
+                      {/* Aviso de bloqueio se locked */}
+                      {isCaseLocked && (
+                        <p className="text-[11px] text-amber-300/80 font-mono mt-1">
+                          🔒 Disponível após concluir a Prática Básica deste módulo.
+                        </p>
+                      )}
+
+                      {/* Resultados se já concluído */}
+                      {isCaseCompleted && (
+                        <div className="mt-1 p-2.5 rounded-lg bg-[#060b1a]/80 border border-emerald-500/30 flex flex-col gap-1">
+                          <div className="flex items-center justify-between text-xs font-mono">
+                            <span className="text-slate-300 uppercase font-semibold">Melhor Score:</span>
+                            <span className="font-bold text-emerald-300">
+                              {caseState.bestScore !== undefined ? `${caseState.bestScore} PTS` : "—"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs font-mono">
+                            <span className="text-slate-300 uppercase font-semibold">Erros / Dicas:</span>
+                            <span className="text-slate-200">
+                              {caseState.bestErrors ?? 0} err • {caseState.bestHints ?? 0} dic
+                            </span>
+                          </div>
+                          {caseState.bestTimeMs !== undefined && (
+                            <div className="flex items-center justify-between text-xs font-mono">
+                              <span className="text-slate-300 uppercase font-semibold">Tempo:</span>
+                              <span className="text-slate-200">
+                                {formatElapsedTime(caseState.bestTimeMs)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Ação do Card de Caso */}
+                    <div className="mt-5 pt-3 border-t border-white/10">
+                      {isCaseCompleted ? (
+                        <GameButton
+                          onClick={() => onSelectCase?.(caseState.definition)}
+                          variant="secondary"
+                          size="md"
+                          icon="↺"
+                          className="w-full justify-center"
+                        >
+                          REPETIR CASO
+                        </GameButton>
+                      ) : isCaseAvailable ? (
+                        <GameButton
+                          onClick={() => onSelectCase?.(caseState.definition)}
+                          variant="primary"
+                          size="md"
+                          icon="→"
+                          iconPosition="right"
+                          className="w-full justify-center"
+                        >
+                          EXPLORAR CASO
+                        </GameButton>
+                      ) : (
+                        <GameButton
+                          variant="ghost"
+                          size="md"
+                          disabled
+                          className="w-full justify-center opacity-50 cursor-not-allowed text-xs text-white/40"
+                        >
+                          BLOQUEADO
+                        </GameButton>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Seção Especial: Modo Desafio Early Exit (Exclusivo Bubble Sort) */}
         {moduleId === "bubble" && (

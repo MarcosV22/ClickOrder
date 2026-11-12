@@ -3,10 +3,18 @@ import {
   isGlobalMinNotInFirstPosition,
   hasAtLeastOneKeepMin,
   hasMultipleMinUpdatesInAtLeastOnePass,
+  hasInterleavedKeepAndNewMin,
+  hasNonAdjacentCommitTransfer,
+  hasRichSelectionDecisions,
   SELECTION_CAMPAIGN_PHASE_LENGTHS,
   SELECTION_BASE_CONSTRAINTS,
+  SELECTION_BASIC_CONSTRAINTS,
+  SELECTION_INTERMEDIATE_CONSTRAINTS,
+  SELECTION_ADVANCED_CONSTRAINTS,
   getSelectionPhaseConstraints,
+  getSelectionPracticeConstraints,
   generateSelectionPhaseArray,
+  generateSelectionPracticeArray,
 } from "./selectionConstraints";
 import { isNotSorted, isNotReverseSorted } from "../../generation";
 
@@ -142,6 +150,55 @@ describe("Selection Sort Constraints & Procedural Generation", () => {
 
       const resTen = generateSelectionPhaseArray(10, 42);
       expect(resTen.values.length).toBe(6); // Clamp para Fase 3
+    });
+  });
+
+  describe("Diferenciação Curricular Procedural do Selection Sort (LEARNING-R2-A)", () => {
+    it("retorna constraints diferenciadas para basic, intermediate e advanced", () => {
+      const basic = getSelectionPracticeConstraints("basic");
+      const intermediate = getSelectionPracticeConstraints("intermediate");
+      const advanced = getSelectionPracticeConstraints("advanced");
+
+      expect(basic).toBe(SELECTION_BASIC_CONSTRAINTS);
+      expect(intermediate).toBe(SELECTION_INTERMEDIATE_CONSTRAINTS);
+      expect(advanced).toBe(SELECTION_ADVANCED_CONSTRAINTS);
+
+      expect(intermediate.map((c) => c.id)).toContain("selection-interleaved-decisions");
+      expect(advanced.map((c) => c.id)).toContain("selection-non-adjacent-transfer");
+      expect(advanced.map((c) => c.id)).toContain("selection-rich-decisions");
+    });
+
+    it("gera vetores para Prática Básica (n=4) satisfazendo todas as restrições em 25 seeds", () => {
+      for (let i = 0; i < 25; i++) {
+        const seed = `sel-basic-test-${i * 37 + 7}`;
+        const res = generateSelectionPracticeArray("basic", seed);
+        expect(res.values).toHaveLength(4);
+        for (const c of SELECTION_BASIC_CONSTRAINTS) {
+          expect(c.predicate(res.values), `Seed ${seed} falhou em ${c.id}`).toBe(true);
+        }
+      }
+    });
+
+    it("gera vetores para Prática Intermediária (n=5) satisfazendo todas as restrições em 25 seeds", () => {
+      for (let i = 0; i < 25; i++) {
+        const seed = `sel-inter-test-${i * 41 + 19}`;
+        const res = generateSelectionPracticeArray("intermediate", seed);
+        expect(res.values).toHaveLength(5);
+        for (const c of SELECTION_INTERMEDIATE_CONSTRAINTS) {
+          expect(c.predicate(res.values), `Seed ${seed} falhou em ${c.id}`).toBe(true);
+        }
+      }
+    });
+
+    it("gera vetores para Prática Avançada (n=6) satisfazendo todas as restrições em 25 seeds", () => {
+      for (let i = 0; i < 25; i++) {
+        const seed = `sel-adv-test-${i * 43 + 29}`;
+        const res = generateSelectionPracticeArray("advanced", seed);
+        expect(res.values).toHaveLength(6);
+        for (const c of SELECTION_ADVANCED_CONSTRAINTS) {
+          expect(c.predicate(res.values), `Seed ${seed} falhou em ${c.id}`).toBe(true);
+        }
+      }
     });
   });
 });

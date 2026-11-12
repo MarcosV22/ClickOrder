@@ -59,6 +59,25 @@ describe("Practice Flow & Presentation Integration (PLATFORM-R1-B)", () => {
       expect(html).not.toContain("EARLY EXIT");
     });
 
+    it("exibe foco de aprendizagem e perfis de suporte nos cards de prática", () => {
+      const save = createDefaultSaveData();
+      const html = renderToStaticMarkup(
+        <PracticeSelector
+          moduleId="insertion"
+          saveData={save}
+          onSelectPractice={vi.fn()}
+          onOpenTutorial={vi.fn()}
+          onReturnHome={vi.fn()}
+        />
+      );
+
+      expect(html).toContain("MÓDULO • INSERTION SORT");
+      expect(html).toContain("FOCO DE APRENDIZAGEM:");
+      expect(html).toContain("SUPORTE COMPLETO");
+      expect(html).toContain("SUPORTE REDUZIDO");
+      expect(html).toContain("AUTONOMIA MÁXIMA");
+    });
+
     it("desbloqueia Prática Intermediária e Avançada sequencialmente com base no Schema v4", () => {
       let save = createDefaultSaveData();
       save = recordExerciseCompletion(save, "bubble", BUBBLE_EXERCISE_SETS.BASIC, {

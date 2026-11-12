@@ -72,7 +72,11 @@ import {
   type InsertionPracticeLevel,
   type InsertionStepRecord,
 } from "./game/sorting/insertion";
-import { type PracticeLevel } from "./game/curriculum";
+import {
+  type PracticeLevel,
+  type ActivityContext,
+  type AlgorithmCaseDefinition,
+} from "./game/curriculum";
 import { getBriefingForMode, type BriefingModeId } from "./game/briefing";
 import type { PhaseCompleteData } from "./screens/GameScreen";
 import type { StepRecord } from "./game/sorting/types";
@@ -344,6 +348,10 @@ export default function App({
     return "bubble";
   });
 
+  // Contexto Curricular da Atividade Ativa (LEARNING-R3-A: Prática Regular vs Caso do Algoritmo)
+  const [activeActivityContext, setActiveActivityContext] =
+    useState<ActivityContext | null>(null);
+
   const isChallengeUnlocked = isChallengeModeUnlocked(saveData, TOTAL_PHASES);
 
   const handleOpenPracticeSelector = (modId: ModuleId) => {
@@ -498,6 +506,18 @@ export default function App({
   };
 
   const handleSelectPracticeLevel = (level: PracticeLevel) => {
+    setActiveActivityContext({
+      type: "practice",
+      moduleId: selectorModule,
+      level,
+      practiceTitle:
+        level === "basic"
+          ? "PRÁTICA BÁSICA"
+          : level === "intermediate"
+            ? "PRÁTICA INTERMEDIÁRIA"
+            : "PRÁTICA AVANÇADA",
+    });
+
     const phaseNumber = level === "basic" ? 1 : level === "intermediate" ? 2 : 3;
 
     if (selectorModule === "bubble") {
@@ -528,6 +548,38 @@ export default function App({
     }
   };
 
+  const handleSelectCase = (caseDef: AlgorithmCaseDefinition) => {
+    setActiveActivityContext({
+      type: "case",
+      moduleId: caseDef.moduleId,
+      caseId: caseDef.id,
+      caseDefinition: caseDef,
+    });
+
+    if (caseDef.moduleId === "bubble") {
+      setGameMode("CAMPAIGN");
+      setPhase(1);
+      setCampaignArray([...caseDef.initialArray]);
+      setCampaignSeed("");
+      setResult(null);
+      setScreen("game");
+    } else if (caseDef.moduleId === "selection") {
+      setGameMode("SELECTION");
+      setSelectionPhase(1);
+      setSelectionArray([...caseDef.initialArray]);
+      setSelectionSeed("");
+      setResult(null);
+      setScreen("selection-game");
+    } else if (caseDef.moduleId === "insertion") {
+      setGameMode("INSERTION");
+      setInsertionArray([...caseDef.initialArray]);
+      setInsertionSeed("");
+      setInsertionLevel("intermediate");
+      setResult(null);
+      setScreen("insertion-practice");
+    }
+  };
+
   // --------------------------------------------------------------------------
   // Conclusão de Fase do Bubble Sort
   // --------------------------------------------------------------------------
@@ -537,6 +589,24 @@ export default function App({
       protocol: "bubble",
       seed: gameMode === "CAMPAIGN" ? campaignSeed : undefined,
     });
+
+    if (activeActivityContext?.type === "case") {
+      const caseId = activeActivityContext.caseDefinition.id;
+      const updated = recordExerciseCompletion(
+        saveData,
+        "bubble",
+        caseId,
+        {
+          score: data.score,
+          errors: data.errors,
+          hintsUsed: data.hintsUsed,
+          elapsedTimeMs: data.elapsedTimeMs,
+        }
+      );
+      setSaveData(updated);
+      setScreen("result");
+      return;
+    }
 
     if (gameMode === "CAMPAIGN") {
       setPhaseResults((prev) => {
@@ -586,6 +656,24 @@ export default function App({
       phase: selectionPhase,
       seed: selectionSeed,
     });
+
+    if (activeActivityContext?.type === "case") {
+      const caseId = activeActivityContext.caseDefinition.id;
+      const updated = recordExerciseCompletion(
+        saveData,
+        "selection",
+        caseId,
+        {
+          score: data.score,
+          errors: data.errors,
+          hintsUsed: data.hintsUsed,
+          elapsedTimeMs: data.elapsedTimeMs,
+        }
+      );
+      setSaveData(updated);
+      setScreen("result");
+      return;
+    }
 
     setSelectionPhaseResults((prev) => {
       const filtered = prev.filter((r) => r.phase !== selectionPhase);
@@ -706,6 +794,24 @@ export default function App({
       }
       return [...prev, data];
     });
+
+    if (activeActivityContext?.type === "case") {
+      const caseId = activeActivityContext.caseDefinition.id;
+      const updated = recordExerciseCompletion(
+        saveData,
+        "insertion",
+        caseId,
+        {
+          score: data.score,
+          errors: data.errors,
+          hintsUsed: data.hintsUsed,
+          elapsedTimeMs: data.elapsedTimeMs,
+        }
+      );
+      setSaveData(updated);
+      setScreen("result");
+      return;
+    }
 
     const exerciseSetId =
       data.level === "basic"
@@ -843,6 +949,31 @@ export default function App({
   };
 
   const handleRepeat = () => {
+    if (activeActivityContext?.type === "case") {
+      const caseDef = activeActivityContext.caseDefinition;
+      if (caseDef.moduleId === "bubble") {
+        setCampaignArray([...caseDef.initialArray]);
+        setCampaignSeed("");
+        setResult(null);
+        setScreen("game");
+        return;
+      }
+      if (caseDef.moduleId === "selection") {
+        setSelectionArray([...caseDef.initialArray]);
+        setSelectionSeed("");
+        setResult(null);
+        setScreen("selection-game");
+        return;
+      }
+      if (caseDef.moduleId === "insertion") {
+        setInsertionArray([...caseDef.initialArray]);
+        setInsertionSeed("");
+        setResult(null);
+        setScreen("insertion-practice");
+        return;
+      }
+    }
+
     // Mantém estritamente o MESMO vetor e a MESMA seed da rodada
     if (result?.protocol === "quick") {
       setResult(null);
@@ -944,6 +1075,7 @@ export default function App({
   };
 
   const handleReturnHome = () => {
+    setActiveActivityContext(null);
     setGameMode("CAMPAIGN");
     setBriefingModeId("bubble-canonical");
     setScreen("home");
@@ -1142,6 +1274,7 @@ export default function App({
               : saveData
           }
           onSelectPractice={handleSelectPracticeLevel}
+          onSelectCase={handleSelectCase}
           onOpenTutorial={() => {
             if (selectorModule === "bubble") setScreen("tutorial");
             else if (selectorModule === "selection") setScreen("selection-tutorial");
@@ -1193,17 +1326,28 @@ export default function App({
       )}
       {screen === "selection-game" && (
         <SelectionGameScreen
-          key={`selection-phase-${selectionPhase}-${selectionSeed}`}
+          key={`selection-${activeActivityContext?.type === "case" ? activeActivityContext.caseDefinition.id : `phase-${selectionPhase}-${selectionSeed}`}`}
           initialArray={selectionArray}
           phase={selectionPhase}
           totalPhases={SELECTION_TOTAL_PHASES}
           seed={selectionSeed}
           practiceTitle={
-            selectionPhase === 1
-              ? "PRÁTICA BÁSICA"
-              : selectionPhase === 2
-                ? "PRÁTICA INTERMEDIÁRIA"
-                : "PRÁTICA AVANÇADA"
+            activeActivityContext?.type === "case"
+              ? activeActivityContext.caseDefinition.shortTitle
+              : selectionPhase === 1
+                ? "PRÁTICA BÁSICA"
+                : selectionPhase === 2
+                  ? "PRÁTICA INTERMEDIÁRIA"
+                  : "PRÁTICA AVANÇADA"
+          }
+          supportProfile={
+            activeActivityContext?.type === "case"
+              ? "reduced"
+              : selectionPhase === 1
+                ? "full"
+                : selectionPhase === 2
+                  ? "reduced"
+                  : "minimal"
           }
           onBackToSelector={() => handleOpenPracticeSelector("selection")}
           onComplete={handleSelectionComplete}
@@ -1211,10 +1355,29 @@ export default function App({
       )}
       {screen === "insertion-practice" && (
         <InsertionGameScreen
-          key={`insertion-practice-${insertionLevel}-${insertionSeed}`}
+          key={`insertion-${activeActivityContext?.type === "case" ? activeActivityContext.caseDefinition.id : `practice-${insertionLevel}-${insertionSeed}`}`}
           level={insertionLevel}
           initialArray={insertionArray}
           seed={insertionSeed}
+          practiceTitle={
+            activeActivityContext?.type === "case"
+              ? activeActivityContext.caseDefinition.shortTitle
+              : undefined
+          }
+          practiceObjective={
+            activeActivityContext?.type === "case"
+              ? activeActivityContext.caseDefinition.learningObjective
+              : undefined
+          }
+          supportProfile={
+            activeActivityContext?.type === "case"
+              ? "reduced"
+              : insertionLevel === "basic"
+                ? "full"
+                : insertionLevel === "intermediate"
+                  ? "reduced"
+                  : "minimal"
+          }
           onComplete={handleInsertionComplete}
           onResetPractice={() => {}}
           onBackToHub={handleReturnHome}
@@ -1232,7 +1395,7 @@ export default function App({
       )}
       {screen === "game" && (
         <GameScreen
-          key={`${gameMode}-${currentPhase}-${gameMode === "CAMPAIGN" ? campaignSeed : ""}`}
+          key={`game-${activeActivityContext?.type === "case" ? activeActivityContext.caseDefinition.id : `${gameMode}-${currentPhase}-${gameMode === "CAMPAIGN" ? campaignSeed : ""}`}`}
           onComplete={handleComplete}
           initialArray={currentArray}
           phase={currentPhase}
@@ -1241,16 +1404,31 @@ export default function App({
           modeTitle={
             gameMode === "CHALLENGE"
               ? activeScenario.title
-              : undefined
+              : activeActivityContext?.type === "case"
+                ? activeActivityContext.caseDefinition.title
+                : undefined
           }
           practiceTitle={
-            gameMode === "CAMPAIGN"
-              ? currentPhase === 1
-                ? "PRÁTICA BÁSICA"
-                : currentPhase === 2
-                  ? "PRÁTICA INTERMEDIÁRIA"
-                  : "PRÁTICA AVANÇADA"
-              : undefined
+            activeActivityContext?.type === "case"
+              ? activeActivityContext.caseDefinition.shortTitle
+              : gameMode === "CAMPAIGN"
+                ? currentPhase === 1
+                  ? "PRÁTICA BÁSICA"
+                  : currentPhase === 2
+                    ? "PRÁTICA INTERMEDIÁRIA"
+                    : "PRÁTICA AVANÇADA"
+                : undefined
+          }
+          supportProfile={
+            activeActivityContext?.type === "case"
+              ? "reduced"
+              : gameMode === "CAMPAIGN"
+                ? currentPhase === 1
+                  ? "full"
+                  : currentPhase === 2
+                    ? "reduced"
+                    : "minimal"
+                : "minimal"
           }
           onBackToSelector={() => handleOpenPracticeSelector("bubble")}
         />
@@ -1266,24 +1444,42 @@ export default function App({
           writesInMain={result.protocol === "merge" ? result.writesInMain : undefined}
           totalWrites={result.protocol === "merge" ? result.totalWrites : undefined}
           writesInArray={result.protocol === "quick" ? result.writesInArray : undefined}
+          activityContext={activeActivityContext ?? undefined}
+          caseDefinition={
+            activeActivityContext?.type === "case"
+              ? activeActivityContext.caseDefinition
+              : undefined
+          }
+          caseReflection={
+            activeActivityContext?.type === "case"
+              ? activeActivityContext.caseDefinition.buildReflection({
+                  comparisons: result.comparisons,
+                  swaps: result.swaps,
+                  shifts: result.protocol === "insertion" ? result.shifts : undefined,
+                  insertions: result.protocol === "insertion" ? result.insertions : undefined,
+                })
+              : undefined
+          }
           practiceTitle={
-            result.protocol === "quick"
-              ? result.practiceTitle
-              : result.protocol === "merge"
-              ? result.practiceTitle
-              : result.protocol === "insertion"
-                ? result.practiceDefinition.title
-                : result.protocol === "selection"
-                  ? selectionPhase === 1
-                    ? "PRÁTICA BÁSICA"
-                    : selectionPhase === 2
-                      ? "PRÁTICA INTERMEDIÁRIA"
-                      : "PRÁTICA AVANÇADA"
-                  : phase === 1
-                    ? "PRÁTICA BÁSICA"
-                    : phase === 2
-                      ? "PRÁTICA INTERMEDIÁRIA"
-                      : "PRÁTICA AVANÇADA"
+            activeActivityContext?.type === "case"
+              ? activeActivityContext.caseDefinition.title
+              : result.protocol === "quick"
+                ? result.practiceTitle
+                : result.protocol === "merge"
+                ? result.practiceTitle
+                : result.protocol === "insertion"
+                  ? result.practiceDefinition.title
+                  : result.protocol === "selection"
+                    ? selectionPhase === 1
+                      ? "PRÁTICA BÁSICA"
+                      : selectionPhase === 2
+                        ? "PRÁTICA INTERMEDIÁRIA"
+                        : "PRÁTICA AVANÇADA"
+                    : phase === 1
+                      ? "PRÁTICA BÁSICA"
+                      : phase === 2
+                        ? "PRÁTICA INTERMEDIÁRIA"
+                        : "PRÁTICA AVANÇADA"
           }
           errors={result.errors}
           hintsUsed={result.hintsUsed}
@@ -1337,7 +1533,11 @@ export default function App({
           <InsertionReplayScreen
             initialArray={result.initialArray}
             history={result.history}
-            practiceTitle={result.practiceDefinition.title}
+            practiceTitle={
+              activeActivityContext?.type === "case"
+                ? activeActivityContext.caseDefinition.title
+                : result.practiceDefinition.title
+            }
             onBackToResult={() => setScreen("result")}
           />
         ) : result.protocol === "merge" ? (

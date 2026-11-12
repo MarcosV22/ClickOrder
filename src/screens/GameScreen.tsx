@@ -18,6 +18,11 @@ import {
   calculateProtocolScore,
   type PhaseSessionMetrics,
 } from "../game/session";
+import {
+  getPracticeSupportConfig,
+  getSupportProfileColorClasses,
+  type PracticeSupportProfile,
+} from "../game/curriculum";
 
 export interface PhaseCompleteData {
   comparisons: number;
@@ -42,6 +47,7 @@ interface GameScreenProps {
   variant?: BubbleSortVariant;
   modeTitle?: string;
   practiceTitle?: string;
+  supportProfile?: PracticeSupportProfile;
   onBackToSelector?: () => void;
 }
 
@@ -55,8 +61,15 @@ export default function GameScreen({
   variant = "CANONICAL",
   modeTitle,
   practiceTitle,
+  supportProfile,
   onBackToSelector,
 }: GameScreenProps) {
+  const effectiveSupportProfile: PracticeSupportProfile =
+    supportProfile ??
+    (phase === 1 ? "full" : phase === 2 ? "reduced" : "minimal");
+
+  const supportConfig = getPracticeSupportConfig(effectiveSupportProfile);
+
   const effectivePracticeTitle =
     practiceTitle ??
     (variant === "EARLY_EXIT"
@@ -95,12 +108,27 @@ export default function GameScreen({
   const [message, setMessage] = useState<{
     text: string;
     type: "info" | "warning" | "success" | "error";
-  }>(() => ({
-    text: initialExpected
-      ? `Compare os dois números vizinhos (${initialExpected.leftValue} e ${initialExpected.rightValue}). Se estiverem fora de ordem, troque. Se já estiverem ordenados, avance.`
-      : "Compare os dois números vizinhos. Se estiverem fora de ordem, troque. Se já estiverem ordenados, avance.",
-    type: "info",
-  }));
+  }>(() => {
+    if (!initialExpected) {
+      return { text: "Iniciando ordenação por bolha.", type: "info" };
+    }
+    if (supportConfig.showInstructionalPrompt) {
+      return {
+        text: `Compare os dois números vizinhos (${initialExpected.leftValue} e ${initialExpected.rightValue}). Se estiverem fora de ordem, troque. Se já estiverem ordenados, avance.`,
+        type: "info",
+      };
+    }
+    if (supportConfig.profile === "reduced") {
+      return {
+        text: `Inspecionando posições #${initialExpected.leftIndex + 1} (${initialExpected.leftValue}) e #${initialExpected.rightIndex + 1} (${initialExpected.rightValue}).`,
+        type: "info",
+      };
+    }
+    return {
+      text: `Inspecionando posições #${initialExpected.leftIndex + 1} e #${initialExpected.rightIndex + 1}.`,
+      type: "info",
+    };
+  });
 
   // Referências para temporizadores, guarda de chamada única, métricas e medição de tempo da fase
   const animTimeoutRef = useRef<number | null>(null);
@@ -230,8 +258,13 @@ export default function GameScreen({
             isActionLockedRef.current = false;
             const nextExpected = getExpectedComparison(result.state);
             if (nextExpected) {
+              const msgText = supportConfig.showInstructionalPrompt
+                ? `Troca realizada! Agora compare os números vizinhos #${nextExpected.leftIndex + 1} e #${nextExpected.rightIndex + 1} (${nextExpected.leftValue} e ${nextExpected.rightValue}).`
+                : supportConfig.profile === "reduced"
+                  ? `Troca realizada. Inspecionando #${nextExpected.leftIndex + 1} e #${nextExpected.rightIndex + 1}.`
+                  : `Troca realizada. Avalie o próximo par.`;
               setMessage({
-                text: `Troca realizada! Agora compare os números vizinhos #${nextExpected.leftIndex + 1} e #${nextExpected.rightIndex + 1} (${nextExpected.leftValue} e ${nextExpected.rightValue}).`,
+                text: msgText,
                 type: "info",
               });
             }
@@ -267,8 +300,13 @@ export default function GameScreen({
         } else {
           const nextExpected = getExpectedComparison(result.state);
           if (nextExpected) {
+            const msgText = supportConfig.showInstructionalPrompt
+              ? `Ordem mantida! Agora compare os números vizinhos #${nextExpected.leftIndex + 1} e #${nextExpected.rightIndex + 1} (${nextExpected.leftValue} e ${nextExpected.rightValue}).`
+              : supportConfig.profile === "reduced"
+                ? `Ordem mantida. Inspecionando #${nextExpected.leftIndex + 1} e #${nextExpected.rightIndex + 1}.`
+                : `Ordem mantida. Avalie o próximo par.`;
             setMessage({
-              text: `Ordem mantida! Agora compare os números vizinhos #${nextExpected.leftIndex + 1} e #${nextExpected.rightIndex + 1} (${nextExpected.leftValue} e ${nextExpected.rightValue}).`,
+              text: msgText,
               type: "info",
             });
           }
@@ -424,6 +462,12 @@ export default function GameScreen({
               {effectivePracticeTitle} • {gameState.arrayLength} NÚMEROS
             </span>
             <span
+              className={`text-xs px-2.5 py-0.5 rounded border font-mono tracking-wider uppercase ${getSupportProfileColorClasses(effectiveSupportProfile)}`}
+              style={{ fontFamily: "'Space Mono', monospace" }}
+            >
+              {supportConfig.badgeLabel}
+            </span>
+            <span
               className="text-xs px-2.5 py-0.5 rounded bg-purple-950/40 border border-purple-500/30 text-purple-300 font-mono tracking-wider uppercase"
               style={{ fontFamily: "'Space Mono', monospace" }}
             >
@@ -482,10 +526,10 @@ export default function GameScreen({
             )}
           </div>
 
-          {/* Textual comparison formula */}
+          {/* Textual comparison formula or evaluation prompt */}
           <div className="text-xs font-bold text-right ml-auto flex items-center gap-2">
             {!gameState.completed && expected ? (
-              <>
+              supportConfig.showRelationalExpression ? (
                 <span className="text-white/80">
                   Condição:{" "}
                   <span className="text-cyan-300">
@@ -493,19 +537,16 @@ export default function GameScreen({
                   </span>{" "}
                   &gt;{" "}
                   <span className="text-cyan-300">
-                    A[{expected.rightIndex}] ({expected.rightValue})
+                    A[{expected.rightIndex}] ({expected.rightValue}) ?
                   </span>
                 </span>
-                <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-mono tracking-wider font-bold ${
-                    expected.leftValue > expected.rightValue
-                      ? "bg-amber-950/60 text-amber-300 border border-amber-500/40"
-                      : "bg-emerald-950/60 text-emerald-300 border border-emerald-500/40"
-                  }`}
-                >
-                  {expected.leftValue > expected.rightValue ? "VERDADEIRO" : "FALSO"}
+              ) : (
+                <span className="text-white/40 text-[11px]">
+                  {supportConfig.profile === "reduced"
+                    ? "Avalie se os vizinhos estão fora de ordem"
+                    : "Avalie o par sob inspeção"}
                 </span>
-              </>
+              )
             ) : (
               <span className="text-emerald-400">Todos os números em ordem</span>
             )}

@@ -17,16 +17,28 @@ export const BUBBLE_EXERCISE_SETS = Object.freeze({
   CHALLENGE_EARLY_EXIT: "bubble.challenge.early-exit",
 } as const);
 
+export const BUBBLE_CASES = Object.freeze({
+  NEARLY_SORTED: "bubble.case.nearly-sorted",
+} as const);
+
 export const SELECTION_EXERCISE_SETS = Object.freeze({
   BASIC: "selection.practice.basic",
   INTERMEDIATE: "selection.practice.intermediate",
   ADVANCED: "selection.practice.advanced",
 } as const);
 
+export const SELECTION_CASES = Object.freeze({
+  ALREADY_SORTED: "selection.case.already-sorted",
+} as const);
+
 export const INSERTION_EXERCISE_SETS = Object.freeze({
   BASIC: "insertion.practice.basic",
   INTERMEDIATE: "insertion.practice.intermediate",
   ADVANCED: "insertion.practice.advanced",
+} as const);
+
+export const INSERTION_CASES = Object.freeze({
+  NEARLY_SORTED: "insertion.case.nearly-sorted",
 } as const);
 
 export const MERGE_EXERCISE_SETS = Object.freeze({

@@ -238,21 +238,29 @@ flowchart TD
 - **Callbacks e Props:** `onComplete: (data: SelectionPhaseCompleteData) => void`, `initialArray: number[]`, `phase: number`, `totalPhases?: number`.
 
 ### 3.8. `src/screens/ResultScreen.tsx`
-- **Responsabilidades:** Apresentar a avaliação de desempenho descritiva após a conclusão da ordenação da fase corrente (Bubble Sort Canônico, Bubble Modo Desafio ou Selection Sort).
+- **Responsabilidades:** Apresentar a avaliação de desempenho descritiva após a conclusão da ordenação da fase/exercício corrente (Bubble Sort Canônico, Bubble Modo Desafio, Selection Sort, Insertion Sort ou Casos do Algoritmo).
 - **Destaques de Implementação:**
   - Renderiza o vetor final resultante consolidado com suporte a rolagem horizontal segura em mobile;
-  - Apresenta contadores puramente factuais sob o título "MÉTRICAS DA FASE": Comparações (`comparisons`), Trocas (`swaps`), Decisões Incorretas (`errors`), Dicas Utilizadas (`hintsUsed`), Tempo de Operação e Pontuação do Protocolo;
+  - Apresenta contadores puramente factuais sob o título "MÉTRICAS DA FASE / EXERCÍCIO": Comparações (`comparisons`), Trocas (`swaps`), Decisões Incorretas (`errors`), Dicas Utilizadas (`hintsUsed`), Tempo de Operação e Pontuação do Protocolo;
+  - **Suporte ao Contexto de Casos do Algoritmo (LEARNING-R3-A / ADR 0026):**
+    - Recebe `activityContext?: 'practice' | 'case'`, `caseDefinition?: AlgorithmCaseDefinition` e `caseReflection?: string`;
+    - Em contexto `case`:
+      - Cabeçalho exibe badge temático `MÓDULO [NOME] — CASO DO ALGORITMO`;
+      - Exibe o título do caso e o objetivo de aprendizagem;
+      - Renderiza card de destaque de **Reflexão Pedagógica** factual gerada a partir das métricas reais da sessão;
+      - Substitui os CTAs de avanço procedural (`PRÓXIMA PRÁTICA`, `NOVA ENTRADA`) por CTAs de caso: `[ ↺ REPETIR CASO ]` e `[ ← VOLTAR AOS CASOS ]`, preservando `[ ▶ VER EXECUÇÃO ]`;
   - **Suporte Multi-Protocolo (P2.1-D / ADR 0013 e P2.1-E / ADR 0014):**
-    - Recebe `protocol?: "bubble" | "selection"`;
+    - Recebe `protocol?: "bubble" | "selection" | "insertion"`;
     - Para Bubble Sort: exibe badge ciano, pseudocódigo correspondente (canônico ou early exit) e botão `[ ▶ VER EXECUÇÃO ]`;
     - Para Selection Sort: exibe badge âmbar `◈ PROTOCOLO SELECTION SORT`, renderiza o pseudocódigo canônico de 13 instruções estruturadas em português (`SELECTION_SORT_PSEUDOCODE`), exibe o princípio pedagógico da busca gulosa do menor e habilita o botão `[ ▶ VER EXECUÇÃO ]` para auditoria retrospectiva (P2.1-E);
+    - Para Insertion Sort: exibe badge esmeralda/âmbar, métricas de deslocamentos (*shifts*) e inserções diretas, pseudocódigo sincronizado de 11 instruções e botão `[ ▶ VER EXECUÇÃO ]`;
   - **Painel Comparativo do Modo Desafio (P1.8):** No modo `EARLY_EXIT`, exibe Comparações Executadas, Comparações Máximas Canônicas de Referência ($n(n-1)/2$), Comparações Evitadas ($\max(0, \text{canônicas} - \text{executadas})$) e Status de Early Exit (SIM/NÃO com passada de término);
   - **Nota Pedagógica de Otimização:** Esclarece a economia de passos ou explica o motivo de não haver economia em casos de pior caso;
   - **Eliminação de Heurística:** Remoção definitiva da antiga métrica arbitrária de "Eficiência (%)", substituída integralmente pela telemetria factual descritiva (ADR 0003);
   - **Responsividade e Scroll Seguro:** Layout com contêiner rolável verticalmente (`overflow-y-auto min-h-full`) e grid responsivo `grid-cols-1 md:grid-cols-2`, impedindo cortes em telas de baixa altura;
   - Suporta a prop semântica `hasNextPhase`: exibe "PRÓXIMA FASE →" ou "CONCLUIR PROTOCOLO →";
-  - Botão "↺ REPETIR FASE" aciona `onRepeat()`; botão principal aciona `onNext()`.
-- **Callbacks e Props:** `onRepeat: () => void`, `onNext: () => void`, `onViewReplay?: () => void`, `protocol?: "bubble" | "selection"`, `variant?: BubbleSortVariant`, `earlyExitTriggered?: boolean`, `terminationPass?: number`, `canonicalComparisons?: number`, `comparisonsAvoided?: number`.
+  - Botão "↺ REPETIR FASE / CASO" aciona `onRepeat()`; botão principal aciona `onNext()`.
+- **Callbacks e Props:** `onRepeat: () => void`, `onNext: () => void`, `onViewReplay?: () => void`, `protocol?: "bubble" | "selection" | "insertion"`, `variant?: BubbleSortVariant`, `earlyExitTriggered?: boolean`, `terminationPass?: number`, `canonicalComparisons?: number`, `comparisonsAvoided?: number`, `activityContext?: 'practice' | 'case'`, `caseDefinition?: AlgorithmCaseDefinition`, `caseReflection?: string`.
 
 ### 3.9. `src/screens/CampaignCompleteScreen.tsx` e `src/screens/campaignCompleteConfig.ts`
 - **Responsabilidades:** Tela unificada orientada a dados e encerramento técnico de campanhas ao término de todas as fases, parametrizada via dicionário declarativo de metadados (`src/screens/campaignCompleteConfig.ts`), eliminando duplicações e bifurcações `if` espalhadas no JSX.
@@ -341,6 +349,34 @@ flowchart TD
   - Exibe resumo estatístico agregado de todas as práticas (Comparações, Deslocamentos, Inserções, Erros, Dicas e Tempo);
   - Cartões de desempenho individual para Prática Básica, Prática Intermediária e Prática Avançada com o vetor final ordenado em caixas verdes;
   - Ações de repetição ou retorno à Central Logística (Home).
+
+### 3.15. `src/screens/PracticeSelector.tsx`, Scaffolding Fading e Casos do Algoritmo (LEARNING-R2-B e LEARNING-R3-A)
+- **Responsabilidades:** Seleção canônica de práticas regulares, desafios e Casos do Algoritmo para os módulos Bubble Sort, Selection Sort e Insertion Sort, integrando visualmente o catálogo transversal de práticas (`src/game/curriculum/practiceCatalog.ts`), o catálogo de casos (`src/game/curriculum/caseCatalog.ts`) e o perfil de andaime cognitivo (`src/game/curriculum/supportConfig.ts`).
+- **Destaques de Implementação:**
+  - **Seção "EXPLORAR CASOS" (LEARNING-R3-A / ADR 0026):**
+    - Renderiza uma seção dedicada abaixo das práticas regulares quando `cases` estão disponíveis;
+    - Desbloqueio dinâmico condicionado à conclusão da Prática Básica (`isModuleCasesUnlocked`);
+    - Exibe cards de casos com visualização do vetor de entrada fixo determinístico (ex: `[10, 30, 20, 40, 50]`);
+    - Status derivado: `BLOQUEADO` (com mensagem explicativa: "Conclua a Prática Básica para desbloquear"), `DISPONÍVEL` ou `CONCLUÍDO`;
+    - Badge de perfil de suporte `SUPORTE REDUZIDO`;
+    - Telemetria de recorde persistida (melhor pontuação, erros, tempo decorrido);
+    - CTA direto: `[ EXECUTAR CASO ]` ou `[ REPETIR CASO ]`;
+  - **Exibição dos Perfis de Suporte nas Práticas:** Cada card de prática regular exibe badge em caixa-alta e descrição de autonomia:
+    - `SUPORTE COMPLETO` (verde/esmeralda): "Destaque dos pares sob análise e lembrete explícito da regra de ordenação.";
+    - `SUPORTE REDUZIDO` (âmbar): "Foco no par ativo; você interpreta e decide se a regra requer ação.";
+    - `AUTONOMIA MÁXIMA` (púrpura): "Foco factual nos elementos sem dicas da regra. Decisão inteiramente autônoma.";
+  - **Diferenciação nas Telas de Gameplay (`GameScreen`, `SelectionGameScreen`, `InsertionGameScreen`):**
+    - Todas as 3 telas recebem a prop `supportProfile: PracticeSupportProfile` (com fallback gracioso baseado em `phase` ou `level`);
+    - Exibem badge temático correspondente no cabeçalho/painel de status;
+    - **Graduação de Pistas Relacionais:**
+      - *Bubble Sort:* A pergunta relacional explícita ($A[\text{left}] > A[\text{right}] ?$) e o banner comparativo só são exibidos em `full`. O badge avaliador de resposta prévia (`VERDADEIRO`/`FALSO`) foi definitivamente eliminado para evitar spoilers cognitivos. Em `reduced` e `minimal`, a pergunta desaparece e o aluno decide com base estritamente nos valores factuais das caixas ativas;
+      - *Selection Sort:* A fórmula formal de comparação no banner ($A[j] < A[\text{minIndex}] ?$) é restrita a `full`. Em `reduced` e `minimal`, os ponteiros factuais (`Alvo (i)`, `Candidato Mín`, `Scanner (j)`) continuam integralmente visíveis, mas a fórmula de spoiler é omitida. No momento de `COMMIT`, a ação de transferência física ou consolidação direta permanece explícita em todos os perfis por representar o ato concreto de mutação;
+      - *Insertion Sort:* O container de condição com a pergunta relacional ($A[j] > \text{CHAVE} ?$) é exclusivo de `full`. Em `reduced` e `minimal`, o painel exibe mensagem interpretativa neutra. A condição de chegada à cabeceira ($j = -1 \text{ • CABECEIRA DA ESTEIRA ALCANÇADA}$) permanece expressa em todos os níveis por constituir fato operacional inegociável;
+  - **Invariantes Invioláveis:**
+    - Botão de Dica (`[ ? DICA ]`) disponível em todos os perfis (`full`, `reduced`, `minimal`);
+    - Feedback formativo detalhado em caso de erro presente em todos os perfis (o erro nunca deixa o aluno sem explicação conceitual);
+    - Acessibilidade plena (`aria-label`, contraste WCAG, navegação por teclado) preservada independentemente do perfil de andaime;
+    - Zero alteração no Schema de Persistência v4 (`supportProfile` é puramente derivado).
 
 ---
 

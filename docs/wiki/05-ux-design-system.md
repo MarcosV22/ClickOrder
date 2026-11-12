@@ -533,5 +533,27 @@ O modelo pedagógico visual aprovado para o Merge Sort foi formalizado como **pa
 5. **Seção Secundária Recolhível (`<details> "Entenda os detalhes técnicos"`):**
    - Invariantes matemáticas formais, otimizações específicas (ex.: Early Exit no Modo Desafio do Bubble), contagem formal de comparações vs movimentações físicas e régua de destaques analíticos (`highlights`).
 
+### 11.8. Design Tokens e Padrão Visual de Scaffolding Fading (Marco LEARNING-R2-B)
+A diferenciação de suporte nas práticas regulares adota uma semântica visual unificada em três níveis de andaimes cognitivos (`PracticeSupportProfile`):
+
+1. **`full` — "SUPORTE COMPLETO" (Prática Básica):**
+   - **Semântica:** Andaime máximo. Guia visual estrito e instrução relacional explícita.
+   - **Tokens de Cor:** `border-emerald-500/40 bg-emerald-500/10 text-emerald-300` com borda e badge verdes esmeralda.
+   - **Interação:** Exibe fórmula comparativa relacional explícita ($A[\text{left}] > A[\text{right}] ?$, $A[j] < A[\text{minIndex}] ?$, $A[j] > \text{CHAVE} ?$).
+   - **Eliminação de Spoilers:** Proibição de crachás pré-avaliados (`VERDADEIRO`/`FALSO`) que antecipavam a resposta antes do clique do aluno.
+2. **`reduced` — "SUPORTE REDUZIDO" (Prática Intermediária):**
+   - **Semântica:** Andaime moderado. Foco no par ou elemento ativo; exige interpretação da regra pelo aluno.
+   - **Tokens de Cor:** `border-amber-500/40 bg-amber-500/10 text-amber-300` com borda e badge âmbar industrial.
+   - **Interação:** Oculta fórmulas comparativas relacionais. Mantém ponteiros factuais e telemetria intactos. Mensagens de prompt convidam à análise reflexiva.
+3. **`minimal` — "AUTONOMIA MÁXIMA" (Prática Avançada):**
+   - **Semântica:** Autonomia plena. Nenhum andaime relacional antecipado; apresentação estrita do estado da esteira.
+   - **Tokens de Cor:** `border-purple-500/40 bg-purple-500/10 text-purple-300` com borda e badge púrpura neon.
+   - **Interação:** Exibe somente o estado algorítmico factual. O aluno opera com base no domínio adquirido da regra.
+4. **Invariantes Invioláveis de UX:**
+   - **Não Ocultação de Fatos Operacionais:** Elementos sob inspeção, índices, caixas ordenadas (`OK`/`ORD`), e condições de contorno (como chegada à cabeceira $j = -1$) NUNCA são escondidos no suporte mínimo.
+   - **Acessibilidade Universal:** Cores são sempre acompanhadas de rótulos textuais legíveis em `Space Mono`, contraste suficiente e atributos `aria-label`.
+   - **Feedback Formativo Permanente:** O desvanecimento de andaimes aplica-se à orientação pré-decisão; o feedback posterior a decisões errôneas permanece completo e explicativo em todos os níveis.
+
+
 
 

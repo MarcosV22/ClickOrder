@@ -11,22 +11,30 @@
 
 A partir do marco **PLATFORM-R0** ([`ADR 0018`](../adr/0018-game-to-educational-platform-transition.md)), o roadmap do Sorting Station foi oficialmente desvinculado do modelo de "fases de jogo linear" e reestruturado em torno de **Módulos Curriculares de Algoritmos** e da **Plataforma Educacional Integrada**.
 
+Em novembro de 2026, a governança curricular estabeleceu um reposicionamento estratégico: **os três módulos elementares (Bubble Sort, Selection Sort e Insertion Sort) devem receber profundidade pedagógica plena antes de expandir novos algoritmos ou abrir o Laboratório Comparativo**. Consequentemente, o desenvolvimento de novos módulos log-lineares (Merge, Quick, Heap) e do Laboratório Comparativo permanece temporariamente congelado durante o ciclo de aprofundamento **LEARNING (LEARNING-R1 a LEARNING-R7)**.
+
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Foundation ["1. Fundação da Plataforma"]
         R0["PLATFORM-R0\nModule Standard & Reestruturação\n[CONCLUÍDO]"]
     end
 
-    subgraph Elementares ["2. Módulos Elementares (O(n²))"]
-        M1["Módulo Bubble Sort\n[IMPLEMENTADO]"]
-        M2["Módulo Selection Sort\n[IMPLEMENTADO]"]
-        M3["Módulo Insertion Sort (P2.2)\n[P2.2-E CONCLUÍDO]"]
+    subgraph Elementares ["2. Módulos Centrais: Aprofundamento Pedagógico (Ciclo LEARNING)"]
+        L1["LEARNING-R1: Auditoria e Redesenho Pedagógico\n[CONCLUÍDO]"]
+        L2["LEARNING-R2-A: Modelo Curricular e Práticas Diferenciadas\n[CONCLUÍDO]"]
+        L2B["LEARNING-R2-B: Scaffolding Fading nas Práticas Regulares\n[CONCLUÍDO]"]
+        L3["LEARNING-R3: Casos do Algoritmo Curados\n(Bubble, Selection, Insertion)"]
+        L4["LEARNING-R4: Desafios Didáticos e Early Exit"]
+        L5["LEARNING-R5: Feedback 4 Fases e Dicas Multinível"]
+        L6["LEARNING-R6: Reflexão ResultScreen e Replay Harmonizado"]
+        L7["LEARNING-R7: Prática Livre e Modo Nova Entrada"]
+        L1 --> L2 --> L2B --> L3 --> L4 --> L5 --> L6 --> L7
     end
 
-    subgraph Avancados ["3. Módulos Avançados (O(n log n))"]
-        M4["Módulo Merge Sort (P3.1)\n[FUTURO]"]
-        M5["Módulo Quick Sort (P3.2)\n[FUTURO]"]
-        M6["Módulo Heap Sort (P3.3)\n[FUTURO]"]
+    subgraph Avancados ["3. Módulos Avançados O(n log n) [TEMPORARIAMENTE CONGELADOS]"]
+        M4["Módulo Merge Sort (P3.1)\n[IMPLEMENTADO / CONGELADO]"]
+        M5["Módulo Quick Sort (P3.2)\n[P3.2-D CONCLUÍDO / CONGELADO]"]
+        M6["Módulo Heap Sort (P3.3)\n[FUTURO / CONGELADO]"]
     end
 
     subgraph Culminacao ["4. Síntese e Pesquisa"]
@@ -34,22 +42,24 @@ flowchart LR
         AC["Avaliação Acadêmica & Artigo\n[EM PLANEJAMENTO]"]
     end
 
-    R0 --> M1 & M2 --> M3 --> M4 --> M5 --> M6 --> CL --> AC
+    R0 --> Elementares
+    Elementares -.->|Após consolidação pedagógica| Avancados
+    Avancados --> CL --> AC
 ```
 
 ---
 
 ## 2. Status Factual dos Módulos Curriculares
 
-| Módulo | Arquivo de Especificação | Complexidade | Status Factual | Próximo Passo |
+| Módulo | Arquivo de Especificação | Complexidade | Status Factual | Situação Atual e Próximo Passo |
 | :--- | :--- | :---: | :---: | :--- |
-| **01. Bubble Sort** | [`modules/bubble-sort.md`](./modules/bubble-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO` | Persistido em Schema v4 (`bubble.practice.*`) |
-| **02. Selection Sort** | [`modules/selection-sort.md`](./modules/selection-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO` | Persistido em Schema v4 (`selection.practice.*`) |
-| **03. Insertion Sort** | [`modules/insertion-sort.md`](./modules/insertion-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO E ATIVADO` | P2.2 integralmente concluído com Schema v4 |
-| **04. Merge Sort** | [`modules/merge-sort.md`](./modules/merge-sort.md) | $\Theta(n \log n)$ | `CAMADA PEDAGÓGICA IMPLEMENTADA` (P3.1-C) | Estação visual de confluência (P3.1-D) |
-| **05. Quick Sort** | [`modules/quick-sort.md`](./modules/quick-sort.md) | $\Theta(n \log n)$ | `ENGINE PURA IMPLEMENTADA` (P3.2-B) | Camada Pedagógica, Tutorial e Demonstração (P3.2-C) |
-| **06. Heap Sort** | [`modules/heap-sort.md`](./modules/heap-sort.md) | $\Theta(n \log n)$ | `FUTURO` (P3.3) | Estrutura de max-heap e afundamento (*sift-down*) |
-| **Laboratório Comparativo**| [`comparison-lab.md`](./comparison-lab.md) | Multi-algoritmo | `BLOQUEADO` | Aguarda conclusão dos 6 módulos |
+| **01. Bubble Sort** | [`modules/bubble-sort.md`](./modules/bubble-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO, DIFERENCIADO, SCAFFOLDING FADING E CASO-PILOTO HOMOLOGADO` | LEARNING-R2-A/B e R3-A concluídos; próximo: LEARNING-R3-B |
+| **02. Selection Sort** | [`modules/selection-sort.md`](./modules/selection-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO, DIFERENCIADO, SCAFFOLDING FADING E CASO-PILOTO HOMOLOGADO` | LEARNING-R2-A/B e R3-A concluídos; próximo: LEARNING-R3-B |
+| **03. Insertion Sort** | [`modules/insertion-sort.md`](./modules/insertion-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO, DIFERENCIADO, SCAFFOLDING FADING E CASO-PILOTO HOMOLOGADO` | LEARNING-R2-A/B e R3-A concluídos; próximo: LEARNING-R3-B |
+| **04. Merge Sort** | [`modules/merge-sort.md`](./modules/merge-sort.md) | $\Theta(n \log n)$ | `IMPLEMENTADO E INTEGRADO (P3.1-F)` | Ativo no Hub; temporariamente congelado para expansão |
+| **05. Quick Sort** | [`modules/quick-sort.md`](./modules/quick-sort.md) | $\Theta(n \log n)$ | `PARTICIONAMENTO ENTREGUE (P3.2-D)` | Temporariamente congelado (P3.2-E aguardando ciclo LEARNING) |
+| **06. Heap Sort** | [`modules/heap-sort.md`](./modules/heap-sort.md) | $\Theta(n \log n)$ | `FUTURO` (P3.3) | Congelado |
+| **Laboratório Comparativo**| [`comparison-lab.md`](./comparison-lab.md) | Multi-algoritmo | `BLOQUEADO` | Aguarda conclusão dos 6 módulos e ciclo pedagógico |
 
 ---
 
@@ -119,7 +129,23 @@ flowchart LR
 
 ---
 
-### Marco 4: MÓDULO HEAP SORT (P3.3) — `FUTURO`
+### Marco 3.5: CICLO DE EXPANSÃO PEDAGÓGICA DOS MÓDULOS CENTRAIS (LEARNING-R1 A LEARNING-R7) — `EM ANDAMENTO`
+- **Justificativa Estratégica:** A auditoria educacional demonstrou que apoiar a progressão de práticas unicamente no crescimento de $n$ ($n=4, 5, 6$) restringe o valor formativo da plataforma. Os três módulos centrais (**Bubble Sort**, **Selection Sort** e **Insertion Sort**) requerem profundidade pedagógica, novos tipos de exercícios, casos algorítmicos curados, desafios didáticos, sistema de feedback em 4 fases e dicas multinível antes que novos módulos ou o Laboratório Comparativo sejam ativados.
+- **Sub-marcos do Ciclo LEARNING:**
+  - **LEARNING-R1: Auditoria e Redesenho Pedagógico (`CONCLUÍDO`):** Auditoria profunda, taxonomia transversal em 7 categorias, catálogo de casos curados, desafios didáticos, padrão de feedback em 4 fases e matriz de aprendizagem dos 3 módulos formalizados em [`learning-experience-expansion.md`](./learning-experience-expansion.md);
+  - **LEARNING-R2-A: Modelo Curricular de Práticas e Diferenciação Procedural (`CONCLUÍDO`):** Evolução de `practiceCatalog.ts` e constraints procedurais dos 3 módulos centrais para diferenciar práticas por propriedades de entrada e objetivos formativos;
+  - **LEARNING-R2-B: Scaffolding Fading e Diferenciação de Suporte nas Práticas Regulares (`CONCLUÍDO`):** Implementação visual e comportamental dos perfis `full` (Básica: orientação conceitual e relação concreta sem spoiler V/F), `reduced` (Intermediária: estado interpretável, sem fórmula relacional direta) e `minimal` (Avançada: autonomia máxima sem instruções prévias redundantes), preservando feedback formativo em erros, botão de dica e acessibilidade integral sem alterar o Schema v4;
+  - **LEARNING-R3-A: Infraestrutura de Casos do Algoritmo e Casos-Piloto (`CONCLUÍDO`):** Implementação transversal da infraestrutura de Casos do Algoritmo (`caseCatalog.ts`), segregação canônica de `ActivityContext = 'practice' | 'case'`, desbloqueio derivado da conclusão da prática básica, persistência em Schema v4 (`exerciseSets[caseId]`), cards dedicados em `PracticeSelector.tsx`, modo de caso em `ResultScreen.tsx` com reflexões factuais e 3 casos-piloto homologados (`bubble.case.nearly-sorted`, `selection.case.already-sorted`, `insertion.case.nearly-sorted`) sob zero PRNG (ADR 0026);
+  - **LEARNING-R3-B / R3-C: Casos do Algoritmo Curados Restantes e Identidade de Duplicatas (`PRÓXIMO PASSO`):** Implementação dos 12 casos curados restantes e identidade visual de duplicatas ($30a, 30b$) preservando `comparisonValue = 30` nas engines puras;
+  - **LEARNING-R4: Desafios Didáticos e Early Exit (`FUTURO`):** Formalização do Early Exit como desafio didático com reflexão comparativa local na tela de resultados, e novos desafios conceituais para Selection e Insertion;
+  - **LEARNING-R5: Dicas Multinível e Feedback em 4 Fases (`FUTURO`):** Implementação do padrão `DECISÃO -> RESULTADO -> EXPLICAÇÃO -> PRÓXIMO RACIOCÍNIO` e sistema de scaffolding em 2 níveis (Nível 1 Conceitual, Nível 2 Direcionamento Focal) preservando a fórmula canônica da Pontuação do Protocolo;
+  - **LEARNING-R6: Reflexão Pós-Exercício e Harmonização do Replay (`FUTURO`):** Seção qualitativa na `ResultScreen` e alinhamento dos modelos de Replay de Bubble e Selection ao padrão ouro estabelecido no Insertion Sort ($1+N$ quadros, semântica estrita);
+  - **LEARNING-R7: Prática Livre e Modo Nova Entrada (`FUTURO`):** Botão "Nova Entrada" nas telas de exercício/resultado e especificação do modo sandbox.
+
+---
+
+### Marco 4: MÓDULO HEAP SORT (P3.3) — `TEMPORARIAMENTE CONGELADO`
+- **Status:** Congelado durante a execução dos marcos LEARNING-R1 a R7.
 - **Objetivo:** Terceiro módulo avançado, unindo complexidade garantida $O(n \log n)$ com espaço auxiliar $O(1)$.
 - **Entregáveis:**
   1. Comutador de visão dupla (esteira horizontal e holograma em árvore binária quase completa);
@@ -129,7 +155,7 @@ flowchart LR
 ---
 
 ### Marco 5: LABORATÓRIO COMPARATIVO (P3.4) — `BLOQUEADO`
-- **Condição Mandatória:** Bloqueado até a conclusão formal dos Marcos 1 a 4 (todos os 6 módulos homologados).
+- **Condição Mandatória:** Bloqueado até a conclusão formal do ciclo LEARNING e dos 6 módulos curriculares homologados.
 - **Entregáveis:**
   1. Modo Comparação Visual: de 2 a 6 esteiras paralelas alimentadas pela mesma semente (PRNG Mulberry32);
   2. Modo Benchmark Analítico: execução em lote sem animação sobre $n = 10, 50, 100, 500$, gerando gráficos analíticos;
@@ -182,12 +208,12 @@ Esta seção preserva o registro histórico indelével de engenharia dos marcos 
 
 ## 5. Próxima Ação Imediata de Desenvolvimento
 
-Com a conclusão dos marcos **P3.2-A**, **P3.2-B**, **P3.2-C** e **P3.2-D** (Módulo Quick Sort: especificação, engine pura, constraints procedurais, camada pedagógica, tutorial guiado, demonstração, briefing ilustrado, estação de particionamento, seletor de práticas e validação visual no navegador), a próxima prioridade de implementação de código no Sorting Station é:
+Com a conclusão bem-sucedida dos marcos **LEARNING-R1** (Auditoria e Redesenho Pedagógico), **LEARNING-R2-A** (Modelo Curricular e Diferenciação Procedural), **LEARNING-R2-B** (Scaffolding Fading e Diferenciação de Suporte nas Práticas Regulares) e **LEARNING-R3-A** (Infraestrutura de Casos do Algoritmo e Casos-Piloto), a próxima prioridade factual de implementação no Sorting Station é:
 
-$$\mathbf{M\acute{O}DULO\ QUICK\ SORT\ -\ REPLAY\ E\ PSEUDOC\acute{O}DIGO\ SINCRONIZADO\ (Marco\ P3.2-E)}$$
+$$\mathbf{MARCO\ LEARNING-R3-B\ /\ R3-C\ -\ CASOS\ CURADOS\ RESTANTES\ E\ DUPLICATAS}$$
 
 Seguindo estritamente o ciclo de governança Wiki-First e o Module Standard:
-1. Implementação do modelo funcional de replay `quickReplayModel.ts` ($1+N$ quadros, derivação pura a partir de `history` sem reexecução algorítmica);
-2. Mapeamento formal de 27 linhas canônicas de pseudocódigo (`quickReplayPseudocode.ts`);
-3. Tela de auditoria e transporte temporal `QuickReplayScreen.tsx` desktop-first com controles acessíveis e suporte a `prefers-reduced-motion`;
-4. Preservação de homologação visual manual pendente em navegador real para PLATFORM-R1-B e P3.1 (Merge Sort).
+1. Implementação dos 12 casos adicionais planejados para Bubble, Selection e Insertion (já ordenado, estritamente reverso, duplicatas/estabilidade com notação $30a/30b$ preservando `comparisonValue = 30` nas engines, e elementos em posições desfavoráveis);
+2. Introdução de suporte visual de duplicatas preservando a igualdade estrita na engine;
+3. Preservação integral da robustez do Schema v4;
+4. Manutenção de 100% de testes verdes no Vitest (650 testes atuais em 50 arquivos).

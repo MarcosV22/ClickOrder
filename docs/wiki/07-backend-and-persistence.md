@@ -73,9 +73,10 @@ Conforme deliberado no [ADR 0021](../../docs/adr/0021-module-exercise-persistenc
 | **Recordes de Exercício** | `bestRecord.bestScoreErrors` | **SIM** | Quantidade de decisões incorretas cometidas na execução da melhor pontuação. |
 | **Recordes de Exercício** | `bestRecord.bestScoreHintsUsed` | **SIM** | Quantidade de dicas utilizadas na execução da melhor pontuação. |
 | **Recordes de Exercício** | `bestRecord.bestScoreElapsedTimeMs` | **SIM** | Duração factual da execução da melhor pontuação (estritamente descritiva; **nunca** desempata recordes). |
+| **Casos do Algoritmo** | `exerciseSets[caseId].completed` / `bestRecord` | **SIM** | Casos do Algoritmo (ADR 0026, ex.: `bubble.case.nearly-sorted`) gravam progresso e telemetria factual em `exerciseSets[caseId]` sob a mesma política de retenção de recordes do Schema v4, sem exigir Schema v5. |
 | **Preferências Globais** | `soundEnabled`, `reducedMotion`, `highContrast` | **SIM** | Configurações globais de acessibilidade e áudio do estudante, compartilhadas entre todos os módulos. |
 | **Metadados** | `schemaVersion`, `lastUpdated` | **SIM** | Versionamento canônico (`schemaVersion: 4` em P2.2-F) e data ISO da última mutação de estado. |
-| **Desbloqueios Derivados** | `unlockedPhases`, `isUnlocked`, `challengeUnlocked` | **NÃO** | **Proibido salvar flags redundantes no storage.** Desbloqueios são calculados puramente a partir de `completed` de exercícios anteriores. |
+| **Desbloqueios Derivados** | `unlockedPhases`, `isUnlocked`, `challengeUnlocked`, `isCasesUnlocked` | **NÃO** | **Proibido salvar flags redundantes no storage.** Desbloqueios de práticas e casos são calculados puramente a partir de `completed` de exercícios anteriores (`isModuleCasesUnlocked` deriva da conclusão da prática básica). |
 | **Sessão / Replay** | `history: StepRecord[]`, `frames`, `seeds` | **NÃO** | Quadros de replay e histórico de micro-passos residem exclusivamente na memória RAM da sessão atual. Seeds procedurais nunca são salvos. |
 | **Demonstração Canônica** | Telas de demonstração | **NÃO** | A demonstração executa vetores fixos curados em tempo de execução e não salva histórico. |
 

@@ -60,7 +60,7 @@ O estado `screen` em [`src/App.tsx`](../../src/App.tsx) controla a tela ativa na
 | `game` | `GameScreen.tsx` | Ambiente interativo de prática do Módulo Bubble Sort | Iniciar prática do Bubble Sort | Conclusão da esteira (vai para `result`) |
 | `selection-game` | `SelectionGameScreen.tsx` | Ambiente interativo de prática do Módulo Selection Sort | Iniciar prática do Selection Sort | Conclusão da esteira (vai para `result`) |
 | `insertion-game` | `InsertionGameScreen.tsx` | Ambiente interativo de prática do Módulo Insertion Sort (básico, intermediário, avançado) | Iniciar práticas de Insertion Sort | Conclusão de cada nível (vai para `result`) |
-| `result` | `ResultScreen.tsx` | Relatório factual pós-exercício com score, métricas e pseudocódigo | Disparo de `onComplete` na esteira | `[ VER EXECUÇÃO ]` (vai para replay), `[ REPETIR ]` ou `[ PRÓXIMO ]` |
+| `result` | `ResultScreen.tsx` | Relatório factual pós-exercício com score, métricas e pseudocódigo (suporta contextos `practice` e `case` com reflexão factual) | Disparo de `onComplete` na esteira | Em prática: `[ VER EXECUÇÃO ]`, `[ REPETIR ]`, `[ PRÓXIMO ]`. Em caso: `[ VER EXECUÇÃO ]`, `[ ↺ REPETIR CASO ]`, `[ ← VOLTAR AOS CASOS ]` |
 | `replay` | `ReplayScreen.tsx` / `SelectionReplayScreen.tsx` / `InsertionReplayScreen.tsx` | Inspeção retrospectiva quadro a quadro polimórfica pelo protocolo | `[ VER EXECUÇÃO ]` em `ResultScreen` | `← VOLTAR AO RESULTADO` (retorna para `result`) |
 | `campaign-complete`| `CampaignCompleteScreen.tsx` | Relatório consolidado de conclusão do conjunto de práticas Bubble | Conclusão do último exercício do Bubble | `[ RETORNAR AO HUB ]` ou `[ REINICIAR MÓDULO ]` |
 | `selection-campaign-complete`| `SelectionCampaignCompleteScreen.tsx`| Relatório consolidado de conclusão do conjunto de práticas Selection | Conclusão do último exercício do Selection | `[ RETORNAR AO HUB ]` ou `[ REINICIAR MÓDULO ]` |
@@ -88,10 +88,11 @@ src/
 │   ├── PhaseHeader.tsx      # Cabeçalho fixo com badge de status e telemetria
 │   └── StatsPanel.tsx       # Contadores numéricos
 └── game/                    # Núcleo de Domínio e Lógica Pura (100% agnóstico de React)
-    ├── sorting/             # Engines algorítmicas e FSMs estritas (Bubble, Selection)
+    ├── curriculum/          # Catálogos curriculares puros (practiceCatalog, caseCatalog, types, supportConfig)
+    ├── sorting/             # Engines algorítmicas e FSMs estritas (Bubble, Selection, Insertion, Merge, Quick)
     ├── demonstration/       # Geradores de execução canônica para demonstração
-    ├── generation/          # Geração procedural determinística universal (Mulberry32)
-    ├── persistence/         # Adaptador desacoplado de armazenamento (Schema v4 - ADR 0021)
+    ├── generation/          # Geração procedural determinística universal (Mulberry32) e constraints
+    ├── persistence/         # Adaptador desacoplado de armazenamento (Schema v4 - ADR 0021 e ADR 0026)
     ├── replay/              # Derivação funcional de quadros e sincronização de pseudocódigo
     ├── session/             # Cálculo puro da Pontuação do Protocolo e métricas
     ├── campaign/            # Agregação de resultados do conjunto de exercícios

@@ -135,49 +135,84 @@ Após $j = n-1$, $minIndex$ aponta para o menor elemento de todo o subvetor $[i 
 
 ---
 
-## 10. Tipos de Exercícios Suportados (PLATFORM-R1-B)
+## 10. Tipos de Exercícios Suportados (PLATFORM-R1-B / LEARNING-R1)
 
-| Tipo de Exercício | Suporte no Módulo | Implementação Concreta no Código |
-| :--- | :---: | :--- |
-| **Introdução / Conceito** | `OBRIGATÓRIO` | `ProtocolModeBriefingScreen.tsx` (`selection-canonical`) |
-| **Demonstração** | `OBRIGATÓRIO` | `DemonstrationScreen.tsx` consumindo `selectionDemonstration.ts` (`[4, 1, 3]`) |
-| **Tutorial Guiado** | `OBRIGATÓRIO` | `SelectionTutorialScreen.tsx` com engine real |
-| **Seletor de Práticas** | `OBRIGATÓRIO` | `PracticeSelector.tsx` com catálogo curricular transversal (`src/game/curriculum/`) |
-| **Prática Básica** | `OBRIGATÓRIO` | `SelectionGameScreen.tsx` (`selection.practice.basic`: $n=4$ gerado proceduralmente) |
-| **Prática Progressiva** | `OBRIGATÓRIO` | `SelectionGameScreen.tsx` (`selection.practice.intermediate`: $n=5$, `selection.practice.advanced`: $n=6$) |
-| **Casos do Algoritmo** | `OBRIGATÓRIO` | Exercícios curados de instabilidade e casos sem troca |
-| **Conclusão de Conjunto** | `OBRIGATÓRIO` | `PracticeSetCompleteScreen.tsx` agregando telemetria e síntese pedagógica |
-| **Desafio** | `OPCIONAL` | Modo com limite estrito de tempo de inspeção |
-| **Prática Livre (Sandbox)**| `OPCIONAL` | Planejado para expansão futura da plataforma |
+> **Expansão Pedagógica Canônica:** Ver especificação completa em [`learning-experience-expansion.md`](../learning-experience-expansion.md).
+
+| Tipo de Exercício | Suporte no Módulo | Implementação Concreta no Código | Mapeamento no Schema v4 |
+| :--- | :---: | :--- | :--- |
+| **Introdução / Conceito** | `OBRIGATÓRIO` | `ProtocolModeBriefingScreen.tsx` (`selection-canonical`) | Volátil (não persistido no Schema v4; acesso livre sob demanda) |
+| **Demonstração** | `OBRIGATÓRIO` | `DemonstrationScreen.tsx` consumindo `selectionDemonstration.ts` (`[4, 1, 3]`) | Volátil (memória) |
+| **Tutorial Guiado** | `OBRIGATÓRIO` | `SelectionTutorialScreen.tsx` com engine real | `modules.selection.completedTutorial` |
+| **Seletor de Práticas** | `OBRIGATÓRIO` | `PracticeSelector.tsx` com catálogo curricular transversal (`src/game/curriculum/`) | N/A |
+| **Prática Básica** | `OBRIGATÓRIO` | `SelectionGameScreen.tsx` ($n=4$ com scanner assistido) | `selection.practice.basic` |
+| **Prática Intermediária**| `OBRIGATÓRIO` | `SelectionGameScreen.tsx` ($n=5$ com múltiplas atualizações de mínimo) | `selection.practice.intermediate` |
+| **Prática Avançada** | `OBRIGATÓRIO` | `SelectionGameScreen.tsx` ($n=6$ com autonomia plena de commit) | `selection.practice.advanced` |
+| **Casos do Algoritmo** | `OBRIGATÓRIO` | Bateria de 5 casos curados fixos (ordenado, reverso, transferência longa, múltiplos mínimos, instabilidade) | `selection.case.*` |
+| **Desafio Didático** | `OPCIONAL` | Desafio da Varredura Imperturbável (insensibilidade das comparações) | `selection.challenge.unperturbed-scan` (CANDIDATO - Aguardando Homologação) |
+| **Conclusão de Conjunto** | `OBRIGATÓRIO` | `PracticeSetCompleteScreen.tsx` agregando telemetria e síntese pedagógica | N/A |
+| **Prática Livre (Sandbox)**| `OPCIONAL` | Modo "Nova Entrada" e sandbox livre (Marco LEARNING-R7) | `selection.sandbox` |
 
 ---
 
-## 11. Casos Pedagógicos Curados Específicos
+## 11. Casos Pedagógicos Curados Específicos (Plano LEARNING-R1)
 
-1. **Caso 1: Mínimo Distante / Permuta Longa (`[60, 20, 30, 40, 10]`)**  
-   - Propósito: O menor elemento (10) está no índice 4. Exige varredura completa e transferência de máxima distância ($|0 - 4| = 4$).
-2. **Caso 2: Múltiplas Mudanças de Mínimo na Mesma Passada (`[80, 50, 30, 15]`)**  
-   - Propósito: Exercitar a atualização contínua do ponteiro de mínimo ($80 \rightarrow 50 \rightarrow 30 \rightarrow 15$).
-3. **Caso 3: Passada Sem Troca ($minIndex = i$) (`[10, 40, 30, 50]`)**  
-   - Propósito: O menor elemento da partição desordenada já ocupa a posição alvo. Demonstra a ação `[ CONSOLIDAR POSIÇÃO ]` sem custo de movimentação física ($swaps$ não incrementa).
-4. **Caso 4: Vetor Totalmente Invertido (`[50, 40, 30, 20, 10]`)**  
-   - Propósito: Evidenciar que mesmo no pior caso de inversões, o Selection Sort executa no máximo $n-1$ trocas físicas ($4$ trocas), contrastando drasticamente com o Bubble Sort.
-5. **Caso 5: Elementos Duplicados e Instabilidade (`[5a, 3, 5b, 1]`)**  
-   - Propósito: Demonstrar visualmente a instabilidade. Ao selecionar 1 e trocá-lo com $5a$, a ordem relativa original entre $5a$ e $5b$ é invertida para $[1, 3, 5b, 5a]$.
+1. **Caso 1: Vetor Já Ordenado (`[10, 20, 30, 40, 50]`) — ID: `selection.case.already-sorted` [HOMOLOGADO EM PRODUÇÃO - LEARNING-R3-A / ADR 0026]**  
+   - Propósito: Evidenciar empiricamente que o Selection Sort inspeciona todas as $\frac{n(n-1)}{2} = 10$ combinações mesmo quando já ordenado, realizando $0$ trocas físicas ($4$ consolidações de posição). Integrado ao Seletor de Práticas e com reflexão factual pós-execução.
+2. **Caso 2: Ordem Reversa (`[50, 40, 30, 20, 10]`) — ID: `selection.case.reverse`**  
+   - Propósito: Contrastar com o Bubble Sort: no pior caso de inversões, o Selection executa apenas 2 permutas físicas ($50 \leftrightarrow 10$ e $40 \leftrightarrow 20$).
+3. **Caso 3: Transferência de Longa Distância (`[90, 20, 30, 40, 10]`) — ID: `selection.case.long-transfer`**  
+   - Propósito: O menor elemento (10) está no extremo oposto (índice 4). Exige varredura completa e transferência de máxima distância ($|0 - 4| = 4$).
+4. **Caso 4: Candidato Mínimo Fluido (`[80, 60, 40, 20, 10]`) — ID: `selection.case.multiple-min`**  
+   - Propósito: Exercitar a atualização contínua do ponteiro de mínimo ($80 \rightarrow 60 \rightarrow 40 \rightarrow 20 \rightarrow 10$).
+5. **Caso 5: Instabilidade Visual com Duplicatas (`[40a, 20, 40b, 10]`) — ID: `selection.case.instability`**  
+   - Propósito: Demonstrar visualmente a não-estabilidade: a troca de $40a$ com $10$ inverte a ordem relativa entre $40a$ e $40b$, gerando `[10, 20, 40b, 40a]`.
 
 ---
 
 ## 12. Geração Procedural e Constraints do Módulo
 
-- **Módulo:** `selectionConstraints.ts` e `generateSelectionPhaseArray`.
-- **Tamanhos Curriculares Canônicos:**
-  - Prática Básica (`selection.practice.basic`): $n = 4$ elementos;
-  - Prática Intermediária (`selection.practice.intermediate`): $n = 5$ elementos;
-  - Prática Avançada (`selection.practice.advanced`): $n = 6$ elementos.
-- **Constraints Matemáticas Dedicadas:**
-  - `isGlobalMinNotInFirstPosition`: impede vetores onde o menor elemento global já inicia na posição $0$ (o que tornaria a primeira passada trivial);
-  - `hasAtLeastOneKeepMin`: assegura ao menos uma decisão `KEEP_MIN` em cada exercício para evitar que o aluno apenas clique em novo mínimo automaticamente;
-  - `hasMultipleMinUpdatesInAtLeastOnePass`: favorece em práticas maiores ao menos uma passada com atualizações sucessivas do candidato.
+- **Gerador:** `generateSelectionPracticeArray` / `generateSortingArray` (PRNG Mulberry32) configurado com restrições procedurais diferenciadas por nível (Marco LEARNING-R2-A / ADR 0025).
+- **Tamanhos e Perfis Curriculares:**
+  - Prática Básica (`selection.practice.basic`): $n = 4$ elementos, perfil `foundation`, suporte `full`;
+  - Prática Intermediária (`selection.practice.intermediate`): $n = 5$ elementos, perfil `mixed-decisions`, suporte `reduced`;
+  - Prática Avançada (`selection.practice.advanced`): $n = 6$ elementos, perfil `autonomous-complex`, suporte `minimal`.
+- **Constraints Matemáticas Obrigatórias por Nível:**
+  - **Prática Básica (`SELECTION_BASIC_CONSTRAINTS`):**
+    - `isNotSorted`: impede vetores já ordenados;
+    - `isNotReverseSorted`: impede vetores totalmente invertidos;
+    - `isGlobalMinNotInFirstPosition`: impede vetores onde o menor elemento global já inicia na posição $0$ (evita primeira passada trivial);
+    - `hasAtLeastOneKeepMin`: assegura ao menos uma decisão `KEEP_MIN` para evitar cliques automáticos em novo mínimo.
+  - **Prática Intermediária (`SELECTION_INTERMEDIATE_CONSTRAINTS`):**
+    - `isNotSorted`, `isNotReverseSorted`, `isGlobalMinNotInFirstPosition`, `hasAtLeastOneKeepMin`;
+    - `hasMultipleMinUpdatesInAtLeastOnePass`: garante ao menos uma passada com $\ge 2$ atualizações de mínimo;
+    - `selection-interleaved-decisions` (`hasInterleavedKeepAndNewMin`): exige alternância de decisões (`KEEP_MIN` e `NEW_MIN`) em ao menos uma passada;
+    - `selection-non-adjacent-transfer` (`hasNonAdjacentCommitTransfer`): garante que ao menos uma permuta de commit mova um elemento entre posições não contíguas ($|i - \text{minIndex}| > 1$).
+  - **Prática Avançada (`SELECTION_ADVANCED_CONSTRAINTS`):**
+    - Todas as anteriores exceto dependência estrita de múltiplas atualizações isoladas;
+    - `selection-rich-decisions` (`hasRichSelectionDecisions`): densidade decisória complexa exigindo $\ge 2$ passadas com atualizações de mínimo, $\ge 2$ passadas com retenção de candidato e $\ge 1$ transferência de commit de longa distância.
+- **Fallbacks Curados Determinísticos:**
+  - Padrões canônicos fixos para $n=4$ (`[42, 17, 85, 23]`), $n=5$ (`[60, 25, 90, 15, 45]`) e $n=6$ (`[70, 30, 85, 12, 55, 40]`), satisfazendo integralmente todas as restrições pedagógicas de seus respectivos níveis.
+
+### 12.1. Scaffolding Fading na Interface de Gameplay (Marco LEARNING-R2-B)
+A interface dedicada do Selection Sort (`SelectionGameScreen.tsx`) incorpora o modelo transversal de andaimes cognitivos (`PracticeSupportProfile`):
+- **`full` (Prática Básica):**
+  - Badge temático no cabeçalho: `SUPORTE COMPLETO` (esmeralda);
+  - Banner de inspeção explícito: Exibe a fórmula relacional exata $A[j] < A[\text{minIndex}] ?$ no banner da esteira;
+  - Prompt: *"Compare o scanner com o candidato a mínimo atual."*.
+- **`reduced` (Prática Intermediária):**
+  - Badge temático: `SUPORTE REDUZIDO` (âmbar);
+  - Omissão da fórmula relacional: O banner oculta a fórmula matemática abstrata, mantendo os identificadores concretos das caixas;
+  - Prompt: *"Avalie se o scanner encontrou um novo menor valor."*.
+- **`minimal` (Prática Avançada):**
+  - Badge temático: `AUTONOMIA MÁXIMA` (púrpura);
+  - Autonomia plena na inspeção: Omissão de perguntas e fórmulas de direcionamento;
+  - Prompt: *"Identifique autonomamente o menor elemento da sub-esteira."*.
+- **Invariantes Invioláveis:**
+  - **Ponteiros Factuais Intactos:** Os papéis `target` (alvo $i$), `min` (candidato $minIndex$), `scan` (leitor $j$) e `sorted` (elementos consolidados `OK`) permanecem rigorosamente visíveis com seus halos em todos os perfis;
+  - **Preservação do Banner de Commit:** Na fase `COMMIT`, o banner com a explicação da ação física (ex.: transferência de carga mínima ou consolidação direta sem troca) permanece visível em todos os níveis, por representar o fechamento formal da passada;
+  - O botão `[ ? DICA ]` permanece disponível em todos os perfis;
+  - O feedback formativo detalhado em erros de decisão de mínimo é idêntico em todos os perfis.
 
 ---
 

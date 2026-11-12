@@ -74,6 +74,26 @@ describe("Curriculum Transversal Practice Catalog (PLATFORM-R1-B / P3.1-D)", () 
         }
       }
     });
+
+    it("fornece metadados pedagógicos transversais enriquecidos (learningFocus, generatorProfile, supportProfile)", () => {
+      for (const moduleId of ["bubble", "selection", "insertion", "merge", "quick"] as const) {
+        const practices = getModulePractices(moduleId);
+        expect(practices.map((p) => p.generatorProfile)).toEqual([
+          "foundation",
+          "mixed-decisions",
+          "autonomous-complex",
+        ]);
+        expect(practices.map((p) => p.supportProfile)).toEqual([
+          "full",
+          "reduced",
+          "minimal",
+        ]);
+        for (const p of practices) {
+          expect(p.learningFocus).toBeDefined();
+          expect(p.learningFocus.length).toBeGreaterThan(10);
+        }
+      }
+    });
   });
 
   describe("2. Navegação Curricular e Resolução de Níveis", () => {

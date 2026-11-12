@@ -40,6 +40,11 @@ import {
   type PhaseSessionMetrics,
 } from "../game/session";
 import type { SeedInput } from "../game/generation";
+import {
+  getPracticeSupportConfig,
+  getSupportProfileColorClasses,
+  type PracticeSupportProfile,
+} from "../game/curriculum";
 
 export interface InsertionPracticeCompleteData {
   protocol: "insertion";
@@ -62,6 +67,9 @@ interface InsertionGameScreenProps {
   level: InsertionPracticeLevel;
   initialArray: readonly number[];
   seed?: SeedInput;
+  supportProfile?: PracticeSupportProfile;
+  practiceTitle?: string;
+  practiceObjective?: string;
   onComplete: (data: InsertionPracticeCompleteData) => void;
   onResetPractice?: () => void;
   onBackToHub?: () => void;
@@ -71,11 +79,19 @@ export default function InsertionGameScreen({
   level,
   initialArray,
   seed,
+  supportProfile,
+  practiceTitle,
+  practiceObjective,
   onComplete,
   onResetPractice,
   onBackToHub,
 }: InsertionGameScreenProps) {
   const practiceDefinition = getInsertionPracticeDefinition(level);
+  const effectiveSupportProfile: PracticeSupportProfile =
+    supportProfile ?? practiceDefinition.supportProfile;
+  const supportConfig = getPracticeSupportConfig(effectiveSupportProfile);
+  const displayTitle = practiceTitle ?? practiceDefinition.title;
+  const displayObjective = practiceObjective ?? practiceDefinition.pedagogicalObjective;
 
   // --------------------------------------------------------------------------
   // 1. Estado Puro da Engine (Única Fonte de Verdade)
@@ -103,7 +119,11 @@ export default function InsertionGameScreen({
     text: string;
     type: "info" | "warning" | "success" | "error";
   }>(() => ({
-    text: "Pegue o número da vez e insira-o na posição correta entre os números que já estão ordenados.",
+    text: supportConfig.showInstructionalPrompt
+      ? "Pegue o número da vez e insira-o na posição correta entre os números que já estão ordenados."
+      : supportConfig.profile === "reduced"
+        ? "Posicione a chave na partição ordenada deslocando os maiores."
+        : "Ordene o vetor inserindo a chave no ponto correto.",
     type: "info",
   }));
 
@@ -362,13 +382,21 @@ export default function InsertionGameScreen({
         {/* Painel Descritivo da Prática */}
         <section className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-[#0a1232]/80 border border-amber-500/20 shadow-lg">
           <div className="flex flex-col gap-1">
-            <span
-              className="text-xs font-bold text-amber-300 tracking-wider uppercase font-mono"
-            >
-              {practiceDefinition.title} • {practiceDefinition.size} NÚMEROS
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-xs font-bold text-amber-300 tracking-wider uppercase font-mono"
+              >
+                {displayTitle} • {initialArray.length} NÚMEROS
+              </span>
+              <span
+                className={`text-xs px-2.5 py-0.5 rounded border font-mono tracking-wider font-bold uppercase ${getSupportProfileColorClasses(effectiveSupportProfile)}`}
+                style={{ fontFamily: "'Space Mono', monospace" }}
+              >
+                {supportConfig.badgeLabel}
+              </span>
+            </div>
             <p className="text-xs text-white/70 font-mono">
-              {practiceDefinition.pedagogicalObjective}
+              {displayObjective}
             </p>
           </div>
 
@@ -475,9 +503,19 @@ export default function InsertionGameScreen({
                 <span>• CABECEIRA DA ESTEIRA ALCANÇADA</span>
               </div>
             ) : isCompareAndShift && comparedValue !== null && gameState.key !== null ? (
-              <div className="flex items-center gap-2 text-sm font-bold text-cyan-200">
-                <span>A[{gameState.j}] ({comparedValue}) &gt; CHAVE ({gameState.key}) ?</span>
-              </div>
+              supportConfig.showRelationalExpression ? (
+                <div className="flex items-center gap-2 text-sm font-bold text-cyan-200">
+                  <span>A[{gameState.j}] ({comparedValue}) &gt; CHAVE ({gameState.key}) ?</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-xs font-medium text-white/60">
+                  <span>
+                    {supportConfig.profile === "reduced"
+                      ? `Inspecione A[${gameState.j}] (${comparedValue}) em relação à chave (${gameState.key})`
+                      : "Avalie o elemento sob inspeção em relação à chave"}
+                  </span>
+                </div>
+              )
             ) : (
               <span className="text-xs text-white/60">
                 Aguardando próxima instrução da esteira.

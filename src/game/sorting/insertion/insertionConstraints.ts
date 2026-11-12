@@ -100,11 +100,119 @@ export const hasInsertionWithMultipleShifts: ArrayConstraint = (arr) => {
 };
 
 /**
+ * Análise analítica pura de execução do Insertion Sort sobre um vetor.
+ * Módulo puramente funcional, sem efeitos colaterais e sem acoplamento com UI/Engine.
+ */
+export interface InsertionSortAnalysis {
+  readonly totalShifts: number;
+  readonly maxShiftsInPass: number;
+  readonly passShifts: readonly number[];
+  readonly hasDirectInsert: boolean;
+  readonly hasMultipleShifts: boolean;
+  readonly hasConditionFalseStopWithShift: boolean;
+  readonly hasHeadLanding: boolean;
+  readonly distinctShiftCounts: number;
+}
+
+export function analyzeInsertionSort(arr: readonly number[]): InsertionSortAnalysis {
+  const a = [...arr];
+  const n = a.length;
+  let totalShifts = 0;
+  let maxShiftsInPass = 0;
+  const passShifts: number[] = [];
+  let hasDirectInsert = false;
+  let hasMultipleShifts = false;
+  let hasConditionFalseStopWithShift = false;
+  let hasHeadLanding = false;
+
+  for (let i = 1; i < n; i++) {
+    const key = a[i];
+    let j = i - 1;
+    let shiftsInPass = 0;
+
+    if (j >= 0 && a[j] <= key) {
+      hasDirectInsert = true;
+    }
+
+    while (j >= 0 && a[j] > key) {
+      shiftsInPass++;
+      totalShifts++;
+      a[j + 1] = a[j];
+      j--;
+    }
+    a[j + 1] = key;
+
+    passShifts.push(shiftsInPass);
+    if (shiftsInPass > maxShiftsInPass) {
+      maxShiftsInPass = shiftsInPass;
+    }
+    if (shiftsInPass >= 2) {
+      hasMultipleShifts = true;
+    }
+    if (j < 0 && shiftsInPass > 0) {
+      hasHeadLanding = true;
+    } else if (j >= 0 && shiftsInPass > 0) {
+      hasConditionFalseStopWithShift = true;
+    }
+  }
+
+  const distinctShiftCounts = new Set(passShifts).size;
+
+  return {
+    totalShifts,
+    maxShiftsInPass,
+    passShifts,
+    hasDirectInsert,
+    hasMultipleShifts,
+    hasConditionFalseStopWithShift,
+    hasHeadLanding,
+    distinctShiftCounts,
+  };
+}
+
+/**
+ * Predicado puro: Valida se em ao menos uma passada a inserção ocorre por parada condicional
+ * (A[j] <= key) após ao menos um deslocamento (encaixe em vaga intermediária da esteira).
+ */
+export const hasConditionFalseStopWithShift: ArrayConstraint = (arr) => {
+  return analyzeInsertionSort(arr).hasConditionFalseStopWithShift;
+};
+
+/**
+ * Predicado puro: Valida se em ao menos uma passada a chave viaja até a cabeceira da esteira (j < 0).
+ */
+export const hasHeadLandingInAtLeastOnePass: ArrayConstraint = (arr) => {
+  return analyzeInsertionSort(arr).hasHeadLanding;
+};
+
+/**
+ * Predicado puro: Valida diversidade de trajetórias de chave (ao menos 3 contagens distintas de shifts).
+ */
+export const hasDiverseShiftTrajectories: ArrayConstraint = (arr) => {
+  return analyzeInsertionSort(arr).distinctShiftCounts >= 3;
+};
+
+/**
+ * Predicado puro: Valida heterogeneidade de custos de passadas (ao menos 2 contagens distintas de shifts).
+ */
+export const hasHeterogeneousPassCosts: ArrayConstraint = (arr) => {
+  return analyzeInsertionSort(arr).distinctShiftCounts >= 2;
+};
+
+/**
+ * Predicado puro: Valida deslocamentos moderados na prática básica (nenhuma passada com mais de 2 shifts).
+ */
+export const hasModerateShiftsInBasic: ArrayConstraint = (arr) => {
+  return analyzeInsertionSort(arr).maxShiftsInPass <= 2;
+};
+
+/**
  * Restrições para Prática Básica (Fase 1, n = 4):
  * - Não previamente ordenado;
  * - Pelo menos um shift;
  * - Pelo menos uma inserção direta (zero shifts);
- * - Evitar vetor totalmente invertido no nível introdutório.
+ * - Evitar vetor totalmente invertido;
+ * - Deslocamentos moderados.
  */
 export const INSERTION_BASIC_CONSTRAINTS: readonly ArrayConstraintDefinition[] =
   Object.freeze([
@@ -130,14 +238,22 @@ export const INSERTION_BASIC_CONSTRAINTS: readonly ArrayConstraintDefinition[] =
         "O lote não deve estar totalmente invertido no nível básico",
       predicate: isNotReverseSorted,
     },
+    {
+      id: "insertion-moderate-shifts",
+      description:
+        "O lote básico deve manter deslocamentos moderados sem sobrecarga inicial",
+      predicate: hasModerateShiftsInBasic,
+    },
   ]);
 
 /**
  * Restrições para Prática Intermediária (Fase 2, n = 5):
  * - Não previamente ordenado;
- * - Pelo menos um shift;
+ * - Não totalmente invertido;
  * - Pelo menos uma inserção direta;
- * - Pelo menos uma passada com múltiplos shifts.
+ * - Pelo menos uma passada com múltiplos shifts;
+ * - Parada condicional por elemento menor ou igual;
+ * - Custos de passadas heterogêneos.
  */
 export const INSERTION_INTERMEDIATE_CONSTRAINTS: readonly ArrayConstraintDefinition[] =
   Object.freeze([
@@ -145,6 +261,11 @@ export const INSERTION_INTERMEDIATE_CONSTRAINTS: readonly ArrayConstraintDefinit
       id: "insertion-not-sorted",
       description: "O lote não deve estar previamente ordenado",
       predicate: isNotSorted,
+    },
+    {
+      id: "insertion-not-reverse-sorted",
+      description: "O lote não deve estar totalmente invertido",
+      predicate: isNotReverseSorted,
     },
     {
       id: "insertion-has-shift",
@@ -163,14 +284,28 @@ export const INSERTION_INTERMEDIATE_CONSTRAINTS: readonly ArrayConstraintDefinit
         "O lote deve exigir ao menos uma passada com múltiplos deslocamentos",
       predicate: hasInsertionWithMultipleShifts,
     },
+    {
+      id: "insertion-heterogeneous-costs",
+      description:
+        "O lote deve propiciar custos distintos de passadas",
+      predicate: hasHeterogeneousPassCosts,
+    },
+    {
+      id: "insertion-condition-stop",
+      description:
+        "O lote deve propiciar ao menos uma inserção interrompida pela condição relacional",
+      predicate: hasConditionFalseStopWithShift,
+    },
   ]);
 
 /**
  * Restrições para Prática Avançada (Fase 3, n = 6):
  * - Não previamente ordenado;
+ * - Não totalmente invertido (reservado para caso curado insertion.case.reverse);
  * - Pelo menos um shift;
  * - Pelo menos uma passada com múltiplos shifts;
- * - Maior diversidade: não exclui vetor reverso apenas por dificuldade.
+ * - Pelo menos uma chave que alcança a cabeceira da esteira;
+ * - Trajetórias de chave heterogêneas e diversas.
  */
 export const INSERTION_ADVANCED_CONSTRAINTS: readonly ArrayConstraintDefinition[] =
   Object.freeze([
@@ -178,6 +313,11 @@ export const INSERTION_ADVANCED_CONSTRAINTS: readonly ArrayConstraintDefinition[
       id: "insertion-not-sorted",
       description: "O lote não deve estar previamente ordenado",
       predicate: isNotSorted,
+    },
+    {
+      id: "insertion-not-reverse-sorted",
+      description: "O lote não deve estar totalmente invertido",
+      predicate: isNotReverseSorted,
     },
     {
       id: "insertion-has-shift",
@@ -189,6 +329,18 @@ export const INSERTION_ADVANCED_CONSTRAINTS: readonly ArrayConstraintDefinition[
       description:
         "O lote deve exigir ao menos uma passada com múltiplos deslocamentos",
       predicate: hasInsertionWithMultipleShifts,
+    },
+    {
+      id: "insertion-head-landing",
+      description:
+        "O lote deve exigir ao menos uma chegada de chave à cabeceira da esteira",
+      predicate: hasHeadLandingInAtLeastOnePass,
+    },
+    {
+      id: "insertion-diverse-trajectories",
+      description:
+        "O lote deve apresentar trajetórias ricas com contagens distintas de deslocamento",
+      predicate: hasDiverseShiftTrajectories,
     },
   ]);
 
