@@ -1,9 +1,18 @@
 # 05 — Sistema de Design, UX e Identidade Visual
 
 > **Documento canônico:** Especificação completa do Design System, identidade visual, linguagem de interação, catálogo de estilos e diretrizes de experiência do usuário (UX) do **Sorting Station**.  
-> **Status:** Ativo / Base de Verdade da Wiki  
-> **Data:** 08/09/2026  
-> **Dependências:** [`AGENTS.md`](../../AGENTS.md), [`CLAUDE.md`](../../CLAUDE.md), [`00-repository-inventory.md`](./00-repository-inventory.md), [`01-product-vision.md`](./01-product-vision.md), [`03-frontend.md`](./03-frontend.md).
+> **Status:** Ativo / Base de Verdade da Wiki (Em transição para V2 via ADR 0027)  
+> **Data:** 16/11/2026  
+> **Dependências:** [`AGENTS.md`](../../AGENTS.md), [`01-product-vision.md`](./01-product-vision.md), [`03-frontend.md`](./03-frontend.md), [`ux-redesign-v2.md`](./ux-redesign-v2.md), [`ADR 0027`](../adr/0027-educational-and-ui-experience-redesign-v2.md).
+
+> [!NOTE]
+> **EVOLUÇÃO PARA O DESIGN SYSTEM V2 (UX-REDESIGN-R1):**  
+> Para resolver a sobrecarga cognitiva e poluição visual identificadas em testes com estudantes e professores, o **ADR 0027** e a especificação [`ux-redesign-v2.md`](./ux-redesign-v2.md) estabelecem o **Design System V2**. O Design System V2 introduz:
+> 1. Cores funcionais com significado semântico único (azul para comparação ativa, âmbar para chave/scanner, verde para ordenado definitivo);
+> 2. Eliminação de sombras e neons puramente decorativos em elementos estáticos;
+> 3. Regra de Ouro da interface (<2s para identificar onde olhar, 1 foco principal, 1 pergunta curta e 2 ações);
+> 4. Hierarquia em 3 níveis (Nível 1 Essencial, Nível 2 Apoio, Nível 3 Sob Demanda).  
+> Os componentes atuais permanecem suportados enquanto a migração progressiva ocorrer (piloto Bubble Sort em UX-REDESIGN-R2).
 
 ---
 
@@ -553,6 +562,40 @@ A diferenciação de suporte nas práticas regulares adota uma semântica visual
    - **Não Ocultação de Fatos Operacionais:** Elementos sob inspeção, índices, caixas ordenadas (`OK`/`ORD`), e condições de contorno (como chegada à cabeceira $j = -1$) NUNCA são escondidos no suporte mínimo.
    - **Acessibilidade Universal:** Cores são sempre acompanhadas de rótulos textuais legíveis em `Space Mono`, contraste suficiente e atributos `aria-label`.
    - **Feedback Formativo Permanente:** O desvanecimento de andaimes aplica-se à orientação pré-decisão; o feedback posterior a decisões errôneas permanece completo e explicativo em todos os níveis.
+
+### 11.9. Padrão Visual V2 em `NumberedBox` e Telas Educacionais Simplificadas (`UX-REDESIGN-R2`)
+No marco `UX-REDESIGN-R2`, foi introduzida a variante de aprendizagem direta para `NumberedBox`:
+- **Prop `variant="learning"`:**
+  - Desativa o brilho difuso permanente (`box-shadow` neon) e remove scanlines e badges concorrentes (`PAR`, `ALVO`, `SCAN`, `PKG`);
+  - Aplica superfícies calmas com alto contraste WCAG:
+    - **Par sob comparação:** `border-2 border-blue-500 bg-blue-950/60 text-white`;
+    - **Elemento consolidado/ordenado:** `border-2 border-emerald-500 bg-emerald-950/60 text-emerald-200`;
+    - **Caixa neutra:** `border border-slate-700 bg-slate-900/60 text-slate-300`;
+- **Prop `showIndex`:**
+  - Suprime a pílula de índice numérico (`#1`, `#2`...) por padrão na Prática Básica para não sobrecarregar o estudante com detalhes de implementação do laço;
+  - Quando o estudante aciona *"Ver Detalhes Técnicos sob demanda"*, `showIndex={true}` é ativado, revelando os índices no topo das caixas de forma contextual;
+- **Paridade e Simetria de Ação:**
+  - Os botões `[ ⇄ TROCAR ]` e `[ = MANTER ]` compartilham o mesmo tamanho, altura de toque e destaque funcional (com atalhos `[1]` e `[2]` visíveis), impedindo o induzimento ao clique automático;
+- **Conformidade com a Scrollable Screen Rule:**
+  - Todas as telas V2 possuem contêiner com rolagem vertical livre (`w-full min-h-screen overflow-y-auto overflow-x-hidden`), garantindo que nenhum elemento seja cortado em viewports de 1366x768 ou 1280x650.
+
+### 11.10. Hierarquia Canônica de Informação em 3 Níveis (`UX-REDESIGN-R3-A`)
+No marco `UX-REDESIGN-R3-A`, foi formalizada a separação inegociável entre apoio conceitual e detalhamento técnico sob demanda nas telas de prática interativa:
+
+1. **Nível 1 (Hero — Decisão e Foco Ativo):**
+   - Vetor de caixas sem ruído visual (`NumberedBox` em `variant="learning"`);
+   - Pergunta central do algoritmo em destaque (`text-lg sm:text-xl font-bold`);
+   - Botões de ação com peso simétrico (`[ ⇄ TROCAR ]` e `[ = MANTER ]`);
+   - Progresso visível da passada e passo atual.
+2. **Nível 2 (Apoio Contextual e Feedback):**
+   - **Botão `[ ? Dica ]`:** Posicionado discretamente no cabeçalho da área de decisão (`text-xs text-cyan-400 border border-cyan-500/30`), sem competir com as ações primárias de troca/manutenção e sem exigir abertura da gaveta técnica;
+   - **Feedback Causal:** Banners explicativos com diagnóstico do porquê de cada decisão (persistindo até nova tentativa no erro, e com transição suave no acerto).
+3. **Nível 3 (Detalhes Técnicos Sob Demanda):**
+   - Gaveta retrátil no rodapé explicitamente rotulada como `"▼ Ver detalhes sob demanda"` / `"▲ Ocultar detalhes"`;
+   - Contém exclusivamente detalhes secundários da execução: índices formais de laço ($i, j, n$), condição formal do laço e pseudocódigo textual completo;
+   - A prática básica é 100% completável sem necessidade de abrir a gaveta técnica.
+
+
 
 
 

@@ -225,6 +225,13 @@ O modelo oficial de deliberação está versionado em [`docs/adr/TEMPLATE.md`](.
 
 ---
 
+### [ADR 0027: Redesenho Integral da Experiência Educacional e da Interface (UX/UI V2)](../../docs/adr/0027-educational-and-ui-experience-redesign-v2.md)
+- **Status:** `ACEITO` (2026-11-16)
+- **Contexto:** Testes com alunos e professores revelaram sobrecarga cognitiva crítica, poluição visual (10 a 18 blocos concorrentes por tela), excesso de métricas em tempo real e risco pedagógico de "clique mecânico" sem reflexão. Define a transição da interface atual para a UX/UI V2 sob o lema "Clareza infantil sem infantilização", estabelece a Regra de Ouro (1 foco visual, 1 pergunta curta, 2 ações claras, decisão em menos de 2s), hierarquia de informação em 3 níveis (Nível 1 Essencial, Nível 2 Apoio, Nível 3 Sob Demanda), modelo de aprendizagem ativa *Observe $\rightarrow$ Preveja $\rightarrow$ Aja $\rightarrow$ Compreenda*, Design System V2 (cores funcionais, tipografia hierárquica, supressão de neons decorativos) e congelamento formal de expansões de conteúdo (Merge/Quick/Heap/Lab e casos restantes) até a homologação da nova experiência no módulo piloto Bubble Sort (UX-REDESIGN-R2).
+- **Impacto:** Estabelece a especificação canônica em [`docs/wiki/ux-redesign-v2.md`](./ux-redesign-v2.md), preserva 100% das engines puras e persistência Schema v4 existentes, e pauta os próximos marcos UX-REDESIGN-R1 a R7.
+
+---
+
 ## 5. Catálogo de Candidatos a ADR Futuro
 
 As seguintes propostas de evolução estrutural permanecem documentadas como **candidatas formais**:

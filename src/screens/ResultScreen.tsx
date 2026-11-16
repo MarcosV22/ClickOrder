@@ -1,5 +1,7 @@
 import NumberedBox from "../components/NumberedBox";
 import GameButton from "../components/GameButton";
+import BubbleResultScreenV2 from "./bubble/BubbleResultScreenV2";
+import type { BubbleUxTestSession } from "./bubble/bubbleUxTest";
 import type { BubbleSortVariant } from "../game/sorting";
 import {
   BUBBLE_SORT_PSEUDOCODE,
@@ -54,6 +56,9 @@ interface ResultScreenProps {
   onRepeat: () => void;
   onViewReplay?: () => void;
   onOpenSelector?: () => void;
+  isUxTestMode?: boolean;
+  uxTestSession?: BubbleUxTestSession;
+  onUxTestSessionUpdate?: (session: BubbleUxTestSession) => void;
 }
 
 export default function ResultScreen({
@@ -86,6 +91,9 @@ export default function ResultScreen({
   onRepeat,
   onViewReplay,
   onOpenSelector,
+  isUxTestMode,
+  uxTestSession,
+  onUxTestSessionUpdate,
 }: ResultScreenProps) {
   const isCase = Boolean(caseDefinition) || activityContext?.type === "case";
   const effectiveCaseDef =
@@ -114,6 +122,29 @@ export default function ResultScreen({
           : isEarlyExit
             ? BUBBLE_SORT_EARLY_EXIT_PSEUDOCODE
             : BUBBLE_SORT_PSEUDOCODE;
+
+  if (protocol === "bubble" && !isCase && !isEarlyExit) {
+    return (
+      <BubbleResultScreenV2
+        finalArray={finalArray}
+        comparisons={comparisons}
+        swaps={swaps}
+        errors={errors}
+        hintsUsed={hintsUsed}
+        score={score}
+        elapsedTimeMs={elapsedTimeMs}
+        canonicalComparisons={canonicalComparisons}
+        hasNextPhase={hasNextPhase}
+        onNext={onNext}
+        onRepeat={onRepeat}
+        onViewReplay={onViewReplay}
+        onOpenSelector={onOpenSelector}
+        isUxTestMode={isUxTestMode}
+        uxTestSession={uxTestSession}
+        onUxTestSessionUpdate={onUxTestSessionUpdate}
+      />
+    );
+  }
 
   return (
     <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-8 pb-16 sm:pb-24 px-4 sm:px-8 select-none">

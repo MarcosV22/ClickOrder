@@ -1,9 +1,9 @@
 # Módulo 01 — Bubble Sort
 
 > **Documento canônico do módulo curricular:** Especificação integral do Módulo de Bubble Sort da plataforma **Sorting Station**.  
-> **Status de Implementação:** `IMPLEMENTADO` (Adaptação conceitual de fases para exercícios; engine pura, FSM, demonstração, replay, persistência v3 e cenários de desafio ativos).  
-> **Data de Atualização:** 15/09/2026 (Marco PLATFORM-R0)  
-> **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md).
+> **Status de Implementação:** `PILOTO IMPLEMENTADO E TECNICAMENTE VALIDADO (AGUARDANDO VALIDAÇÃO FORMATIVA COM USUÁRIOS)` — Marco UX-REDESIGN-R3-A.  
+> **Data de Atualização:** 16/11/2026 (Marco UX-REDESIGN-R3-A)  
+> **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`ADR 0027`](../../adr/0027-bubble-sort-v2-active-learning-pilot.md), [`bubble-v2-formative-evaluation.md`](../bubble-v2-formative-evaluation.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md).
 
 ---
 
@@ -12,7 +12,7 @@
 - **Nome Canônico:** Bubble Sort (Ordenação por Flutuação em Pares Adjacentes)
 - **Identificador de Sistema (`moduleId`):** `bubble`
 - **Rótulo Diegético na Interface:** `PROTOCOLO: BUBBLE SORT // ESTEIRA DE COMPARAÇÃO`
-- **Status Factual:** `IMPLEMENTADO`
+- **Status Factual:** `PILOTO IMPLEMENTADO E TECNICAMENTE VALIDADO (AGUARDANDO VALIDAÇÃO FORMATIVA COM USUÁRIOS)`
 - **Classificação Curricular:** Algoritmo Elementar de Trocas Adjacentes
 - **Complexidade Temporal:**
   - **Melhor Caso (Canônico):** $\Theta(n^2)$ comparações, $0$ trocas
@@ -301,3 +301,43 @@ A interface interativa do Bubble Sort (`GameScreen.tsx`) integra o modelo transv
 - **Paridade:** No Laboratório Comparativo, o Bubble Sort consumirá a mesma semente PRNG que os outros algoritmos selecionados.
 - **Métricas Exportáveis:** $C(n)$ comparações, $M(n)$ trocas locais, quadros de execução.
 - **Comportamento Previsto:** Superará o Selection Sort em trocas no melhor caso ($0$ trocas no Early Exit), mas será superado pelo Selection Sort em número de trocas no caso médio e pior caso, e amplamente superado em comparações pelos algoritmos $O(n \log n)$.
+
+---
+
+## 21. Piloto End-to-End Bubble Sort V2 (`UX-REDESIGN-R2`)
+
+No marco **UX-REDESIGN-R2**, o Bubble Sort tornou-se o **módulo-piloto da experiência educacional redesenhada**:
+- **Visão Geral Simplificada (`BubbleModuleOverviewV2.tsx`):** Substitui o antigo briefing complexo por um resumo conceitual com subtítulo claro (*"Compare vizinhos e leve os maiores para o final."*), 3 passos sequenciais e mini-diagrama DOM acessível;
+- **Tutorial Interativo com Predição (`BubbleTutorialScreenV2.tsx`):** Tutorial sobre `[3, 1, 2]` que introduz uma etapa de predição antes de liberar a primeira troca, consolidando a mecânica em 4 passos sem sobrecarga cognitiva;
+- **Prática Ativa Despoluída (`BubbleGameScreenV2.tsx`):**
+  - Elimina placar e cronômetro em tempo real do cabeçalho;
+  - Utiliza `NumberedBox` sob `variant="learning"` com `showIndex={false}` por padrão;
+  - Exige previsão de resultado no primeiro passo da prática;
+  - Apresenta botões simétricos de mesmo peso visual: `[ ⇄ TROCAR ]` (atalho `1`) e `[ = MANTER ]` (atalho `2`);
+  - Oferece feedback construtivo e causal em decisões incorretas sem avanço indevido do laço;
+  - Inclui micro-checagem pós-passada após a primeira passada e gaveta técnica retrátil sob demanda;
+- **Tela de Resultados Educacional (`BubbleResultScreenV2.tsx`):**
+  - Banner de Descoberta focado no comportamento do maior elemento;
+  - 3 métricas limpas e frase canônica: *"Referência desta variante: X comparações"*;
+  - Pergunta de Micro-Reflexão Conceitual com validação imediata;
+  - Acesso direto ao Replay e às práticas subsequentes;
+- **Desacoplamento e Pureza da Engine:** Todas as melhorias operam na camada de apresentação, consumindo `bubbleSortEngine.ts` de forma puramente determinística.
+
+---
+
+## 22. Hardening e Kit de Validação Formativa com Usuários (`UX-REDESIGN-R3-A`)
+
+No marco **UX-REDESIGN-R3-A**, o piloto Bubble Sort V2 passou por refinamentos de usabilidade e foi instrumentado com um kit completo de observação para testes empíricos com turmas reais:
+1. **Separação Canônica entre Apoio Contextual e Detalhes Técnicos:**
+   - O botão `[ ? Dica ]` (Nível 2) foi extraído da gaveta técnica e posicionado discretamente na própria área de decisão (ao lado do rótulo da pergunta), permitindo acesso imediato sem desviar o foco da esteira;
+   - A gaveta inferior retrátil foi formalizada como Nível 3 (`"▼ Ver detalhes sob demanda"` / `"▲ Ocultar detalhes"`), contendo exclusivamente detalhes secundários ($i, j, n$, condição formal e pseudocódigo);
+   - A prática básica é 100% realizável sem abrir a gaveta técnica.
+2. **Instrumentação Local Não-Invasiva (`?uxTest=1`):**
+   - Ativação estrita via query param `?uxTest=1` sem impacto no uso cotidiano de estudantes comuns;
+   - Rastreamento puramente em memória (`BubbleUxTestSession`): tempo até a primeira ação, acerto na primeira tentativa, contagem de erros, dicas e aberturas da gaveta técnica, respostas nos checkpoints e micro-reflexão;
+   - Zero envio de telemetria para rede, zero PII e zero mutação do Schema v4;
+   - Painel do pesquisador na tela de resultado com exportação em formato JSON (cópia e download).
+3. **Protocolo de Validação Formativa:**
+   - Formalizado em [`docs/wiki/bubble-v2-formative-evaluation.md`](../bubble-v2-formative-evaluation.md) com regras do pesquisador (Think-Aloud, proibição de indução ou explicação prévia da interface), teste dos 5 segundos, roteiro qualitativo e matriz de red flags.
+
+

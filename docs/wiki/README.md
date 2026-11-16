@@ -39,8 +39,8 @@ O objetivo pedagógico central é **ensinar algoritmos de ordenação por manipu
 - **Frontend Core:** React 19 (`react` e `react-dom` `^19.0.0`), Vite 8 (`vite` `^8.0.5`);
 - **Estilização e Design:** Tailwind CSS v4 (`@tailwindcss/vite` e `tailwindcss` `^4.0.0`) com tokens `@theme inline`, sem arquivos legados de configuração;
 - **Formatador:** `oxfmt` (baseado em Rust/Biome);
-- **Testes Automatizados:** **Vitest** com **303 testes unitários automatizados** em 19 arquivos de teste (100% verde);
-- **Persistência:** Single Page Application (SPA) client-side com armazenamento local desacoplado via **`localStorage` (Schema v3)** e fallback defensivo em memória.
+- **Testes Automatizados:** **Vitest** com **650 testes unitários automatizados** em 50 arquivos de teste (100% verde);
+- **Persistência:** Single Page Application (SPA) client-side com armazenamento local desacoplado via **`localStorage` (Schema v4)** e fallback defensivo em memória.
 
 ---
 
@@ -56,12 +56,14 @@ O objetivo pedagógico central é **ensinar algoritmos de ordenação por manipu
 | **04** | [`04-sorting-engine.md`](04-sorting-engine.md) | `IMPLEMENTADO` | Arquitetura das engines puras, FSMs de Bubble e Selection Sort e catálogo de algoritmos. |
 | **05** | [`05-ux-design-system.md`](05-ux-design-system.md) | `IMPLEMENTADO` | Design System sci-fi, tokens cromáticos, tipografia, efeitos e vocabulário UX. |
 | **06** | [`06-development-environment.md`](06-development-environment.md) | `IMPLEMENTADO` | Guia operacional do Figma Make, porta 8443, HMR, scripts `.figma/make/*` e checklist de build. |
-| **07** | [`07-backend-and-persistence.md`](07-backend-and-persistence.md) | `IMPLEMENTADO` / `PLANEJADO` | Persistência Schema v3 atual, diagnóstico de limitações e especificação conceitual do Schema v4. |
-| **08** | [`08-testing-and-quality.md`](08-testing-and-quality.md) | `IMPLEMENTADO` | Suíte Vitest (303 testes em 19 arquivos), pirâmide de qualidade e critérios de Definition of Done. |
+| **07** | [`07-backend-and-persistence.md`](07-backend-and-persistence.md) | `IMPLEMENTADO` | Persistência Schema v4 modular por `exerciseSets` e fallback defensivo em memória. |
+| **08** | [`08-testing-and-quality.md`](08-testing-and-quality.md) | `IMPLEMENTADO` | Suíte Vitest (650 testes em 50 arquivos), pirâmide de qualidade e critérios de Definition of Done. |
 | **09** | [`09-build-deploy.md`](09-build-deploy.md) | `IMPLEMENTADO` | Pipeline estático Vite, empacotamento `dist.tar.gz`, `FIGMA_PUBLIC_URL` e checklist pré-deploy. |
-| **10** | [`10-roadmap.md`](10-roadmap.md) | `HISTÓRICO` / `CANÔNICO` | Histórico Legacy (P0 a P2.1-G) e Novo Roadmap Canônico da Plataforma em 6 Marcos. |
-| **11** | [`11-architecture-decisions.md`](11-architecture-decisions.md) | `IMPLEMENTADO` | Governança de ADRs, índice formal de ADRs 0001 a 0018 e catálogo de candidatos. |
+| **10** | [`10-roadmap.md`](10-roadmap.md) | `HISTÓRICO` / `CANÔNICO` | Histórico Legacy, ciclo UX-REDESIGN (R1 a R7) e Novo Roadmap Canônico da Plataforma. |
+| **11** | [`11-architecture-decisions.md`](11-architecture-decisions.md) | `IMPLEMENTADO` | Governança de ADRs, índice formal de ADRs 0001 a 0027 e catálogo de candidatos. |
 | **12** | [`12-pedagogy-and-academic-traceability.md`](12-pedagogy-and-academic-traceability.md) | `IMPLEMENTADO` | Rastreabilidade pedagógica, rigor científico, modo demonstração e inventário de seções do artigo. |
+| **V2** | [`ux-redesign-v2.md`](ux-redesign-v2.md) | `ATIVO` | Redesenho integral da UX/UI V2: auditoria de poluição, hierarquia em 3 níveis, wireframes e aprendizagem ativa. |
+| **EXP**| [`learning-experience-expansion.md`](learning-experience-expansion.md) | `ATIVO` | Especificação dos marcos de diferenciação curricular e Casos do Algoritmo. |
 | **LAB**| [`comparison-lab.md`](comparison-lab.md) | `BLOQUEADO (P3.4)` | Especificação técnica do Laboratório Comparativo (bloqueado até os 6 módulos estarem prontos). |
 | **QA** | [`qa-gameplay-checklist.md`](qa-gameplay-checklist.md) | `IMPLEMENTADO` | Roteiro operacional e matriz de testes manuais/homologação de mecânicas e regressão. |
 
@@ -69,28 +71,28 @@ O objetivo pedagógico central é **ensinar algoritmos de ordenação por manipu
 | Módulo | Documento | Status Factual | Resumo e Ordem Curricular |
 | :--- | :--- | :---: | :--- |
 | **Padrão** | [`modules/README.md`](modules/README.md) | `ATIVO` | Module Standard de 20 seções, catálogo e taxonomia transversal de exercícios (A a H). |
-| **01. Bubble Sort** | [`modules/bubble-sort.md`](modules/bubble-sort.md) | `IMPLEMENTADO` | Comparação e troca local adjacente, invariante de bolha, modo Early Exit opcional. |
+| **01. Bubble Sort** | [`modules/bubble-sort.md`](modules/bubble-sort.md) | `IMPLEMENTADO` | Comparação e troca local adjacente, invariante de bolha, piloto do Redesign V2. |
 | **02. Selection Sort** | [`modules/selection-sort.md`](modules/selection-sort.md) | `IMPLEMENTADO` | Varredura de mínimo global com scanner e permuta pontual por elevação no final da passada. |
-| **03. Insertion Sort** | [`modules/insertion-sort.md`](modules/insertion-sort.md) | `PLANEJADO (P2.2)`| Inserção ordenada em sublista mantida à esquerda com deslocamentos sucessivos (*shifts*). |
-| **04. Merge Sort** | [`modules/merge-sort.md`](modules/merge-sort.md) | `FUTURO (P3.1)` | Divisão e conquista recursiva com intercalação de sub-esteiras ordenadas. |
-| **05. Quick Sort** | [`modules/quick-sort.md`](modules/quick-sort.md) | `FUTURO (P3.2)` | Particionamento com pivô e recursão sobre sub-vetores independentes. |
-| **06. Heap Sort** | [`modules/heap-sort.md`](modules/heap-sort.md) | `FUTURO (P3.3)` | Estrutura de dados Max-Heap, afundamento (*sift-down*) e ordenação in-place. |
+| **03. Insertion Sort** | [`modules/insertion-sort.md`](modules/insertion-sort.md) | `IMPLEMENTADO` | Inserção ordenada em sublista mantida à esquerda com deslocamentos sucessivos (*shifts*). |
+| **04. Merge Sort** | [`modules/merge-sort.md`](modules/merge-sort.md) | `CONGELADO (P3.1)` | Divisão e conquista recursiva com intercalação de sub-esteiras ordenadas. |
+| **05. Quick Sort** | [`modules/quick-sort.md`](modules/quick-sort.md) | `CONGELADO (P3.2)` | Particionamento com pivô e recursão sobre sub-vetores independentes. |
+| **06. Heap Sort** | [`modules/heap-sort.md`](modules/heap-sort.md) | `CONGELADO (P3.3)` | Estrutura de dados Max-Heap, afundamento (*sift-down*) e ordenação in-place. |
 
 ---
 
 ## 3. Repositório de Decisões Arquiteturais ([`docs/adr/`](../adr/))
 
 - [`0001-bubble-sort-fsm-ui-integration.md`](../adr/0001-bubble-sort-fsm-ui-integration.md) (FSM Bubble Sort)
-- [`0002-procedural-generation-mulberry32.md`](../adr/0002-procedural-generation-mulberry32.md) (PRNG Mulberry32)
+- [`0002-campaign-completion-memory-state.md`](../adr/0002-campaign-completion-memory-state.md) (Memória de Campanha)
 - [`0003-session-metrics-engine-decoupling.md`](../adr/0003-session-metrics-engine-decoupling.md) (Telemetria Desacoplada)
 - [`0004-execution-replay-state-derivation.md`](../adr/0004-execution-replay-state-derivation.md) (Replay Ponto-a-Ponto)
 - [`0005-replay-synchronized-pseudocode.md`](../adr/0005-replay-synchronized-pseudocode.md) (Pseudocódigo Sincronizado)
 - [`0006-decoupled-local-storage-persistence.md`](../adr/0006-decoupled-local-storage-persistence.md) (Persistência Schema v1)
 - [`0007-protocol-score-and-descriptive-elapsed-time.md`](../adr/0007-protocol-score-and-descriptive-elapsed-time.md) (Pontuação do Protocolo)
-- [`0008-campaign-progression-and-celebration.md`](../adr/0008-campaign-progression-and-celebration.md) (Campanha de 3 Fases)
-- [`0009-interactive-tutorial-guided-fsm.md`](../adr/0009-interactive-tutorial-guided-fsm.md) (Tutorial Guiado Bubble)
-- [`0010-persistence-migration-schema-v2.md`](../adr/0010-persistence-migration-schema-v2.md) (Schema v2)
-- [`0011-selection-sort-fsm-and-engine.md`](../adr/0011-selection-sort-fsm-and-engine.md) (Engine Selection Sort)
+- [`0008-bubble-sort-early-exit-variant.md`](../adr/0008-bubble-sort-early-exit-variant.md) (Early Exit Bubble)
+- [`0009-global-procedural-array-generation.md`](../adr/0009-global-procedural-array-generation.md) (PRNG Mulberry32)
+- [`0010-reusable-data-driven-mode-briefing.md`](../adr/0010-reusable-data-driven-mode-briefing.md) (Briefing Reutilizável)
+- [`0011-selection-sort-engine-and-fsm.md`](../adr/0011-selection-sort-engine-and-fsm.md) (Engine Selection Sort)
 - [`0012-selection-sort-pedagogical-layer-and-interactive-tutorial.md`](../adr/0012-selection-sort-pedagogical-layer-and-interactive-tutorial.md) (Tutorial Selection Sort)
 - [`0013-selection-sort-gameplay-and-three-phase-campaign.md`](../adr/0013-selection-sort-gameplay-and-three-phase-campaign.md) (Gameplay Selection Sort)
 - [`0014-selection-sort-replay-and-synchronized-pseudocode.md`](../adr/0014-selection-sort-replay-and-synchronized-pseudocode.md) (Replay Selection Sort)
@@ -98,3 +100,12 @@ O objetivo pedagógico central é **ensinar algoritmos de ordenação por manipu
 - [`0016-educational-charter-and-cross-protocol-standardization.md`](../adr/0016-educational-charter-and-cross-protocol-standardization.md) (Charter Educacional)
 - [`0017-canonical-demonstration-mode.md`](../adr/0017-canonical-demonstration-mode.md) (Modo Demonstração)
 - [`0018-game-to-educational-platform-transition.md`](../adr/0018-game-to-educational-platform-transition.md) (Transição para Plataforma Educacional)
+- [`0019-insertion-sort-pedagogical-layer-and-interactive-tutorial.md`](../adr/0019-insertion-sort-pedagogical-layer-and-interactive-tutorial.md) (Tutorial Insertion Sort)
+- [`0020-insertion-sort-interactive-practice-system.md`](../adr/0020-insertion-sort-interactive-practice-system.md) (Gameplay Insertion Sort)
+- [`0021-module-exercise-persistence-schema-v4.md`](../adr/0021-module-exercise-persistence-schema-v4.md) (Persistência Schema v4)
+- [`0022-canonical-exercise-module-standardization.md`](../adr/0022-canonical-exercise-module-standardization.md) (Standard de Módulos)
+- [`0023-merge-sort-pedagogical-mechanical-design.md`](../adr/0023-merge-sort-pedagogical-mechanical-design.md) (Design Merge Sort)
+- [`0024-quick-sort-pedagogical-mechanical-design.md`](../adr/0024-quick-sort-pedagogical-mechanical-design.md) (Design Quick Sort)
+- [`0025-curriculum-practice-differentiation-and-transversal-model.md`](../adr/0025-curriculum-practice-differentiation-and-transversal-model.md) (Diferenciação Curricular)
+- [`0026-algorithm-case-architecture-and-activity-context.md`](../adr/0026-algorithm-case-architecture-and-activity-context.md) (Infraestrutura de Casos do Algoritmo)
+- [`0027-educational-and-ui-experience-redesign-v2.md`](../adr/0027-educational-and-ui-experience-redesign-v2.md) (Redesenho Integral UX/UI V2)

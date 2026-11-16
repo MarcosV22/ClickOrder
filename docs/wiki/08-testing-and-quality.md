@@ -12,7 +12,7 @@
 Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Insertion Sort e Schema v4)**, a infraestrutura de testes automatizados do projeto cobre 100% da lógica pura de domínio, FSMs de ordenação (Bubble, Selection e Insertion Sort), tutoriais, conjuntos de prática progressiva, agregação de resultados, geração procedural Mulberry32, briefing, telemetria de sessão, replay da execução, pseudocódigo sincronizado, modo demonstração e persistência Schema v4:
 
 - **Framework de Testes Implementado:** **Vitest** (`vitest ^5.0.0`) instalado como dependência de desenvolvimento canônica via `pnpm add -D vitest`.
-- **Arquivos de Teste Ativos (50 arquivos, 650 testes automatizados aprovados 100% verde):**
+- **Arquivos de Teste Ativos (51 arquivos, 659 testes automatizados aprovados 100% verde):**
   1. `src/screens/illustratedBriefings.test.tsx` (7 testes - Briefings Ilustrados Canônicos para Bubble, Selection, Insertion, Merge e Quick Sort, e integridade estrutural do ProtocolCard)
   2. `src/game/sorting/quick/quickConstraints.test.ts` (5 testes - Constraints procedurais Mulberry32 do Quick Sort para níveis básico, intermediário e avançado, predicado de igualdade via engine real e fallbacks curados)
   3. `src/game/sorting/quick/quickPedagogy.test.ts` (4 testes - Feedback formativo de erro, scaffolding de dicas em 3 níveis e precedência de realce visual)
@@ -63,6 +63,7 @@ Com as conclusões dos marcos **P0**, **P1**, **P2.1**, **P2.1-G** e **P2.2 (Ins
   48. `src/screens/scaffoldingFading.test.tsx` (5 testes - Testes comportamentais de desvanecimento de suporte visual nas 3 telas)
   49. `src/game/curriculum/caseCatalog.test.ts` (11 testes - Catálogo canônico de Casos do Algoritmo, casos-piloto Bubble, Selection e Insertion, invariantes de zero PRNG e reflexões factuais puras)
   50. `src/screens/algorithmCaseFlow.test.tsx` (10 testes - Fluxo integrado de Casos do Algoritmo: seleção em PracticeSelector, cards dedicados, bloqueio/desbloqueio dinâmico, execução com engines reais, ResultScreen em modo caso com reflexão factual e CTAs dedicados, repetição determinística e Replay round-trip)
+  51. `src/screens/bubbleV2Pilot.test.tsx` (9 testes - Piloto End-to-End Bubble Sort V2: Visão Geral, Tutorial com predição ativa, Prática Ativa com atalhos e gaveta, Feedback causal, Tela de Resultados com reflexão conceitual, separação de Nível 2 / Nível 3 com Dica na área de decisão e isolamento do modo de teste de usabilidade ?uxTest=1)
 - **Scripts de Teste Canônicos em [`package.json`](../../package.json):**
   - `pnpm run test:run`: Execução única headless da suíte completa;
   - `pnpm test`: Modo watch interativo de desenvolvimento.

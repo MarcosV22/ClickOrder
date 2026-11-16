@@ -482,5 +482,69 @@ O marco **LEARNING-R3-A** introduz a infraestrutura curricular para **Casos do A
 ### 15.3. Síntese Reflexiva Baseada em Fatos Reais
 A reflexão pedagógica exibida na `ResultScreen` em contexto de caso não é um texto estático genérico. Ela é gerada dinamicamente pela função pura `buildReflection(metrics)` a partir dos contadores reais da sessão (`comparisons`, `swaps`, `shifts`, `insertions`), ancorando a teoria na experiência empírica concreta que o estudante acabou de vivenciar.
 
+---
+
+## 16. Modelo de Aprendizagem Ativa e Piloto Bubble Sort V2 (`UX-REDESIGN-R2`)
+
+O marco **UX-REDESIGN-R2** materializa a transição da plataforma para o ciclo de aprendizagem ativa baseado no princípio de **"Clareza Infantil sem Infantilização"**, estruturado em quatro etapas cognitivas sequenciais:
+
+$$\text{1. OBSERVAR} \longrightarrow \text{2. PREVER} \longrightarrow \text{3. AGIR} \longrightarrow \text{4. COMPREENDER}$$
+
+### 16.1. Rastreabilidade das Etapas do Ciclo Ativo
+1. **OBSERVAR:**
+   - O estudante depara-se com dois vizinhos sob foco visual limpo (`border-2 border-blue-500 bg-blue-950/60`), sem interferência de scanlines, contadores numéricos acelerados ou neons desnecessários;
+   - O cabeçalho é desprovido de placar e cronômetro em tempo real, eliminando a ansiedade temporal que induzia a cliques precipitados.
+2. **PREVER:**
+   - Antes do primeiro ato mecânico no Tutorial e na Prática Ativa, o sistema exige uma **predição explícita**: *"Depois de comparar [A] e [B], qual valor ficará mais à direita?"*;
+   - O estudante deve formular uma hipótese mental baseada no objetivo da ordenação crescente;
+   - Somente após responder e ler a justificativa causal da predição, os botões de ação são liberados.
+3. **AGIR:**
+   - A decisão é apresentada em dois botões simétricos de mesmo peso visual e dimensional: `[ ⇄ TROCAR ]` e `[ = MANTER ]`;
+   - O acionamento pode ocorrer via clique ou via atalhos de teclado ergonômicos (`1` para Trocar, `2` para Manter);
+   - A paridade dos botões impede que a cor "recompense" ou "induza" uma ação antes do julgamento reflexivo.
+4. **COMPREENDER:**
+   - **Feedback Causal Imediato:** Em caso de erro, o algoritmo não avança nem embaralha o vetor; exibe explicação causal do porquê o par está ou não em ordem e convida à nova tentativa;
+   - **Micro-Checagem Pós-Passada:** Ao concluir a 1ª passada, o sistema exige identificar qual elemento atingiu sua posição definitiva (consolidação da invariante de flutuação da maior carga);
+   - **Micro-Reflexão de Encerramento:** Na tela de resultados, uma pergunta conceitual objetiva avalia a compreensão do invariante estrutural com feedback formativo imediato.
+
+### 16.2. Desacoplamento Arquitetural entre Aprendizagem e Engine Algorítmica
+Para preservar a pureza matemática do algoritmo:
+- A engine `bubbleSortEngine.ts` opera como fonte única da verdade e máquina de estados determinística imutável;
+- Os estados de predição pré-ação, verificação de passada e micro-reflexão residem na camada de apresentação (`BubbleGameScreenV2` e `BubbleResultScreenV2`);
+- Não há modificação no Schema v4 de persistência e não há alteração de telemetria nos módulos congelados (Selection e Insertion Sort).
+
+### 16.3. Classificação Epistemológica das Metas de Avaliação
+Em cumprimento estrito às diretrizes de linguagem não-presuntiva (Seção 1 e Seção 13.4):
+- Qualquer menção a parâmetros operacionais (como *"tempo até a primeira ação <4s"*, *"taxa de acerto conceitual >80%"* ou *"redução substancial de cliques mecânicos"*) é classificada exclusivamente como **METAS EXPLORATÓRIAS DE AVALIAÇÃO** para desenho de protocolos experimentais futuros;
+- O sistema não afirma nem promete garantia de aprendizagem; afirma apenas que oferece condições estruturadas, observáveis e despoluídas para que a compreensão possa ocorrer.
+
+---
+
+## 17. Protocolo de Validação Formativa e Ética de Observação (`UX-REDESIGN-R3-A`)
+
+No marco **UX-REDESIGN-R3-A**, o piloto Bubble Sort V2 foi preparado e instrumentado para observação empírica direta com estudantes e professores, em conformidade com as melhores práticas de pesquisa formativa em IHC e informática na educação:
+
+### 17.1. Estatuto Epistemológico Canônico do Piloto
+- O Bubble Sort V2 é classificado formalmente como:  
+  **`PILOTO IMPLEMENTADO E TECNICAMENTE VALIDADO (AGUARDANDO VALIDAÇÃO FORMATIVA COM USUÁRIOS)`**;
+- É estritamente vedado categorizar o piloto como "pedagogicamente homologado" antes da condução e análise de testes empíricos com turmas reais;
+- A validação técnica (código sem erros, testes verdes, build aprovado) é condição necessária, mas não suficiente para homologação de usabilidade ou pedagógica.
+
+### 17.2. Metodologia de Observação Formativa Não-Invasiva
+O protocolo canônico foi formalizado em [`bubble-v2-formative-evaluation.md`](./bubble-v2-formative-evaluation.md), estruturado nas seguintes diretrizes:
+1. **Natureza Não-Clínica e Amigável:** Os testes destinam-se a avaliar a clareza da interface e os andaimes cognitivos da ferramenta, e **nunca** a inteligência, capacidade ou valor acadêmico do participante;
+2. **Protocolo Think-Aloud:** O estudante é encorajado a verbalizar seu fluxo de pensamento em tempo real (*"o que você está procurando agora?"*, *"o que você acha que vai acontecer se clicar aqui?"*);
+3. **Regra de Ouro do Observador:** O facilitador/pesquisador **não deve antecipar explicações** sobre a interface ou sobre o funcionamento do algoritmo. A interface deve ser autoexplicativa; caso o estudante fique bloqueado, o mediador anota o ponto de atrito e só intervém com perguntas neutras;
+4. **Teste dos 5 Segundos Inicial:** Avalia se o participante consegue identificar sem ajuda: onde está, onde olhar e qual o próximo passo imediato.
+
+### 17.3. Instrumentação Local e Ética de Dados (`?uxTest=1`)
+Para garantir a reprodutibilidade da pesquisa sem ferir preceitos éticos ou normativos de privacidade (LGPD):
+- **Isolamento Total:** A instrumentação só é ativada explicitamente via parâmetro de busca na URL (`?uxTest=1`). Em navegação cotidiana, o modo é completamente inativo;
+- **Zero PII e Efemeridade:** As métricas residem estritamente em memória volátil (`BubbleUxTestSession`), associadas a um ID anônimo efêmero gerado para a sessão;
+- **Zero Telemetria Remota:** Não há disparo de requisições de rede para servidores externos ou serviços de analytics de terceiros;
+- **Exportação Manual:** Na tela final de resultados, um painel exclusivo para o pesquisador exibe os tempos factuais e contadores da sessão, permitindo copiar ou descarregar os dados brutos em formato JSON padronizado para análise posterior.
+
+
+
 
 

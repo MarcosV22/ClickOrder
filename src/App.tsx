@@ -19,6 +19,9 @@ import InsertionGameScreen, {
 import PracticeSetCompleteScreen from "./screens/PracticeSetCompleteScreen";
 import PracticeSelector from "./screens/PracticeSelector";
 import DemonstrationScreen from "./screens/DemonstrationScreen";
+import BubbleModuleOverviewV2 from "./screens/bubble/BubbleModuleOverviewV2";
+import BubbleGameScreenV2 from "./screens/bubble/BubbleGameScreenV2";
+import type { BubbleUxTestSession } from "./screens/bubble/bubbleUxTest";
 import InsertionReplayScreen from "./screens/InsertionReplayScreen";
 import MergeReplayScreen from "./screens/MergeReplayScreen";
 import MergeTutorialScreen from "./screens/MergeTutorialScreen";
@@ -352,6 +355,9 @@ export default function App({
   const [activeActivityContext, setActiveActivityContext] =
     useState<ActivityContext | null>(null);
 
+  // Sessão efêmera em memória para Teste de UX (?uxTest=1)
+  const [bubbleUxSession, setBubbleUxSession] = useState<BubbleUxTestSession | null>(null);
+
   const isChallengeUnlocked = isChallengeModeUnlocked(saveData, TOTAL_PHASES);
 
   const handleOpenPracticeSelector = (modId: ModuleId) => {
@@ -583,7 +589,10 @@ export default function App({
   // --------------------------------------------------------------------------
   // Conclusão de Fase do Bubble Sort
   // --------------------------------------------------------------------------
-  const handleComplete = (data: PhaseCompleteData) => {
+  const handleComplete = (data: PhaseCompleteData, uxTestSession?: BubbleUxTestSession) => {
+    if (uxTestSession) {
+      setBubbleUxSession(uxTestSession);
+    }
     setResult({
       ...data,
       protocol: "bubble",
@@ -1241,23 +1250,31 @@ export default function App({
         />
       )}
       {screen === "briefing" && (
-        <ProtocolModeBriefingScreen
-          briefing={getBriefingForMode(briefingModeId)}
-          onStart={handleBriefingStart}
-          onBack={() => setScreen(briefingReturnScreen)}
-          onOpenDemonstration={() =>
-            handleOpenDemonstration(
-              briefingModeId === "merge-canonical"
-                ? "merge"
-                : briefingModeId === "insertion-canonical"
-                  ? "insertion"
-                  : briefingModeId === "selection-canonical"
-                    ? "selection"
-                    : "bubble",
-              "briefing"
-            )
-          }
-        />
+        briefingModeId === "bubble-canonical" ? (
+          <BubbleModuleOverviewV2
+            onStartTutorial={() => setScreen("tutorial")}
+            onStartPractice={() => handleOpenPracticeSelector("bubble")}
+            onBack={() => setScreen(briefingReturnScreen)}
+          />
+        ) : (
+          <ProtocolModeBriefingScreen
+            briefing={getBriefingForMode(briefingModeId)}
+            onStart={handleBriefingStart}
+            onBack={() => setScreen(briefingReturnScreen)}
+            onOpenDemonstration={() =>
+              handleOpenDemonstration(
+                briefingModeId === "merge-canonical"
+                  ? "merge"
+                  : briefingModeId === "insertion-canonical"
+                    ? "insertion"
+                    : briefingModeId === "selection-canonical"
+                      ? "selection"
+                      : "bubble",
+                "briefing"
+              )
+            }
+          />
+        )
       )}
       {screen === "practice-selector" && (
         <PracticeSelector
@@ -1394,44 +1411,64 @@ export default function App({
         />
       )}
       {screen === "game" && (
-        <GameScreen
-          key={`game-${activeActivityContext?.type === "case" ? activeActivityContext.caseDefinition.id : `${gameMode}-${currentPhase}-${gameMode === "CAMPAIGN" ? campaignSeed : ""}`}`}
-          onComplete={handleComplete}
-          initialArray={currentArray}
-          phase={currentPhase}
-          totalPhases={currentTotalPhases}
-          variant={activeVariant}
-          modeTitle={
-            gameMode === "CHALLENGE"
-              ? activeScenario.title
-              : activeActivityContext?.type === "case"
-                ? activeActivityContext.caseDefinition.title
-                : undefined
-          }
-          practiceTitle={
-            activeActivityContext?.type === "case"
-              ? activeActivityContext.caseDefinition.shortTitle
-              : gameMode === "CAMPAIGN"
-                ? currentPhase === 1
-                  ? "PRÁTICA BÁSICA"
-                  : currentPhase === 2
-                    ? "PRÁTICA INTERMEDIÁRIA"
-                    : "PRÁTICA AVANÇADA"
-                : undefined
-          }
-          supportProfile={
-            activeActivityContext?.type === "case"
-              ? "reduced"
-              : gameMode === "CAMPAIGN"
-                ? currentPhase === 1
-                  ? "full"
-                  : currentPhase === 2
-                    ? "reduced"
-                    : "minimal"
-                : "minimal"
-          }
-          onBackToSelector={() => handleOpenPracticeSelector("bubble")}
-        />
+        gameMode === "CAMPAIGN" && activeActivityContext?.type !== "case" ? (
+          <BubbleGameScreenV2
+            key={`bubble-v2-phase-${phase}-${campaignSeed}`}
+            initialArray={currentArray}
+            phase={currentPhase}
+            totalPhases={currentTotalPhases}
+            practiceTitle={
+              currentPhase === 1
+                ? "Prática Básica"
+                : currentPhase === 2
+                  ? "Prática Intermediária"
+                  : "Prática Avançada"
+            }
+            onComplete={handleComplete}
+            onBackToSelector={() => handleOpenPracticeSelector("bubble")}
+            uxTestSession={bubbleUxSession || undefined}
+            onUxTestSessionUpdate={setBubbleUxSession}
+          />
+        ) : (
+          <GameScreen
+            key={`game-${activeActivityContext?.type === "case" ? activeActivityContext.caseDefinition.id : `${gameMode}-${currentPhase}-${gameMode === "CAMPAIGN" ? campaignSeed : ""}`}`}
+            onComplete={handleComplete}
+            initialArray={currentArray}
+            phase={currentPhase}
+            totalPhases={currentTotalPhases}
+            variant={activeVariant}
+            modeTitle={
+              gameMode === "CHALLENGE"
+                ? activeScenario.title
+                : activeActivityContext?.type === "case"
+                  ? activeActivityContext.caseDefinition.title
+                  : undefined
+            }
+            practiceTitle={
+              activeActivityContext?.type === "case"
+                ? activeActivityContext.caseDefinition.shortTitle
+                : gameMode === "CAMPAIGN"
+                  ? currentPhase === 1
+                    ? "PRÁTICA BÁSICA"
+                    : currentPhase === 2
+                      ? "PRÁTICA INTERMEDIÁRIA"
+                      : "PRÁTICA AVANÇADA"
+                  : undefined
+            }
+            supportProfile={
+              activeActivityContext?.type === "case"
+                ? "reduced"
+                : gameMode === "CAMPAIGN"
+                  ? currentPhase === 1
+                    ? "full"
+                    : currentPhase === 2
+                      ? "reduced"
+                      : "minimal"
+                  : "minimal"
+            }
+            onBackToSelector={() => handleOpenPracticeSelector("bubble")}
+          />
+        )
       )}
       {screen === "result" && result && (
         <ResultScreen
@@ -1510,6 +1547,8 @@ export default function App({
           earlyExitTriggered={result.protocol === "bubble" ? result.earlyExitTriggered : undefined}
           terminationPass={result.protocol === "bubble" ? result.terminationPass : undefined}
           canonicalComparisons={canonicalComparisons}
+          uxTestSession={bubbleUxSession || undefined}
+          onUxTestSessionUpdate={setBubbleUxSession}
         />
       )}
       {screen === "replay" && result && (

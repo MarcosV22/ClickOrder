@@ -29,6 +29,8 @@ interface NumberedBoxProps {
   animating?: "left" | "right" | null;
   swapDistance?: number;
   size?: "sm" | "md" | "lg";
+  variant?: "legacy" | "learning";
+  showIndex?: boolean;
 }
 
 export default function NumberedBox({
@@ -44,11 +46,20 @@ export default function NumberedBox({
   animating = null,
   swapDistance,
   size = "lg",
+  variant = "legacy",
+  showIndex,
 }: NumberedBoxProps) {
+  const isLearning = variant === "learning";
+  const shouldShowIndex = showIndex ?? !isLearning;
+
   const sizeMap = {
     sm: { box: "w-16 h-16", text: "text-2xl", label: "text-xs" },
     md: { box: "w-20 h-20", text: "text-3xl", label: "text-xs" },
-    lg: { box: "w-28 h-28", text: "text-4xl", label: "text-xs" },
+    lg: {
+      box: isLearning ? "w-24 h-24 sm:w-28 sm:h-28" : "w-28 h-28",
+      text: isLearning ? "text-3xl sm:text-4xl" : "text-4xl",
+      label: "text-xs",
+    },
   };
 
   const s = sizeMap[size];
@@ -103,6 +114,39 @@ export default function NumberedBox({
   };
 
   const getRoleClasses = (r: BoxRole) => {
+    if (isLearning) {
+      switch (r) {
+        case "pair":
+          return {
+            bg: "bg-blue-950/70 shadow-lg shadow-blue-500/20 ring-2 ring-blue-400",
+            border: "2px solid #60a5fa",
+            text: "text-blue-100",
+            badgeColor: "text-blue-300 font-semibold",
+            pulse: false,
+          };
+        case "sorted":
+        case "ordered":
+          return {
+            bg: "bg-emerald-950/50 shadow-md shadow-emerald-500/10",
+            border: "2px solid #10b981",
+            text: "text-emerald-200",
+            badgeColor: "text-emerald-300 font-semibold",
+            pulse: false,
+          };
+        case "default":
+        default:
+          return {
+            bg: disabled
+              ? "bg-slate-900/40 opacity-40 cursor-not-allowed"
+              : "bg-[#111827]/90 hover:bg-[#1a233a]",
+            border: "1px solid rgba(71,85,105,0.6)",
+            text: "text-slate-200",
+            badgeColor: "text-slate-400 font-normal",
+            pulse: false,
+          };
+      }
+    }
+
     switch (r) {
       case "key":
         return {
@@ -290,17 +334,23 @@ export default function NumberedBox({
       }
     >
       {/* Box number label above */}
-      <span
-        className="text-slate-300 font-mono font-bold"
-        style={{ fontFamily: "'Space Mono', monospace", fontSize: "11px" }}
-      >
-        #{index + 1}
-      </span>
+      {shouldShowIndex && (
+        <span
+          className="text-slate-300 font-mono font-bold"
+          style={{ fontFamily: "'Space Mono', monospace", fontSize: "11px" }}
+        >
+          #{index + 1}
+        </span>
+      )}
 
       <button
         onClick={() => !disabled && onClick?.(index)}
         disabled={disabled || !onClick}
-        aria-label={`Caixa #${index + 1}, valor ${value}, papel: ${roleDescription}, estado ${displayBadge}`}
+        aria-label={
+          isLearning
+            ? `Caixa com número ${value}${resolvedRole === "pair" ? ", em comparação" : resolvedRole === "sorted" || resolvedRole === "ordered" ? ", já posicionada" : ""}`
+            : `Caixa #${index + 1}, valor ${value}, papel: ${roleDescription}, estado ${displayBadge}`
+        }
         className={`
           relative ${s.box} rounded-lg flex flex-col items-center justify-center
           transition-all duration-200 cursor-pointer select-none
@@ -331,12 +381,14 @@ export default function NumberedBox({
         </span>
 
         {/* Bottom label */}
-        <span
-          className={`absolute bottom-1.5 text-[9px] font-mono font-bold tracking-widest ${roleStyles.badgeColor}`}
-          style={{ fontFamily: "'Space Mono', monospace" }}
-        >
-          {displayBadge}
-        </span>
+        {(!isLearning || badge !== undefined) && (
+          <span
+            className={`absolute bottom-1.5 text-[9px] font-mono font-bold tracking-widest ${roleStyles.badgeColor}`}
+            style={{ fontFamily: "'Space Mono', monospace" }}
+          >
+            {displayBadge}
+          </span>
+        )}
       </button>
     </div>
   );

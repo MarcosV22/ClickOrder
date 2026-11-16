@@ -1,8 +1,8 @@
 # Sorting Station – Sumário Operacional da Plataforma
 
 > **Status da Documentação:** Ativo / Canônico  
-> **Data da Última Revisão:** 12/11/2026 (Marco LEARNING-R3-A: Infraestrutura de "Casos do Algoritmo" + 1 Caso-Piloto por Módulo)  
-> **Governança:** [`AGENTS.md`](../../AGENTS.md), [`ADR 0018`](../adr/0018-game-to-educational-platform-transition.md), [`ADR 0025`](../adr/0025-curriculum-practice-differentiation-and-transversal-model.md) e [`ADR 0026`](../adr/0026-algorithm-case-architecture-and-activity-context.md).  
+> **Data da Última Revisão:** 16/11/2026 (Marco UX-REDESIGN-R3-A: Hardening do Bubble V2 + Kit de Validação Formativa com Usuários)  
+> **Governança:** [`AGENTS.md`](../../AGENTS.md), [`ADR 0018`](../adr/0018-game-to-educational-platform-transition.md), [`ADR 0025`](../adr/0025-curriculum-practice-differentiation-and-transversal-model.md), [`ADR 0026`](../adr/0026-algorithm-case-architecture-and-activity-context.md) e [`ADR 0027`](../adr/0027-educational-and-ui-experience-redesign-v2.md).  
 > 
 > *Este documento é o ponto de entrada operacional e mapa de navegação canônico da Wiki. Ele não substitui a leitura das páginas temáticas detalhadas correspondentes ao escopo da tarefa.*
 
@@ -48,7 +48,7 @@ A plataforma possui um currículo oficial congelado em **6 Módulos de Algoritmo
 
 | Módulo Curricular | Status Factual | Implementação no Código | Documentação Canônica |
 | :--- | :---: | :--- | :--- |
-| **01. Bubble Sort** | `IMPLEMENTADO, DIFERENCIADO, SCAFFOLDING FADING INTEGRADO E CASO-PILOTO HOMOLOGADO (LEARNING-R3-A)` | Engine pura (`bubbleSortEngine.ts`), FSM sequencial estrita, tutorial guiado (`[3, 1, 2]`), demonstração autônoma (`[5, 2, 4, 1]`), Seletor de Práticas (`PracticeSelector`), conjunto canônico de 3 práticas procedurais diferenciadas pedagogicamente com Scaffolding Fading ativo (`basic`: Suporte Completo; `intermediate`: Suporte Reduzido; `advanced`: Autonomia Máxima), Caso Especial Curricular / Desafio Early Exit desacoplado, Caso do Algoritmo piloto integrado e homologado (`bubble.case.nearly-sorted`: `[10, 30, 20, 40, 50]` com 10 comparações e 1 troca), reflexão factual em `ResultScreen`, replay retrospectivo com pseudocódigo sincronizado de 9/14 linhas, e conclusão via `PracticeSetCompleteScreen`. Persistido em Schema v4 (`bubble.practice.*` e `bubble.case.*`). | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |
+| **01. Bubble Sort** | `PILOTO IMPLEMENTADO E TECNICAMENTE VALIDADO (AGUARDANDO VALIDAÇÃO FORMATIVA COM USUÁRIOS) — UX-REDESIGN-R3-A` | Experiência integral V2 ativa e endurecida: Visão Geral límpida (`BubbleModuleOverviewV2.tsx`), Tutorial em 4 passos com checkpoint de predição ativa (`BubbleTutorialScreenV2.tsx`), Prática Ativa com botões simétricos de ação, checkpoint pré-ação e micro-checagem pós-passada sem poluição no cabeçalho (`BubbleGameScreenV2.tsx`), Dica discretamente acessível na área de decisão (Nível 2), gaveta retrátil contendo estritamente detalhes técnicos e condição formal (Nível 3), Resultado V2 com descoberta e micro-reflexão conceitual (`BubbleResultScreenV2.tsx`), instrumentação local não invasiva via `?uxTest=1` e protocolo formativo em [`bubble-v2-formative-evaluation.md`](./bubble-v2-formative-evaluation.md). Engine pura (`bubbleSortEngine.ts`) e persistência Schema v4 $100\%$ preservadas. | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |
 | **02. Selection Sort** | `IMPLEMENTADO, DIFERENCIADO, SCAFFOLDING FADING INTEGRADO E CASO-PILOTO HOMOLOGADO (LEARNING-R3-A)` | Engine pura (`selectionSortEngine.ts`), FSM bimodal `INSPECT`/`COMMIT`, constraints procedurais enriquecidas com Scaffolding Fading ativo (`basic`: Suporte Completo; `intermediate`: Suporte Reduzido; `advanced`: Autonomia Máxima), briefing oficial, tutorial guiado (`[4, 1, 3]`), demonstração autônoma, Seletor de Práticas (`PracticeSelector`), Caso do Algoritmo piloto integrado e homologado (`selection.case.already-sorted`: `[10, 20, 30, 40, 50]` evidenciando 10 comparações e 0 trocas), reflexão factual de insensibilidade assintótica em `ResultScreen`, replay com pseudocódigo sincronizado de 13 linhas, e conclusão via `PracticeSetCompleteScreen`. Persistido em Schema v4 (`selection.practice.*` e `selection.case.*`). | [`modules/selection-sort.md`](./modules/selection-sort.md) |
 | **03. Insertion Sort** | `IMPLEMENTADO, DIFERENCIADO, SCAFFOLDING FADING INTEGRADO E CASO-PILOTO HOMOLOGADO (LEARNING-R3-A)` | Engine pura (`insertionSortEngine.ts`), FSM de deslocamentos (*shifts*), constraints procedurais enriquecidas com Scaffolding Fading ativo (`basic`: Suporte Completo; `intermediate`: Suporte Reduzido; `advanced`: Autonomia Máxima), briefing oficial, tutorial guiado (`[4, 2, 3]`), demonstração autônoma (`[6, 3, 5, 2, 7]`), Seletor de Práticas (`PracticeSelector`), Caso do Algoritmo piloto integrado e homologado (`insertion.case.nearly-sorted`: `[10, 20, 40, 30, 50]` com 5 comparações, 1 shift e 4 inserções diretas), reflexão factual de adaptabilidade assintótica $\Theta(n)$ em `ResultScreen`, `PracticeSetCompleteScreen`, replay retrospectivo puro (`insertionReplayModel.ts`), pseudocódigo sincronizado de 11 linhas, persistência Schema v4 e ativado publicamente no Hub. | [`modules/insertion-sort.md`](./modules/insertion-sort.md) |
 | **04. Merge Sort** | `IMPLEMENTADO, INTEGRADO E REVISADO (P3.1-F / REVISÃO PEDAGÓGICA) — Nivelamento do Hub Validado` | Estação Desktop-First com área única de decisão (`MergeGameScreen.tsx`), botoeira de ação imediata (`1: ESCOLHER DA ESQUERDA`, `2: ESCOLHER DA DIREITA`, `3: COPIAR OS RESTANTES`), briefing progressivo em 3 etapas com detalhes secundários recolhíveis, dois grupos lado a lado sem caixas redundantes de confronto, destaque nítido nos ponteiros `p1` e `p2` sem ofuscamento, buffer temporário intermediário (`Vetor Auxiliar B`), esteira principal com legenda explícita `ORD` (ordenado localmente) vs `OK` (posição final consolidada), Seletor de Práticas (`PracticeSelector` com tema merge e 3 práticas $n=4, 5, 6$), `ResultScreen` com notas pedagógicas diretas, Replay retrospectivo puro (`mergeReplayModel.ts`, invariante $1+N$ quadros, histórico factual sem reexecução algorítmica, telemetria e pseudocódigo canônico de 30 linhas sincronizados em `MergeReplayScreen.tsx` e `MergeSortPseudocodePanel.tsx`), Tutorial guiado com FSM autônoma (`MergeTutorialScreen.tsx`), Modo Demonstração observacional com engine pura, Tela de Conclusão de Conjunto (`PracticeSetCompleteScreen.tsx`), persistência canônica Schema v4 em `saveData.modules["merge"]`, migração defensiva de saves e ativação pública com status `available` no Hub de Protocolos. Cartões do Hub equalizados por CSS Grid Subgrid (0px de desalinhamento em 1920×1080 e 1366×768). 535 testes verdes no Vitest (40 arquivos). | [`modules/merge-sort.md`](./modules/merge-sort.md) |
@@ -158,36 +158,37 @@ flowchart TD
 
 ## 7. Qual é a próxima prioridade de desenvolvimento?
 
-A prioridade curricular dos três módulos centrais (**Bubble Sort**, **Selection Sort** e **Insertion Sort**) teve suas etapas fundamentais entregues com êxito:
-- **LEARNING-R2-A:** Modelo Curricular de Práticas e Diferenciação Procedural dos 3 Módulos Centrais (constraints e perfis procedurais diferenciados);
-- **LEARNING-R2-B:** Scaffolding Fading e Diferenciação de Suporte nas Práticas Regulares (desvanecimento de suporte visual com Suporte Completo, Suporte Reduzido e Autonomia Máxima sem ocultar dados factuais e sem tocar no Schema v4);
-- **LEARNING-R3-A:** Infraestrutura transversal de Casos do Algoritmo + 1 Caso-Piloto por Módulo Central (Bubble, Selection, Insertion) com reflexão factual pós-sessão e zero PRNG (ADR 0026).
+Em resposta a testes informais com estudantes e professores que revelaram sobrecarga cognitiva, poluição visual e risco de "clique mecânico", a prioridade do projeto foi repactuada pelo marco **UX-REDESIGN-R1** e formalizada no [ADR 0027](../adr/0027-educational-and-ui-experience-redesign-v2.md) e na especificação canônica [`ux-redesign-v2.md`](./ux-redesign-v2.md).
 
-A próxima prioridade oficial é:
+> [!IMPORTANT]
+> **CONGELAMENTO DE EXPANSÕES DE CONTEÚDO:**  
+> A expansão de novos Casos do Algoritmo (LEARNING-R3-B/C), novos algoritmos (Merge Sort, Quick Sort, Heap Sort) e o Laboratório Comparativo estão **temporariamente CONGELADOS**. O foco absoluto é a simplificação radical da experiência visual e pedagógica dos 3 módulos fundamentais (**Bubble Sort**, **Selection Sort**, **Insertion Sort**).
 
-> **Marco LEARNING-R3-B / R3-C — Casos do Algoritmo Curados Restantes e Identidade Visual de Duplicatas**  
-> Expansão dos casos de estudo nos três módulos (vetor já ordenado, quase ordenado, totalmente invertido e presença de duplicatas com identificadores visuais distintos $30a/30b$ preservando `comparisonValue = 30` nas engines puras) conforme formalizado em [`learning-experience-expansion.md`](./learning-experience-expansion.md).
+A próxima prioridade oficial e imediata é:
+
+> **Marco UX-REDESIGN-R2 — Bubble Sort como Piloto End-to-End do Redesign V2**  
+> Implementação integral e validação da nova interface no módulo Bubble Sort: tela inicial do módulo enxuta, Tutorial e Demonstração focados na mecânica elementar, gameplay com Regra de Ouro (1 foco, 1 pergunta, 2 ações, <2s para decidir onde olhar), loop *Observe $\rightarrow$ Preveja $\rightarrow$ Aja $\rightarrow$ Compreenda*, eliminação de telemetria em tempo real e tela de resultados causal/reflexiva.
 
 ---
 
 ## 8. O que é trabalho futuro?
 
-1. **Expansão Pedagógica dos Três Módulos Centrais (Marcos LEARNING):**
-   - **LEARNING-R2-A:** `CONCLUÍDO` — Práticas regulares diversificadas pedagogicamente com metadados transversais e constraints procedurais;
-   - **LEARNING-R2-B:** `CONCLUÍDO` — Scaffolding Fading e diferenciação de suporte nas práticas regulares;
-   - **LEARNING-R3-A:** `CONCLUÍDO` — Infraestrutura de Casos do Algoritmo + 1 Caso-Piloto por módulo;
-   - **LEARNING-R3-B / R3-C:** Casos do Algoritmo restantes (12 casos) e duplicatas/estabilidade visual $30a/30b$;
-   - **LEARNING-R4:** Desafios didáticos específicos (formalização do Early Exit e novos desafios homologados);
-   - **LEARNING-R5:** Dicas multinível (Nível 1 Conceitual, Nível 2 Foco) e padrão de feedback em 4 fases;
-   - **LEARNING-R6:** Reflexão pós-exercício na `ResultScreen` e harmonização dos Replays;
-   - **LEARNING-R7:** Botão "Nova Entrada" e Prática Livre (Sandbox).
-2. **Módulos Avançados (Temporariamente Congelados durante os marcos LEARNING):**
-   - **Marco P3.1:** Merge Sort (concluído e integrado; pendente homologação visual em browser);
-   - **Marco P3.2:** Quick Sort (P3.2-A a P3.2-D concluídos; P3.2-E e P3.2-F congelados);
-   - **Marco P3.3:** Heap Sort (congelado).
-3. **Marco P3.4:** **Laboratório Comparativo** ([`comparison-lab.md`](./comparison-lab.md)) — **Status: BLOQUEADO até a conclusão dos 6 módulos**;
-4. **Marco P3.5:** Avaliação Acadêmica e Metodologia Científica com turmas universitárias reais;
-5. **Narrativa / Lore:** Personagens e diálogos reposicionados como backlog opcional de gamificação.
+1. **Ciclo de Redesenho da Experiência e Interface (UX-REDESIGN — Prioridade Atual):**
+   - **UX-REDESIGN-R1:** `CONCLUÍDO` — Auditoria completa de poluição visual, definição da hierarquia em 3 níveis, wireframes canônicos em 9 estados, especificação do modelo de aprendizagem ativa e ADR 0027;
+   - **UX-REDESIGN-R2:** `EM EXECUÇÃO` — Piloto End-to-End no Bubble Sort (Overview do módulo, Tutorial V2, Prática Básica V2, Feedback causal e Resultado reflexivo);
+   - **UX-REDESIGN-R3:** Refinamento e Avaliação do Piloto Bubble Sort com testes de usuários (ajustes antes de propagar);
+   - **UX-REDESIGN-R4:** Extensão do Redesign ao Selection Sort (foco visual no scanner de mínimo, destaque persistente do candidato);
+   - **UX-REDESIGN-R5:** Extensão do Redesign ao Insertion Sort (destaque claro da chave, visualização limpa do subarray ordenado e deslocamentos);
+   - **UX-REDESIGN-R6:** Harmonização Global da HomeScreen, Seletor Canônico, Modo Demonstração e Replays;
+   - **UX-REDESIGN-R7:** Avaliação com Usuários Reais, testes de regressão transversal e descongelamento planejado.
+2. **Expansões Pedagógicas Congeladas (Retomada após validação do UX-REDESIGN):**
+   - Casos do Algoritmo restantes (LEARNING-R3-B/C — 12 casos estáticos curados e duplicatas visuais $30a/30b$);
+   - Desafios de Early Exit e Prática Livre Sandbox (LEARNING-R4 a R7).
+3. **Módulos Avançados Congelados:**
+   - Merge Sort (P3.1), Quick Sort (P3.2-E/F), Heap Sort (P3.3);
+   - Laboratório Comparativo (P3.4 — bloqueado até validação e conclusão dos 6 módulos).
+4. **Avaliação Acadêmica e Artigo Científico:**
+   - Marco P3.5: Avaliação metodológica formal em turmas reais de Ciência da Computação / Engenharia de Software.
 
 ---
 
@@ -196,6 +197,8 @@ A próxima prioridade oficial é:
 | Preciso saber sobre... | Documento Canônico de Referência |
 | :--- | :--- |
 | **Regras mandatórias e restrições do agente** | [`AGENTS.md`](../../AGENTS.md) |
+| **Redesenho Integral de Experiência e Interface V2** | [`ux-redesign-v2.md`](./ux-redesign-v2.md) |
+| **Decisão Arquitetural do Redesign V2 (ADR 0027)** | [`docs/adr/0027-educational-and-ui-experience-redesign-v2.md`](../adr/0027-educational-and-ui-experience-redesign-v2.md) |
 | **Visão oficial do produto e princípios** | [`01-product-vision.md`](./01-product-vision.md) |
 | **Arquitetura de software e roteamento de telas** | [`02-system-architecture.md`](./02-system-architecture.md) |
 | **Front-end, componentes visuais e props** | [`03-frontend.md`](./03-frontend.md) |
@@ -203,12 +206,12 @@ A próxima prioridade oficial é:
 | **Design System, tokens e acessibilidade** | [`05-ux-design-system.md`](./05-ux-design-system.md) |
 | **Ambiente Figma Make e scripts operacionais** | [`06-development-environment.md`](./06-development-environment.md) |
 | **Persistência Schema v4 e migração v3->v4** | [`07-backend-and-persistence.md`](./07-backend-and-persistence.md) |
-| **Suíte de testes Vitest (598 testes) e DoD** | [`08-testing-and-quality.md`](./08-testing-and-quality.md) |
+| **Suíte de testes Vitest (657 testes) e DoD** | [`08-testing-and-quality.md`](./08-testing-and-quality.md) |
 | **Build, deploy e empacotamento** | [`09-build-deploy.md`](./09-build-deploy.md) |
 | **Roadmap canônico da plataforma e legado histórico** | [`10-roadmap.md`](./10-roadmap.md) |
-| **Governança de ADRs e índice de decisões 0001 a 0026** | [`11-architecture-decisions.md`](./11-architecture-decisions.md) |
+| **Governança de ADRs e índice de decisões 0001 a 0027** | [`11-architecture-decisions.md`](./11-architecture-decisions.md) |
 | **Pedagogia, rigor ético e diretrizes para o artigo** | [`12-pedagogy-and-academic-traceability.md`](./12-pedagogy-and-academic-traceability.md) |
-| **Expansão pedagógica dos 3 módulos (LEARNING-R1)** | [`learning-experience-expansion.md`](./learning-experience-expansion.md) |
+| **Expansão pedagógica dos 3 módulos (LEARNING-R1 a R3-A)** | [`learning-experience-expansion.md`](./learning-experience-expansion.md) |
 | **Padrão transversal de módulo e taxonomia de exercícios**| [`modules/README.md`](./modules/README.md) |
 | **Módulo 01: Bubble Sort** | [`modules/bubble-sort.md`](./modules/bubble-sort.md) |
 | **Módulo 02: Selection Sort** | [`modules/selection-sort.md`](./modules/selection-sort.md) |

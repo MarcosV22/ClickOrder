@@ -29,6 +29,11 @@ src/
 ├── index.css            # Folha de estilo global: fontes web, Tailwind v4, tokens @theme e animações
 ├── vite-env.d.ts        # Declarações de tipos do cliente Vite
 ├── screens/             # Telas completas da aplicação (orquestradas por App.tsx)
+│   ├── bubble/          # [UX-REDESIGN-R2] Telas do Piloto End-to-End Bubble Sort V2
+│   │   ├── BubbleModuleOverviewV2.tsx # Entrada limpa com metáfora de vizinhos e passos
+│   │   ├── BubbleTutorialScreenV2.tsx # Tutorial em 4 passos com checkpoint de predição
+│   │   ├── BubbleGameScreenV2.tsx     # Prática ativa sem poluição e com botões simétricos
+│   │   └── BubbleResultScreenV2.tsx   # Resultado V2 com descoberta e micro-reflexão
 │   ├── HomeScreen.tsx   # Hub Educacional Simétrico de Protocolos (Bubble, Selection, Insertion)
 │   ├── ProtocolCard.tsx # Componente simétrico de cartão de protocolo para o Hub da Home
 │   ├── protocolCatalog.ts # Catálogo desacoplado de metadados dos protocolos
@@ -378,6 +383,22 @@ flowchart TD
     - Acessibilidade plena (`aria-label`, contraste WCAG, navegação por teclado) preservada independentemente do perfil de andaime;
     - Zero alteração no Schema de Persistência v4 (`supportProfile` é puramente derivado).
 
+### 3.16. Piloto End-to-End Bubble Sort V2 (`UX-REDESIGN-R2`)
+- **Diretório:** `src/screens/bubble/`
+- **Telas Integradas:**
+  - `BubbleModuleOverviewV2.tsx`: Apresentação límpida do módulo com subtítulo conceitual (*"Compare vizinhos e leve os maiores para o final."*), 3 passos pedagógicos, mini-demonstração visual e 2 CTAs diretos.
+  - `BubbleTutorialScreenV2.tsx`: Tutorial interativo em 4 passos sobre o vetor `[3, 1, 2]`. Exige predição ativa antes do primeiro movimento (*"Depois de comparar 3 e 1, qual valor ficará mais à direita?"*), demonstrando a propagação do maior elemento e a retenção do invariante.
+  - `BubbleGameScreenV2.tsx`: Ambiente de prática ativa de ordenação com:
+    - Cabeçalho minimalista sem placar nem cronômetro;
+    - Esteira hero com `NumberedBox` sob `variant="learning"`;
+    - Checkpoint de previsão pré-ação no primeiro passo;
+    - Dois botões simétricos de mesmo peso visual: `[ ⇄ TROCAR ]` (atalho `1`) e `[ = MANTER ]` (atalho `2`);
+    - Feedback causal imediato e construtivo em erros (sem avançar o algoritmo e sem penalização);
+    - Micro-checagem formativa pós-passada após a primeira passada (verificação da fixação do maior elemento);
+    - Gaveta retrátil sob demanda no rodapé com detalhes técnicos e solicitação de dica.
+  - `BubbleResultScreenV2.tsx`: Relatório formativo com banner de descoberta, 3 métricas essenciais sem punição, pergunta de micro-reflexão conceitual com feedback explicativo imediato e gaveta técnica sob demanda.
+- **Roteamento em `App.tsx`:** O roteador raiz direciona o fluxo canônico de campanha e briefing do Bubble Sort para as telas V2, mantendo Selection Sort e Insertion Sort integralmente operando em suas respectivas telas consolidadas.
+
 ---
 
 ## 4. Componentes Compartilhados (`src/components/`)
@@ -409,6 +430,8 @@ interface NumberedBoxProps {
   animating?: "left" | "right" | null; // Dispara animate-swap-left ou animate-swap-right
   swapDistance?: number;          // Distância em posições para animação de longa distância (default: 1) (ADR 0013)
   size?: "sm" | "md" | "lg";      // Dimensão da caixa (default: "lg")
+  variant?: "default" | "learning"; // [UX-REDESIGN-R2] Variante limpa sem anéis de neon permanente
+  showIndex?: boolean;            // [UX-REDESIGN-R2] Controla visibilidade de #index sob demanda (default: true)
 }
 ```
 

@@ -53,7 +53,7 @@ flowchart TD
 
 | Módulo | Arquivo de Especificação | Complexidade | Status Factual | Situação Atual e Próximo Passo |
 | :--- | :--- | :---: | :---: | :--- |
-| **01. Bubble Sort** | [`modules/bubble-sort.md`](./modules/bubble-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO, DIFERENCIADO, SCAFFOLDING FADING E CASO-PILOTO HOMOLOGADO` | LEARNING-R2-A/B e R3-A concluídos; próximo: LEARNING-R3-B |
+| **01. Bubble Sort** | [`modules/bubble-sort.md`](./modules/bubble-sort.md) | $\Theta(n^2)$ | `PILOTO V2 IMPLEMENTADO E TECNICAMENTE VALIDADO (AGUARDANDO VALIDAÇÃO FORMATIVA COM USUÁRIOS) — R3-A` | Piloto V2 ativo e endurecido; próximo: testes com usuários no marco UX-REDESIGN-R3-B |
 | **02. Selection Sort** | [`modules/selection-sort.md`](./modules/selection-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO, DIFERENCIADO, SCAFFOLDING FADING E CASO-PILOTO HOMOLOGADO` | LEARNING-R2-A/B e R3-A concluídos; próximo: LEARNING-R3-B |
 | **03. Insertion Sort** | [`modules/insertion-sort.md`](./modules/insertion-sort.md) | $\Theta(n^2)$ | `IMPLEMENTADO, DIFERENCIADO, SCAFFOLDING FADING E CASO-PILOTO HOMOLOGADO` | LEARNING-R2-A/B e R3-A concluídos; próximo: LEARNING-R3-B |
 | **04. Merge Sort** | [`modules/merge-sort.md`](./modules/merge-sort.md) | $\Theta(n \log n)$ | `IMPLEMENTADO E INTEGRADO (P3.1-F)` | Ativo no Hub; temporariamente congelado para expansão |
@@ -206,14 +206,32 @@ Esta seção preserva o registro histórico indelével de engenharia dos marcos 
 
 ---
 
-## 5. Próxima Ação Imediata de Desenvolvimento
+## 5. Repactuação de Prioridades: Ciclo UX-REDESIGN (V2)
 
-Com a conclusão bem-sucedida dos marcos **LEARNING-R1** (Auditoria e Redesenho Pedagógico), **LEARNING-R2-A** (Modelo Curricular e Diferenciação Procedural), **LEARNING-R2-B** (Scaffolding Fading e Diferenciação de Suporte nas Práticas Regulares) e **LEARNING-R3-A** (Infraestrutura de Casos do Algoritmo e Casos-Piloto), a próxima prioridade factual de implementação no Sorting Station é:
+A partir de testes informais com estudantes e professores, identificou-se que a plataforma sofria de sobrecarga cognitiva acentuada, excesso de informação simultânea e risco de automação mecânica de cliques. Conforme deliberado no [ADR 0027](../adr/0027-educational-and-ui-experience-redesign-v2.md) e especificado em [`ux-redesign-v2.md`](./ux-redesign-v2.md):
 
-$$\mathbf{MARCO\ LEARNING-R3-B\ /\ R3-C\ -\ CASOS\ CURADOS\ RESTANTES\ E\ DUPLICATAS}$$
+> [!IMPORTANT]
+> **CONGELAMENTO DE EXPANSÃO DE CONTEÚDO:**  
+> A expansão de novos algoritmos (Merge Sort, Quick Sort, Heap Sort), o Laboratório Comparativo e a criação de novos Casos do Algoritmo estão **temporariamente CONGELADOS**. O Sorting Station concentra todos os esforços na experiência de aprendizagem e simplificação visual radical dos 3 módulos centrais: **Bubble Sort**, **Selection Sort** e **Insertion Sort**.
 
-Seguindo estritamente o ciclo de governança Wiki-First e o Module Standard:
-1. Implementação dos 12 casos adicionais planejados para Bubble, Selection e Insertion (já ordenado, estritamente reverso, duplicatas/estabilidade com notação $30a/30b$ preservando `comparisonValue = 30` nas engines, e elementos em posições desfavoráveis);
-2. Introdução de suporte visual de duplicatas preservando a igualdade estrita na engine;
-3. Preservação integral da robustez do Schema v4;
-4. Manutenção de 100% de testes verdes no Vitest (650 testes atuais em 50 arquivos).
+### Cronograma de Marcos UX-REDESIGN:
+- **UX-REDESIGN-R1:** `CONCLUÍDO` — Auditoria de poluição visual de todas as 17 telas, inventário consolidado de remoções, especificação canônica V2 (`docs/wiki/ux-redesign-v2.md`), wireframes em 9 estados, padrão do loop *Observe $\rightarrow$ Preveja $\rightarrow$ Aja $\rightarrow$ Compreenda* e formalização no ADR 0027.
+- **UX-REDESIGN-R2:** `CONCLUÍDO` — Piloto End-to-End no Bubble Sort (implementação do padrão V2 na visão geral do módulo, Tutorial V2, Prática Básica V2, Feedback causal e Resultados enxutos com micro-reflexão).
+- **UX-REDESIGN-R3-A:** `CONCLUÍDO` — Hardening do Piloto Bubble V2 (dica no Nível 2 na área de decisão, gaveta retrátil restrita a Nível 3 com detalhes técnicos, atalhos discretos, instrumentação local não invasiva via `?uxTest=1` sem PII/rede e kit completo de validação formativa em [`bubble-v2-formative-evaluation.md`](./bubble-v2-formative-evaluation.md)).
+- **UX-REDESIGN-R3-B:** `PRÓXIMO PASSO` — Execução presencial dos testes formativos com estudantes e professores, e ajustes empíricos decorrentes das observações reais.
+- **UX-REDESIGN-R4:** `FUTURO` — Extensão do Redesign ao Selection Sort (foco visual no scanner de menor elemento e seleção persistente; inicia SOMENTE após R3-B).
+- **UX-REDESIGN-R5:** `FUTURO` — Extensão do Redesign ao Insertion Sort (destaque explícito da chave e separador visual da sublista ordenada).
+- **UX-REDESIGN-R6:** `FUTURO` — Harmonização Global da HomeScreen, Seletor de Práticas, Modo Demonstração e Replays síncronos com pseudocódigo sob demanda.
+- **UX-REDESIGN-R7:** `FUTURO` — Avaliação Ampla com Usuários Reais e descongelamento curricular planejado.
+
+---
+
+## 6. Próxima Ação Imediata de Desenvolvimento
+
+$$\mathbf{MARCO\ UX-REDESIGN-R3-B\ -\ EXECUÇÃO\ DE\ TESTES\ FORMATIVOS\ DO\ BUBBLE\ SORT\ V2}$$
+
+Seguindo estritamente o protocolo especificado em [`bubble-v2-formative-evaluation.md`](./bubble-v2-formative-evaluation.md):
+1. Conduzir sessões formativas presenciais ou remotas assistidas com estudantes das Categorias A (novatos) e B (em formação) e docentes da Categoria C;
+2. Coletar tempos factuais de primeira ação (`timeToFirstActionMs`), acertos de predição e invariante via telemetria local `?uxTest=1`;
+3. Aplicar a entrevista qualitativa (Questões A a G) e registrar sinais de falha heurística;
+4. Realizar os ajustes finos de microcopy e tempos de transição no código antes de iniciar a propagação para o Selection Sort V2 (Marco UX-REDESIGN-R4).
