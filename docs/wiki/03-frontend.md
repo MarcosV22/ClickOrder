@@ -133,15 +133,23 @@ flowchart TD
   - Orquestrar a transição para `CampaignCompleteScreen` (Bubble), `SelectionCampaignCompleteScreen` (Selection) ou `PracticeSetCompleteScreen` (Insertion);
   - Forçar a remontagem de telas de gameplay através da prop `key={'game-phase-${phase}'}` ([`src/App.tsx`](../../src/App.tsx)).
 
-### 3.2. `src/screens/HomeScreen.tsx`, `ProtocolCard.tsx` e `protocolCatalog.ts` (Redesign UX-HOME-R1 / ADR 0028)
-- **Responsabilidades:** Ponto de entrada educacional da plataforma, projetado para acolhimento, orientação rápida (< 5s) e aprendizagem ativa sem ruído técnico excessivo. A Home organiza-se em 5 seções funcionais:
-  1. **Seção A (Hero - `HomeHero.tsx`):** Apresentação límpida com crachá educacional, proposta de valor acessível, orientação explícita para iniciantes (*"Recomendamos começar pelo Bubble Sort com o tutorial interativo"*) e botões de ação imediata: primário largo `[ COMEÇAR PELO BUBBLE SORT ▶ ]` e secundário suave `[ COMO FUNCIONA ↓ ]`.
-  2. **Seção B (Como Funciona - `HomeHowItWorks.tsx`):** Guia visual em 3 passos numerados (01. Escolha o Método, 02. Entenda a Lógica, 03. Pratique na Esteira).
-  3. **Seção C (Retomada - `HomeContinueCard.tsx`):** Renderizado apenas quando há progresso factual salvo (`hasAnyProgress === true`), exibindo o resumo geral de práticas concluídas (X de 12), porcentagem, indicação do próximo módulo/fase recomendada e botão direto `[ CONTINUAR TREINAMENTO ▶ ]`.
-  4. **Seção D (Catálogo de Módulos - `ProtocolCard.tsx`):** Grade responsiva (`grid-cols-1 md:grid-cols-2 2xl:grid-cols-4`) com subgrid em 4 linhas, selo `★ RECOMENDADO` no Bubble Sort, chips de tópicos práticos (`metadata.practiceItems`), painel compacto de status de aprendizado e hierarquia nítida de ações: primário full-width `[ INICIAR TREINAMENTO ]` + grid secundário de 2 colunas com `[ TUTORIAL ]` e `[ DEMONSTRAÇÃO ]`, seguido por slot inferior exclusivo de desafio no Bubble Sort.
-  5. **Seção E (Rodapé Educacional):** Rodapé acolhedor indicando que o ambiente é 100% interativo, local e sem necessidade de conexão externa ou backend.
-- **Catálogo Desacoplado (`src/screens/protocolCatalog.ts`):** Metadados puros de produto declarando id, nome, metáfora diegética, descrição pedagógica concisa, itens de prática, status operacional (`available` vs `coming_soon`), temas visuais de destaque e fases totais. Fornece ainda `getProtocolProgressSummary(id, saveData)` e a função agregadora `getStationOverallProgress(saveData)` para telemetria curricular de retomada.
-- **Responsividade e Acessibilidade:** Conformidade com a Scrollable Screen Rule (`min-h-screen overflow-y-auto overflow-x-hidden pb-16 sm:pb-24`), opacidade atenuada nas esteiras decorativas de fundo (0.08) para eliminação de competição visual, botões semânticos reais com `focus-visible` e navegação limpa por teclado.
+### 3.2. `src/screens/HomeScreen.tsx`, `HomeHeader.tsx`, `HomeProcessStrip.tsx`, `LearningModuleCard.tsx` e `protocolCatalog.ts` (Redesign UX-HOME-R2 / ADR 0029)
+- **Responsabilidades:** Ponto de entrada educacional da plataforma, reconstruído como um **Launcher Educacional Visual** de alta clareza (< 5s de cognição), livre de sobrecarga textual e de aparência de dashboard/landing page. A Home organiza-se em 5 componentes estritos:
+  1. **Header Compacto (`HomeHeader.tsx`):** Logo tipográfico reduzido em 25–35% (`text-3xl sm:text-4xl md:text-5xl`) e subtítulo direto em 1 linha (*"Aprenda algoritmos de ordenação visualmente."*), eliminando parágrafos longos, callouts redundantes e CTAs repetidos.
+  2. **Faixa Compacta de Processo (`HomeProcessStrip.tsx`):** Cápsula horizontal (< 45px) apresentando o ciclo pedagógico em 3 passos com ícones SVG puros (sem emojis): `ESCOLHA um algoritmo` → `APRENDA como funciona` → `PRATIQUE passo a passo`.
+  3. **Retomada Sutil de Sessão:** Faixa não invasiva de 1 linha exibida estritamente quando há progresso salvo (`Sessão em andamento: [Módulo] ([Fase]) • Continuar →`), sem ocupar altura útil da tela.
+  4. **Grade de Módulos Educacionais (`LearningModuleCard.tsx`):** Exatamente 3 opções ativas (Bubble Sort, Selection Sort, Insertion Sort). Merge Sort é congelado e terminantemente ausente da Home. Cada card (~280–360px de altura) apresenta:
+     - Título com metáfora em caixa mista (*"Comparação de vizinhos"*, *"Seleção do menor número"*, *"Inserção na parte ordenada"*);
+     - Badge discreto `Recomendado` exclusivo no Bubble Sort;
+     - **Mini Visual da Mecânica:** demonstre antes do clique a essência física da ordenação com caixas numeradas, setas direcionais e acessibilidade (`role="img"`, `aria-label` completo):
+       - *Bubble:* `[ 8 ] [ 3 ] ➔ [ 3 ] [ 8 ]` + legenda *"Compare vizinhos."*;
+       - *Selection:* `[ 4 ] [ 1 (min) ] [ 7 ] ➔ [ 1 ] [ 4 ] [ 7 ]` + legenda *"Encontre o menor."*;
+       - *Insertion:* `[ 2 ] [ 5 ] [ 3 (key) ] ➔ [ 2 ] [ 3 ] [ 5 ]` + legenda *"Encaixe cada elemento."*;
+     - Progresso minimalista: `X de 3 práticas` com 3 pontos visuais (`● ● ○`);
+     - **CTA Único por Card:** exatamente 1 botão de ação primária `[ COMEÇAR ]` ou `[ CONTINUAR ]`. Botões concorrentes de tutorial, demonstração e desafio foram transferidos para a tela interna do módulo.
+  5. **Rodapé Minimalista:** Rodapé limpo de 2 linhas (*"Sorting Station • Plataforma Educacional de Algoritmos"*).
+- **Catálogo Desacoplado (`src/screens/protocolCatalog.ts`):** `ACTIVE_LAUNCHER_MODULES = ["bubble", "selection", "insertion"]`. A função `getStationOverallProgress(saveData)` computa o progresso curricular ativo estritamente sobre os 3 módulos (9 práticas regulares e 3 tutoriais).
+- **Responsividade e Fundo:** Fundo decorativo com esteiras atenuadas (opacidade 0.06), scroll vertical ergonômico único (`min-h-screen overflow-y-auto pb-16 sm:pb-20`).
 - **Callbacks e Props:** `saveData?: GameSaveSchema`, `onStartProtocol?: (id: ProtocolId) => void`, `onOpenTutorial?: (id: ProtocolId) => void`, `onOpenDemonstration?: (id: ProtocolId) => void`, `isChallengeUnlocked?: boolean`, `onStartChallenge?: () => void`. Mantém retrocompatibilidade com `onStart`, `onHowToPlay` e `onStartSelection`.
 
 ### 3.3. `src/screens/ProtocolModeBriefingScreen.tsx`

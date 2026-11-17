@@ -347,13 +347,13 @@ describe("Merge Sort Practice Flow & Intercalation Station (P3.1-D)", () => {
       expect(html).toContain("PRÁTICA BÁSICA");
     });
 
-    it("disponibiliza Merge Sort publicamente no Hub em produção", () => {
+    it("mantém Merge Sort congelado e restringe o Hub aos 3 módulos ativos (Bubble, Selection, Insertion)", () => {
       const html = renderToStaticMarkup(<App />);
       expect(html).toContain("SORTING");
       expect(html).toContain("BUBBLE SORT");
       expect(html).toContain("SELECTION SORT");
       expect(html).toContain("INSERTION SORT");
-      expect(html).toContain("MERGE SORT");
+      expect(html).not.toContain("MERGE SORT");
     });
 
     it("ignora query params ?screen=merge-practice e ?module=merge quando DEV=false (bloqueio de produção)", () => {

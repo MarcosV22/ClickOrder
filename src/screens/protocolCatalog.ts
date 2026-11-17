@@ -229,6 +229,12 @@ export function getProtocolProgressSummary(
   };
 }
 
+export const ACTIVE_LAUNCHER_MODULES: readonly ProtocolId[] = Object.freeze([
+  "bubble",
+  "selection",
+  "insertion",
+]);
+
 export interface StationOverallProgress {
   readonly totalCompletedPractices: number;
   readonly totalPractices: number;
@@ -247,7 +253,9 @@ export interface StationOverallProgress {
 export function getStationOverallProgress(
   saveData?: GameSaveSchema
 ): StationOverallProgress {
-  const protocols = PROTOCOL_CATALOG;
+  const protocols = PROTOCOL_CATALOG.filter((p) =>
+    ACTIVE_LAUNCHER_MODULES.includes(p.id)
+  );
   let totalCompletedPractices = 0;
   let totalPractices = 0;
   let completedTutorialsCount = 0;

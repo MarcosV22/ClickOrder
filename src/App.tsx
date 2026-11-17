@@ -193,6 +193,10 @@ export default function App({
   const [gameMode, setGameMode] = useState<GameMode>("CAMPAIGN");
   const [briefingModeId, setBriefingModeId] =
     useState<BriefingModeId>(() => {
+      if (initialModule === "merge") return "merge-canonical";
+      if (initialModule === "selection") return "selection-canonical";
+      if (initialModule === "insertion") return "insertion-canonical";
+      if (initialModule === "bubble") return "bubble-canonical";
       if (isDev && typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search);
         const mod = params.get("module");

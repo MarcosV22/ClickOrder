@@ -47,26 +47,12 @@ describe("Merge Sort Full Integration & Lifecycle Flow (P3.1-F)", () => {
   };
 
   // --------------------------------------------------------------------------
-  // 1. Hub -> ProtocolCard -> Briefing
   // --------------------------------------------------------------------------
-  describe("1. Hub e Acesso Inicial", () => {
-    it("apresenta o card do Merge Sort com status disponível e aciona briefing ao clicar em Iniciar Treinamento", () => {
-      mount(<App initialScreen="home" />);
-
-      expect(container.textContent).toContain("MERGE SORT");
-      expect(container.textContent).toContain("DIVISÃO E INTERCALAÇÃO");
-
-      // Localiza o botão "INICIAR TREINAMENTO" dentro do card do Merge Sort
-      const startButtons = Array.from(container.querySelectorAll("button")).filter((btn) =>
-        btn.textContent?.includes("INICIAR TREINAMENTO")
-      );
-      // O quarto botão de Iniciar Treinamento corresponde ao Merge Sort (Bubble, Selection, Insertion, Merge)
-      const mergeStartBtn = startButtons[3] ?? startButtons[startButtons.length - 1];
-      expect(mergeStartBtn).toBeDefined();
-
-      act(() => {
-        mergeStartBtn.click();
-      });
+  // 1. Acesso ao Briefing do Merge Sort
+  // --------------------------------------------------------------------------
+  describe("1. Acesso ao Briefing do Merge Sort", () => {
+    it("renderiza o briefing do Merge Sort com protocolo canônico e metáfora correta", () => {
+      mount(<App initialScreen="briefing" initialModule="merge" />);
 
       // Deve estar na tela de Briefing do Merge Sort
       expect(container.textContent).toContain("PROTOCOLO: MERGE SORT");

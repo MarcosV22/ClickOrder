@@ -373,14 +373,17 @@ Após a ocorrência de um evento estrutural (ex.: conclusão da primeira passada
 
 ## 6. Jornada Visual e Redesenho das Telas Principais
 
-### 6.1. Nova Home
-- **Foco Estrito nos 3 Módulos:** Bubble Sort, Selection Sort e Insertion Sort.
-- Módulos futuros (Merge, Quick, Heap) são ocultos ou agrupados discretamente como *"Em Breve"* no rodapé, sem competir visualmente.
-- Cada card responde imediatamente: **O QUE VOU APRENDER?** em uma frase:
-  - **Bubble Sort:** *"Compare vizinhos e leve os maiores para o final."*
-  - **Selection Sort:** *"Procure o menor número e coloque-o na próxima posição."*
-  - **Insertion Sort:** *"Pegue uma chave e encaixe-a no lugar certo da parte ordenada."*
-- **CTA Único por Card:** `[ APRENDER ]` (abre a visão do módulo).
+### 6.1. Nova Home (Launcher Educacional Visual — UX-HOME-R2)
+- **Foco Estrito nos 3 Módulos:** Bubble Sort, Selection Sort e Insertion Sort (Merge, Quick, Heap estão congelados e completamente ausentes da Home, sem "Em Breve").
+- **Header Compacto:** Logo 25–35% menor com subtítulo direto em 1 linha: *"Aprenda algoritmos de ordenação visualmente."* (sem parágrafos longos, sem caixas de callout, sem CTAs redundantes).
+- **Faixa de Processo (< 45px):** 3 passos com SVGs puros: `ESCOLHA um algoritmo` → `APRENDA como funciona` → `PRATIQUE passo a passo`.
+- **Cards com Mini Visual da Mecânica:** Demonstração visual compacta (~70–90px) da operação antes do clique:
+  - **Bubble Sort:** `[ 8 ] [ 3 ] ➔ [ 3 ] [ 8 ]` + *"Compare vizinhos."* (badge discreto `Recomendado`);
+  - **Selection Sort:** `[ 4 ] [ 1 (min) ] [ 7 ] ➔ [ 1 ] [ 4 ] [ 7 ]` + *"Encontre o menor."*;
+  - **Insertion Sort:** `[ 2 ] [ 5 ] [ 3 (key) ] ➔ [ 2 ] [ 3 ] [ 5 ]` + *"Encaixe cada elemento."*.
+- **Progresso Minimalista:** Indicador de 3 pontos (`● ● ○`) e texto `X de 3 práticas`.
+- **CTA Único por Card:** Exatamente 1 botão: `[ COMEÇAR ]` ou `[ CONTINUAR ]` (abre a visão do módulo).
+- **Retomada Sutil:** Faixa não invasiva de 1 linha quando há progresso salvo (`Sessão em andamento: ... • Continuar →`).
 
 ### 6.2. Página do Módulo (Module Overview)
 Substitui o `PracticeSelector` sobrecarregado por um caminho linear e claro:
@@ -445,56 +448,38 @@ Cards humanizados com intencionalidade pedagógica imediata:
 
 ## 7. Wireframes Textuais / ASCII da Arquitetura V2
 
-### 7.1. Wireframe A — Home Redesenhada
+### 7.1. Wireframe A — Home Redesenhada (Launcher Educacional Visual — UX-HOME-R2)
 
 ```
 ================================================================================
                                 SORTING STATION
-                   Aprenda Algoritmos de Ordenação na Prática
+                  Aprenda algoritmos de ordenação visualmente.
 ================================================================================
+       [ ESCOLHA um algoritmo ] ➔ [ APRENDA como funciona ] ➔ [ PRATIQUE passo a passo ]
 
-    ┌──────────────────────────────────────────────────────────────────────┐
-    │                                                                      │
-    │   [01] BUBBLE SORT                                                   │
-    │   "Compare vizinhos e leve os maiores para o final."                 │
-    │                                                                      │
-    │   Progresso: 1 de 3 práticas concluídas                              │
-    │                                                                      │
-    │   [  APRENDER BUBBLE SORT  ▶  ]                                      │
-    │                                                                      │
-    └──────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────┐ ┌───────────────────────────┐ ┌───────────────────────────┐
+│ BUBBLE SORT  Recomendado  │ │ SELECTION SORT            │ │ INSERTION SORT            │
+│ Comparação de vizinhos    │ │ Seleção do menor número   │ │ Inserção na parte orden.  │
+│                           │ │                           │ │                           │
+│ ┌───────────────────────┐ │ │ ┌───────────────────────┐ │ │ ┌───────────────────────┐ │
+│ │ [ 8 ][ 3 ] ➔ [ 3 ][ 8 ]│ │ │ │ [ 4 ][ 1*][ 7 ]➔[1][4]│ │ │ │ [ 2 ][ 5 ][3*]➔[2][3] │ │
+│ │   Compare vizinhos.   │ │ │ │   Encontre o menor.   │ │ │ │   Encaixe cada elemento │ │
+│ └───────────────────────┘ │ │ └───────────────────────┘ │ │ └───────────────────────┘ │
+│                           │ │                           │ │                           │
+│ 0 de 3 práticas   ○ ○ ○   │ │ 0 de 3 práticas   ○ ○ ○   │ │ 0 de 3 práticas   ○ ○ ○   │
+│ [      COMEÇAR  ▶     ]   │ │ [      COMEÇAR  ▶     ]   │ │ [      COMEÇAR  ▶     ]   │
+└───────────────────────────┘ └───────────────────────────┘ └───────────────────────────┘
 
-    ┌──────────────────────────────────────────────────────────────────────┐
-    │                                                                      │
-    │   [02] SELECTION SORT                                                │
-    │   "Procure o menor número e coloque-o na próxima posição."           │
-    │                                                                      │
-    │   Progresso: Não iniciado                                            │
-    │                                                                      │
-    │   [  APRENDER SELECTION SORT  ▶  ]                                   │
-    │                                                                      │
-    └──────────────────────────────────────────────────────────────────────┘
-
-    ┌──────────────────────────────────────────────────────────────────────┐
-    │                                                                      │
-    │   [03] INSERTION SORT                                                │
-    │   "Pegue uma chave e encaixe-a no lugar certo da parte ordenada."   │
-    │                                                                      │
-    │   Progresso: Não iniciado                                            │
-    │                                                                      │
-    │   [  APRENDER INSERTION SORT  ▶  ]                                   │
-    │                                                                      │
-    └──────────────────────────────────────────────────────────────────────┘
-
---------------------------------------------------------------------------------
-                  Módulos Avançados (Merge, Quick, Heap) em Breve
+================================================================================
+          Sorting Station • Plataforma Educacional de Algoritmos
 ================================================================================
 ```
 
 *Teste dos 5 Segundos (Home):*
-1. **Onde estou?** Na tela inicial do Sorting Station.
-2. **Onde olhar?** Nos 3 cards dos módulos centrais.
-3. **O que fazer?** Clicar em `[ APRENDER BUBBLE SORT ]`.
+1. **Para que serve isso?** Aprender algoritmos de ordenação visualmente.
+2. **Quais são as três opções?** Bubble Sort, Selection Sort e Insertion Sort.
+3. **Qual delas devo abrir primeiro?** Bubble Sort (marcado como Recomendado).
+4. **Onde clico?** No botão `[ COMEÇAR ]`.
 
 ---
 

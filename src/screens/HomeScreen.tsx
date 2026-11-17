@@ -1,14 +1,15 @@
+import React from "react";
 import type { GameSaveSchema } from "../game/persistence/types";
 import {
   PROTOCOL_CATALOG,
+  ACTIVE_LAUNCHER_MODULES,
   getProtocolProgressSummary,
   getStationOverallProgress,
   type ProtocolId,
 } from "./protocolCatalog";
-import ProtocolCard from "./ProtocolCard";
-import HomeHero from "./home/HomeHero";
-import HomeHowItWorks from "./home/HomeHowItWorks";
-import HomeContinueCard from "./home/HomeContinueCard";
+import HomeHeader from "./home/HomeHeader";
+import HomeProcessStrip from "./home/HomeProcessStrip";
+import LearningModuleCard from "./home/LearningModuleCard";
 
 export interface HomeScreenProps {
   saveData?: GameSaveSchema;
@@ -28,7 +29,7 @@ function ConveyorBelt({ y, speed }: { y: number; speed: number }) {
   return (
     <div
       className="absolute w-full overflow-hidden pointer-events-none"
-      style={{ top: `${y}%`, opacity: 0.08 }}
+      style={{ top: `${y}%`, opacity: 0.06 }}
       aria-hidden="true"
     >
       <div className="conveyor-track h-12 flex items-center">
@@ -76,23 +77,12 @@ export default function HomeScreen({
     }
   };
 
-  const handleOpenTutorial = (id: ProtocolId) => {
-    if (onOpenTutorial) {
-      onOpenTutorial(id);
-    } else if (id === "bubble" && onHowToPlay) {
-      onHowToPlay();
-    }
-  };
-
-  const handleExploreHowItWorks = () => {
-    const el = document.getElementById("como-funciona");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const activeProtocols = PROTOCOL_CATALOG.filter((p) =>
+    ACTIVE_LAUNCHER_MODULES.includes(p.id)
+  );
 
   return (
-    <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-10 pb-16 sm:pb-24 px-4 select-none">
+    <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-8 sm:pt-12 pb-16 sm:pb-20 px-4 select-none">
       {/* Animated belt CSS */}
       <style>{`
         @keyframes scroll-belt {
@@ -101,10 +91,10 @@ export default function HomeScreen({
         }
       `}</style>
 
-      {/* Background conveyor belts with subtle ambient opacity */}
-      <ConveyorBelt y={10} speed={18} />
-      <ConveyorBelt y={48} speed={24} />
-      <ConveyorBelt y={86} speed={15} />
+      {/* Background conveyor belts with subtle ambient opacity (0.06) */}
+      <ConveyorBelt y={8} speed={20} />
+      <ConveyorBelt y={50} speed={26} />
+      <ConveyorBelt y={88} speed={18} />
 
       {/* Subtle vignette overlay */}
       <div className="absolute inset-0 bg-radial-[ellipse_at_center] from-transparent via-[#060b1a]/60 to-[#060b1a]/95 pointer-events-none" />
@@ -114,107 +104,65 @@ export default function HomeScreen({
       <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Main Hub Container */}
-      <div className="relative z-10 flex flex-col items-center gap-8 sm:gap-12 max-w-6xl w-full px-2 sm:px-4">
-        {/* Seção A: Hero & Apresentação Educacional */}
-        <HomeHero
-          onStartBubble={() => handleStartTraining("bubble")}
-          onExploreHowItWorks={handleExploreHowItWorks}
-        />
+      <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8 max-w-5xl w-full px-2 sm:px-4">
+        {/* 1. Header Compacto (Logo reduzido + 1 linha de subtítulo) */}
+        <HomeHeader />
 
-        {/* Seção B: Como Funciona o Sorting Station (3 Passos) */}
-        <HomeHowItWorks />
+        {/* 2. Faixa Compacta: Como Funciona (3 Passos) */}
+        <HomeProcessStrip />
 
-        {/* Seção C: Retomada rápida de progresso (condicional) */}
+        {/* 3. Retomada Rápida e Sutil de Progresso (apenas se houver progresso) */}
         {overallProgress.hasAnyProgress && (
-          <HomeContinueCard
-            overallProgress={overallProgress}
-            onResume={handleStartTraining}
-          />
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/70 border border-slate-700/60 text-xs text-slate-300 shadow-sm animate-fade-in">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="truncate">
+              Sessão em andamento:{" "}
+              <strong className="text-white font-medium">
+                {overallProgress.recommendedResumeName}
+              </strong>{" "}
+              ({overallProgress.recommendedResumePhase})
+            </span>
+            <button
+              type="button"
+              onClick={() => handleStartTraining(overallProgress.recommendedResumeId)}
+              className="text-cyan-400 hover:text-cyan-300 font-semibold underline decoration-cyan-400/40 text-xs ml-1 shrink-0 cursor-pointer"
+            >
+              Continuar →
+            </button>
+          </div>
         )}
 
-        {/* Seção D: Catálogo de Módulos / Escolha de Algoritmo */}
-        <section
-          className="flex flex-col items-center gap-5 w-full pt-2"
-          aria-labelledby="modules-catalog-title"
-        >
-          {/* Section Heading */}
-          <div className="text-center flex flex-col items-center gap-1.5">
-            <span
-              className="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-cyan-400 uppercase"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              MÓDULOS DISPONÍVEIS
-            </span>
-            <h2
-              id="modules-catalog-title"
-              className="text-2xl sm:text-3xl font-black text-white tracking-tight"
-              style={{ fontFamily: "'Orbitron', sans-serif" }}
-            >
-              Escolha um Algoritmo
-            </h2>
-            <p
-              className="text-xs sm:text-sm text-slate-300 max-w-lg leading-relaxed"
-              style={{ fontFamily: "'Exo 2', sans-serif" }}
-            >
-              Selecione um método para ver a demonstração, seguir o tutorial ou
-              iniciar o treinamento interativo.
-            </p>
-          </div>
-
-          {/* Protocols Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-x-6 gap-y-4 w-full mt-2">
-            {PROTOCOL_CATALOG.map((metadata) => {
+        {/* 4. Grade de Módulos (Exatamente 3 Escolhas Claras) */}
+        <main className="w-full">
+          <h2 className="sr-only">Algoritmos de Ordenação Disponíveis</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 w-full">
+            {activeProtocols.map((metadata) => {
               const summary = getProtocolProgressSummary(metadata.id, saveData);
               return (
-                <ProtocolCard
+                <LearningModuleCard
                   key={metadata.id}
                   metadata={metadata}
-                  summary={{
-                    ...summary,
-                    isChallengeUnlocked:
-                      metadata.id === "bubble"
-                        ? (isChallengeUnlocked ?? summary.isChallengeUnlocked)
-                        : undefined,
-                  }}
-                  onStartTraining={handleStartTraining}
-                  onOpenTutorial={handleOpenTutorial}
-                  onOpenDemonstration={onOpenDemonstration}
-                  onStartChallenge={onStartChallenge}
+                  completedPhases={summary.completedPhases}
+                  onStart={handleStartTraining}
                 />
               );
             })}
           </div>
-        </section>
+        </main>
 
-        {/* Seção E: Rodapé Educacional & Telemetria Amigável */}
-        <footer className="flex flex-col items-center gap-3 mt-6 pt-6 border-t border-white/10 w-full text-center">
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs text-slate-300">
-            <span
-              className="font-mono text-cyan-300 font-semibold tracking-wider"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              SORTING STATION
-            </span>
-            <span className="text-white/20 hidden sm:inline">•</span>
-            <span className="font-sans text-slate-300">
-              Plataforma Educacional Prática de Algoritmos de Ordenação
-            </span>
-            <span className="text-white/20 hidden sm:inline">•</span>
-            <span
-              className="font-mono text-emerald-400 font-semibold tracking-wider"
-              style={{ fontFamily: "'Space Mono', monospace" }}
-            >
-              100% LOCAL & INTERATIVO
-            </span>
-          </div>
-
+        {/* 5. Rodapé Minimalista */}
+        <footer className="mt-6 pt-4 border-t border-white/5 w-full flex flex-col items-center gap-1 text-center text-xs text-slate-400">
           <p
-            className="text-[11px] text-slate-400 max-w-xl leading-relaxed"
+            className="font-mono text-slate-300 font-medium tracking-wide"
+            style={{ fontFamily: "'Space Mono', monospace" }}
+          >
+            Sorting Station • Plataforma Educacional de Algoritmos
+          </p>
+          <p
+            className="text-[11px] text-slate-400"
             style={{ fontFamily: "'Exo 2', sans-serif" }}
           >
-            Projetado para ensino de Ciência da Computação com foco em
-            compreensão de invariantes, raciocínio ativo e visualização sem
-            fricção técnica.
+            Aprenda ciência da computação de forma visual e interativa.
           </p>
         </footer>
       </div>

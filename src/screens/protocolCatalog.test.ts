@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   PROTOCOL_CATALOG,
+  ACTIVE_LAUNCHER_MODULES,
   getProtocolMetadata,
   getProtocolProgressSummary,
   getStationOverallProgress,
@@ -253,12 +254,16 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
   });
 
   describe("4. Progresso Global da Estação (getStationOverallProgress)", () => {
-    it("retorna estado zerado e recomenda Bubble Sort para novo usuário sem save", () => {
+    it("contém exatamente os três módulos ativos no launcher (bubble, selection, insertion)", () => {
+      expect(ACTIVE_LAUNCHER_MODULES).toEqual(["bubble", "selection", "insertion"]);
+    });
+
+    it("retorna estado zerado e recomenda Bubble Sort para novo usuário sem save (3 módulos ativos = 9 práticas, 3 tutoriais)", () => {
       const progress = getStationOverallProgress(undefined);
       expect(progress.totalCompletedPractices).toBe(0);
-      expect(progress.totalPractices).toBe(12);
+      expect(progress.totalPractices).toBe(9);
       expect(progress.completedTutorialsCount).toBe(0);
-      expect(progress.totalTutorials).toBe(4);
+      expect(progress.totalTutorials).toBe(3);
       expect(progress.hasAnyProgress).toBe(false);
       expect(progress.recommendedResumeId).toBe("bubble");
       expect(progress.recommendedResumePhase).toBe("Prática Básica");
