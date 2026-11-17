@@ -1,8 +1,8 @@
 # Sorting Station – Sumário Operacional da Plataforma
 
 > **Status da Documentação:** Ativo / Canônico  
-> **Data da Última Revisão:** 16/11/2026 (Marco UX-REDESIGN-R3-A: Hardening do Bubble V2 + Kit de Validação Formativa com Usuários)  
-> **Governança:** [`AGENTS.md`](../../AGENTS.md), [`ADR 0018`](../adr/0018-game-to-educational-platform-transition.md), [`ADR 0025`](../adr/0025-curriculum-practice-differentiation-and-transversal-model.md), [`ADR 0026`](../adr/0026-algorithm-case-architecture-and-activity-context.md) e [`ADR 0027`](../adr/0027-educational-and-ui-experience-redesign-v2.md).  
+> **Data da Última Revisão:** 17/11/2026 (Marco UX-HOME-R1: Redesign da Tela Inicial / Menu Principal da Plataforma)  
+> **Governança:** [`AGENTS.md`](../../AGENTS.md), [`ADR 0018`](../adr/0018-game-to-educational-platform-transition.md), [`ADR 0025`](../adr/0025-curriculum-practice-differentiation-and-transversal-model.md), [`ADR 0026`](../adr/0026-algorithm-case-architecture-and-activity-context.md), [`ADR 0027`](../adr/0027-educational-and-ui-experience-redesign-v2.md) e [`ADR 0028`](../adr/0028-home-redesign-ux-home-r1.md).  
 > 
 > *Este documento é o ponto de entrada operacional e mapa de navegação canônico da Wiki. Ele não substitui a leitura das páginas temáticas detalhadas correspondentes ao escopo da tarefa.*
 
@@ -175,8 +175,10 @@ A próxima prioridade oficial e imediata é:
 
 1. **Ciclo de Redesenho da Experiência e Interface (UX-REDESIGN — Prioridade Atual):**
    - **UX-REDESIGN-R1:** `CONCLUÍDO` — Auditoria completa de poluição visual, definição da hierarquia em 3 níveis, wireframes canônicos em 9 estados, especificação do modelo de aprendizagem ativa e ADR 0027;
-   - **UX-REDESIGN-R2:** `EM EXECUÇÃO` — Piloto End-to-End no Bubble Sort (Overview do módulo, Tutorial V2, Prática Básica V2, Feedback causal e Resultado reflexivo);
-   - **UX-REDESIGN-R3:** Refinamento e Avaliação do Piloto Bubble Sort com testes de usuários (ajustes antes de propagar);
+   - **UX-REDESIGN-R2:** `CONCLUÍDO (VALIDADO TECNICAMENTE)` — Piloto End-to-End no Bubble Sort (Overview do módulo, Tutorial V2, Prática Básica V2, Feedback causal e Resultado reflexivo);
+   - **UX-REDESIGN-R3-A:** `CONCLUÍDO` — Hardening do Bubble V2 + Kit de Validação Formativa com Usuários;
+   - **UX-HOME-R1:** `CONCLUÍDO` — Redesign da Tela Inicial / Menu Principal da Plataforma (Hero educacional, guia de 3 passos, card de retomada condicional, catálogo de módulos com subgrid alinhado e ADR 0028);
+   - **UX-REDESIGN-R3-B:** Execução da rodada real de testes de usuário com o kit formativo;
    - **UX-REDESIGN-R4:** Extensão do Redesign ao Selection Sort (foco visual no scanner de mínimo, destaque persistente do candidato);
    - **UX-REDESIGN-R5:** Extensão do Redesign ao Insertion Sort (destaque claro da chave, visualização limpa do subarray ordenado e deslocamentos);
    - **UX-REDESIGN-R6:** Harmonização Global da HomeScreen, Seletor Canônico, Modo Demonstração e Replays;

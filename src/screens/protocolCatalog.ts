@@ -229,6 +229,71 @@ export function getProtocolProgressSummary(
   };
 }
 
+export interface StationOverallProgress {
+  readonly totalCompletedPractices: number;
+  readonly totalPractices: number;
+  readonly completedTutorialsCount: number;
+  readonly totalTutorials: number;
+  readonly hasAnyProgress: boolean;
+  readonly recommendedResumeId: ProtocolId;
+  readonly recommendedResumeName: string;
+  readonly recommendedResumePhase: string;
+}
+
+/**
+ * Calcula o progresso global acumulado na estação e determina a próxima atividade recomendada.
+ * Função pura e determinística sem efeitos colaterais.
+ */
+export function getStationOverallProgress(
+  saveData?: GameSaveSchema
+): StationOverallProgress {
+  const protocols = PROTOCOL_CATALOG;
+  let totalCompletedPractices = 0;
+  let totalPractices = 0;
+  let completedTutorialsCount = 0;
+  const totalTutorials = protocols.length;
+
+  let recommendedResumeId: ProtocolId = "bubble";
+  let recommendedResumeName = "BUBBLE SORT";
+  let recommendedResumePhase = "Prática Básica";
+  let foundIncomplete = false;
+
+  for (const protocol of protocols) {
+    const summary = getProtocolProgressSummary(protocol.id, saveData);
+    totalCompletedPractices += summary.completedPhases;
+    totalPractices += summary.totalPhases;
+    if (summary.hasCompletedTutorial) {
+      completedTutorialsCount += 1;
+    }
+
+    if (!foundIncomplete && summary.completedPhases < summary.totalPhases) {
+      foundIncomplete = true;
+      recommendedResumeId = protocol.id;
+      recommendedResumeName = protocol.name;
+      recommendedResumePhase =
+        summary.completedPhases === 0
+          ? "Prática Básica"
+          : summary.completedPhases === 1
+            ? "Prática Intermediária"
+            : "Prática Avançada";
+    }
+  }
+
+  const hasAnyProgress =
+    totalCompletedPractices > 0 || completedTutorialsCount > 0;
+
+  return {
+    totalCompletedPractices,
+    totalPractices,
+    completedTutorialsCount,
+    totalTutorials,
+    hasAnyProgress,
+    recommendedResumeId,
+    recommendedResumeName,
+    recommendedResumePhase,
+  };
+}
+
 export function getProtocolMetadata(id: ProtocolId): ProtocolMetadata {
   const found = PROTOCOL_CATALOG.find((p) => p.id === id);
   if (!found) {

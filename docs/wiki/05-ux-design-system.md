@@ -454,23 +454,49 @@ A plataforma preserva a atmosfera diegética da estação espacial, mas adota **
    - Redução dos halos e sombras de texto (`text-shadow`) em classes `.glow-cyan` e `.glow-purple` para um raio máximo de 4px com opacidade atenuada, eliminando a perda de definição das arestas numéricas em telas escuras.
    - Distinção nítida e independente entre valor numérico (`Orbitron font-bold`), identificador de duplicata (badge nítido `bg-[#060b1a]/80 text-cyan-200 border border-cyan-400/40`), índice (`#index+1` em `text-slate-300 font-bold`) e estado do elemento (papel semântico `BoxRole`).
 
-### 11.3. Organização Estrutural do Hub e Arquitetura de 4 Regiões com CSS Grid Subgrid
-- **Grade Compartilhada no `HomeScreen.tsx` e Subgrid no `ProtocolCard.tsx`:**
+### 11.3. Organização Estrutural da Tela Inicial (HomeScreen) e Subgrid no ProtocolCard (UX-HOME-R1 / ADR 0028)
+- **Arquitetura em 5 Seções Funcionais e Escaneáveis (`HomeScreen.tsx`):**
+  A tela inicial foi completamente reformulada para responder em < 5s às três perguntas fundamentais (*O que é isso?*, *O que eu faço primeiro?*, *Onde eu clico para começar?*):
+  1. **Seção A — Hero Educacional (`HomeHero.tsx`):**
+     - Crachá `Plataforma Educacional • Aprendizado Ativo`;
+     - Título principal limpo em degradê Orbitron (`SORTING STATION`) e subtítulo direto (*"Aprenda algoritmos de ordenação na prática, passo a passo."*);
+     - Proposta de valor em 1-2 linhas explicando a aprendizagem visual e cinestésica na esteira;
+     - Callout de recomendação contextual: *"Primeira vez aqui? Recomendamos começar pelo Bubble Sort com o tutorial interativo."*;
+     - Botoeira primária com CTA largo `[ COMEÇAR PELO BUBBLE SORT ▶ ]` e CTA secundário de rolagem suave `[ COMO FUNCIONA ↓ ]`.
+  2. **Seção B — Metodologia Prática em 3 Passos (`HomeHowItWorks.tsx`):**
+     - Três cartões concisos ancorados pelo id `#como-funciona`:
+       - `01. Escolha o Método`: Seleção do algoritmo no catálogo;
+       - `02. Entenda a Lógica`: Demonstração automática ou tutorial guiado;
+       - `03. Pratique na Esteira`: Tomada de decisão reflexiva com feedback imediato.
+  3. **Seção C — Retomada Rápida de Progresso (`HomeContinueCard.tsx`):**
+     - Renderizada condicionalmente se houver progresso salvo (`hasAnyProgress === true`);
+     - Apresenta total de práticas concluídas (X de 12), mini barra de progresso visual, identificação da próxima prática recomendada e botão direto `[ CONTINUAR TREINAMENTO ▶ ]`.
+  4. **Seção D — Catálogo de Módulos Curriculares (`ProtocolCard.tsx`):**
+     - Cabeçalho de catálogo limpo (*"Escolha um Algoritmo"*);
+     - Grade compartilhada CSS Grid com subgrid em 4 linhas;
+     - Selo `★ RECOMENDADO` destacado no Bubble Sort;
+     - Chips compactos de práticas (`metadata.practiceItems`);
+     - Bloco resumido de progresso (práticas concluídas, tutorial, melhor nota);
+     - **Hierarquia Clara de Ações:** Botão primário largo `INICIAR TREINAMENTO` (`variant="primary"`) + Grid secundário de 2 colunas para `TUTORIAL` (`variant="secondary"`) e `DEMONSTRAÇÃO` (`variant="ghost"`);
+     - Slot inferior para o Modo Desafio do Bubble Sort.
+  5. **Seção E — Rodapé Educacional:**
+     - Síntese da missão acadêmica e indicação explícita de ambiente 100% local e interativo (sem backend nem coleta de dados).
+
+- **Grade Compartilhada e Subgrid no `ProtocolCard.tsx`:**
   Para eliminar variações verticais causadas por diferenças no tamanho de texto (como a descrição mais concisa do Merge Sort) ou pela presença de atividades extras (como o bloco de Modo Desafio do Bubble Sort), o Hub e os cartões utilizam uma arquitetura estrutural baseada em **CSS Grid com `subgrid`**:
   - **Grade Principal (`HomeScreen.tsx`):**
-    Configurada com `grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-x-6 gap-y-4 w-full mt-2`. Foi removido `items-start`, permitindo que os cartões se estendam uniformemente pelas 4 faixas de linhas (`align-self: stretch`).
+    Configurada com `grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-x-6 gap-y-4 w-full mt-2`. Permite que os cartões se estendam uniformemente pelas 4 faixas de linhas (`align-self: stretch`).
   - **Cartão Subgrid (`ProtocolCard.tsx`):**
     Adota `grid grid-rows-subgrid row-span-4` (com `gridRow: "span 4"`, `display: "grid"`, `gridTemplateRows: "subgrid"` inline), conectando diretamente seus 4 filhos imediatos às linhas da grade pai:
-    1. **Linha 1 — Região 1 (Conteúdo do Protocolo):** Contém chip de disponibilidade e práticas, título do algoritmo em degradê, subtítulo de metáfora diegética e descrição pedagógica direta. A altura da Linha 1 é unificada automaticamente pelo subgrid com base na descrição mais longa da fileira, eliminando alturas mínimas arbitrárias ou textos artificiais de preenchimento.
-    2. **Linha 2 — Região 2 (Progresso e Metadados):** Painel de status de aprendizado estruturado em 3 linhas empilhadas com espaçamento vertical:
+    1. **Linha 1 — Região 1 (Conteúdo do Protocolo):** Contém chip de disponibilidade, selo de recomendado (no Bubble), chip de total de práticas, título do algoritmo em degradê, subtítulo de metáfora diegética, descrição pedagógica direta e chips de tópicos de prática. A altura da Linha 1 é unificada automaticamente pelo subgrid com base na descrição mais longa da fileira, eliminando alturas mínimas arbitrárias ou textos artificiais de preenchimento.
+    2. **Linha 2 — Região 2 (Progresso e Metadados):** Painel de status de aprendizado estruturado em formato compacto:
        - Linha 1: `Práticas: X de Y concluídas`
-       - Linha 2: `Tutorial guiado: CONCLUÍDO / PENDENTE`
-       - Linha 3: `Melhor pontuação: X / 100` (ou `—`)
+       - Linha 2: `Tutorial: CONCLUÍDO / PENDENTE`
+       - Linha 3: `Melhor nota: X / 100` (quando existente)
        Começa rigorosamente no mesmo pixel vertical ($y$) em todos os cartões.
-    3. **Linha 3 — Região 3 (Ações Comuns Padronizadas):** Bloco delimitado por borda superior divisória (`pt-4 border-t border-white/10`), contendo os três botões comuns a todos os módulos:
-       - `INICIAR TREINAMENTO` (botão primário);
-       - `TUTORIAL` (botão secundário);
-       - `DEMONSTRAÇÃO` (botão secundário).
+    3. **Linha 3 — Região 3 (Ações Comuns Padronizadas):** Bloco delimitado por borda superior divisória (`pt-3 border-t border-white/10`), contendo:
+       - `INICIAR TREINAMENTO` (botão primário largo, full-width);
+       - Grid de 2 colunas com `TUTORIAL` (botão secundário) e `DEMONSTRAÇÃO` (botão terciário/ghost).
        Compartilham coordenadas verticais ($y$ e topo) rigorosamente idênticas entre todos os 4 cards em 1920×1080 (Desktop) e entre as duplas em 1366×768 (Laptop).
     4. **Linha 4 — Região 4 (Atividade Extra / Desafio Exclusivo):** Posicionada **estritamente abaixo** da Região 3 como 4º filho persistente do subgrid em todos os cartões. Renderiza o Modo Desafio no Bubble Sort e permanece como slot vazio de altura zero nos demais módulos (Selection, Insertion, Merge). Na visualização de 4 colunas, o cartão estende seu contorno externo para acompanhar a altura do Bubble, garantindo alinhamento pixel-perfect da base de todos os cartões.
 

@@ -3,6 +3,7 @@ import {
   PROTOCOL_CATALOG,
   getProtocolMetadata,
   getProtocolProgressSummary,
+  getStationOverallProgress,
 } from "./protocolCatalog";
 import {
   createDefaultSaveData,
@@ -248,6 +249,35 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
         expect(protocol.theme).toBeDefined();
         expect(protocol.demonstrationStatus).toBe("available");
       });
+    });
+  });
+
+  describe("4. Progresso Global da Estação (getStationOverallProgress)", () => {
+    it("retorna estado zerado e recomenda Bubble Sort para novo usuário sem save", () => {
+      const progress = getStationOverallProgress(undefined);
+      expect(progress.totalCompletedPractices).toBe(0);
+      expect(progress.totalPractices).toBe(12);
+      expect(progress.completedTutorialsCount).toBe(0);
+      expect(progress.totalTutorials).toBe(4);
+      expect(progress.hasAnyProgress).toBe(false);
+      expect(progress.recommendedResumeId).toBe("bubble");
+      expect(progress.recommendedResumePhase).toBe("Prática Básica");
+    });
+
+    it("detecta progresso factual e recomenda a próxima prática pendente", () => {
+      const defaultSave = createDefaultSaveData(3, 3);
+      const saveWithBubble = recordExerciseCompletion(
+        defaultSave,
+        "bubble",
+        "bubble.practice.basic",
+        { score: 95, errors: 0, hintsUsed: 0 }
+      );
+
+      const progress = getStationOverallProgress(saveWithBubble);
+      expect(progress.totalCompletedPractices).toBe(1);
+      expect(progress.hasAnyProgress).toBe(true);
+      expect(progress.recommendedResumeId).toBe("bubble");
+      expect(progress.recommendedResumePhase).toBe("Prática Intermediária");
     });
   });
 });

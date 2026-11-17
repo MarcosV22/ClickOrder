@@ -133,24 +133,16 @@ flowchart TD
   - Orquestrar a transição para `CampaignCompleteScreen` (Bubble), `SelectionCampaignCompleteScreen` (Selection) ou `PracticeSetCompleteScreen` (Insertion);
   - Forçar a remontagem de telas de gameplay através da prop `key={'game-phase-${phase}'}` ([`src/App.tsx`](../../src/App.tsx)).
 
-### 3.2. `src/screens/HomeScreen.tsx`, `ProtocolCard.tsx` e `protocolCatalog.ts`
-- **Responsabilidades:** Hub Educacional Simétrico de Protocolos, ambientação narrativa na "Central Logística v2.0" e seleção curricular de algoritmos de ordenação (P2.1-G-C / ADR 0016). A Home deixa de tratar o Bubble Sort como jogo único e adota o Sorting Station como plataforma transversal de aprendizagem.
-- **Destaques de Implementação:**
-  - **Hierarquia Visual Principal:**
-    - Cabeçalho: Badge `CENTRAL LOGÍSTICA V2.0` com pulso de telemetria;
-    - Título: `SORTING STATION`;
-    - Subtítulo Curricular: `CENTRAL DE TREINAMENTO DE ALGORITMOS DE ORDENAÇÃO`;
-    - Diretiva Operacional: `ESCOLHA UM PROTOCOLO`.
-  - **Catálogo Desacoplado (`src/screens/protocolCatalog.ts`):** Metadados puros de produto declarando id, nome, metáfora diegética, descrição pedagógica concisa, itens de "O que você vai praticar", status operacional (`available` vs `coming_soon`), temas visuais de destaque e fases totais. O catálogo é puramente estático e desacoplado de engines;
-  - **Resumo Factual de Progresso (`getProtocolProgressSummary`):** Função pura que combina o catálogo com o `GameSaveSchema` (v3) para computar de forma isolada fases concluídas ($X/3$), status do tutorial (`CONCLUÍDO` / `PENDENTE`), melhor pontuação registrada e destravamento do Modo Desafio;
-  - **Componente Reutilizável de Card (`src/screens/ProtocolCard.tsx`):**
-    - Simetria visual estrita de largura, tipografia e organização de ações entre Bubble Sort e Selection Sort;
-    - **Card Bubble Sort:** Metáfora "Pares Vizinhos / Esteira de Comparação", botões `[ ▶ INICIAR TREINAMENTO ]`, `[ ? TUTORIAL ]`, botão desabilitado de Demonstração e slot para `[ ⚡ MODO DESAFIO (EARLY EXIT) ]` quando desbloqueado factual ou aviso com requisito;
-    - **Card Selection Sort:** Metáfora "Scanner de Carga Mínima", botões simétricos de treinamento e tutorial interativo guiado;
-    - **Card Insertion Sort:** Placeholder curricular com status "EM BREVE", visualmente desabilitado, sem rota ativa quebrada, comunicando a progressão para o Marco P2.2;
-    - **Modo Demonstração Institucionalizado:** Botões `[ DEMO (EM BREVE) ]` presentes em todos os cards, com `disabled` e `aria-disabled="true"`, preparando a estrutura de 6 camadas para o marco P2.1-G-D;
-  - **Responsividade e Acessibilidade:** Grid responsivo (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`), scroll vertical natural com `pb-16 sm:pb-24`, botões semânticos reais com `focus-visible`, e ausência de dependência de cores para transmissão de status.
-- **Callbacks e Props:** `saveData?: GameSaveSchema`, `onStartProtocol?: (id: ProtocolId) => void`, `onOpenTutorial?: (id: ProtocolId) => void`, `isChallengeUnlocked?: boolean`, `onStartChallenge?: () => void`. Mantém retrocompatibilidade com `onStart`, `onHowToPlay` e `onStartSelection`.
+### 3.2. `src/screens/HomeScreen.tsx`, `ProtocolCard.tsx` e `protocolCatalog.ts` (Redesign UX-HOME-R1 / ADR 0028)
+- **Responsabilidades:** Ponto de entrada educacional da plataforma, projetado para acolhimento, orientação rápida (< 5s) e aprendizagem ativa sem ruído técnico excessivo. A Home organiza-se em 5 seções funcionais:
+  1. **Seção A (Hero - `HomeHero.tsx`):** Apresentação límpida com crachá educacional, proposta de valor acessível, orientação explícita para iniciantes (*"Recomendamos começar pelo Bubble Sort com o tutorial interativo"*) e botões de ação imediata: primário largo `[ COMEÇAR PELO BUBBLE SORT ▶ ]` e secundário suave `[ COMO FUNCIONA ↓ ]`.
+  2. **Seção B (Como Funciona - `HomeHowItWorks.tsx`):** Guia visual em 3 passos numerados (01. Escolha o Método, 02. Entenda a Lógica, 03. Pratique na Esteira).
+  3. **Seção C (Retomada - `HomeContinueCard.tsx`):** Renderizado apenas quando há progresso factual salvo (`hasAnyProgress === true`), exibindo o resumo geral de práticas concluídas (X de 12), porcentagem, indicação do próximo módulo/fase recomendada e botão direto `[ CONTINUAR TREINAMENTO ▶ ]`.
+  4. **Seção D (Catálogo de Módulos - `ProtocolCard.tsx`):** Grade responsiva (`grid-cols-1 md:grid-cols-2 2xl:grid-cols-4`) com subgrid em 4 linhas, selo `★ RECOMENDADO` no Bubble Sort, chips de tópicos práticos (`metadata.practiceItems`), painel compacto de status de aprendizado e hierarquia nítida de ações: primário full-width `[ INICIAR TREINAMENTO ]` + grid secundário de 2 colunas com `[ TUTORIAL ]` e `[ DEMONSTRAÇÃO ]`, seguido por slot inferior exclusivo de desafio no Bubble Sort.
+  5. **Seção E (Rodapé Educacional):** Rodapé acolhedor indicando que o ambiente é 100% interativo, local e sem necessidade de conexão externa ou backend.
+- **Catálogo Desacoplado (`src/screens/protocolCatalog.ts`):** Metadados puros de produto declarando id, nome, metáfora diegética, descrição pedagógica concisa, itens de prática, status operacional (`available` vs `coming_soon`), temas visuais de destaque e fases totais. Fornece ainda `getProtocolProgressSummary(id, saveData)` e a função agregadora `getStationOverallProgress(saveData)` para telemetria curricular de retomada.
+- **Responsividade e Acessibilidade:** Conformidade com a Scrollable Screen Rule (`min-h-screen overflow-y-auto overflow-x-hidden pb-16 sm:pb-24`), opacidade atenuada nas esteiras decorativas de fundo (0.08) para eliminação de competição visual, botões semânticos reais com `focus-visible` e navegação limpa por teclado.
+- **Callbacks e Props:** `saveData?: GameSaveSchema`, `onStartProtocol?: (id: ProtocolId) => void`, `onOpenTutorial?: (id: ProtocolId) => void`, `onOpenDemonstration?: (id: ProtocolId) => void`, `isChallengeUnlocked?: boolean`, `onStartChallenge?: () => void`. Mantém retrocompatibilidade com `onStart`, `onHowToPlay` e `onStartSelection`.
 
 ### 3.3. `src/screens/ProtocolModeBriefingScreen.tsx`
 - **Responsabilidades:** Tela intermediária orientada a dados e 100% agnóstica a motores específicos, responsável pelo alinhamento pedagógico prévio e preparação cognitiva do operador antes de qualquer interação motora na esteira.
