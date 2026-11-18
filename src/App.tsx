@@ -21,6 +21,8 @@ import PracticeSelector from "./screens/PracticeSelector";
 import DemonstrationScreen from "./screens/DemonstrationScreen";
 import BubbleModuleOverviewV2 from "./screens/bubble/BubbleModuleOverviewV2";
 import InsertionModuleOverviewV2 from "./screens/insertion/InsertionModuleOverviewV2";
+import SelectionModuleOverviewV2 from "./screens/selection/SelectionModuleOverviewV2";
+import SelectionGameScreenV2 from "./screens/selection/SelectionGameScreenV2";
 import BubbleGameScreenV2 from "./screens/bubble/BubbleGameScreenV2";
 import type { BubbleUxTestSession } from "./screens/bubble/bubbleUxTest";
 import InsertionReplayScreen from "./screens/InsertionReplayScreen";
@@ -1259,6 +1261,9 @@ export default function App({
           <BubbleModuleOverviewV2
             onStartTutorial={() => setScreen("tutorial")}
             onStartPractice={() => handleOpenPracticeSelector("bubble")}
+            onOpenDemonstration={() =>
+              handleOpenDemonstration("bubble", "briefing")
+            }
             onBack={() => setScreen(briefingReturnScreen)}
           />
         ) : briefingModeId === "insertion-canonical" ? (
@@ -1270,6 +1275,15 @@ export default function App({
             }
             onBack={() => setScreen(briefingReturnScreen)}
           />
+        ) : briefingModeId === "selection-canonical" ? (
+          <SelectionModuleOverviewV2
+            onStartTutorial={() => setScreen("selection-tutorial")}
+            onStartPractice={() => handleOpenPracticeSelector("selection")}
+            onOpenDemonstration={() =>
+              handleOpenDemonstration("selection", "briefing")
+            }
+            onBack={() => setScreen(briefingReturnScreen)}
+          />
         ) : (
           <ProtocolModeBriefingScreen
             briefing={getBriefingForMode(briefingModeId)}
@@ -1277,11 +1291,7 @@ export default function App({
             onBack={() => setScreen(briefingReturnScreen)}
             onOpenDemonstration={() =>
               handleOpenDemonstration(
-                briefingModeId === "merge-canonical"
-                  ? "merge"
-                  : briefingModeId === "selection-canonical"
-                    ? "selection"
-                    : "bubble",
+                briefingModeId === "merge-canonical" ? "merge" : "bubble",
                 "briefing"
               )
             }
@@ -1353,35 +1363,47 @@ export default function App({
           onBack={() => setScreen("home")}
         />
       )}
-      {screen === "selection-game" && (
-        <SelectionGameScreen
-          key={`selection-${activeActivityContext?.type === "case" ? activeActivityContext.caseDefinition.id : `phase-${selectionPhase}-${selectionSeed}`}`}
-          initialArray={selectionArray}
-          phase={selectionPhase}
-          totalPhases={SELECTION_TOTAL_PHASES}
-          seed={selectionSeed}
-          practiceTitle={
-            activeActivityContext?.type === "case"
-              ? activeActivityContext.caseDefinition.shortTitle
-              : selectionPhase === 1
-                ? "PRÁTICA BÁSICA"
-                : selectionPhase === 2
-                  ? "PRÁTICA INTERMEDIÁRIA"
-                  : "PRÁTICA AVANÇADA"
-          }
-          supportProfile={
-            activeActivityContext?.type === "case"
-              ? "reduced"
-              : selectionPhase === 1
-                ? "full"
-                : selectionPhase === 2
-                  ? "reduced"
-                  : "minimal"
-          }
-          onBackToSelector={() => handleOpenPracticeSelector("selection")}
-          onComplete={handleSelectionComplete}
-        />
-      )}
+      {screen === "selection-game" &&
+        (activeActivityContext?.type !== "case" && selectionPhase === 1 ? (
+          <SelectionGameScreenV2
+            key={`selection-v2-phase-${selectionPhase}-${selectionSeed}`}
+            initialArray={selectionArray}
+            phase={selectionPhase}
+            totalPhases={SELECTION_TOTAL_PHASES}
+            seed={selectionSeed}
+            practiceTitle="PRÁTICA BÁSICA"
+            onBackToSelector={() => handleOpenPracticeSelector("selection")}
+            onComplete={handleSelectionComplete}
+          />
+        ) : (
+          <SelectionGameScreen
+            key={`selection-${activeActivityContext?.type === "case" ? activeActivityContext.caseDefinition.id : `phase-${selectionPhase}-${selectionSeed}`}`}
+            initialArray={selectionArray}
+            phase={selectionPhase}
+            totalPhases={SELECTION_TOTAL_PHASES}
+            seed={selectionSeed}
+            practiceTitle={
+              activeActivityContext?.type === "case"
+                ? activeActivityContext.caseDefinition.shortTitle
+                : selectionPhase === 1
+                  ? "PRÁTICA BÁSICA"
+                  : selectionPhase === 2
+                    ? "PRÁTICA INTERMEDIÁRIA"
+                    : "PRÁTICA AVANÇADA"
+            }
+            supportProfile={
+              activeActivityContext?.type === "case"
+                ? "reduced"
+                : selectionPhase === 1
+                  ? "full"
+                  : selectionPhase === 2
+                    ? "reduced"
+                    : "minimal"
+            }
+            onBackToSelector={() => handleOpenPracticeSelector("selection")}
+            onComplete={handleSelectionComplete}
+          />
+        ))}
       {screen === "insertion-practice" && (
         <InsertionGameScreen
           key={`insertion-${activeActivityContext?.type === "case" ? activeActivityContext.caseDefinition.id : `practice-${insertionLevel}-${insertionSeed}`}`}

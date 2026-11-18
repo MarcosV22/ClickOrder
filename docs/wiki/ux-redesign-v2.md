@@ -1033,3 +1033,177 @@ A introdução foi projetada para apresentar a intuição mecânica (*"Pegue um 
 - **Suíte de Testes:** `src/screens/insertionModuleOverviewV2.test.tsx` com 13 testes comportamentais aprovados;
 - **Total Factual:** 53 arquivos de teste e 687 testes verdes no Vitest (100% de aprovação, zero regressões);
 - **Typecheck & Build:** `tsc --noEmit` com 0 erros e build de produção Vite concluído em ~675ms.
+
+---
+
+## 16. Introdução Visual-First do Selection Sort (`UX-MODULE-R2` / `UX-MODULE-R2.1`)
+
+### 16.1. Contexto e Modelo Mental Próprio
+Dando sequência à simplificação radical da experiência educacional, a introdução do Selection Sort foi concebida e refinada sobre a abordagem **Visual-First**. Ao contrário do Bubble Sort (comparações e trocas locais continuadas) e do Insertion Sort (deslocamento e encaixe de chave), o Selection Sort fundamenta-se em um modelo mental singular:
+$$\text{PROCURAR O MENOR} \longrightarrow \text{LEMBRAR O MENOR} \longrightarrow \text{TERMINAR A VARREDURA} \longrightarrow \text{COLOCAR NA PRÓXIMA POSIÇÃO}$$
+
+### 16.2. Regra Fundamental Visual: `PROCURAR ≠ MOVER`
+O princípio visual inegociável do módulo é:
+> *"Durante a busca, o marcador anda e as caixas ficam paradas. Só depois de terminar, o menor é colocado no lugar."*
+
+Observações formativas anteriores indicaram como possível fonte de confusão a tendência de alunos iniciantes tentarem trocar caixas no instante exato em que encontram qualquer valor menor que a primeira posição da passada (confundindo o Selection com o Bubble Sort). A introdução visual foi calibrada para evidenciar que, durante a varredura, o scanner move-se enquanto as caixas permanecem perfeitamente estáticas, ocorrendo a movimentação física apenas ao final.
+
+### 16.3. Arquitetura de Componentes (`src/screens/selection/`)
+1. **Ponto de Entrada e Visão Geral (`SelectionModuleOverviewV2.tsx`):**
+   - **Título Dominante:** `SELECTION SORT` em tipografia display (`Orbitron`, `text-3xl sm:text-4xl`);
+   - **Frase Conceitual Única:** *"Encontre o menor e coloque-o na próxima posição."*;
+   - **CTA Principal Dominante:** Botão `[ COMEÇAR TUTORIAL ▶ ]` com microcopy *"Você vai praticar a busca do menor passo a passo."*;
+   - **Caminho Secundário Único:** *"Já conhece o algoritmo? [ Ir para práticas › ]"*;
+   - **Rolagem Conforme:** Contêiner rolável sem `overflow-hidden`, ajustado para o primeiro viewport em 1366×768.
+2. **Visual Hero Protagonista (`SelectionConceptVisual.tsx`):**
+   - Opera sobre o vetor elementar mínimo curado **`[4, 1, 3]`** ($n=3$);
+   - O exemplo elementar serve estritamente como recurso pedagógico e perceptivo para ilustrar a mecânica da busca e do posicionamento final; a complexidade assintótica $\Theta(n^2)$ decorre formalmente da análise matemática de seus laços aninhados invariantes, e não de uma "comprovação empírica" sobre 3 elementos;
+   - Stepper interativo dos 3 passos essenciais:
+     - **Passo 1 (PROCURE):** O scanner aponta para a posição inicial (4 como candidato inicial), com indicador de alvo `PRÓXIMA POSIÇÃO`;
+     - **Passo 2 (LEMBRE O MENOR):** O scanner percorre 1 e 3. O número 1 recebe o badge `MENOR`. Durante a inspeção das caixas 1 e 3, as caixas permanecem estáticas em seus lugares;
+     - **Passo 3 (POSICIONE):** O menor elemento (1) é transferido para a primeira posição, resultando em `[1, 4, 3]`. O elemento posicionado recebe realce suave em esmeralda;
+   - Acessibilidade: `role="img"` com `aria-label="O scanner percorre 4, 1 e 3 sem mover os elementos. O número 1 é identificado como o menor e, somente após a busca, é colocado na primeira posição."`.
+3. **Resumo dos 3 Passos e Regra de Ouro (`SelectionConceptSteps.tsx`):**
+   - Faixa leve de 3 colunas: (1) `PROCURE`, (2) `LEMBRE O MENOR`, (3) `POSICIONE`;
+   - Banner de destaque da regra visual: `PROCURAR ≠ MOVER: Durante a busca, nada troca de lugar.`.
+4. **Detalhes Técnicos Sob Demanda (`SelectionDetails.tsx`):**
+   - Seção retrátil única (`<details>`) fechada por padrão (`▼ Ver mais detalhes técnicos`);
+   - Contém formalismos: índices de iteração $i, j, \text{minIndex}$, FSM bimodal `INSPECT`/`COMMIT`, contraste explícito com o Bubble Sort, pseudocódigo canônico de 13 instruções importado diretamente de `SELECTION_SORT_PSEUDOCODE`, complexidade assintótica ($\Theta(n^2)$ comparações invariantes decorrentes dos laços aninhados com $\frac{n(n-1)}{2}$ avaliações; política de trocas da variante canônica com guarda `minIndex !== i`, realizando 0 trocas físicas se o vetor já estiver ordenado e no máximo $n-1$ trocas nos casos médio e pior; $\Theta(1)$ espaço auxiliar) e link subordinado `[ Ver Demonstração Livre › ]`.
+
+### 16.4. Regras Estritas de Redução de Ruído
+- **Zero Jargão Formal na Camada Primária:** A camada primária visível não contém $i$, $j$, $\text{minIndex}$, `INSPECT`, `COMMIT`, `FSM`, $\Theta(n^2)$ ou `swap`;
+- **Zero Emojis de Sistema:** Todo significado visual é expresso por tipografia, contraste e ícones funcionais em SVG;
+- **Caminho Secundário Único:** Apenas 1 atalho secundário abaixo do CTA primário; a Demonstração Livre foi subordinada à gaveta técnica.
+
+### 16.5. Hardening Metodológico e Conceitual (`UX-MODULE-R2.1`)
+O marco UX-MODULE-R2.1 consolidou três níveis de distinção epistemológica:
+1. **Propriedades Matemáticas do Algoritmo:** Comparações incondicionais $\sum_{i=0}^{n-2} (n - 1 - i) = \frac{n(n-1)}{2}$ determinam rigorosamente $\Theta(n^2)$ em todos os casos. Na variante canônica do Sorting Station (que omite auto-trocas via `if (minIndex !== i)`), o algoritmo executa rigorosamente $0$ trocas físicas no melhor caso (já ordenado) e no máximo $n-1$ trocas físicas nos casos médio e pior.
+2. **Hipóteses de Design:** A estruturação em camadas visuais progressivas e o adiamento de variáveis de controle ($i, j, minIndex$) constituem hipóteses instrucionais destinadas a reduzir atrito cognitivo.
+3. **Observações Formativas:** Registros obtidos em sessões formativas preliminares qualificam armadilhas de aprendizado sem status probatório formal.
+
+### 16.6. Verificação e Métricas Factuais
+- **Suíte de Testes:** `src/screens/selectionModuleOverviewV2.test.tsx` com 13 testes comportamentais aprovados;
+- **Total Factual:** 54 arquivos de teste e 700 testes verdes no Vitest (100% de aprovação, zero regressões);
+- **Typecheck & Build:** `tsc --noEmit` com 0 erros e build de produção Vite aprovado.
+
+---
+
+## 17. Harmonização Visual e Pedagógica dos 3 Módulos Centrais (`UX-MODULE-R3`)
+
+### 17.1. Princípio Central: Mesma Gramática Visual ≠ Mesma Mecânica
+Após as rodadas de simplificação individual de cada módulo, o marco **UX-MODULE-R3** estabeleceu a harmonização transversal entre os três algoritmos elementares fundamentais da plataforma: **Bubble Sort**, **Selection Sort** e **Insertion Sort**.
+
+O princípio orientador é:
+$$\text{PADRONIZAR ESTRUTURA} \quad \Longleftrightarrow \quad \text{PRESERVAR MODELO MENTAL}$$
+
+Todos os módulos agora compartilham:
+- Mesma hierarquia visual e densidade textual rigorosamente contida (<100 palavras na camada inicial);
+- Shell visual estrutural compartilhado (`LearningModuleOverviewLayout.tsx`);
+- Mesma posição, tamanho e peso visual do CTA primário dominante: `[ COMEÇAR TUTORIAL ▶ ]`;
+- Rota secundária padronizada e acolhedora: `Já conhece o algoritmo? [ Ir para práticas › ]`;
+- Aprofundamento técnico e pseudocódigo alocado em um único accordion retrátil sob demanda (`<details>`), fechado por padrão;
+- Escala tipográfica unificada (`Orbitron` no H1 e valores de caixas; `Space Mono` em identificadores, passos e código; sans-serif legível em microcopy e parágrafos didáticos);
+- Princípios de acessibilidade plenos (`role="img"` com descrições auditivas cinestésicas, `role="tab"` nos steppers, foco navegável por teclado, respeito a *reduced motion*);
+- Ergonomia para o primeiro viewport em 1366×768 sem rolagem obrigatória na camada primária e sem uso prejudicial de `h-screen` ou `overflow-hidden`.
+
+Ao mesmo tempo, cada módulo **conserva integralmente**:
+- Sua mecânica algorítmica específica;
+- Seu movimento cinestésico e animação pedagógica própria;
+- Suas perguntas de reflexão;
+- Suas cores funcionais de identidade funcional;
+- Sua metáfora visual e modelo mental singular.
+
+### 17.2. Modelos Mentais Canônicos da Tríade Elementar
+
+| Módulo | Modelo Mental Canônico | Vetor Hero Canônico | Cinemática Visual Distinta | Regra Visual Fundamental |
+| :--- | :--- | :---: | :--- | :--- |
+| **Bubble Sort** | `COMPARE ➔ DECIDA ➔ AVANCE` | `[8, 3]` | Troca bilateral horizontal contígua entre caixas vizinhas imediatas ($8 > 3 \Rightarrow [3, 8]$) | **COMPARAÇÃO LOCAL:** Apenas vizinhos imediatos trocam de lugar diretamente. |
+| **Selection Sort** | `PROCURE ➔ LEMBRE O MENOR ➔ POSICIONE` | `[4, 1, 3]` | Scanner percorre caixas estáticas sem movimentação; única transferência física (commit) do menor ao final para a posição alvo ($[1, 4, 3]$) | **PROCURAR ≠ MOVER:** Durante a busca, nada troca de lugar. |
+| **Insertion Sort** | `PEGUE ➔ ABRA ESPAÇO ➔ ENCAIXE` | `[2, 5, 3]` | Suspensão vertical da chave no trilho aéreo ($3$); deslocamento unilateral dos maiores para a direita ($5$); descida e encaixe da chave na vaga ($[2, 3, 5]$) | **DESLOCAR ≠ TROCAR:** Elementos maiores apenas abrem espaço; a chave desce na vaga. |
+
+### 17.3. Alinhamento Estrutural do Bubble Sort ao Padrão Visual-First
+O Bubble Sort Overview havia sido implementado em UX-REDESIGN-R2 antes da maturação completa da gramática Visual-First. No marco UX-MODULE-R3:
+- O card delimitador `#111827/80` foi removido em favor da superfície neutra profunda compartilhada;
+- Foi criado o componente `BubbleConceptVisual.tsx` com stepper interativo dos 3 passos sobre `[8, 3]`;
+- Foi criado o componente `BubbleConceptSteps.tsx` com 3 colunas leves (1. COMPARE, 2. DECIDA, 3. AVANCE) e o dístico da regra de comparação local;
+- Foi criado o componente `BubbleDetails.tsx` com o accordion retrátil de aprofundamento técnico, expondo o pseudocódigo canônico de 9 linhas (`BUBBLE_SORT_PSEUDOCODE`), a análise exata de complexidade assintótica ($\Theta(n^2)$ comparações na variante canônica sem early exit por padrão, 0 a $n(n-1)/2$ trocas físicas, espaço $\Theta(1)$ e estabilidade garantida) e link subordinado para a Demonstração Livre;
+- `BubbleModuleOverviewV2.tsx` passou a utilizar o layout unificado `LearningModuleOverviewLayout.tsx`.
+
+### 17.4. Verificação e Métricas Factuais
+- **Suíte de Testes:**
+  - `src/screens/bubbleModuleOverviewV2.test.tsx` (13 testes aprovados);
+  - `src/screens/selectionModuleOverviewV2.test.tsx` (13 testes aprovados);
+  - `src/screens/insertionModuleOverviewV2.test.tsx` (13 testes aprovados);
+  - `src/screens/bubbleV2Pilot.test.tsx` (9 testes aprovados);
+  - `src/screens/homeScreen.test.tsx` (12 testes aprovados).
+- **Total Factual da Suíte:** **55 arquivos de teste e 713 testes verdes no Vitest** (100% de aprovação);
+- **Typecheck & Build:** `tsc --noEmit` com 0 erros e build de produção Vite concluído com sucesso em ~560ms.
+
+---
+
+## 18. Redesign Visual-First do Tutorial e da Prática Básica do Selection Sort (`UX-PRACTICE-R1`)
+
+No marco **UX-PRACTICE-R1**, a metodologia Visual-First foi estendida para o gameplay interativo do Selection Sort, abrangendo especificamente o **Tutorial Guiado** e a **Prática Básica (Fase 1)**:
+
+### 18.1. Princípio Arquitetural e Pedagógico
+- **`BUSCA ≠ MOVIMENTAÇÃO`:** Durante a fase de inspeção (`INSPECT`), o usuário observa o scanner percorrer a esteira, mas **nenhuma caixa se move**. Apenas marcadores semânticos (`próxima posição`, `menor atual`, `observando`) são atualizados.
+- **Transição Atômica para `COMMIT`:** Apenas quando o scanner conclui a varredura até a última posição não ordenada, a FSM entra na fase de consolidação (`COMMIT`), onde ocorre no máximo uma transferência física de longa distância por passada.
+
+### 18.2. Componentes Modulares Criados
+1. `SelectionConveyorTrack.tsx`: Esteira visual com caixas `NumberedBox` estáticas em `INSPECT`, animação pontual em `COMMIT` e selos de estado não poluentes.
+2. `SelectionDecisionControls.tsx`: Pergunta central dinâmica (*"O {scanVal} é menor que o menor atual, {minVal}?"*), dois botões neutros balanceados (`[ 1 ] Sim, é o novo menor` / `[ 2 ] Não, manter o menor`), atalhos de teclado `1` e `2`, feedback causal imediato e suporte pedagógico de Nível 2 (`[ ? Dica ]`).
+3. `SelectionCommitCheckpoint.tsx`: Pergunta formativa pré-commit em linguagem natural (*"Qual número deve ir para a primeira posição?"*) na passada inicial e botão de confirmação de transferência pontual.
+4. `SelectionPredictionCard.tsx`: Desafio reflexivo de previsão preliminar no início do Tutorial Guiado.
+5. `SelectionTechnicalDetails.tsx`: Gaveta retrátil `<details>` de Nível 3, expondo formalmente as variáveis $i$, $j$, $minIndex$ e o pseudocódigo canônico sincronizado.
+
+### 18.3. Integração e Roteamento
+- `SelectionTutorialScreenV2.tsx` substitui o tutorial legado, conduzindo o aluno pelo vetor `[4, 1, 3]`;
+- `SelectionGameScreenV2.tsx` assume a Prática Básica (Fase 1) em `src/App.tsx`;
+- As fases Intermediária (2), Avançada (3) e Casos Especiais continuam executando em `SelectionGameScreen.tsx` original, garantindo 100% de estabilidade e preservação de testes de scaffolding fading.
+
+### 18.4. Verificação e Métricas Factuais
+- **Suíte de Testes:**
+  - `src/screens/selectionTutorialScreen.test.tsx` (3 testes aprovados);
+  - `src/screens/selectionGameScreenV2.test.tsx` (4 testes aprovados);
+- **Total Factual da Suíte:** **57 arquivos de teste e 720 testes verdes no Vitest** (100% de aprovação);
+- **Typecheck & Build:** `tsc --noEmit` com 0 erros e build de produção Vite concluído em 565ms.
+
+---
+
+## 19. Hardening Semântico e Visual do Selection Sort (`UX-PRACTICE-R1.1`)
+
+No marco **UX-PRACTICE-R1.1**, consolidamos o refino de vocabulário e a limpeza visual da Prática Básica e do Tutorial do Selection Sort:
+
+### 19.1. Distinção Epistemológica: Posição-Alvo vs. Vaga Física
+- O termo "vaga" pertencia originalmente ao modelo mental do **Insertion Sort** (`PEGUE ➔ ABRA ESPAÇO ➔ ENCAIXE`), onde uma caixa é suspensa e deixa uma lacuna física transitória na esteira enquanto os elementos maiores são deslocados para a direita.
+- No **Selection Sort** (`PROCURE ➔ LEMBRE O MENOR ➔ POSICIONE`), **não existe vaga vazia nem deslocamento de elementos**: todas as posições da esteira estão continuamente ocupadas por caixas físicas durante a inspeção. No encerramento da passada, ocorre uma permuta bilateral entre a posição-alvo $i$ e a posição $minIndex$.
+- Portanto, todos os resíduos de "vaga", "próxima vaga", "vaga #1" e "vaga aberta" foram erradicados do Selection Sort, substituídos rigorosamente por "próxima posição", "posição a preencher", "primeira posição" ou "posição correta".
+- O checkpoint pré-commit agora pergunta: *"Qual número deve ir para a primeira posição?"* (ou *"próxima posição"*), eliminando a menção a índices técnicos de código (`#1`).
+
+### 19.2. Regra Estrita da Esteira: UMA Informação Visual por Papel
+- O componente `SelectionConveyorTrack.tsx` foi simplificado para eliminar duplicações cognitivas:
+  1. **Posição-alvo da passada:** Rótulo discreto `próxima posição` exibido no topo do slot $i$;
+  2. **Elemento inspecionado:** Anel ciano de destaque (`ring-2 ring-cyan-400 ring-offset-2 ring-offset-[#0d1635]`) na borda da caixa $j$;
+  3. **Menor encontrado:** Marcador inferior `menor atual` exclusivamente na caixa $minIndex$;
+  4. **Elemento em escaneamento:** Marcador inferior `observando` exclusivamente se $j$ estiver sob varredura e não for o menor;
+  5. **Caixas consolidadas:** O realce esmeralda e a posição à esquerda indicam a consolidação; o badge poluente `fixado ✓` interno a cada caixa foi removido, transferindo a contagem para o subtítulo global (`N posições ordenadas ✓`).
+
+### 19.3. Erradicação de Emojis do Sistema Operacional
+- Substituição integral de emojis nativos (`💡`, `⚠️`, `ℹ️`, `🏁`, `✨`, `🎯`, `🎉`, `🔍`) por elementos gráficos vetoriais/CSS de alto contraste:
+  - Botão de dica: `[ ? Dica ]` com badge circular;
+  - Feedbacks causais: selos `!`, `i`, `✓`;
+  - Checkpoint: ponto pulsante âmbar institucional;
+  - Conclusão da prática: botão canônico `[ Concluir Prática ➔ ]` com ícone de verificação vetorial.
+
+### 19.4. Diferenciação Metodológica entre Métricas Escolares e Telemetria UX
+- Diferenciação formal documentada:
+  - **Métricas de Prática Pedagógica:** Comparações realizadas, trocas efetuadas, erros cometidos, dicas consultadas e tempo de resolução (métricas canônicas de aprendizagem);
+  - **Instrumentação de Usabilidade (UX):** Tempos de reação por botão e pontos de fixação do olhar pertencem exclusivamente a protocolos de pesquisa formativa com usuários externos, sem acoplamento com a FSM ou motores matemáticos.
+
+### 19.5. Verificação e Métricas Factuais
+- **Suíte de Testes:**
+  - `src/screens/selectionTutorialScreen.test.tsx` (3 testes aprovados, adaptados para o novo vocabulário sem "vagas");
+  - `src/screens/selectionGameScreenV2.test.tsx` (5 testes aprovados, incluindo asserção dedicada de ausência de "vagas" e emojis nativos);
+- **Total Factual da Suíte:** **57 arquivos de teste e 721 testes verdes no Vitest** (100% de aprovação);
+- **Typecheck & Build:** `tsc --noEmit` com 0 erros e build de produção Vite aprovado.
+

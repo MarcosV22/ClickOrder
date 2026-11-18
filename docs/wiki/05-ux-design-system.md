@@ -631,6 +631,72 @@ Nos marcos `UX-MODULE-R1` e `UX-MODULE-R1.1`, foi formalizado e estabilizado o p
    - **Paleta Cromática Estritamente Funcional:** Fundo neutro escuro (`#060b1a`), Âmbar (`#f59e0b`) para chave/atenção, Ciano para elemento em movimento/foco, Esmeralda para encaixe concluído;
    - **Ergonomia Viewport (1366×768):** A camada principal (título, frase, visual hero, 3 passos e CTA) é integralmente visível no primeiro viewport sem rolagem obrigatória, preservando a **Scrollable Screen Rule** (sem `overflow-hidden`).
 
+### 11.13. Harmonização Transversal dos Módulos Centrais (`UX-MODULE-R3`)
+No marco `UX-MODULE-R3`, os três módulos centrais (**Bubble Sort**, **Selection Sort** e **Insertion Sort**) foram integrados sob uma **gramática visual e estrutural unificada**, eliminando assimetrias de layout sem homogeneizar nem descaracterizar os modelos mentais e cinéticos próprios de cada algoritmo:
+
+1. **Shell Unificado Reutilizável (`LearningModuleOverviewLayout.tsx`):**
+   Todos os três módulos compartilham a mesma casca de apresentação e semântica de layout, parametrizada pela propriedade `themeColor: "blue" | "purple" | "amber"`:
+   - **Barra Superior Funcional:** Botão "← Voltar ao Início" com hover temático suave + badge sutil do algoritmo à direita;
+   - **Cabeçalho Hero:** Título principal em tipografia *Orbitron* com gradiente calibrado + subtítulo amigável de uma linha em português claro;
+   - **Slot Visual Protagonista (`heroVisual`):** Enquadramento em superfície única escura neutra (`bg-slate-900/60 border-slate-800`), contendo o componente interativo de 3 passos (`BubbleConceptVisual`, `SelectionConceptVisual` ou `InsertionConceptVisual`) com stepper sutil e botões de avanço/recuo;
+   - **Slot de Passos Conceituais (`conceptSteps`):** Faixa leve em 3 colunas limpas sobre fundo neutro (`BubbleConceptSteps`, `SelectionConceptSteps` ou `InsertionConceptSteps`), encimada ou acompanhada pelo banner da Regra Fundamental correspondente;
+   - **Bloco de Ação Canônica Centralizado:**
+     - Botão Primário Dominante de alto contraste: `[ COMEÇAR TUTORIAL ▶ ]`;
+     - Microcopy pedagógico de apoio (≤ 10 palavras);
+     - Rota Secundária Única e discreta: *"Já conhece o algoritmo? [ Ir para práticas › ]"*;
+   - **Slot Retrátil de Detalhes Técnicos (`detailsDrawer`):** Accordion único `<details>` (`BubbleDetails`, `SelectionDetails` ou `InsertionDetails`), fechado por padrão (`▼ Ver mais detalhes técnicos (para quem quer se aprofundar)`), contendo pseudocódigo formal canônico, análise assintótica rigorosa e atalho para o modo Demonstração Livre.
+
+2. **Matriz de Harmonização Visual e Modelos Mentais Exclusivos:**
+
+| Algoritmo | Cor Semântica | Tríade Conceitual | Exemplo Hero Canônico | Movimento Cinético Próprio | Regra Pedagógica em Destaque |
+|---|---|---|---|---|---|
+| **Bubble Sort** | Azul / Ciano (`blue`) | `COMPARE ➔ DECIDA ➔ AVANCE` | `[8, 3] ➔ [3, 8]` ($n=2$) | Troca bilateral direta entre vizinhos adjacentes | **COMPARAÇÃO LOCAL:** *"Apenas vizinhos imediatos trocam de lugar diretamente."* |
+| **Selection Sort** | Roxo / Violeta (`purple`) | `PROCURE ➔ LEMBRE O MENOR ➔ POSICIONE` | `[4, 1, 3] ➔ [1, 4, 3]` ($n=3$) | Varredura de scanner sobre caixas estáticas; transferência no final | **PROCURAR ≠ MOVER:** *"Durante a busca, nada troca de lugar. Só o marcador anda."* |
+| **Insertion Sort** | Âmbar / Laranja (`amber`) | `PEGUE ➔ ABRA ESPAÇO ➔ ENCAIXE` | `[2, 5, 3] ➔ [2, 3, 5]` ($n=3$) | Elevação vertical da chave, deslizamento lateral dos maiores e descida na vaga | **DESLOCAR ≠ TROCAR:** *"Elementos maiores apenas abrem espaço; a chave desce na vaga."* |
+
+3. **Invariantes e Higiene Visual Transversal:**
+   - **Menos de 80 palavras** na camada primária de cada módulo;
+   - **Zero jargão acadêmico precoce** na camada primária (termos como $\Theta(n^2)$, invariante, FSM, pseudocódigo ou complexidade são restritos ao `<details>`);
+   - **Zero emojis de sistema** (design limpo com ícones SVG funcionais de Lucide-React);
+   - **Superfície única**: nenhuma caixa ou card aninhado desnecessário;
+   - **Acessibilidade e Usabilidade:** Elementos com `role="img"`, `aria-label` completo, suporte a navegação por teclado (Enter/Espaço) e conformidade estrita com a **Scrollable Screen Rule** em resolução de referência 1366×768.
+
+### 11.14. Padrão Visual-First na Prática Interativa: Selection Sort (`UX-PRACTICE-R1`)
+No marco `UX-PRACTICE-R1`, o padrão Visual-First expandiu-se da camada de introdução/visão geral para a camada de gameplay ativo e tutoriais guiados:
+1. **Esteira Visual com Caixas Estáticas em `INSPECT` (`SelectionConveyorTrack.tsx`):**
+   - As caixas `NumberedBox` não se movem enquanto o scanner varre os elementos;
+   - Apenas os selos semânticos mudam (`próxima posição`, `menor atual`, `observando`);
+   - No `COMMIT`, uma única animação de troca bilateral (`animatingPair`) desloca o menor para a posição consolidada.
+2. **Pergunta Dinâmica e Botoeira Neutra (`SelectionDecisionControls.tsx`):**
+   - Pergunta centralizada situacional: *"O {scanVal} é menor que o menor atual, {minVal}?"*;
+   - Dois botões neutros e balanceados sem pistas cromáticas pré-clique (`[ 1 ] Sim, é o novo menor` / `[ 2 ] Não, manter o menor`);
+   - Atalhos de teclado `1` e `2` exibidos em badges `<kbd>`;
+   - Feedback causal imediato explicando o motivo de cada ação.
+3. **Checkpoints Formativos de Previsão e Pré-Commit:**
+   - Desafio de hipótese antes da busca no Tutorial (`SelectionPredictionCard.tsx`);
+   - Pergunta de confirmação de transferência em linguagem natural antes do Commit (`SelectionCommitCheckpoint.tsx`).
+4. **Hierarquia de 3 Níveis:**
+   - Nível 1: Esteira, pergunta central e botões de decisão;
+   - Nível 2: Dica reflexiva sob demanda `[ ? Dica ]`;
+   - Nível 3: Gaveta retrátil `<details>` com variáveis da FSM e pseudocódigo sincronizado (`SelectionTechnicalDetails.tsx`).
+
+### 11.15. Hardening Visual e Semântico da Prática: Regra de Ouro da Esteira e Zero Emojis (`UX-PRACTICE-R1.1`)
+No marco `UX-PRACTICE-R1.1`, foram estabelecidas duas regras canônicas de consistência visual e semântica para todas as práticas da plataforma:
+1. **Regra de Ouro da Esteira (Uma Informação Visual por Papel):**
+   - Cada caixa ou posição da esteira deve comunicar exatamente um papel contextual ativo.
+   - Posição-alvo: rotulada externamente no topo do slot (`próxima posição`), sem duplicar chips na caixa;
+   - Foco do scanner: anel visual de contorno (`ring-2 ring-cyan-400`);
+   - Menor encontrado: chip inferior único `menor atual`;
+   - Elemento sob inspeção: chip inferior `observando` exclusivamente se não for o menor;
+   - Consolidação: expressa por realce esmeralda e posição estática; badges repetitivos (`fixado ✓`) dentro de cada caixa são proibidos em favor do contador global de posições ordenadas no cabeçalho.
+2. **Erradicação Total de Emojis de Sistema da UI:**
+   - Emojis nativos de SO (`💡`, `⚠️`, `ℹ️`, `🏁`, `✨`, `🎯`, `🎉`, `🔍`) possuem renderizações cromáticas e de tamanho inconsistentes entre Windows, Linux, macOS, ChromeOS e iOS em ambientes escolares.
+   - Toda sinalização de status, botões de dica, feedbacks e checkpoints deve utilizar elementos gráficos padronizados em CSS e SVG (`?`, `!`, `i`, `✓`, dots pulsantes).
+3. **Distinção Terminológica Epistemológica:**
+   - O termo "vaga" é restrito ao Insertion Sort (onde a chave desocupa fisicamente um slot e elementos sofrem *shift*). No Selection Sort, utiliza-se rigorosamente "posição-alvo", "próxima posição" ou "posição a preencher", pois não há vacância física durante a varredura.
+
+
+
 
 
 

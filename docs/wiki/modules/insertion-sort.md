@@ -419,3 +419,38 @@ A interface dedicada do Insertion Sort (`InsertionGameScreen.tsx`) aplica a prog
 - **Status:** O laboratório permanece `BLOQUEADO` até que todos os 6 módulos estejam implementados.
 - **Comportamento no Benchmark:** O Insertion Sort demonstrará empiricamente sua superioridade assintótica em conjuntos de dados quase ordenados, alcançando desempenho $O(n)$ e superando Bubble e Selection Sort em comparações e movimentações.
 - **Isolamento de Métricas:** A métrica de *Shifts* será reportada em coluna própria, nunca somada ou equiparada a *Swaps* bilaterais.
+
+---
+
+## 21. Introdução Visual-First e Harmonização Estrutural (`UX-MODULE-R1` e `UX-MODULE-R3`)
+
+Nos marcos **UX-MODULE-R1**, **UX-MODULE-R1.1** e **UX-MODULE-R3**, a visão geral do Insertion Sort foi estabelecida como a pioneira do padrão **Visual-First** e subsequentemente integrada ao shell estrutural unificado:
+
+1. **Adoção do Shell Unificado (`LearningModuleOverviewLayout.tsx`):**
+   - O `InsertionModuleOverviewV2.tsx` utiliza o layout unificado com o tema `themeColor="amber"`;
+   - Barra superior com navegação simplificada e badge `INSERTION SORT`;
+   - Título hero e subtítulo claro: *"Pegue uma carta, abra espaço e encaixe no lugar certo."*;
+   - Ponto de foco cristalino, sem ruídos decorativos nem cartões aninhados.
+
+2. **Hero Visual Protagonista (`InsertionConceptVisual.tsx`):**
+   - Demonstração visual interativa de 3 passos com vetor elementar `[2, 5, 3]`:
+     - **Passo 1 (PEGUE):** A chave `3` é elevada verticalmente ao trilho aéreo em realce âmbar, abrindo a vaga na esteira;
+     - **Passo 2 (ABRA ESPAÇO):** O elemento maior `5` desliza lateralmente para a direita, deslocando a vaga física para a esquerda;
+     - **Passo 3 (ENCAIXE):** A chave `3` desce na vaga desocupada, consolidando o vetor em `[2, 3, 5]` com realce esmeralda;
+   - Stepper acessível com navegação por botões, `role="img"` e rótulo `aria-label` completo.
+
+3. **Passos Conceituais e Regra Fundamental (`InsertionConceptSteps.tsx`):**
+   - Tríade de passos em 3 colunas limpas sobre fundo neutro: `1. PEGUE` (separe o elemento da vez), `2. ABRA ESPAÇO` (deslize os maiores para o lado), `3. ENCAIXE` (solte o elemento na vaga aberta);
+   - **Regra Pedagógica em Destaque:**
+     > **DESLOCAR ≠ TROCAR:** *"Elementos maiores apenas abrem espaço; a chave desce na vaga."*
+
+4. **CTA Dominante e Rota Secundária:**
+   - Botão de ação primária de alto contraste: `[ COMEÇAR TUTORIAL ▶ ]` com subtítulo *"Aprenda a mecânica passo a passo."*;
+   - Rota secundária subordinada: *"Já conhece o algoritmo? [ Ir para práticas › ]"*.
+
+5. **Aprofundamento Técnico Sob Demanda (`InsertionDetails.tsx`):**
+   - Gaveta retrátil `<details>` fechada por padrão (`▼ Ver mais detalhes técnicos (para quem quer se aprofundar)`);
+   - Pseudocódigo formal canônico de 11 instruções (`INSERTION_SORT_PSEUDOCODE` de `src/game/sorting/insertion/insertionPseudocode.ts`);
+   - Análise assintótica formal: Melhor Caso $\Theta(n)$ com $0$ deslocamentos, Casos Médio e Pior $\Theta(n^2)$ com até $\frac{n(n-1)}{2}$ deslocamentos unilaterais, estabilidade algorítmica garantida e memória auxiliar $\Theta(1)$ / $O(1)$;
+   - Botão para execução da Demonstração Livre.
+

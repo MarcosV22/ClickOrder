@@ -46,17 +46,16 @@ describe("Bubble Sort V2 Pilot — End-to-End Educational & Visual Experience", 
         );
       });
 
-      expect(container.textContent).toContain("Bubble Sort");
-      expect(container.textContent).toContain("Compare vizinhos e leve os maiores para o final.");
-      expect(container.textContent).toContain("Observe dois vizinhos");
-      expect(container.textContent).toContain("Compare e decida");
-      expect(container.textContent).toContain("O maior avança");
-      expect(container.textContent).toContain("30 > 12");
+      expect(container.textContent).toContain("BUBBLE SORT");
+      expect(container.textContent).toContain("Compare vizinhos e coloque o menor primeiro.");
+      expect(container.textContent).toContain("COMPARE");
+      expect(container.textContent).toContain("DECIDA");
+      expect(container.textContent).toContain("AVANCE");
+      expect(container.textContent).toContain("[8, 3]");
 
-      const tutorialBtn = container.querySelector("button:has-text('Aprender Bubble Sort')") ||
-        Array.from(container.querySelectorAll("button")).find((b) =>
-          b.textContent?.includes("Aprender Bubble Sort")
-        );
+      const tutorialBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("COMEÇAR TUTORIAL")
+      );
       expect(tutorialBtn).toBeTruthy();
 
       await act(async () => {
@@ -65,7 +64,7 @@ describe("Bubble Sort V2 Pilot — End-to-End Educational & Visual Experience", 
       expect(onStartTutorial).toHaveBeenCalledTimes(1);
 
       const practiceBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("Ir para as práticas")
+        b.textContent?.includes("Ir para práticas")
       );
       expect(practiceBtn).toBeTruthy();
 

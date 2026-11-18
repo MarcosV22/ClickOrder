@@ -196,7 +196,7 @@ Para garantir que o jogo não caia na armadilha de usar a mesma mecânica de per
 - **Princípio Epistemológico da Diferenciação Algorítmica:** A literatura em Computing Education Research (CER) identifica como equívoco frequente a confusão conceitual entre algoritmos $O(n^2)$, em especial a assimilação de Selection Sort como "uma variante de Bubble Sort que troca menos". Para mitigar esse modelo mental errôneo, o Sorting Station estabelece mecânicas e interfaces radicalmente distintas:
   1. *Ausência de Trocas Adjacentes:* É fisicamente impossível trocar caixas vizinhas durante a varredura do Selection Sort;
   2. *Separação Cognitiva Estrita (Inspeção vs. Movimentação):* Durante a fase `INSPECT`, o scanner percorre a partição desordenada avaliando $A[j] < A[minIndex]$. O operador decide entre `[ ✦ NOVO MÍNIMO ]` e `[ = MANTER CANDIDATO ]`. Nenhuma caixa se desloca fisicamente na esteira durante essa inspeção;
-  3. *Transferência Única de Longa Distância:* A movimentação física ocorre exclusivamente na fase `COMMIT`, acionada ao término da varredura (`[ ⇄ TRANSFERIR MENOR CARGA ]` ou `[ ✓ CONSOLIDAR POSIÇÃO ]`). Isso comprova cinestesicamente que o Selection Sort realiza no máximo $n-1$ trocas físicas em toda a execução ($O(n)$ escritas em memória contra $O(n^2)$ no Bubble Sort);
+  3. *Transferência Única de Longa Distância:* A movimentação física ocorre exclusivamente na fase `COMMIT`, acionada ao término da varredura (`[ ⇄ TRANSFERIR MENOR CARGA ]` ou `[ ✓ CONSOLIDAR POSIÇÃO ]`). Isso permite observar cinestesicamente que o Selection Sort realiza no máximo $n-1$ trocas físicas em toda a execução ($O(n)$ escritas em memória contra $O(n^2)$ no Bubble Sort);
   4. *Convergência Direcionada à Esquerda:* Enquanto o Bubble Sort consolida os maiores elementos progressivamente à direita ($n-1, n-2, \dots$), o Selection Sort consolida os menores elementos progressivamente à esquerda ($0, 1, \dots$), reforçando a diferença de direção da invariante de laço.
 - **Constraints Didáticas Procedurais:** As entradas procedurais do Selection Sort são filtradas por predicados matemáticos puros para garantir valor formativo:
   - O vetor não pode estar ordenado nem invertido;
@@ -576,6 +576,133 @@ Os marcos **UX-MODULE-R1** e **UX-MODULE-R1.1** estabeleceram o novo padrão ped
 Em conformidade com as diretrizes da Seção 4:
 - O projeto não afirma que a nova interface "garante compreensão imediata" ou que "eliminou qualquer confusão do estudante";
 - A eficácia pedagógica da introdução Visual-First é tratada como hipótese de design a ser avaliada em protocolos de validação formativa empírica com estudantes e docentes.
+
+---
+
+## 19. Introdução Visual-First do Selection Sort e Diferenciação Cognitiva (Marcos UX-MODULE-R2 e UX-MODULE-R2.1)
+
+O marco **UX-MODULE-R2** (consolidado e refinado metodologicamente em **UX-MODULE-R2.1**) estende o padrão Visual-First para o **Selection Sort**, fundamentando-se na necessidade epistemológica de distinguir o modelo mental deste algoritmo em relação ao Bubble Sort e ao Insertion Sort.
+
+### 19.1. O Modelo Mental Específico do Selection Sort
+Ao passo que o Bubble Sort realiza trocas locais sucessivas durante cada passada e o Insertion Sort abre vagas retrogradamente para encaixar uma chave suspensa, o Selection Sort opera sob uma separação cognitiva rígida entre **varredura investigativa** e **ação mecânica**:
+$$\text{1. PROCURAR O MENOR} \longrightarrow \text{2. LEMBRAR O MENOR} \longrightarrow \text{3. POSICIONAR AO FINAL}$$
+
+A introdução visual foca exatamente nesta distinção: o estudante deve perceber pelos olhos que, enquanto o marcador de busca percorre a esteira, as caixas permanecem estáticas. Somente após a busca ser concluída até o final do subvetor é que ocorre a transferência física da carga mínima para a doca de destino.
+
+### 19.2. A Regra Fundamental Visual: `PROCURAR ≠ MOVER`
+Uma armadilha pedagógica identificada durante avaliações informais foi a tendência de alunos iniciantes tentarem trocar caixas no instante exato em que encontram qualquer valor menor que o primeiro elemento da passada (confundindo a busca do Selection com as trocas locais do Bubble Sort).  
+Para mitigar essa confusão antes da prática guiada, foi introduzida a **Regra Fundamental Visual**:
+> *"Durante a busca, o marcador anda e as caixas ficam paradas. Só depois de terminar, o menor é colocado no lugar."*
+
+Esta regra é sintetizada na interface com o dístico `PROCURAR ≠ MOVER: Durante a busca, nada troca de lugar.`.
+
+### 19.3. Racional Pedagógico da Arquitetura Visual-First
+1. **Redução de Carga Cognitiva Extrínseca:**
+   Símbolos analíticos como índices $i, j$, ponteiros de mínimo ($minIndex$), estados de FSM (`INSPECT`, `COMMIT`) e notações de complexidade ($\Theta(n^2)$) foram completamente removidos da camada inicial visível e alocados na gaveta retrátil de aprofundamento sob demanda (`SelectionDetails.tsx`). O iniciante foca exclusivamente na observação perceptual dos números `[4, 1, 3]` e no movimento final de consolidação.
+2. **Poda de Decisões Concorrentes:**
+   A tela fornece um único CTA dominante (`[ COMEÇAR TUTORIAL ▶ ]`) com microcopy acolhedor e apenas uma rota secundária subordinada (`Já conhece o algoritmo? [ Ir para práticas › ]`). A Demonstração Livre foi transferida para dentro do accordion de detalhes técnicos para evitar dispersão de atenção no primeiro contato.
+3. **Fidelidade Algorítmica e Assimetria de Custos:**
+   No aprofundamento técnico, o pseudocódigo canônico de 13 instruções (`SELECTION_SORT_PSEUDOCODE`) é exposto em sua integridade formal, evidenciando o contraste analítico central: $\Theta(n^2)$ comparações incondicionais ($\frac{n(n-1)}{2}$) decorrentes da estrutura fixa de seus laços aninhados versus a política de movimentações da variante canônica do Sorting Station (guardada por `if (minIndex !== i)` e isenta de auto-trocas), que realiza rigorosamente $0$ trocas físicas quando a entrada já se encontra ordenada e no máximo $n-1$ trocas físicas nos casos médio e pior. Ressalta-se que o exemplo elementar $n=3$ da introdução ilustra visualmente a mecânica de operação, sem pretensão de constituir prova empírica da complexidade assintótica.
+
+### 19.4. Postura Epistemológica Não-Presuntiva
+Em estrito alinhamento com a Seção 1 e a Seção 13.4 deste documento:
+- O Sorting Station não afirma que a introdução redesenhada "assegura que o estudante nunca mais confundirá Selection com Bubble";
+- A abordagem Visual-First é categorizada como uma intervenção de design instrucional estruturada para favorecer a formação de modelos mentais adequados, cuja eficácia comparativa permanece sujeita à validação empírica rigorosa com sujeitos humanos.
+- Fica estritamente demarcada a fronteira entre garantias matemáticas do algoritmo (comparações e trocas derivadas analiticamente), hipóteses pedagógicas de design instrucional e registros diagnósticos de avaliações formativas.
+
+---
+
+## 20. Harmonização Transversal dos Módulos Centrais e Singularidade Epistemológica (`UX-MODULE-R3`)
+
+O marco **UX-MODULE-R3** consolida a harmonização estrutural, visual e instrucional dos três módulos elementares da plataforma (**Bubble Sort**, **Selection Sort** e **Insertion Sort**). O princípio pedagógico orientador deste marco é a **unidade de gramática visual sem homogeneização mecânica**: os três módulos devem compartilhar idêntica clareza ergonômica e previsibilidade de navegação, ao mesmo tempo em que preservam a integridade intransigente de seus respectivos modelos mentais, regras pedagógicas e cinéticas de movimentação.
+
+### 20.1. Matriz Epistemológica Comparativa dos Três Módulos
+
+| Dimensão Conceitual | Bubble Sort | Selection Sort | Insertion Sort |
+|---|---|---|---|
+| **Tríade de Ação** | `COMPARE ➔ DECIDA ➔ AVANCE` | `PROCURE ➔ LEMBRE O MENOR ➔ POSICIONE` | `PEGUE ➔ ABRA ESPAÇO ➔ ENCAIXE` |
+| **Exemplo Hero Canônico** | `[8, 3] ➔ [3, 8]` ($n=2$) | `[4, 1, 3] ➔ [1, 4, 3]` ($n=3$) | `[2, 5, 3] ➔ [2, 3, 5]` ($n=3$) |
+| **Cinética Espacial** | Troca bilateral direta entre vizinhos imediatos | Varredura de scanner sobre caixas fixas; transporte isolado ao final | Elevação vertical da chave, deslizamento lateral dos maiores e descida na vaga |
+| **Regra Pedagógica Explícita** | `COMPARAÇÃO LOCAL: Apenas vizinhos imediatos trocam de lugar diretamente.` | `PROCURAR ≠ MOVER: Durante a busca, nada troca de lugar. Só o marcador anda.` | `DESLOCAR ≠ TROCAR: Elementos maiores apenas abrem espaço; a chave desce na vaga.` |
+| **Comparações de Chaves** | $\Theta(n^2)$ em todos os casos (variante didática canônica sem flag de parada) | $\Theta(n^2)$ em todos os casos ($\frac{n(n-1)}{2}$ comparações incondicionais) | $\Theta(n)$ melhor caso; $\Theta(n^2)$ casos médio e pior |
+| **Movimentações Físicas** | 0 a $\frac{n(n-1)}{2}$ permutas bilaterais | 0 a $n-1$ transferências / trocas físicas | 0 a $\frac{n(n-1)}{2}$ deslocamentos unilaterais + descida |
+| **Pseudocódigo Canônico** | `BUBBLE_SORT_PSEUDOCODE` (9 linhas) | `SELECTION_SORT_PSEUDOCODE` (13 linhas) | `INSERTION_SORT_PSEUDOCODE` (11 linhas) |
+| **Cor Semântica da Trilha** | Azul / Ciano (`blue`) | Roxo / Violeta (`purple`) | Âmbar / Laranja (`amber`) |
+
+### 20.2. Racional Pedagógico da Arquitetura Unificada (`LearningModuleOverviewLayout`)
+1. **Redução da Carga Cognitiva de Navegação:**
+   Ao navegar entre Bubble, Selection e Insertion, o estudante encontra exatamente a mesma disposição espacial: barra superior com botão voltar, título hero com microcopy, demonstrador visual com stepper de 3 estados, tríade de passos conceituais encimada pela regra fundamental, botão dominante `[ COMEÇAR TUTORIAL ▶ ]`, atalho secundário para práticas e gaveta retrátil de aprofundamento técnico (`<details>`). Essa previsibilidade reduz a carga extrínseca associada à interpretação da interface.
+2. **Diferenciação Cinética Intransigente:**
+   Embora o invólucro seja padronizado, o núcleo perceptual de cada algoritmo permanece inconfundível. No Bubble, as caixas invertem de posição entre si. No Selection, a caixa menor é destacada após varredura e colocada no início. No Insertion, a caixa chave sai do alinhamento horizontal, abre-se espaço e ela é reinserida. Nenhum algoritmo "empresta" mecânica do outro.
+3. **Didática Canônica do Bubble Sort:**
+   A documentação e a interface formalizam que a variante didática canônica do Bubble Sort no Sorting Station executa passadas completas sem flag prematura de parada por padrão, realizando $\Theta(n^2)$ comparações mesmo em vetores já ordenados. Isso reforça pedagogicamente a ineficiência intrínseca do algoritmo em contraste com o melhor caso linear $\Theta(n)$ do Insertion Sort.
+
+### 20.3. Postura Epistemológica Não-Presuntiva
+A harmonização estrutural introduzida pelo marco UX-MODULE-R3 constitui uma hipótese de arquitetura instrucional unificada. A validação empírica de que essa gramática comum facilita a transição entre módulos sem induzir confusão de conceitos será conduzida nas etapas de testagem formativa do projeto.
+
+---
+
+## 21. Redesign Visual-First do Tutorial e da Prática Básica do Selection Sort (`UX-PRACTICE-R1`)
+
+O marco **UX-PRACTICE-R1** transpõe os princípios de design instrucional do padrão Visual-First para a experiência prática interativa do Selection Sort, abrangendo o Tutorial Guiado (`SelectionTutorialScreenV2.tsx`) e a Prática Básica (`SelectionGameScreenV2.tsx`).
+
+### 21.1. Fundamentação Pedagógica das Intervenções de Prática
+1. **Separação Visual Estrita entre Busca e Movimentação (`BUSCA ≠ MOVIMENTAÇÃO`):**
+   - *Intenção Pedagógica:* Romper com o equívoco frequente de associar a identificação de um número menor à sua movimentação imediata (confusão com Bubble Sort).
+   - *Implementação Observável:* Durante a fase `INSPECT`, a esteira mantém as caixas `NumberedBox` em repouso absoluto. Apenas o sensor e os rótulos de memória são atualizados. A movimentação física pontual é postergada com exclusividade para o momento do `COMMIT`.
+2. **Pergunta Central Dinâmica e Decisões Conscientes:**
+   - *Intenção Pedagógica:* Converter a inspeção algorítmica em um ato deliberado de reflexão relacional.
+   - *Implementação Observável:* Em vez de comandar "inspecione o elemento", a tela projeta a comparação explícita: *"O {scanVal} é menor que o menor atual, {minVal}?"*.
+3. **Botoeira Neutra e Balanceada:**
+   - *Intenção Pedagógica:* Evitar adivinhação orientada por pistas superficiais (efeito *Clever Hans* ou viés cromático verde/vermelho pré-clique).
+   - *Implementação Observável:* Dois botões com mesmo peso visual e suporte a atalhos rápidos (`1` e `2`).
+4. **Feedback Causal Imediato:**
+   - *Intenção Pedagógica:* Reforçar a causalidade lógica das decisões tomadas.
+   - *Implementação Observável:* Mensagens claras explicando a consequência interna de cada escolha (ex.: *"Correto! 1 é menor que 4. Marcador do menor atualizado para 1. As caixas permanecem no lugar!"*).
+5. **Checkpoints Formativos de Previsão e Pré-Commit:**
+   - *Intenção Pedagógica:* Estimular a formulação de hipóteses (*prediction effect*) e verificar o entendimento antes da execução mecânica da troca.
+   - *Implementação Observável:* Card de previsão no início do Tutorial (`SelectionPredictionCard.tsx`) e checkpoint pré-commit na primeira passada (`SelectionCommitCheckpoint.tsx`).
+6. **Andaime Instrucional com Suporte em 3 Níveis:**
+   - Nível 1 (Principal): Esteira limpa, pergunta central e duas ações;
+   - Nível 2 (Apoio Reflexivo): Dica sob demanda via botão `[ ? Dica ]`;
+   - Nível 3 (Aprofundamento Técnico): Gaveta retrátil `<details>` com variáveis da FSM e pseudocódigo formal de 13 instruções (`SelectionTechnicalDetails.tsx`).
+
+### 21.2. Postura Epistemológica Não-Presuntiva
+Esta reformulação é classificada formalmente como **hipótese de design instrucional formativo**. Os ganhos na consolidação do modelo mental e na separação conceitual entre busca e movimentação serão mensurados nas rodadas empíricas subsequentes com alunos e professores.
+
+---
+
+## 22. Hardening Semântico e Epistemológico do Selection Sort (`UX-PRACTICE-R1.1`)
+
+No marco **UX-PRACTICE-R1.1**, foram consolidadas demarcações epistemológicas e refinamentos semânticos fundamentais para evitar confusões conceituais cruzadas entre algoritmos:
+
+### 22.1. Distinção Epistemológica: Posição-Alvo vs. Vaga Física
+1. **O Modelo da Vaga Pertence ao Insertion Sort:**
+   - No Insertion Sort, o elemento chave é extraído da sequência contínua (elevado no trilho), gerando literalmente uma **vaga desocupada** que se desloca lateralmente conforme os elementos maiores da partição ordenada sofrem *shift* para a direita. O movimento culmina com o encaixe da chave na vaga resultante.
+2. **O Selection Sort Não Possui Vagas Transitórias:**
+   - No Selection Sort, todas as posições da esteira estão continuamente ocupadas por caixas físicas durante toda a fase de inspeção (`INSPECT`). O scanner apenas "olha" e memoriza o índice do menor elemento. Ao término da passada (`COMMIT`), ocorre uma permuta bilateral entre a posição-alvo $i$ e a posição $minIndex$.
+   - A introdução do termo "vaga" no Selection Sort configurava uma contaminação de modelo mental prejudicial ao aprendizado.
+   - Todo o vocabulário da prática foi purificado: utiliza-se rigorosamente **"posição-alvo"**, **"posição a preencher"**, **"primeira posição"** ou **"posição correta"**. O checkpoint pré-commit foi reescrito em linguagem natural: *"Qual número deve ir para a primeira posição?"*, sem símbolos artificiais de código como `#1`.
+
+### 22.2. Sobrecarga Perceptiva e Regra da Esteira (Uma Informação por Papel)
+- A Teoria da Carga Cognitiva (Sweller) alerta para os perigos do ruído visual redundante. A sobreposição de múltiplos selos e badges (`alvo • menor`, `próxima vaga`, `fixado ✓`, `aguardando`) sobre uma mesma caixa gerava dispersão de atenção.
+- A regra de ouro estabelecida no UX-PRACTICE-R1.1 determina **no máximo uma informação visual ativa por papel**:
+  - Posição-alvo: rótulo `próxima posição` no cabeçalho do slot $i$;
+  - Elemento sob o sensor: anel de realce ciano contornando a caixa;
+  - Menor identificado: chip inferior `menor atual`;
+  - Elemento em varredura: chip inferior `observando`;
+  - Consolidação: expressa pela posição e cor esmeralda, complementada pelo contador sintético no topo (`N posições ordenadas ✓`).
+
+### 22.3. Neutralidade Visual e Eliminação de Emojis
+- A utilização de emojis do sistema operacional (`💡`, `⚠️`, `🏁`, etc.) introduz assimetrias perceptivas involuntárias entre plataformas (Android, iOS, Windows, Linux) e confere um tom excessivamente informal ou infantilizado.
+- O redesign padronizou toda a sinalização em elementos vetoriais SVG e tipográficos em CSS com contraste WCAG AAA, garantindo seriedade educacional e acessibilidade transversal.
+
+### 22.4. Demarcação Metodológica: Métricas Pedagógicas vs. Telemetria UX
+- O projeto distingue formalmente duas categorias de telemetria:
+  1. **Métricas Pedagógicas Escolares:** Comparações, trocas, erros, dicas utilizadas e tempo total de resolução. Constituem dados de aprendizagem e scaffolding, integrados à FSM e ao Schema v4 de persistência;
+  2. **Instrumentação de Usabilidade (UX):** Tempos de latência entre estímulo e primeiro clique, tempos de resposta a botões e padrões de navegação são restritos a sessões de teste formativo com usuários (ativadas sob flag `?uxTest=1`), sem qualquer impacto no estado algorítmico, score ou persistência do estudante.
+
+
 
 
 

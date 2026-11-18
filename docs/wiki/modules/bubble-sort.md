@@ -340,4 +340,39 @@ No marco **UX-REDESIGN-R3-A**, o piloto Bubble Sort V2 passou por refinamentos d
 3. **Protocolo de Validação Formativa:**
    - Formalizado em [`docs/wiki/bubble-v2-formative-evaluation.md`](../bubble-v2-formative-evaluation.md) com regras do pesquisador (Think-Aloud, proibição de indução ou explicação prévia da interface), teste dos 5 segundos, roteiro qualitativo e matriz de red flags.
 
+---
+
+## 23. Harmonização Transversal com o Padrão Visual-First (`UX-MODULE-R3`)
+
+No marco **UX-MODULE-R3**, a introdução do Bubble Sort foi modernizada e alinhada com a gramática visual e instrucional dos módulos de Selection Sort e Insertion Sort, preservando integralmente seu modelo mental próprio:
+
+1. **Adoção do Shell Unificado (`LearningModuleOverviewLayout.tsx`):**
+   - O `BubbleModuleOverviewV2.tsx` passou a ser renderizado através do layout base unificado sob o tema `themeColor="blue"`;
+   - Barra superior padronizada com botão *"← Voltar ao Início"* e badge `BUBBLE SORT`;
+   - Título e frase amigável: *"Compare vizinhos e leve os maiores para o final."*;
+   - Ponto de foco claro, sem cards aninhados e com menos de 80 palavras na camada inicial visível.
+
+2. **Hero Visual Protagonista (`BubbleConceptVisual.tsx`):**
+   - Demonstração interativa de 3 passos em vetor minimalista `[8, 3]`:
+     - **Passo 1 (COMPARE):** Caixas `8` e `3` em foco ativo com molduras azuis de destaque;
+     - **Passo 2 (DECIDA):** Comparação relacional $8 > 3$ com ícone de troca bilateral `⇄`;
+     - **Passo 3 (AVANCE):** Posições invertidas `[3, 8]` com o maior elemento (`8`) alcançando a extremidade direita com realce esmeralda;
+   - Stepper acessível com botões de avanço/recuo e semântica `role="img"` com `aria-label` completo.
+
+3. **Passos Conceituais e Regra Fundamental (`BubbleConceptSteps.tsx`):**
+   - Tríade de passos conceituais em 3 colunas limpas: `1. COMPARE` (olhe para dois vizinhos), `2. DECIDA` (se fora de ordem, troque), `3. AVANCE` (passe para o próximo par);
+   - **Regra Pedagógica em Destaque:**
+     > **COMPARAÇÃO LOCAL:** *"Apenas vizinhos imediatos trocam de lugar diretamente."*
+
+4. **CTA Dominante e Rota Secundária:**
+   - Botão de ação primária de alto contraste: `[ COMEÇAR TUTORIAL ▶ ]` com subtítulo *"Aprenda a mecânica básica passo a passo."*;
+   - Rota secundária discreta e subordinada: *"Já conhece o algoritmo? [ Ir para práticas › ]"*.
+
+5. **Aprofundamento Técnico Sob Demanda (`BubbleDetails.tsx`):**
+   - Gaveta retrátil `<details>` fechada por padrão (`▼ Ver mais detalhes técnicos (para quem quer se aprofundar)`);
+   - Pseudocódigo formal canônico com 9 instruções (`BUBBLE_SORT_PSEUDOCODE` de `src/game/replay/replayPseudocode.ts`);
+   - Análise assintótica rigorosa com explicitação da variante canônica didática: $\Theta(n^2)$ comparações em todos os casos (sem flag de parada prematura por padrão), $0$ a $\frac{n(n-1)}{2}$ trocas físicas, estabilidade garantida e memória $\Theta(1)$;
+   - Botão para acionamento do modo Demonstração Livre.
+
+
 

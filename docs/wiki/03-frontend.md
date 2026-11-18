@@ -29,16 +29,31 @@ src/
 ├── index.css            # Folha de estilo global: fontes web, Tailwind v4, tokens @theme e animações
 ├── vite-env.d.ts        # Declarações de tipos do cliente Vite
 ├── screens/             # Telas completas da aplicação (orquestradas por App.tsx)
-│   ├── bubble/          # [UX-REDESIGN-R2] Telas do Piloto End-to-End Bubble Sort V2
-│   │   ├── BubbleModuleOverviewV2.tsx # Entrada limpa com metáfora de vizinhos e passos
+│   ├── bubble/          # [UX-REDESIGN-R2 / UX-MODULE-R3] Telas do Bubble Sort V2 Harmonizado
+│   │   ├── BubbleModuleOverviewV2.tsx # Entrada Visual-First harmonizada via LearningModuleOverviewLayout
+│   │   ├── BubbleConceptVisual.tsx    # Visual Hero com stepper interativo dos 3 passos sobre [8, 3]
+│   │   ├── BubbleConceptSteps.tsx     # Resumo em 3 passos (COMPARE / DECIDA / AVANCE) + banner de comparação local
+│   │   ├── BubbleDetails.tsx          # Detalhes técnicos e pseudocódigo (9 linhas) sob demanda em accordion retrátil
 │   │   ├── BubbleTutorialScreenV2.tsx # Tutorial em 4 passos com checkpoint de predição
 │   │   ├── BubbleGameScreenV2.tsx     # Prática ativa sem poluição e com botões simétricos
 │   │   └── BubbleResultScreenV2.tsx   # Resultado V2 com descoberta e micro-reflexão
-│   ├── insertion/       # [UX-MODULE-R1] Introdução Visual-First do Insertion Sort
-│   │   ├── InsertionModuleOverviewV2.tsx # Entrada Visual-First com exemplo hero [2, 5, 3] e 3 passos
-│   │   ├── InsertionConceptVisual.tsx   # Visual Hero com stepper interativo dos 3 estados
+│   ├── insertion/       # [UX-MODULE-R1 / UX-MODULE-R3] Introdução Visual-First do Insertion Sort
+│   │   ├── InsertionModuleOverviewV2.tsx # Entrada Visual-First harmonizada via LearningModuleOverviewLayout
+│   │   ├── InsertionConceptVisual.tsx   # Visual Hero com stepper interativo dos 3 estados sobre [2, 5, 3]
 │   │   ├── InsertionConceptSteps.tsx    # Resumo em 3 colunas (PEGUE / ABRA ESPAÇO / ENCAIXE)
 │   │   └── InsertionDetails.tsx         # Detalhes técnicos e formais sob demanda em accordion retrátil
+│   ├── selection/       # [UX-MODULE-R2 / UX-PRACTICE-R1] Experiência Visual-First do Selection Sort
+│   │   ├── SelectionModuleOverviewV2.tsx # Entrada Visual-First harmonizada via LearningModuleOverviewLayout
+│   │   ├── SelectionConceptVisual.tsx   # Visual Hero com stepper interativo dos 3 passos sobre [4, 1, 3]
+│   │   ├── SelectionConceptSteps.tsx    # Resumo em 3 passos + banner PROCURAR ≠ MOVER
+│   │   ├── SelectionDetails.tsx         # Detalhes técnicos e formais sob demanda em accordion retrátil
+│   │   ├── SelectionConveyorTrack.tsx   # Esteira visual com caixas estáticas em INSPECT e movimentação no COMMIT
+│   │   ├── SelectionDecisionControls.tsx# Pergunta dinâmica + botões neutros [ 1 ] e [ 2 ] + feedback causal imediato
+│   │   ├── SelectionCommitCheckpoint.tsx# Checkpoint pedagógico pré-commit + botão de consolidação pontual
+│   │   ├── SelectionPredictionCard.tsx  # Card reflexivo de previsão preliminar no início do Tutorial
+│   │   ├── SelectionTechnicalDetails.tsx# Gaveta retrátil de Nível 3 (variáveis FSM e pseudocódigo canônico)
+│   │   ├── SelectionTutorialScreenV2.tsx# Tutorial Guiado V2 interativo com predição e checkpoints
+│   │   └── SelectionGameScreenV2.tsx    # Prática Básica (Fase 1) redesenhada sob a gramática Visual-First
 │   ├── HomeScreen.tsx   # Hub Educacional Simétrico de Protocolos (Bubble, Selection, Insertion)
 │   ├── ProtocolCard.tsx # Componente simétrico de cartão de protocolo para o Hub da Home
 │   ├── protocolCatalog.ts # Catálogo desacoplado de metadados dos protocolos
@@ -186,7 +201,7 @@ flowchart TD
   - **Guarda Síncrona e Animações:** Utiliza `isActionLockedRef` e `animatingPair` com duração de 500ms, idêntica à esteira do `GameScreen`.
 - **Callbacks:** `onBack: () => void`, `onUnderstood: () => void`.
 
-### 3.5. `src/screens/SelectionTutorialScreen.tsx`
+### 3.5. `src/screens/SelectionTutorialScreen.tsx` (Legado / Fallback)
 - **Responsabilidades:** Tutorial interativo guiado do protocolo Selection Sort ("Scanner de Carga Mínima", P2.1-C, ADR 0012) utilizando a `SelectionSortEngine` real como única fonte de verdade algorítmica sobre o vetor canônico `[4, 1, 3]`.
 - **Destaques de Implementação:**
   - **Integração Real com FSM:** Guiado diretamente pelo estado imutável da `SelectionSortEngine` via `executeSelectionInspection` e `commitSelectionPass`;
@@ -198,6 +213,17 @@ flowchart TD
   - **Animação de Transferência:** Animação de permuta visual (500ms) executada exclusivamente na confirmação do commit, comprovando que o scanner não movimenta caixas na varredura;
   - **Dicas Pedagógicas Dinâmicas:** Explicam a comparação matemática formal da vez através de `getSelectionTutorialStepInfo`;
   - **Conclusão Segura:** Apresenta painel de conclusão ao ordenar `[1, 3, 4]` com botão `[ ✓ CONCLUIR TUTORIAL ]` retornando à tela inicial.
+- **Callbacks:** `onComplete: () => void`, `onBack: () => void`.
+
+### 3.5.1. `src/screens/selection/SelectionTutorialScreenV2.tsx` (Redesign UX-PRACTICE-R1 / Hardening UX-PRACTICE-R1.1)
+- **Responsabilidades:** Tutorial guiado ativo do Selection Sort sob o padrão **Visual-First**, desfazendo sobrecargas textuais da versão legada e ancorando o aprendizado no modelo mental `PROCURE ➔ LEMBRE O MENOR ➔ POSICIONE`.
+- **Destaques de Implementação:**
+  - **Predição Preliminar (`SelectionPredictionCard.tsx`):** Desafio reflexivo no primeiro passo estimulando o aluno a prever o menor valor do vetor `[4, 1, 3]` antes de iniciar o scanner;
+  - **Esteira Estática em `INSPECT` (`SelectionConveyorTrack.tsx`):** Regra de ouro de **uma informação visual por papel**. Caixa sob varredura recebe anel ciano (`ring-cyan-400`); menor candidato recebe chip `menor atual`; elemento sob scanner que não seja menor recebe `observando`. Ausência total de "vagas" conceituais e chips duplicados;
+  - **Pergunta Central e Botões Neutros (`SelectionDecisionControls.tsx`):** Pergunta situacional (*"O {scanVal} é menor que o menor atual, {minVal}?"*), botões neutros sem pistas cromáticas e atalhos rápidos `1` e `2`;
+  - **Feedback Causal e Sem Emojis de Sistema:** Explicações imediatas da causalidade da regra lógica sem emojis nativos (`[ ! ]`, `[ i ]`, `[ ✓ ]`);
+  - **Checkpoint Pré-Commit (`SelectionCommitCheckpoint.tsx`):** Pergunta em linguagem natural (*"Qual número deve ir para a primeira posição?"*) antes de executar a transferência final;
+  - **Andaime em 3 Níveis:** Nível 1 (interação principal), Nível 2 (`[ ? Dica ]` sob demanda), Nível 3 (`SelectionTechnicalDetails.tsx` retrátil com FSM e pseudocódigo canônico).
 - **Callbacks:** `onComplete: () => void`, `onBack: () => void`.
 
 ### 3.6. `src/screens/GameScreen.tsx`
@@ -246,6 +272,31 @@ flowchart TD
   - **Conclusão Segura:**
     - Detecta `gameState.completed === true`, aguarda 1200ms de feedback comemorativo e despacha `onComplete(data: SelectionPhaseCompleteData)`.
 - **Callbacks e Props:** `onComplete: (data: SelectionPhaseCompleteData) => void`, `initialArray: number[]`, `phase: number`, `totalPhases?: number`.
+
+### 3.7.1. `src/screens/selection/SelectionGameScreenV2.tsx` (Redesign UX-PRACTICE-R1 / Hardening UX-PRACTICE-R1.1)
+- **Responsabilidades:** Interface da Prática Básica (Fase 1) do Selection Sort sob o padrão **Visual-First**, consumindo diretamente a `selectionSortEngine` e aplicando rigorosa disciplina visual, causal e semântica.
+- **Destaques de Implementação:**
+  - **Isolamento Curricular:** Opera sobre a prática básica ($n=4$), enquanto práticas intermediária, avançada e casos permanecem estáveis no componente original;
+  - **Esteira Estática e Despoluída (`SelectionConveyorTrack.tsx`):**
+    - Posição-alvo indicada discretamente por `próxima posição` no topo do slot $i$;
+    - Anel ciano (`ring-cyan-400`) identifica a caixa sob inspeção pelo scanner $j$;
+    - Marcador inferior `menor atual` exclusivamente na caixa $minIndex$;
+    - Ausência total do vocabulário "vaga" ou "vaga aberta" (Selection Sort opera sem lacunas transitórias);
+    - Remoção do badge duplicado `fixado ✓` interno às caixas; o cabeçalho exibe `N posições ordenadas ✓`;
+  - **Pergunta Situacional e Ações Balanceadas (`SelectionDecisionControls.tsx`):**
+    - Pergunta: *"O {scanVal} é menor que o menor atual, {minVal}?"*;
+    - Botões neutros sem viés de cor pré-clique: `[ 1 ] Sim, é o novo menor` e `[ 2 ] Não, manter o menor`;
+    - Feedback causal imediato mantendo o foco no elemento sob varredura em caso de erro;
+    - Dica reflexiva sob demanda `[ ? Dica ]` (Nível 2) orientando a comparação sem entregar a resposta;
+  - **Checkpoint Pré-Commit na 1ª Passada (`SelectionCommitCheckpoint.tsx`):**
+    - Pergunta diagnóstica: *"Qual número deve ir para a primeira posição?"*;
+    - Confirmação explícita da transferência única antes da animação mecânica;
+  - **Conclusão Enxuta e Sem Emojis de Sistema:**
+    - Card de conclusão com checkmark estilizado e métricas factuais;
+    - CTA institucional `[ Concluir Prática ➔ ]` e navegação de retorno `← Práticas`;
+  - **Gaveta Retrátil de Nível 3 (`SelectionTechnicalDetails.tsx`):**
+    - Sincronização em tempo real das variáveis $i$, $j$, $minIndex$ e realce de linhas do `SELECTION_SORT_PSEUDOCODE`.
+- **Callbacks e Props:** `initialArray: number[]`, `phase: number`, `totalPhases?: number`, `onComplete: (data: SelectionPhaseCompleteData) => void`, `onBack?: () => void`.
 
 ### 3.8. `src/screens/ResultScreen.tsx`
 - **Responsabilidades:** Apresentar a avaliação de desempenho descritiva após a conclusão da ordenação da fase/exercício corrente (Bubble Sort Canônico, Bubble Modo Desafio, Selection Sort, Insertion Sort ou Casos do Algoritmo).
@@ -412,6 +463,15 @@ flowchart TD
   - `InsertionConceptSteps.tsx`: Faixa leve em 3 colunas sobre o fundo neutro resumindo os verbos de ação: (1) `PEGUE`, (2) `ABRA ESPAÇO`, (3) `ENCAIXE`.
   - `InsertionDetails.tsx`: Seção retrátil única (`<details>`) fechada por padrão, reservada para aprofundamento técnico: definição formal, CHAVE e VAGA, deslocamento vs troca, `ORD` local vs `OK` definitivo, pseudocódigo canônico de 9 linhas e complexidade assintótica.
 - **Roteamento em `App.tsx`:** Quando `screen === "briefing"` e `briefingModeId === "insertion-canonical"`, renderiza diretamente `InsertionModuleOverviewV2`, substituindo a antiga arquitetura de 9 cartões técnicos densos de `ProtocolModeBriefingScreen.tsx`.
+
+### 3.18. Introdução Visual-First do Selection Sort (`UX-MODULE-R2`)
+- **Diretório:** `src/screens/selection/`
+- **Componentes Integrados:**
+  - `SelectionModuleOverviewV2.tsx`: Ponto de entrada reformulado do módulo Selection Sort, estruturado com título dominante `SELECTION SORT`, frase-resumo única (*"Encontre o menor e coloque-o na próxima posição."*), Visual Hero central (`SelectionConceptVisual.tsx`), faixa de 3 passos (`SelectionConceptSteps.tsx`), CTA primário dominante `[ COMEÇAR TUTORIAL ▶ ]` (*"Você vai praticar a busca do menor passo a passo."*), rota secundária única sob o CTA (*"Já conhece o algoritmo? [ Ir para práticas › ]"*) e accordion técnico retrátil (`SelectionDetails.tsx`) fechado por padrão.
+  - `SelectionConceptVisual.tsx`: Visual Hero protagonista sobre o vetor curado mínimo `[4, 1, 3]`, com stepper interativo dos 3 passos (`1. PROCURE`, `2. LEMBRE O MENOR`, `3. POSICIONE`). No Passo 2, permite inspeção das caixas sem qualquer movimentação física de caixas; no Passo 3, consolida o vetor em `[1, 4, 3]` com realce suave em esmeralda. Suporte semântico acessível completo via `role="img"` e `aria-label`.
+  - `SelectionConceptSteps.tsx`: Faixa leve em 3 colunas resumindo os 3 passos de ação e banner destacado com a Regra Fundamental Visual: `PROCURAR ≠ MOVER: Durante a busca, nada troca de lugar.`.
+  - `SelectionDetails.tsx`: Seção retrátil única (`<details>`) fechada por padrão com detalhes formais do algoritmo ($i, j, \text{minIndex}$, FSM `INSPECT`/`COMMIT`, contraste com Bubble Sort, 13 linhas de pseudocódigo canônico consumidas diretamente de `SELECTION_SORT_PSEUDOCODE`, análise assintótica com $\Theta(n^2)$ comparações em qualquer caso e máximo de $n-1$ trocas físicas, e link subordinado `[ Ver Demonstração Livre › ]`).
+- **Roteamento em `App.tsx`:** Quando `screen === "briefing"` e `briefingModeId === "selection-canonical"`, renderiza diretamente `SelectionModuleOverviewV2`.
 
 ---
 
