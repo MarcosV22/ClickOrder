@@ -1,8 +1,8 @@
 # Módulo 03 — Insertion Sort
 
 > **Documento canônico do módulo curricular:** Especificação integral de design pedagógico, mecânico e computacional do Módulo de Insertion Sort da plataforma **Sorting Station**.  
-> **Status de Implementação:** `IMPLEMENTADO E ATIVADO (P2.2 CONCLUÍDO)` (P2.2-A a P2.2-F concluídos — Constraints, Briefing, Tutorial Interativo, Práticas, Replay Retrospectivo, Pseudocódigo Sincronizado, Demonstração Visual, Persistência Schema v4 e Ativação Pública no Hub).  
-> **Data de Atualização:** 17/09/2026 (Marco P2.2-F / ADR 0019 / ADR 0020 / ADR 0021)  
+> **Status de Implementação:** `IMPLEMENTADO E ATIVADO (P2.2 CONCLUÍDO) — INTRODUÇÃO VISUAL-FIRST ATIVA (UX-MODULE-R1)` (P2.2-A a P2.2-F concluídos; Introdução redesenhada no padrão Visual-First com `InsertionModuleOverviewV2.tsx`, exemplo hero `[2, 5, 3]`, 3 passos intuitivos `PEGUE / ABRA ESPAÇO / ENCAIXE`, ausência de ORD na camada principal e detalhes técnicos sob demanda).  
+> **Data de Atualização:** 17/11/2026 (Marco UX-MODULE-R1 / ADR 0027)  
 > **Dependências:** [`AGENTS.md`](../../../AGENTS.md), [`ADR 0018`](../../adr/0018-game-to-educational-platform-transition.md), [`ADR 0019`](../../adr/0019-insertion-sort-pedagogical-layer-and-interactive-tutorial.md), [`ADR 0020`](../../adr/0020-insertion-interactive-practice-system.md), [`ADR 0021`](../../adr/0021-module-exercise-persistence-schema-v4.md), [`modules/README.md`](./README.md), [`04-sorting-engine.md`](../04-sorting-engine.md), [`05-ux-design-system.md`](../05-ux-design-system.md), [`07-backend-and-persistence.md`](../07-backend-and-persistence.md), [`10-roadmap.md`](../10-roadmap.md), [`12-pedagogy-and-academic-traceability.md`](../12-pedagogy-and-academic-traceability.md).
 
 ---
@@ -153,6 +153,36 @@ Fica aprovada a **Proposta A Refinada**, com as seguintes diretrizes ergonômica
 
 ---
 
+## 7.1. Introdução Visual-First do Módulo (UX-MODULE-R1)
+
+O ponto de entrada do módulo foi radicalmente redesenhado no marco `UX-MODULE-R1` sob o princípio fundamental:
+$$\text{VISUAL FIRST} \longrightarrow \text{NATURAL LANGUAGE} \longrightarrow \text{FORMAL TERMINOLOGY}$$
+
+### Arquitetura da Tela (`InsertionModuleOverviewV2.tsx`)
+A antiga arquitetura baseada em múltiplos cards de documentação técnica foi substituída por uma apresentação visual progressiva (revisada e consolidada no marco `UX-MODULE-R1.1`):
+1. **Título Dominante:** `INSERTION SORT` em destaque principal (sem competição com rótulos diegéticos pesados).
+2. **Frase Conceitual Única:** *"Pegue um número e encaixe no lugar certo."* (projetada para leitura imediata sem termos técnicos prévios).
+3. **Hero Visual Central (`InsertionConceptVisual.tsx`):** O elemento de maior destaque na tela, operando sobre o vetor elementar `[2, 5, 3]`:
+   - **1. PEGUE:** Elemento `3` suspenso com badge `CHAVE`, abrindo a vaga inicial (`VAGA`). Mensagem: *"Vamos encaixar o 3. O número que estamos encaixando é chamado de chave."*.
+   - **2. ABRA ESPAÇO:** Como $5 > 3$, o elemento `5` desliza para a direita para a vaga aberta. A vaga desloca-se para a esquerda. Mensagem: *"5 é maior que 3, então ele desliza para a direita. O 5 apenas desliza. Ele não troca de lugar com o 3."*. Badges concorrentes de ação foram eliminados em favor da evidência cinestésica direta do movimento e do destaque em ciano.
+   - **3. ENCAIXE:** A chave `3` desce e pousa na vaga entre `2` e `5` (`[ 2 ] [ 3 ] [ 5 ]`). Mensagem: *"Agora o 3 cabe aqui. O vetor fica organizado: [2, 3, 5].*". O vetor final recebe realce suave em esmeralda, sem introduzir badges textuais prematuros como `OK`.
+4. **Os 3 Passos Essenciais (`InsertionConceptSteps.tsx`):**
+   - `1. PEGUE`: *"Escolha o próximo número."*
+   - `2. ABRA ESPAÇO`: *"Mova para a direita quem for maior."*
+   - `3. ENCAIXE`: *"Coloque a chave na vaga."*
+5. **Ação Principal Dominante (CTA) com Caminho Secundário Único:** Botão `[ COMEÇAR TUTORIAL ▶ ]` com legenda *"Você vai praticar isso passo a passo."* e atalho secundário único discretamente posicionado: *"Já conhece o algoritmo? [ Ir para práticas › ]"*. O acesso à Demonstração Livre foi subordinado aos detalhes sob demanda, evitando sobrecarga com 3 caminhos de peso semelhante.
+6. **Detalhes Técnicos Sob Demanda (`InsertionDetails.tsx`):** Único accordion retrátil fechado por padrão (`▼ Ver mais detalhes técnicos`) contendo:
+   - Definição formal do algoritmo;
+   - Relação entre Chave e Vaga Aberta;
+   - Distinção conceitual entre *Shift* (deslocamento unilateral) e *Swap* (troca bilateral);
+   - Região Ordenada Local (`ORD`) vs Posição Definitiva (`OK`), explicitando que o conceito foi adiado para esta seção de aprofundamento para reduzir a carga conceitual inicial;
+   - Pseudocódigo canônico formal de 11 instruções importado diretamente de `src/game/sorting/insertion/insertionPseudocode.ts`;
+   - Complexidades assintóticas completas: Melhor Caso $\Theta(n)$, Caso Médio $\Theta(n^2)$, Pior Caso $\Theta(n^2)$ e Espaço Auxiliar $\Theta(1)$ / $O(1)$;
+   - Link subordinado para abertura da Demonstração Livre (`[ Ver Demonstração Livre › ]`).
+7. **Regras de Despoluição e Factualidade:** Zero badges `ORD` na camada principal; zero badges textuais `OK` no hero conceitual; zero emojis de sistema; menos de 80 palavras antes do CTA principal; visível no primeiro viewport de 1366×768 sem rolagem obrigatória. Decisões registradas como escolhas arquiteturais de redução de carga cognitiva, sem asserção de efeitos cognitivos definitivos antes de nova validação formativa com usuários.
+
+---
+
 ## 8. Modo Demonstração (Showcase Autônomo)
 
 - **Propósito:** Proporcionar aprendizado observacional puro da mecânica de chave suspensa, deslocamentos em cadeia e encaixes.
@@ -199,7 +229,7 @@ Fica aprovada a **Proposta A Refinada**, com as seguintes diretrizes ergonômica
 
 | Tipo de Exercício | Suporte | ID Canônico | Artefato Implementado / Status | Mapeamento no Schema v4 |
 | :--- | :---: | :---: | :--- | :--- |
-| **A. Introdução / Conceito** | `OBRIGATÓRIO` | `insertion-canonical` | `ProtocolModeBriefingScreen.tsx` (`IMPLEMENTADO`, P2.2-C) | Volátil (não persistido no Schema v4; acesso livre sob demanda) |
+| **A. Introdução / Conceito** | `OBRIGATÓRIO` | `insertion-canonical` | `InsertionModuleOverviewV2.tsx` (`IMPLEMENTADO`, UX-MODULE-R1 / UX-MODULE-R1.1) | Volátil (não persistido no Schema v4; acesso livre sob demanda) |
 | **B. Demonstração** | `OBRIGATÓRIO` | `insertion-demo` | `insertionDemonstration.ts` puro (`IMPLEMENTADO`, P2.2-C; visual em P2.2-E) | Volátil (memória) |
 | **C. Tutorial Guiado** | `OBRIGATÓRIO` | `insertion-tutorial` | `InsertionTutorialScreen.tsx` sobre vetor `[4, 2, 3]` (`IMPLEMENTADO`, P2.2-C) | `modules.insertion.completedTutorial` |
 | **D. Prática Básica** | `OBRIGATÓRIO` | `insertion.practice.basic` | `InsertionGameScreen.tsx` ($n=4$ com vaga única assistida) | `insertion.practice.basic` |

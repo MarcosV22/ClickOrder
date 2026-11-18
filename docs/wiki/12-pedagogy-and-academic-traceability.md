@@ -544,6 +544,40 @@ Para garantir a reprodutibilidade da pesquisa sem ferir preceitos éticos ou nor
 - **Zero Telemetria Remota:** Não há disparo de requisições de rede para servidores externos ou serviços de analytics de terceiros;
 - **Exportação Manual:** Na tela final de resultados, um painel exclusivo para o pesquisador exibe os tempos factuais e contadores da sessão, permitindo copiar ou descarregar os dados brutos em formato JSON padronizado para análise posterior.
 
+---
+
+## 18. Introdução Visual-First do Insertion Sort e Hardening de Usabilidade (Marcos UX-MODULE-R1 e UX-MODULE-R1.1)
+
+Os marcos **UX-MODULE-R1** e **UX-MODULE-R1.1** estabeleceram o novo padrão pedagógico de introdução de módulo algorítmico, aplicando o princípio de **"Clareza Infantil sem Infantilização"** e substituindo a antiga sobrecarga textual por uma **Explicação Visual Interativa**.
+
+### 18.1. Fundamentação na Teoria da Carga Cognitiva e Foco Perceptivo
+- **Prioridade Visual-First:** A apreensão de uma nova mecânica deve ocorrer primariamente pela observação visual e cinestésica dos estados antes da formalização simbólica ou proposicional.
+- **Micro-Exemplo Tridimensional Sequencial:** A introdução do Insertion Sort apresenta a inserção da chave $3$ no vetor prefixo já ordenado $[2, 5]$ em três quadros autoexplicativos:
+  1. *Quadro 1 — Retirar a chave e abrir a vaga:* O valor $3$ é destacado acima, liberando a vaga no índice correspondente;
+  2. *Quadro 2 — Deslocar elementos maiores:* O valor $5$ ($5 > 3$) translada para a vaga aberta à direita;
+  3. *Quadro 3 — Inserir na posição correta:* A chave $3$ encaixa-se na nova vaga aberta, consolidando o vetor $[2, 3, 5]$.
+
+### 18.2. Racional Pedagógico das Decisões de Usabilidade (UX-MODULE-R1.1)
+1. **Hierarquia e Eliminação de Ramificações Concorrentes:**
+   - O CTA primário dominante é exclusivamente `[ COMEÇAR TUTORIAL ▶ ]`;
+   - Alunos que já conhecem a mecânica possuem uma única rota secundária na camada visível: `Já conhece o algoritmo? [ Ir para práticas › ]`;
+   - O link para a Demonstração Livre foi subordinado ao interior do accordion de Detalhes Técnicos, evitando uma decisão tripla prematura para o estudante iniciante.
+2. **Poda de Rótulos Redundantes (Prioridade ao Número e Movimento):**
+   - Rótulos textuais de ação (`5 ➔`) foram removidos; a translação lateral e a borda ciano comunicam o deslocamento de forma direta;
+   - Sub-rótulos operacionais (`VAGA INICIAL`, `VAGA ABERTA`) foram unificados para a designação semântica simples `VAGA`;
+   - O badge textual `OK` foi suprimido do hero, reservando a indicação de ordenação a um sutil realce esmeralda no segmento consolidado.
+3. **Padiamento Didático do Conceito `ORD`:**
+   - A introdução simultânea de `ORD`, `CHAVE`, `VAGA`, `DESLOCAMENTO` e `INSERÇÃO` sobrecarregava a memória de trabalho. A notação formal de partição ordenada `ORD` foi transferida para o aprofundamento técnico posterior, permitindo que o estudante foque primeiro na física do encaixe.
+4. **Precisão Assintótica e Fonte Única da Verdade:**
+   - A complexidade formal emprega notação exata: Melhor Caso $\Theta(n)$ (vetor já ordenado), Caso Médio $\Theta(n^2)$, Pior Caso $\Theta(n^2)$ (vetor em ordem decrescente) e Espaço Auxiliar $\Theta(1)$ / $O(1)$;
+   - O pseudocódigo formal exibido no aprofundamento técnico consome diretamente o objeto `INSERTION_SORT_PSEUDOCODE` (11 instruções canônicas) de `src/game/sorting/insertion/insertionPseudocode.ts`, unificando a fonte de verdade entre o jogo, o replay e a documentação.
+
+### 18.3. Postura Epistemológica Não-Presuntiva
+Em conformidade com as diretrizes da Seção 4:
+- O projeto não afirma que a nova interface "garante compreensão imediata" ou que "eliminou qualquer confusão do estudante";
+- A eficácia pedagógica da introdução Visual-First é tratada como hipótese de design a ser avaliada em protocolos de validação formativa empírica com estudantes e docentes.
+
+
 
 
 

@@ -114,17 +114,18 @@ export default function HomeScreen({
         {/* 3. Retomada Rápida e Sutil de Progresso (apenas se houver progresso) */}
         {overallProgress.hasAnyProgress && (
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/70 border border-slate-700/60 text-xs text-slate-300 shadow-sm animate-fade-in">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" aria-hidden="true" />
             <span className="truncate">
-              Sessão em andamento:{" "}
+              Continue de onde parou:{" "}
               <strong className="text-white font-medium">
                 {overallProgress.recommendedResumeName}
               </strong>{" "}
-              ({overallProgress.recommendedResumePhase})
+              • {overallProgress.recommendedResumePractice}
             </span>
             <button
               type="button"
               onClick={() => handleStartTraining(overallProgress.recommendedResumeId)}
+              aria-label={`Continuar ${overallProgress.recommendedResumeName}`}
               className="text-cyan-400 hover:text-cyan-300 font-semibold underline decoration-cyan-400/40 text-xs ml-1 shrink-0 cursor-pointer"
             >
               Continuar →
@@ -142,7 +143,7 @@ export default function HomeScreen({
                 <LearningModuleCard
                   key={metadata.id}
                   metadata={metadata}
-                  completedPhases={summary.completedPhases}
+                  completedPractices={summary.completedPractices}
                   onStart={handleStartTraining}
                 />
               );

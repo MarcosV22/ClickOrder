@@ -88,6 +88,8 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
       const defaultSave = createDefaultSaveData(3, 3);
 
       const bubbleSummary = getProtocolProgressSummary("bubble", defaultSave);
+      expect(bubbleSummary.completedPractices).toBe(0);
+      expect(bubbleSummary.totalPractices).toBe(3);
       expect(bubbleSummary.completedPhases).toBe(0);
       expect(bubbleSummary.totalPhases).toBe(3);
       expect(bubbleSummary.hasCompletedTutorial).toBe(false);
@@ -95,6 +97,8 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
       expect(bubbleSummary.isChallengeUnlocked).toBe(false);
 
       const selectionSummary = getProtocolProgressSummary("selection", defaultSave);
+      expect(selectionSummary.completedPractices).toBe(0);
+      expect(selectionSummary.totalPractices).toBe(3);
       expect(selectionSummary.completedPhases).toBe(0);
       expect(selectionSummary.totalPhases).toBe(3);
       expect(selectionSummary.hasCompletedTutorial).toBe(false);
@@ -102,6 +106,8 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
       expect(selectionSummary.isChallengeUnlocked).toBeUndefined();
 
       const insertionSummary = getProtocolProgressSummary("insertion", defaultSave);
+      expect(insertionSummary.completedPractices).toBe(0);
+      expect(insertionSummary.totalPractices).toBe(3);
       expect(insertionSummary.completedPhases).toBe(0);
       expect(insertionSummary.hasCompletedTutorial).toBe(false);
       expect(insertionSummary.bestScore).toBeUndefined();
@@ -266,6 +272,7 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
       expect(progress.totalTutorials).toBe(3);
       expect(progress.hasAnyProgress).toBe(false);
       expect(progress.recommendedResumeId).toBe("bubble");
+      expect(progress.recommendedResumePractice).toBe("Prática Básica");
       expect(progress.recommendedResumePhase).toBe("Prática Básica");
     });
 
@@ -282,6 +289,7 @@ describe("Protocol Catalog & Progress Summary (P2.1-G-C)", () => {
       expect(progress.totalCompletedPractices).toBe(1);
       expect(progress.hasAnyProgress).toBe(true);
       expect(progress.recommendedResumeId).toBe("bubble");
+      expect(progress.recommendedResumePractice).toBe("Prática Intermediária");
       expect(progress.recommendedResumePhase).toBe("Prática Intermediária");
     });
   });

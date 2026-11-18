@@ -164,6 +164,7 @@ describe("HomeScreen - Redesign UX-HOME-R2 (Visual Educational Launcher)", () =>
     await renderScreen();
 
     const text = container.textContent || "";
+    expect(text).not.toContain("Continue de onde parou:");
     expect(text).not.toContain("Sessão em andamento:");
   });
 
@@ -180,29 +181,41 @@ describe("HomeScreen - Redesign UX-HOME-R2 (Visual Educational Launcher)", () =>
     await renderScreen({ saveData: saveWithProgress, onStartProtocol });
 
     const text = container.textContent || "";
-    // Faixa sutil presente
-    expect(text).toContain("Sessão em andamento:");
+    // Faixa sutil presente com microcopy natural sem resíduo de "fase" ou "sessão"
+    expect(text).toContain("Continue de onde parou:");
     expect(text).toContain("BUBBLE SORT");
     expect(text).toContain("Prática Intermediária");
 
-    // Card do Bubble deve exibir "1 de 3 práticas" e botão "CONTINUAR"
+    // Card do Bubble deve exibir "1 de 3 práticas" e botão "CONTINUAR" com aria-label acessível
     const articles = container.querySelectorAll("article");
     expect(articles[0].textContent).toContain("1 de 3 práticas");
-    expect(articles[0].querySelector("button")?.textContent).toContain("CONTINUAR");
+    const bubbleBtn = articles[0].querySelector("button");
+    expect(bubbleBtn?.textContent).toContain("CONTINUAR");
+    expect(bubbleBtn?.getAttribute("aria-label")).toBe("Continuar módulo BUBBLE SORT");
 
-    // Os outros cards ainda devem estar em "0 de 3 práticas" e "COMEÇAR"
+    // Os outros cards ainda devem estar em "0 de 3 práticas" e "COMEÇAR" com aria-label acessível
     expect(articles[1].textContent).toContain("0 de 3 práticas");
-    expect(articles[1].querySelector("button")?.textContent).toContain("COMEÇAR");
+    const selectionBtn = articles[1].querySelector("button");
+    expect(selectionBtn?.textContent).toContain("COMEÇAR");
+    expect(selectionBtn?.getAttribute("aria-label")).toBe("Começar módulo SELECTION SORT");
 
-    // Clicar no botão Continuar da faixa sutil retoma o protocolo sugerido
+    // Clicar no botão Continuar da faixa sutil retoma o protocolo sugerido e possui aria-label
     const resumeBtn = Array.from(container.querySelectorAll("button")).find(
       (btn) => btn.textContent?.includes("Continuar →")
     );
     expect(resumeBtn).toBeDefined();
+    expect(resumeBtn?.getAttribute("aria-label")).toBe("Continuar BUBBLE SORT");
     act(() => {
       resumeBtn?.click();
     });
     expect(onStartProtocol).toHaveBeenCalledWith("bubble");
+  });
+
+  it("não utiliza emojis de sistema na interface", async () => {
+    await renderScreen();
+    const text = container.textContent || "";
+    // Verificação de ausência de emojis comuns
+    expect(text).not.toMatch(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u);
   });
 
   it("renderiza o rodapé minimalista", async () => {

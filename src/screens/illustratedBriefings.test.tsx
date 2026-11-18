@@ -158,6 +158,8 @@ describe("Illustrated Briefings & ProtocolCard Layout", () => {
           <ProtocolCard
             metadata={bubbleMeta}
             summary={{
+              completedPractices: 1,
+              totalPractices: 3,
               completedPhases: 1,
               totalPhases: 3,
               hasCompletedTutorial: true,
@@ -193,6 +195,8 @@ describe("Illustrated Briefings & ProtocolCard Layout", () => {
           <ProtocolCard
             metadata={selectionMeta}
             summary={{
+              completedPractices: 0,
+              totalPractices: 3,
               completedPhases: 0,
               totalPhases: 3,
               hasCompletedTutorial: false,

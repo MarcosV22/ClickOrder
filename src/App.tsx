@@ -20,6 +20,7 @@ import PracticeSetCompleteScreen from "./screens/PracticeSetCompleteScreen";
 import PracticeSelector from "./screens/PracticeSelector";
 import DemonstrationScreen from "./screens/DemonstrationScreen";
 import BubbleModuleOverviewV2 from "./screens/bubble/BubbleModuleOverviewV2";
+import InsertionModuleOverviewV2 from "./screens/insertion/InsertionModuleOverviewV2";
 import BubbleGameScreenV2 from "./screens/bubble/BubbleGameScreenV2";
 import type { BubbleUxTestSession } from "./screens/bubble/bubbleUxTest";
 import InsertionReplayScreen from "./screens/InsertionReplayScreen";
@@ -1260,6 +1261,15 @@ export default function App({
             onStartPractice={() => handleOpenPracticeSelector("bubble")}
             onBack={() => setScreen(briefingReturnScreen)}
           />
+        ) : briefingModeId === "insertion-canonical" ? (
+          <InsertionModuleOverviewV2
+            onStartTutorial={() => setScreen("insertion-tutorial")}
+            onStartPractice={() => handleOpenPracticeSelector("insertion")}
+            onOpenDemonstration={() =>
+              handleOpenDemonstration("insertion", "briefing")
+            }
+            onBack={() => setScreen(briefingReturnScreen)}
+          />
         ) : (
           <ProtocolModeBriefingScreen
             briefing={getBriefingForMode(briefingModeId)}
@@ -1269,11 +1279,9 @@ export default function App({
               handleOpenDemonstration(
                 briefingModeId === "merge-canonical"
                   ? "merge"
-                  : briefingModeId === "insertion-canonical"
-                    ? "insertion"
-                    : briefingModeId === "selection-canonical"
-                      ? "selection"
-                      : "bubble",
+                  : briefingModeId === "selection-canonical"
+                    ? "selection"
+                    : "bubble",
                 "briefing"
               )
             }

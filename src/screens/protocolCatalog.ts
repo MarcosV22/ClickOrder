@@ -151,6 +151,9 @@ export const PROTOCOL_CATALOG: readonly ProtocolMetadata[] = Object.freeze([
 ]);
 
 export interface ProtocolProgressSummary {
+  readonly completedPractices: number;
+  readonly totalPractices: number;
+  // Retido para compatibilidade com chamadores legados
   readonly completedPhases: number;
   readonly totalPhases: number;
   readonly hasCompletedTutorial: boolean;
@@ -192,6 +195,8 @@ export function getProtocolProgressSummary(
 ): ProtocolProgressSummary {
   if (!saveData) {
     return {
+      completedPractices: 0,
+      totalPractices: 3,
       completedPhases: 0,
       totalPhases: 3,
       hasCompletedTutorial: false,
@@ -199,10 +204,10 @@ export function getProtocolProgressSummary(
   }
 
   const exercises = MODULE_REGULAR_EXERCISES[protocolId] ?? [];
-  let completedPhases = 0;
+  let completedPractices = 0;
   for (const exId of exercises) {
     if (isExerciseSetCompleted(saveData, protocolId, exId)) {
-      completedPhases += 1;
+      completedPractices += 1;
     }
   }
 
@@ -221,7 +226,9 @@ export function getProtocolProgressSummary(
     protocolId === "bubble" ? isChallengeModeUnlocked(saveData) : undefined;
 
   return {
-    completedPhases,
+    completedPractices,
+    totalPractices: 3,
+    completedPhases: completedPractices,
     totalPhases: 3,
     hasCompletedTutorial,
     bestScore,
@@ -243,6 +250,7 @@ export interface StationOverallProgress {
   readonly hasAnyProgress: boolean;
   readonly recommendedResumeId: ProtocolId;
   readonly recommendedResumeName: string;
+  readonly recommendedResumePractice: string;
   readonly recommendedResumePhase: string;
 }
 
@@ -263,25 +271,25 @@ export function getStationOverallProgress(
 
   let recommendedResumeId: ProtocolId = "bubble";
   let recommendedResumeName = "BUBBLE SORT";
-  let recommendedResumePhase = "Prática Básica";
+  let recommendedResumePractice = "Prática Básica";
   let foundIncomplete = false;
 
   for (const protocol of protocols) {
     const summary = getProtocolProgressSummary(protocol.id, saveData);
-    totalCompletedPractices += summary.completedPhases;
-    totalPractices += summary.totalPhases;
+    totalCompletedPractices += summary.completedPractices;
+    totalPractices += summary.totalPractices;
     if (summary.hasCompletedTutorial) {
       completedTutorialsCount += 1;
     }
 
-    if (!foundIncomplete && summary.completedPhases < summary.totalPhases) {
+    if (!foundIncomplete && summary.completedPractices < summary.totalPractices) {
       foundIncomplete = true;
       recommendedResumeId = protocol.id;
       recommendedResumeName = protocol.name;
-      recommendedResumePhase =
-        summary.completedPhases === 0
+      recommendedResumePractice =
+        summary.completedPractices === 0
           ? "Prática Básica"
-          : summary.completedPhases === 1
+          : summary.completedPractices === 1
             ? "Prática Intermediária"
             : "Prática Avançada";
     }
@@ -298,7 +306,8 @@ export function getStationOverallProgress(
     hasAnyProgress,
     recommendedResumeId,
     recommendedResumeName,
-    recommendedResumePhase,
+    recommendedResumePractice,
+    recommendedResumePhase: recommendedResumePractice,
   };
 }
 

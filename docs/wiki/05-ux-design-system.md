@@ -454,18 +454,18 @@ A plataforma preserva a atmosfera diegética da estação espacial, mas adota **
    - Redução dos halos e sombras de texto (`text-shadow`) em classes `.glow-cyan` e `.glow-purple` para um raio máximo de 4px com opacidade atenuada, eliminando a perda de definição das arestas numéricas em telas escuras.
    - Distinção nítida e independente entre valor numérico (`Orbitron font-bold`), identificador de duplicata (badge nítido `bg-[#060b1a]/80 text-cyan-200 border border-cyan-400/40`), índice (`#index+1` em `text-slate-300 font-bold`) e estado do elemento (papel semântico `BoxRole`).
 
-### 11.3. Launcher Educacional Visual e Redesign da Tela Inicial (UX-HOME-R2 / ADR 0029)
+### 11.3. Launcher Educacional Visual e Redesign da Tela Inicial (UX-HOME-R2/R2.1 / ADR 0029)
 - **Filosofia do Launcher Educacional Visual (`HomeScreen.tsx`):**
-  A tela inicial foi reconstruída para responder em < 5 segundos sem sobrecarga cognitiva:
-  1. *Para que serve isso?* (Aprender algoritmos de ordenação visualmente);
+  A tela inicial foi reconstruída sob a **meta heurística dos 5 segundos** (critério norteador de design a ser avaliado em testes com usuários):
+  1. *O que é isso?* (Aprender algoritmos de ordenação visualmente);
   2. *Quais são as três opções?* (Bubble Sort, Selection Sort, Insertion Sort);
   3. *Qual delas devo abrir primeiro?* (Bubble Sort, marcado discretamente como `Recomendado`);
   4. *Onde clico?* (Um único botão de CTA por card: `COMEÇAR` ou `CONTINUAR`).
 
 - **Arquitetura de Componentes da Home (`src/screens/home/`):**
   1. **Header Compacto (`HomeHeader.tsx`):** Logo tipográfico reduzido em 25–35% (`text-3xl sm:text-4xl md:text-5xl`) e subtítulo direto em 1 linha (*"Aprenda algoritmos de ordenação visualmente."*). Eliminação de parágrafos longos, callouts redundantes e CTAs repetidos no hero.
-  2. **Faixa Compacta de Processo (`HomeProcessStrip.tsx`):** Cápsula horizontal (< 45px) apresentando o ciclo pedagógico em 3 passos com ícones SVG puros: `ESCOLHA um algoritmo` → `APRENDA como funciona` → `PRATIQUE passo a passo`.
-  3. **Retomada Sutil de Sessão:** Faixa não invasiva de 1 linha exibida estritamente quando há progresso salvo (`Sessão em andamento: [Módulo] ([Fase]) • Continuar →`).
+  2. **Faixa Compacta de Processo (`HomeProcessStrip.tsx`):** Cápsula horizontal (< 45px) apresentando o ciclo pedagógico em 3 passos com ícones SVG puros (sem emojis): `ESCOLHA um algoritmo` → `APRENDA como funciona` → `PRATIQUE passo a passo`.
+  3. **Retomada Sutil de Sessão:** Faixa não invasiva de 1 linha com microcopy natural exibida estritamente quando há progresso factual salvo (`Continue de onde parou: [Módulo] • [Prática] • Continuar →`), sem emojis e com dot CSS discreto.
   4. **Grade de Módulos Educacionais (`LearningModuleCard.tsx`):** Exatamente 3 opções ativas (Bubble Sort, Selection Sort, Insertion Sort). Merge Sort congelado e terminantemente ausente da Home. Cada card (~280–360px de altura) apresenta:
      - Título com metáfora em caixa mista (*"Comparação de vizinhos"*, *"Seleção do menor número"*, *"Inserção na parte ordenada"*);
      - Badge discreto `Recomendado` exclusivo no Bubble Sort;
@@ -474,8 +474,8 @@ A plataforma preserva a atmosfera diegética da estação espacial, mas adota **
        - *Selection:* `[ 4 ] [ 1 (min) ] [ 7 ] ➔ [ 1 ] [ 4 ] [ 7 ]` + legenda *"Encontre o menor."*;
        - *Insertion:* `[ 2 ] [ 5 ] [ 3 (key) ] ➔ [ 2 ] [ 3 ] [ 5 ]` + legenda *"Encaixe cada elemento."*;
        - Acessibilidade integral: `role="img"` com descrições semânticas em `aria-label`.
-     - Progresso minimalista: `X de 3 práticas` com 3 pontos visuais (`● ● ○`);
-     - **CTA Único por Card:** Exatamente 1 botão primário `[ COMEÇAR ]` (ou `[ CONTINUAR ]`). Botões concorrentes de tutorial, demonstração e desafio pertencem à visão interna do módulo.
+     - Progresso minimalista: `X de 3 práticas` (`completedPractices`) com 3 pontos visuais (`● ● ○`);
+     - **CTA Único por Card:** Exatamente 1 botão primário `[ COMEÇAR ]` (ou `[ CONTINUAR ]`) com `aria-label` acessível explícito. Botões concorrentes de tutorial, demonstração e desafio pertencem à visão interna do módulo.
   5. **Rodapé Minimalista:** Rodapé limpo de 2 linhas (*"Sorting Station • Plataforma Educacional de Algoritmos"*).
 
 - **Preservação de `ProtocolCard.tsx`:** O componente de cartão com subgrid de 4 linhas é mantido no repositório para assegurar a retrocompatibilidade de testes estruturais existentes (como `illustratedBriefings.test.tsx`).
@@ -601,6 +601,36 @@ No marco `UX-REDESIGN-R3-A`, foi formalizada a separação inegociável entre ap
    - Gaveta retrátil no rodapé explicitamente rotulada como `"▼ Ver detalhes sob demanda"` / `"▲ Ocultar detalhes"`;
    - Contém exclusivamente detalhes secundários da execução: índices formais de laço ($i, j, n$), condição formal do laço e pseudocódigo textual completo;
    - A prática básica é 100% completável sem necessidade de abrir a gaveta técnica.
+
+### 11.11. Padrão Visual-First para Introdução de Módulos (`UX-MODULE-R1` / `UX-MODULE-R1.1`)
+Nos marcos `UX-MODULE-R1` e `UX-MODULE-R1.1`, foi formalizado e estabilizado o padrão arquitetural de design para telas de introdução/briefing de módulos, superando a sobrecarga da arquitetura anterior de cartões empilhados:
+
+1. **Princípio Canônico:**
+   $$\text{VISUAL FIRST} \longrightarrow \text{NATURAL LANGUAGE} \longrightarrow \text{FORMAL TERMINOLOGY}$$
+   A interface é desenhada para tornar a mecânica fundamental legível pelos olhos de forma imediata. A terminologia formal (`ORD`, $i, j$, pseudocódigo, complexidade) é adiada para aprofundamento sob demanda, evitando atrito cognitivo antes da experiência.
+
+2. **Estrutura Canônica da Tela de Introdução:**
+   - **Cabeçalho Limpo:** Botão de retorno e tag de identificação do módulo (`Módulo X • Nome da Categoria`);
+   - **Título Dominante:** Nome do algoritmo em tipografia display (`Orbitron`, `text-3xl sm:text-4xl`), sem rótulos diegéticos concorrentes;
+   - **Frase Conceitual Única:** Frase de no máximo 1–2 linhas capturando a intuição motora do algoritmo (ex.: *"Pegue um número e encaixe no lugar certo."*);
+   - **Visual Hero Protagonista (`InsertionConceptVisual.tsx`):** Maior elemento da tela, operando sobre o menor vetor expressivo (`[2, 5, 3]`), com stepper de 3 estados límpidos:
+     - *1. PEGUE:* Chave suspensa em destaque âmbar, abrindo a vaga inicial (`VAGA`);
+     - *2. ABRA ESPAÇO:* Elemento maior desliza para a direita para a vaga aberta (*shift* unilateral, sem troca com a chave). Badges de ação concorrentes são omitidos para priorizar movimento e valor numérico;
+     - *3. ENCAIXE:* Chave desce e pousa na vaga entre os elementos menores e maiores. O vetor consolidado recebe realce suave em esmeralda, sem introduzir badges textuais como `OK`;
+   - **Os 3 Passos Essenciais (`InsertionConceptSteps.tsx`):** Faixa leve em 3 colunas diretamente sobre o fundo neutro, sem cartões aninhados;
+   - **CTA Principal Dominante com Caminho Secundário Único:** Botão em destaque primário (`COMEÇAR TUTORIAL ▶`) com legenda de apoio e um único atalho secundário visível na camada primária (*"Já conhece o algoritmo? [ Ir para práticas › ]"*). Ações adicionais (como Demonstração Livre) são subordinadas à gaveta de detalhes;
+   - **Accordion Retrátil Único (`InsertionDetails.tsx`):** Seção fechada por padrão (`▼ Ver mais detalhes técnicos`) reunindo definições formais, distinções conceituais (`ORD` vs `OK`, *shift* vs *swap*), pseudocódigo canônico formal de 11 instruções (`INSERTION_SORT_PSEUDOCODE`) e complexidades assintóticas completas ($\Theta(n)$, $\Theta(n^2)$, $\Theta(1)$ / $O(1)$).
+
+3. **Invariantes e Regras de Higiene Visual:**
+   - **Zero ORD na Camada Principal:** O conceito de ordenação provisória é adiado para a seção de detalhes técnicos, eliminando a sigla da visão inicial;
+   - **Zero Badges Prematuros:** Selos textuais como `OK` não são exibidos no hero conceitual;
+   - **Zero Emojis de Sistema:** Nenhum emoji (📌, 📖, 🔑, 🔍) é permitido;
+   - **Superfície Única:** Proibida a técnica de "card dentro de card". Apenas 1 superfície visual principal delimita o exemplo Hero;
+   - **Caminho Secundário Único:** A área de CTA principal deve oferecer no máximo 1 caminho alternativo, evitando bifurcação de atenção para estudantes iniciantes;
+   - **Redução Textual:** Menos de 80 palavras no total antes do CTA principal;
+   - **Paleta Cromática Estritamente Funcional:** Fundo neutro escuro (`#060b1a`), Âmbar (`#f59e0b`) para chave/atenção, Ciano para elemento em movimento/foco, Esmeralda para encaixe concluído;
+   - **Ergonomia Viewport (1366×768):** A camada principal (título, frase, visual hero, 3 passos e CTA) é integralmente visível no primeiro viewport sem rolagem obrigatória, preservando a **Scrollable Screen Rule** (sem `overflow-hidden`).
+
 
 
 

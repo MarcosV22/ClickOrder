@@ -34,6 +34,11 @@ src/
 │   │   ├── BubbleTutorialScreenV2.tsx # Tutorial em 4 passos com checkpoint de predição
 │   │   ├── BubbleGameScreenV2.tsx     # Prática ativa sem poluição e com botões simétricos
 │   │   └── BubbleResultScreenV2.tsx   # Resultado V2 com descoberta e micro-reflexão
+│   ├── insertion/       # [UX-MODULE-R1] Introdução Visual-First do Insertion Sort
+│   │   ├── InsertionModuleOverviewV2.tsx # Entrada Visual-First com exemplo hero [2, 5, 3] e 3 passos
+│   │   ├── InsertionConceptVisual.tsx   # Visual Hero com stepper interativo dos 3 estados
+│   │   ├── InsertionConceptSteps.tsx    # Resumo em 3 colunas (PEGUE / ABRA ESPAÇO / ENCAIXE)
+│   │   └── InsertionDetails.tsx         # Detalhes técnicos e formais sob demanda em accordion retrátil
 │   ├── HomeScreen.tsx   # Hub Educacional Simétrico de Protocolos (Bubble, Selection, Insertion)
 │   ├── ProtocolCard.tsx # Componente simétrico de cartão de protocolo para o Hub da Home
 │   ├── protocolCatalog.ts # Catálogo desacoplado de metadados dos protocolos
@@ -133,22 +138,22 @@ flowchart TD
   - Orquestrar a transição para `CampaignCompleteScreen` (Bubble), `SelectionCampaignCompleteScreen` (Selection) ou `PracticeSetCompleteScreen` (Insertion);
   - Forçar a remontagem de telas de gameplay através da prop `key={'game-phase-${phase}'}` ([`src/App.tsx`](../../src/App.tsx)).
 
-### 3.2. `src/screens/HomeScreen.tsx`, `HomeHeader.tsx`, `HomeProcessStrip.tsx`, `LearningModuleCard.tsx` e `protocolCatalog.ts` (Redesign UX-HOME-R2 / ADR 0029)
-- **Responsabilidades:** Ponto de entrada educacional da plataforma, reconstruído como um **Launcher Educacional Visual** de alta clareza (< 5s de cognição), livre de sobrecarga textual e de aparência de dashboard/landing page. A Home organiza-se em 5 componentes estritos:
+### 3.2. `src/screens/HomeScreen.tsx`, `HomeHeader.tsx`, `HomeProcessStrip.tsx`, `LearningModuleCard.tsx` e `protocolCatalog.ts` (Redesign UX-HOME-R2/R2.1 / ADR 0029)
+- **Responsabilidades:** Ponto de entrada educacional da plataforma, reconstruído como um **Launcher Educacional Visual** norteado pela meta heurística dos 5 segundos de identificação visual, livre de sobrecarga textual e de aparência de dashboard/landing page. A Home organiza-se em 5 componentes estritos:
   1. **Header Compacto (`HomeHeader.tsx`):** Logo tipográfico reduzido em 25–35% (`text-3xl sm:text-4xl md:text-5xl`) e subtítulo direto em 1 linha (*"Aprenda algoritmos de ordenação visualmente."*), eliminando parágrafos longos, callouts redundantes e CTAs repetidos.
   2. **Faixa Compacta de Processo (`HomeProcessStrip.tsx`):** Cápsula horizontal (< 45px) apresentando o ciclo pedagógico em 3 passos com ícones SVG puros (sem emojis): `ESCOLHA um algoritmo` → `APRENDA como funciona` → `PRATIQUE passo a passo`.
-  3. **Retomada Sutil de Sessão:** Faixa não invasiva de 1 linha exibida estritamente quando há progresso salvo (`Sessão em andamento: [Módulo] ([Fase]) • Continuar →`), sem ocupar altura útil da tela.
+  3. **Retomada Sutil de Sessão:** Faixa não invasiva de 1 linha com microcopy natural exibida estritamente quando há progresso factual salvo (`Continue de onde parou: [Módulo] • [Prática] • Continuar →`), sem ocupar altura útil da tela.
   4. **Grade de Módulos Educacionais (`LearningModuleCard.tsx`):** Exatamente 3 opções ativas (Bubble Sort, Selection Sort, Insertion Sort). Merge Sort é congelado e terminantemente ausente da Home. Cada card (~280–360px de altura) apresenta:
      - Título com metáfora em caixa mista (*"Comparação de vizinhos"*, *"Seleção do menor número"*, *"Inserção na parte ordenada"*);
      - Badge discreto `Recomendado` exclusivo no Bubble Sort;
-     - **Mini Visual da Mecânica:** demonstre antes do clique a essência física da ordenação com caixas numeradas, setas direcionais e acessibilidade (`role="img"`, `aria-label` completo):
+     - **Mini Visual da Mecânica:** demonstração antes do clique da essência física da ordenação com caixas numeradas, setas direcionais e acessibilidade (`role="img"`, `aria-label` completo):
        - *Bubble:* `[ 8 ] [ 3 ] ➔ [ 3 ] [ 8 ]` + legenda *"Compare vizinhos."*;
        - *Selection:* `[ 4 ] [ 1 (min) ] [ 7 ] ➔ [ 1 ] [ 4 ] [ 7 ]` + legenda *"Encontre o menor."*;
        - *Insertion:* `[ 2 ] [ 5 ] [ 3 (key) ] ➔ [ 2 ] [ 3 ] [ 5 ]` + legenda *"Encaixe cada elemento."*;
-     - Progresso minimalista: `X de 3 práticas` com 3 pontos visuais (`● ● ○`);
-     - **CTA Único por Card:** exatamente 1 botão de ação primária `[ COMEÇAR ]` ou `[ CONTINUAR ]`. Botões concorrentes de tutorial, demonstração e desafio foram transferidos para a tela interna do módulo.
+     - Progresso minimalista: `X de 3 práticas` (`completedPractices`) com 3 pontos visuais (`● ● ○`);
+     - **CTA Único por Card:** exatamente 1 botão de ação primária `[ COMEÇAR ]` (0 práticas) ou `[ CONTINUAR ]` (> 0 práticas) com `aria-label` acessível explícito. Botões concorrentes de tutorial, demonstração e desafio foram transferidos para a tela interna do módulo.
   5. **Rodapé Minimalista:** Rodapé limpo de 2 linhas (*"Sorting Station • Plataforma Educacional de Algoritmos"*).
-- **Catálogo Desacoplado (`src/screens/protocolCatalog.ts`):** `ACTIVE_LAUNCHER_MODULES = ["bubble", "selection", "insertion"]`. A função `getStationOverallProgress(saveData)` computa o progresso curricular ativo estritamente sobre os 3 módulos (9 práticas regulares e 3 tutoriais).
+- **Catálogo Desacoplado (`src/screens/protocolCatalog.ts`):** `ACTIVE_LAUNCHER_MODULES = ["bubble", "selection", "insertion"]`. A função `getStationOverallProgress(saveData)` computa o progresso curricular ativo estritamente sobre os 3 módulos (9 práticas regulares e 3 tutoriais), expondo `completedPractices`, `totalPractices` e `recommendedResumePractice`.
 - **Responsividade e Fundo:** Fundo decorativo com esteiras atenuadas (opacidade 0.06), scroll vertical ergonômico único (`min-h-screen overflow-y-auto pb-16 sm:pb-20`).
 - **Callbacks e Props:** `saveData?: GameSaveSchema`, `onStartProtocol?: (id: ProtocolId) => void`, `onOpenTutorial?: (id: ProtocolId) => void`, `onOpenDemonstration?: (id: ProtocolId) => void`, `isChallengeUnlocked?: boolean`, `onStartChallenge?: () => void`. Mantém retrocompatibilidade com `onStart`, `onHowToPlay` e `onStartSelection`.
 
@@ -398,6 +403,15 @@ flowchart TD
     - Gaveta retrátil sob demanda no rodapé com detalhes técnicos e solicitação de dica.
   - `BubbleResultScreenV2.tsx`: Relatório formativo com banner de descoberta, 3 métricas essenciais sem punição, pergunta de micro-reflexão conceitual com feedback explicativo imediato e gaveta técnica sob demanda.
 - **Roteamento em `App.tsx`:** O roteador raiz direciona o fluxo canônico de campanha e briefing do Bubble Sort para as telas V2, mantendo Selection Sort e Insertion Sort integralmente operando em suas respectivas telas consolidadas.
+
+### 3.17. Introdução Visual-First do Insertion Sort (`UX-MODULE-R1`)
+- **Diretório:** `src/screens/insertion/`
+- **Componentes Integrados:**
+  - `InsertionModuleOverviewV2.tsx`: Ponto de entrada reformulado do módulo, implementando o princípio $\text{VISUAL FIRST} \longrightarrow \text{NATURAL LANGUAGE} \longrightarrow \text{FORMAL TERMINOLOGY}$. Apresenta título dominante `INSERTION SORT`, frase conceitual única (*"Pegue um número e encaixe no lugar certo."*), o Visual Hero central, os 3 passos pedagógicos, CTA direto `[ COMEÇAR TUTORIAL ▶ ]` e accordion retrátil fechado por padrão com detalhes formais.
+  - `InsertionConceptVisual.tsx`: Visual Hero central e protagonista da tela, operando sobre o vetor elementar `[2, 5, 3]`. Fornece stepper de 3 estados com navegação acessível e controle de passo (`1. PEGUE`, `2. ABRA ESPAÇO`, `3. ENCAIXE`), demonstrando visualmente a chave suspensa, a abertura de vaga e o deslocamento (*shift* unilateral) do $5$ para a direita antes do encaixe do $3$.
+  - `InsertionConceptSteps.tsx`: Faixa leve em 3 colunas sobre o fundo neutro resumindo os verbos de ação: (1) `PEGUE`, (2) `ABRA ESPAÇO`, (3) `ENCAIXE`.
+  - `InsertionDetails.tsx`: Seção retrátil única (`<details>`) fechada por padrão, reservada para aprofundamento técnico: definição formal, CHAVE e VAGA, deslocamento vs troca, `ORD` local vs `OK` definitivo, pseudocódigo canônico de 9 linhas e complexidade assintótica.
+- **Roteamento em `App.tsx`:** Quando `screen === "briefing"` e `briefingModeId === "insertion-canonical"`, renderiza diretamente `InsertionModuleOverviewV2`, substituindo a antiga arquitetura de 9 cartões técnicos densos de `ProtocolModeBriefingScreen.tsx`.
 
 ---
 

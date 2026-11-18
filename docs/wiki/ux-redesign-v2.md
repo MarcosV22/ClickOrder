@@ -383,7 +383,7 @@ Após a ocorrência de um evento estrutural (ex.: conclusão da primeira passada
   - **Insertion Sort:** `[ 2 ] [ 5 ] [ 3 (key) ] ➔ [ 2 ] [ 3 ] [ 5 ]` + *"Encaixe cada elemento."*.
 - **Progresso Minimalista:** Indicador de 3 pontos (`● ● ○`) e texto `X de 3 práticas`.
 - **CTA Único por Card:** Exatamente 1 botão: `[ COMEÇAR ]` ou `[ CONTINUAR ]` (abre a visão do módulo).
-- **Retomada Sutil:** Faixa não invasiva de 1 linha quando há progresso salvo (`Sessão em andamento: ... • Continuar →`).
+- **Retomada Sutil:** Faixa não invasiva de 1 linha quando há progresso factual salvo (`Continue de onde parou: [Módulo] • [Prática] • Continuar →`).
 
 ### 6.2. Página do Módulo (Module Overview)
 Substitui o `PracticeSelector` sobrecarregado por um caminho linear e claro:
@@ -475,8 +475,8 @@ Cards humanizados com intencionalidade pedagógica imediata:
 ================================================================================
 ```
 
-*Teste dos 5 Segundos (Home):*
-1. **Para que serve isso?** Aprender algoritmos de ordenação visualmente.
+*Meta Heurística dos 5 Segundos (Hipótese de Design da Home — a validar em campo em UX-REDESIGN-R3-B):*
+1. **O que é isso?** Aprender algoritmos de ordenação visualmente.
 2. **Quais são as três opções?** Bubble Sort, Selection Sort e Insertion Sort.
 3. **Qual delas devo abrir primeiro?** Bubble Sort (marcado como Recomendado).
 4. **Onde clico?** No botão `[ COMEÇAR ]`.
@@ -980,3 +980,56 @@ Foi consolidado o protocolo canônico [`bubble-v2-formative-evaluation.md`](./bu
 ### 14.4. Estado e Métricas de Qualidade
 - **Status Canônico:** `PILOTO IMPLEMENTADO E TECNICAMENTE VALIDADO (AGUARDANDO VALIDAÇÃO FORMATIVA COM USUÁRIOS)`;
 - **Testes Automatizados:** 51 arquivos de teste e 659 testes passando sem falhas (+2 testes cobrindo isolamento do modo UX test e hierarquia de Níveis 2 e 3 em `bubbleV2Pilot.test.tsx`).
+
+---
+
+## 15. Introdução Visual-First do Insertion Sort (`UX-MODULE-R1` / `UX-MODULE-R1.1`)
+
+### 15.1. Contexto e Diagnóstico da Introdução Legada
+A introdução do Insertion Sort apresentava sobrecarga cognitiva grave:
+- Exibição simultânea de 9 cartões técnicos pesados (*Objetivo do Módulo*, *O que você vai aprender*, *O que você vai praticar*, *Como funciona o ciclo*, *Avisos importantes*, *Exemplo visual*, *Deslocamento vs Troca*, *ORD local vs Selo OK*, *Número-Chave e Vaga Aberta*);
+- Cartão dentro de cartão e bordas em praticamente todos os blocos de texto;
+- Exibição concorrente de terminologia formal (`ORD`, `CHAVE`, `VAGA`, `DESLOCAMENTO`, `TROCA`, `POSIÇÃO DEFINITIVA`) antes do estudante experimentar o algoritmo;
+- Exemplo visual relegado a papel secundário e sobrecarregado por vetor de 4 elementos com múltiplos badges `ORD`.
+
+A tela assemelhava-se a uma **documentação técnica de especificação**, e não a uma **explicação visual progressiva e acolhedora**.
+
+### 15.2. Princípio Canônico de Design
+Fica formalizado o princípio canônico para introdução de módulos:
+$$\text{VISUAL FIRST} \longrightarrow \text{NATURAL LANGUAGE} \longrightarrow \text{FORMAL TERMINOLOGY}$$
+
+A introdução foi projetada para apresentar a intuição mecânica (*"Pegue um número e encaixe no lugar certo"*) por meio de representação visual e linguagem direta antes de introduzir siglas formais (`ORD`), índices ($i, j$), invariantes de laço ou pseudocódigo. O objetivo de design é reduzir barreiras iniciais de atenção, sem emitir alegações empíricas prévias de assimilação cognitiva antes de nova rodada de testes formativos.
+
+### 15.3. Nova Arquitetura e Componentes (`src/screens/insertion/`)
+1. **Ponto de Entrada e Visão Geral (`InsertionModuleOverviewV2.tsx`):**
+   - **Título Dominante:** `INSERTION SORT` em tipografia display (sem rótulos diegéticos concorrendo);
+   - **Frase Conceitual Única:** *"Pegue um número e encaixe no lugar certo."*;
+   - **CTA Principal Dominante:** Botão `[ COMEÇAR TUTORIAL ▶ ]` com legenda *"Você vai praticar isso passo a passo."*;
+   - **Caminho Secundário Único:** *"Já conhece o algoritmo? [ Ir para práticas › ]"*. O acesso à Demonstração Livre foi transferido para dentro da seção de detalhes técnicos, eliminando bifurcações concorrentes na entrada do iniciante;
+   - **Ergonomia Viewport:** Estruturado para o primeiro viewport de 1366×768 sem rolagem obrigatória, preservando a regra de tela rolável sem `overflow-hidden`.
+2. **Visual Hero Protagonista (`InsertionConceptVisual.tsx`):**
+   - Opera sobre o vetor elementar mínimo curado **`[2, 5, 3]`** (redução de 4 para 3 elementos para clareza focal imediata);
+   - Badges limpos com prioridade no movimento e nos números:
+     - **Passo 1 (PEGUE):** O número `3` é suspenso com badge `CHAVE`, abrindo a vaga inicial (`VAGA`). Mensagem curta: *"Vamos encaixar o 3. O número que estamos encaixando é chamado de chave."*;
+     - **Passo 2 (ABRA ESPAÇO):** O número `5` desliza para a direita para a vaga aberta. A vaga translada-se para a esquerda. Mensagem curta: *"5 é maior que 3, então ele desliza para a direita. O 5 apenas desliza. Ele não troca de lugar com o 3."*. Badges de ação concorrentes foram suprimidos;
+     - **Passo 3 (ENCAIXE):** A chave `3` desce e pousa na vaga entre 2 e 5 (`[ 2 ] [ 3 ] [ 5 ]`). Mensagem curta: *"Agora o 3 cabe aqui. O vetor fica organizado: [2, 3, 5].*". O vetor ordenado recebe realce suave em esmeralda, sem introduzir badges textuais como `OK`.
+   - Acessibilidade: `role="img"` com `aria-label` descritivo completo para leitores de tela e independência de cor.
+3. **Resumo dos 3 Passos (`InsertionConceptSteps.tsx`):**
+   - Três colunas leves diretamente sobre o fundo neutro: (1) `PEGUE` (*"Escolha o próximo número."*), (2) `ABRA ESPAÇO` (*"Mova para a direita quem for maior."*), (3) `ENCAIXE` (*"Coloque a chave na vaga."*).
+4. **Detalhes Técnicos Sob Demanda (`InsertionDetails.tsx`):**
+   - Seção retrátil única fechada por padrão (`▼ Ver mais detalhes técnicos`);
+   - Reúne o aprofundamento conceitual: definição formal de Insertion Sort, Chave e Vaga, Deslocamento (*shift*) vs Troca (*swap*), Região Ordenada Local (`ORD`) vs Posição Definitiva (`OK`) explicitando que `ORD` foi adiado para esta gaveta para reduzir a carga conceitual inicial, Pseudocódigo Canônico formal de 11 instruções importado de `src/game/sorting/insertion/insertionPseudocode.ts`, Complexidade Assintótica completa ($\Theta(n)$ / $\Theta(n^2)$ / $\Theta(1)$ ou $O(1)$) e link subordinado para abertura da Demonstração Livre.
+   - O estudante **não** precisa abrir o accordion para iniciar o Tutorial.
+
+### 15.4. Regras Estritas de Redução de Ruído
+- **Zero `ORD` na Camada Principal:** O conceito de ordenação parcial provisória foi adiado para o aprofundamento técnico, eliminando a sigla da visão inicial;
+- **Zero Badges Textuais Prematuros:** Selos como `OK` foram omitidos da introdução conceitual;
+- **Zero Emojis de Sistema:** Nenhum emoji (📌, 📖, 🔑, 🔍) é utilizado;
+- **Redução Textual Drástica:** Menos de 80 palavras no total antes do CTA principal;
+- **Paleta Cromática Funcional:** Fundo neutro escuro (`#060b1a`), Âmbar (`#f59e0b`) para chave/atenção, Ciano para elemento em movimento/foco, Esmeralda para encaixe concluído;
+- **Bordas Eliminadas:** Apenas 1 superfície visual principal (o Hero Visual).
+
+### 15.5. Verificação e Métricas Factuais
+- **Suíte de Testes:** `src/screens/insertionModuleOverviewV2.test.tsx` com 13 testes comportamentais aprovados;
+- **Total Factual:** 53 arquivos de teste e 687 testes verdes no Vitest (100% de aprovação, zero regressões);
+- **Typecheck & Build:** `tsc --noEmit` com 0 erros e build de produção Vite concluído em ~675ms.

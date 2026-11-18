@@ -3,7 +3,7 @@ import type { ProtocolMetadata, ProtocolId } from "../protocolCatalog";
 
 export interface LearningModuleCardProps {
   metadata: ProtocolMetadata;
-  completedPhases: number;
+  completedPractices: number;
   onStart: (id: ProtocolId) => void;
 }
 
@@ -186,7 +186,7 @@ function formatMetaphor(metaphor: string): string {
 
 export default function LearningModuleCard({
   metadata,
-  completedPhases,
+  completedPractices,
   onStart,
 }: LearningModuleCardProps) {
   const isBubble = metadata.id === "bubble";
@@ -224,7 +224,7 @@ export default function LearningModuleCard({
       ? "bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.25)]"
       : "bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.25)]";
 
-  const isStarted = completedPhases > 0;
+  const isStarted = completedPractices > 0;
   const ctaLabel = isStarted ? "CONTINUAR" : "COMEÇAR";
 
   return (
@@ -276,15 +276,15 @@ export default function LearningModuleCard({
             className="font-mono text-[11px]"
             style={{ fontFamily: "'Space Mono', monospace" }}
           >
-            {completedPhases} de 3 práticas
+            {completedPractices} de 3 práticas
           </span>
 
           <div
             className="flex items-center gap-1.5"
-            aria-label={`${completedPhases} de 3 práticas concluídas`}
+            aria-label={`${completedPractices} de 3 práticas concluídas`}
           >
             {[0, 1, 2].map((idx) => {
-              const isCompleted = idx < completedPhases;
+              const isCompleted = idx < completedPractices;
               return (
                 <span
                   key={idx}
@@ -304,7 +304,8 @@ export default function LearningModuleCard({
         <button
           type="button"
           onClick={() => onStart(metadata.id)}
-          className={`w-full py-2.5 px-4 rounded-xl font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform active:scale-[0.98] ${ctaBtnStyle}`}
+          aria-label={`${ctaLabel === "COMEÇAR" ? "Começar" : "Continuar"} módulo ${metadata.name}`}
+          className={`w-full py-2.5 px-4 rounded-xl font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform active:scale-[0.98] cursor-pointer ${ctaBtnStyle}`}
           style={{ fontFamily: "'Orbitron', sans-serif" }}
         >
           <span>{ctaLabel}</span>
