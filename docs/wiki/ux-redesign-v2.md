@@ -1207,3 +1207,118 @@ No marco **UX-PRACTICE-R1.1**, consolidamos o refino de vocabulário e a limpeza
 - **Total Factual da Suíte:** **57 arquivos de teste e 721 testes verdes no Vitest** (100% de aprovação);
 - **Typecheck & Build:** `tsc --noEmit` com 0 erros e build de produção Vite aprovado.
 
+---
+
+## 20. Redesign Visual-First do Tutorial e da Prática Básica do Insertion Sort (`UX-PRACTICE-R2`)
+
+No marco **UX-PRACTICE-R2**, a metodologia Visual-First foi estendida ao gameplay interativo do Insertion Sort, abrangendo especificamente o **Tutorial Guiado** (`InsertionTutorialScreenV2.tsx` e wrapper `InsertionTutorialScreen.tsx`) e a **Prática Básica (Fase 1)** (`InsertionGameScreenV2.tsx` e conexão no roteador em `App.tsx`):
+
+### 20.1. Princípio Arquitetural e Pedagógico
+- **Modelo Mental Canônico:**
+  $$\text{OBSERVE A CHAVE} \longrightarrow \text{COMPARE PARA TRÁS} \longrightarrow \text{DECIDA SE PRECISA ABRIR ESPAÇO} \longrightarrow \text{DESLOQUE OU ENCAIXE} \longrightarrow \text{ENTENDA O RESULTADO}$$
+- **Distinção Epistemológica Inegociável:**
+  - **Selection Sort:** `POSIÇÃO-ALVO` — todas as caixas ocupam posições durante a varredura; no encerramento, ocorre permuta única.
+  - **Insertion Sort:** `VAGA FÍSICA` — a chave é suspensa automaticamente para o trilho aéreo, deixando uma vaga vazia física transitória `[ _ ]` (`InsertionHoleSlot`) no vetor.
+  - **`DESLOCAMENTO ≠ TROCA` (`SHIFT ≠ SWAP`):** O elemento maior desliza unilateralmente para a direita preenchendo a vaga à sua direita e transferindo a vaga para a sua esquerda. A chave suspensa NUNCA é trocada bilateralmente com elementos durante o deslocamento; ela desce na vaga resultante apenas no comando de encaixe (`INSERT`).
+
+### 20.2. Componentes Modulares Criados (`src/screens/insertion/`)
+1. **`InsertionConveyorTrack.tsx`:**
+   - Trilho aéreo superior com suporte para a caixa suspensa com badge `CHAVE`;
+   - Esteira horizontal de roletes contendo a vaga física `[ _ ]` (`InsertionHoleSlot.tsx`) na posição `holeIndex`;
+   - Marcador inferior `observando` exclusivamente sob a caixa $j$ sob comparação retroativa;
+   - Região preliminarmente ordenada em acabamento discreto sem coloração esmeralda prematura e sem o badge ruidoso `ORD` na camada operacional primária (`ORD LOCAL ≠ OK DEFINITIVO`);
+   - Acessibilidade: atributos `aria-live="polite"` e rótulos de acessibilidade descritivos.
+2. **`InsertionDecisionControls.tsx`:**
+   - Pergunta central situacional derivada dinamicamente do estado da FSM:
+     - Em `COMPARE_AND_SHIFT`: *"O número sob análise ({scanVal}) é maior que a chave ({keyVal})?"*;
+     - Em `INSERT_READY` ($j < 0$): *"Início do vetor alcançado. A chave ({keyVal}) pode ser encaixada na vaga!"*;
+   - Botoeira com dois botões neutros e balanceados sem viés de cor pré-clique:
+     - `[ 1: Deslizar para a Direita ]` (aciona `SHIFT_RIGHT`);
+     - `[ 2: Encaixar a Chave ]` (aciona `INSERT_KEY`);
+   - Em `INSERT_READY`, apenas a ação válida de encaixe é exibida;
+   - Suporte a atalhos de teclado `1` e `2` (e `Enter`);
+   - Dica reflexiva de Nível 2 sob demanda `[ ? Dica ]` orientando o raciocínio sem entregar a resposta;
+   - Feedback causal imediato explicando o motivo da regra sem avançar o estado em caso de erro.
+3. **`InsertionPredictionCard.tsx`:**
+   - Desafio prévio de predição ativo no Tutorial Guiado sobre o vetor `[4, 2, 3]`: *"A chave 2 deve ficar antes ou depois do 4?"*, com opções `[ ANTES ]` e `[ DEPOIS ]` e feedback causal imediato antes do primeiro movimento.
+4. **`InsertionConceptualCheckpoint.tsx`:**
+   - Checkpoint conceitual de reforço após o primeiro deslocamento no Tutorial: *"O que aconteceu com o 4?"*, enfatizando que ele apenas deslizou para a direita para abrir espaço, reforçando `DESLOCAMENTO ≠ TROCA`.
+5. **`InsertionTechnicalDetails.tsx`:**
+   - Gaveta retrátil de Nível 3 (`<details>`) fechada por padrão, sincronizando em tempo real as variáveis da FSM ($i, j, \text{key}, \text{holeIndex}, \text{orderedBoundary}$) e o pseudocódigo canônico de 11 instruções (`INSERTION_SORT_PSEUDOCODE`).
+
+### 20.3. Isolamento Curricular e Integridade
+- A engine pura `insertionSortEngine.ts`, FSM de estados, histórico, métricas, persistência Schema v4 e fórmula canônica da Pontuação do Protocolo ($\max(0, 100 - \text{erros}\times10 - \text{dicas}\times5)$) foram preservadas 100% intactas.
+- Práticas intermediária ($n=5$), avançada ($n=6$) e Casos do Algoritmo continuam sendo atendidas com estabilidade por `InsertionGameScreen.tsx`.
+
+### 20.4. Verificação e Métricas Factuais
+- **Suíte de Testes:**
+  - `src/screens/insertionTutorialScreen.test.tsx` (5 testes aprovados);
+  - `src/screens/insertionGameScreenV2.test.tsx` (5 testes aprovados);
+- **Total Factual da Suíte:** **59 arquivos de teste e 731 testes verdes no Vitest** (100% de aprovação);
+- **Typecheck & Build:** `tsc --noEmit` com 0 erros e build de produção Vite concluído em ~1.55s.
+
+---
+
+## 21. Hardening Conceitual e Redução de Ruído do Insertion Sort V2 (`UX-PRACTICE-R2.1`)
+
+O marco **UX-PRACTICE-R2.1** completou o ciclo de refinamento do Insertion Sort interativo, corrigindo resíduos conceituais e auditando minuciosamente a densidade perceptual da tela de prática:
+
+### 21.1. Invariante Estrita: `ORD LOCAL ≠ OK DEFINITIVO`
+1. **A Falha de Premissas em Interfaces Anteriores:** Em interfaces ingênuas, o subvetor $A[0 \dots \text{orderedBoundary}]$ era estilizado em verde/esmeralda, induzindo o estudante ao erro grave de supor que aqueles elementos já estavam em suas posições finais (como ocorre no Selection Sort);
+2. **Correção Semântica Factual:** No Insertion Sort, o prefixo ordenado é instável: se a próxima chave for menor que todos eles, **todos** os elementos do prefixo sofrerão deslocamento (*shift*) para a direita. Portanto, nenhuma carga em execução recebe cor verde/esmeralda;
+3. **Reserva Exclusiva do Esmeralda:** O papel `sorted` com badge `OK` e borda esmeralda (`#10b981`) é ativado estritamente quando `completed === true` (após o encaixe da última chave).
+
+### 21.2. Eliminação de Métricas Operacionais durante a Decisão
+- As métricas de desempenho (`Comparações`, `Deslocamentos`, `Inserções` e `Tentativas incorretas`) foram expurgadas do cabeçalho da área ativa de decisão;
+- A tela de decisão apresenta estritamente a passada atual (`Passada X de Y`), barra sutil de progresso, esteira com trilho, pergunta situacional e botoeira;
+- As métricas operacionais completas permanecem integralmente auditáveis na gaveta técnica `<details>` (Nível 3) e são apresentadas em formato consolidado na Tela de Resultados pós-prática.
+
+### 21.3. Despoluição dos Indicadores de Chave, Vaga e Scanner
+- **Chave Suspensa:** Trilho aéreo sob o título `TRILHO AÉREO • CHAVE SUSPENSA` com a caixa portando um único crachá `CHAVE`, eliminando duplicatas textuais no contêiner;
+- **Vaga Física:** Slot tracejado âmbar `InsertionHoleSlot.tsx` apresentando unicamente o rótulo `VAGA` e o índice posicional `#idx+1`, removendo os chips redundantes `ABERTA`, `⇣` e animações de pulso contínuas;
+- **Elemento Observado ($A[j]$):** Borda e foco ciano acompanhados de chip inferior único `OBSERVANDO`, removendo flechas animadas flutuantes (`▼ animate-bounce`).
+
+---
+
+## 22. Auditoria Comparativa das Três Práticas Básicas (`UX-PRACTICE-R3`)
+
+No marco estritamente diagnóstico **`UX-PRACTICE-R3`**, foi conduzida uma auditoria comparativa visual, funcional e pedagógica das Práticas Básicas V2 dos três módulos centrais (**Bubble Sort**, **Selection Sort** e **Insertion Sort**), combinando inspeção estática do código-fonte com renderização real em **Chrome Headless (DevTools Protocol)** nas viewports `1280×650`, `1366×768`, `1600×900` e `1920×1080`.
+
+O relatório completo e o backlog priorizado encontram-se documentados em [`ux-practice-r3-comparative-audit.md`](./ux-practice-r3-comparative-audit.md). Síntese dos principais achados diagnósticos (registrados sem alteração automática de código para preservação de escopo):
+
+1. **Preservação dos Modelos Mentais e Semântica Visual (Confirmado):**
+   - Os três algoritmos mantêm mecânicas interativas distintas e inconfundíveis (troca adjacente no Bubble; varredura estática + commit no Selection; chave suspensa + vaga física + deslocamento unilateral no Insertion);
+   - A invariante `ORD LOCAL ≠ OK DEFINITIVO` e o contrato de erro sem avanço de estado (`+1 errors` + explicação causal) operam em 100% de conformidade.
+2. **Achados Críticos (`CRÍTICO`):**
+   - **P-01 (Bubble — Checkpoint Pós-1ª Passada):** Em `BubbleGameScreenV2.tsx:533-535`, `.slice(0, 3)` corta `maxInitialVal` das alternativas sempre que o maior elemento inicia no índice $\ge 3$ (ex.: `[30, 20, 10, 50]`, válido em `BUBBLE_BASIC_CONSTRAINTS`), impossibilitando marcar a resposta certa;
+   - **P-02 (Insertion — Ergonomia em `1366×768` e `1280×650`):** Com `scrollHeight = 1089px` (devido ao empilhamento de barra de progresso separada + trilho aéreo `lg` + esteira `lg`), os botões de decisão (`top: 777px`), o feedback causal e a dica ficam inteiramente abaixo da dobra inicial em `1366×768`.
+3. **Achados de Alta Prioridade (`ALTO` — Riscos de Clique Mecânico):**
+   - **P-03 (Bubble — Dica Entrega Gabarito):** `BubbleGameScreenV2.tsx:351-355` exibe *"A ação correta é TROCAR/MANTER"*;
+   - **P-04 (Selection — Spoiler e Posição Fixa no Checkpoint Pré-Commit):** `SelectionCommitCheckpoint.tsx` revela `({minVal})` no título acima da pergunta e ordena as opções via `.sort((a,b)=>a-b)`, mantendo a resposta correta 100% das vezes no 1º botão à esquerda;
+   - **P-05 (Bubble — Assimetria Cromática dos Botões):** `⇄ TROCAR` possui estilo de CTA primário azul vibrante enquanto `= MANTER` é cinza neutro, induzindo viés visual.
+4. **Achados Médios e Baixos (`MÉDIO` / `BAIXO`):**
+   - Vazamento de `INSPECT`/`COMMIT` e métricas ao vivo no Nível 1 do Selection; `handleReset` do Insertion sem zerar `hintsUsed`; retorno do Insertion indo à `HomeScreen` em vez do `PracticeSelector`; `BubbleGameScreenV2` ativo também nas fases 2 e 3 em `App.tsx`; `#pos` (`#1..#4`) desnecessário na camada básica do Insertion; e desalinhamento de `12px` + duplo `overflow-y: auto` no Bubble.
+
+---
+
+## 23. Correção de Defeitos Críticos e Vieses Pedagógicos nas Três Práticas Básicas (`UX-PRACTICE-R3.1`)
+
+O marco **`UX-PRACTICE-R3.1`** executou o hardening focado sobre os achados prioritários da auditoria `UX-PRACTICE-R3`, preparando as três Práticas Básicas V2 para avaliação formativa com usuários sem tocar em engines, FSMs, pontuação ou Schema v4:
+
+1. **`P-01` Corrigido (Bubble — Checkpoint Pós-Passada 1 Determinístico):**
+   - `buildBubblePassCheckpointOptions` garante que o maior elemento esteja sempre presente entre as alternativas, sem valores repetidos, sem ordenação crescente automática e distribuído deterministicamente entre as posições `0`, `1` e `2`.
+2. **`P-02` e `P-09` Corrigidos (Insertion — Compactação Vertical Responsiva e Ocultação de `#pos`):**
+   - Eliminado o card redundante de passada, ocultados os índices visuais `#1..#4` por padrão (preservados em `aria-label`/`.sr-only` e exibidos sob demanda ao abrir o Nível 3) e adotado dimensionamento adaptativo à altura real do viewport (`size="md"` `80×80px` para alturas `< 860px` como `1366×768` e `1280×650`, mantendo `size="lg"` `112×112px` em `1600×900` e `1920×1080`).
+   - Medição real em Chrome Headless a `1366×768`: `scrollHeight` reduzido de `1089px` para `768px` (zero scroll), com botões em `top: 532–586px` (`100%` visíveis sem rolagem em `1366×768` e `1280×650`).
+3. **`P-03` e `P-05` Corrigidos (Bubble — Dica Reflexiva e Botoeira Neutra Simétrica):**
+   - Removido o gabarito direto (*"A ação correta é..."*) da dica; padronizados os botões `[1] TROCAR` e `[2] MANTER` em `bg-slate-800/90` idênticos a Selection e Insertion; e reformulada a pergunta para *"O que devemos fazer com esses dois números vizinhos?"* com feedback explícito de estabilidade em valores iguais.
+4. **`P-04` e `P-06` Corrigidos (Selection — Checkpoint sem Spoiler e Limpeza do Nível 1):**
+   - Oculto o menor valor do título enquanto o checkpoint está ativo; removida a ordenação crescente `.sort` via `buildSelectionCheckpointOptions`; removidos contadores operacionais do header primário; e substituídos `INSPECT`/`COMMIT` por `BUSCA` e `POSICIONAMENTO` no Nível 1.
+5. **`P-07` e `P-10a/b` Corrigidos (Reset Integral no Insertion e Higiene Visual):**
+   - `handleReset` em `InsertionGameScreenV2` limpa integralmente `hintsUsed`, `hintsUsedRef`, `startTimeRef`, timeouts de animação e flags transitórias; nivelado o baseline de caixas no Bubble e adicionadas bordas semânticas sutis para `min`/`target` em `NumberedBox` (`variant="learning"`).
+6. **Pendências Registradas para Intervenção Posterior (`P-08` e `P-10c/d`):**
+   - Unificação de rotas/escopo em `App.tsx` (incluindo a restrição de `BubbleGameScreenV2` antes de avaliar práticas Intermediária/Avançada com *Scaffolding Fading*) e unificação das gavetas de Nível 3 permanecem formalmente registradas em [`ux-practice-r3-comparative-audit.md`](./ux-practice-r3-comparative-audit.md).
+
+
+
+

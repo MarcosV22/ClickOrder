@@ -473,6 +473,19 @@ flowchart TD
   - `SelectionDetails.tsx`: Seção retrátil única (`<details>`) fechada por padrão com detalhes formais do algoritmo ($i, j, \text{minIndex}$, FSM `INSPECT`/`COMMIT`, contraste com Bubble Sort, 13 linhas de pseudocódigo canônico consumidas diretamente de `SELECTION_SORT_PSEUDOCODE`, análise assintótica com $\Theta(n^2)$ comparações em qualquer caso e máximo de $n-1$ trocas físicas, e link subordinado `[ Ver Demonstração Livre › ]`).
 - **Roteamento em `App.tsx`:** Quando `screen === "briefing"` e `briefingModeId === "selection-canonical"`, renderiza diretamente `SelectionModuleOverviewV2`.
 
+### 3.19. Redesign Visual-First do Tutorial e da Prática Básica do Insertion Sort (`UX-PRACTICE-R2`)
+- **Diretório:** `src/screens/insertion/`
+- **Componentes Integrados:**
+  - `InsertionTutorialScreenV2.tsx`: Tutorial guiado sobre o vetor canônico `[4, 2, 3]`. Apresenta predição ativa de hipótese (`InsertionPredictionCard.tsx`), botoeira com pergunta dinâmica situacional e atalhos de teclado 1 e 2, esteira com chave elevada no trilho aéreo e vaga física `[ _ ]`, checkpoint conceitual de reforço pós-deslocamento (`InsertionConceptualCheckpoint.tsx` consolidando `DESLOCAMENTO ≠ TROCA`), gaveta retrátil de aprofundamento técnico (`InsertionTechnicalDetails.tsx`) e delegação para `onComplete`.
+  - `InsertionTutorialScreen.tsx`: Wrapper canônico retrocompatível que delega a renderização para `InsertionTutorialScreenV2.tsx`.
+  - `InsertionGameScreenV2.tsx`: Interface da Prática Básica ($n=4$, SupportProfile `full`) do Insertion Sort sob o padrão Visual-First. Consome diretamente a `insertionSortEngine`, mantém histórico, métricas, score canônico e despacha `onComplete(data)`.
+  - `InsertionConveyorTrack.tsx`: Trilho aéreo de elevação da `CHAVE`, esteira de roletes com a vaga física `[ _ ]` (`InsertionHoleSlot.tsx`), indicador `observando` sob a caixa $j$ em comparação retroativa, realce sutil esmeralda na região ordenada preliminar sem exibir `ORD` na camada operacional primária, e `aria-live="polite"`.
+  - `InsertionDecisionControls.tsx`: Pergunta central dinâmica baseada no estado (`COMPARE_AND_SHIFT` ou `INSERT_READY`), botões neutros balanceados `[ 1: Deslizar para a Direita ]` / `[ 2: Encaixar a Chave ]`, atalhos de teclado `1` e `2`, feedback causal imediato sem avanço de estado em caso de erro, e suporte pedagógico de Nível 2 `[ ? Dica ]`.
+  - `InsertionPredictionCard.tsx`: Desafio prévio reflexivo para estimulação de hipótese no início do tutorial.
+  - `InsertionConceptualCheckpoint.tsx`: Checkpoint reflexivo intermediário consolidando que o elemento maior apenas abriu espaço.
+  - `InsertionTechnicalDetails.tsx`: Gaveta retrátil de Nível 3 com variáveis da FSM e 11 instruções do `INSERTION_SORT_PSEUDOCODE`.
+- **Roteamento em `App.tsx`:** O roteador raiz conecta `InsertionTutorialScreenV2` no fluxo de tutorial e `InsertionGameScreenV2` na Prática Básica do Insertion Sort (fase 1), mantendo as práticas intermediária, avançada e casos na tela consolidada original.
+
 ---
 
 ## 4. Componentes Compartilhados (`src/components/`)
@@ -642,6 +655,8 @@ interface SelectionSortPseudocodePanelProps {
 | **`ProtocolModeBriefingScreen`** | [`src/screens/ProtocolModeBriefingScreen.tsx`](../../src/screens/ProtocolModeBriefingScreen.tsx) | Briefing intermediário orientado a dados para modos e protocolos | `briefing`, `onStart`, `onBack` | [`src/App.tsx`](../../src/App.tsx) |
 | **`TutorialScreen`** | [`src/screens/TutorialScreen.tsx`](../../src/screens/TutorialScreen.tsx) | Demonstração animada e regras do Bubble Sort | `onBack`, `onUnderstood` | [`src/App.tsx`](../../src/App.tsx) |
 | **`SelectionTutorialScreen`** | [`src/screens/SelectionTutorialScreen.tsx`](../../src/screens/SelectionTutorialScreen.tsx) | Tutorial interativo guiado com a engine real do Selection Sort | `onComplete`, `onBack` | [`src/App.tsx`](../../src/App.tsx) |
+| **`InsertionTutorialScreenV2`** | [`src/screens/insertion/InsertionTutorialScreenV2.tsx`](../../src/screens/insertion/InsertionTutorialScreenV2.tsx) | Tutorial interativo guiado Visual-First do Insertion Sort | `onComplete`, `onBack` | `InsertionTutorialScreen`, [`src/App.tsx`](../../src/App.tsx) |
+| **`InsertionGameScreenV2`** | [`src/screens/insertion/InsertionGameScreenV2.tsx`](../../src/screens/insertion/InsertionGameScreenV2.tsx) | Gameplay interativo da Prática Básica Visual-First do Insertion Sort | `initialArray`, `phase`, `onComplete`, `onBack` | [`src/App.tsx`](../../src/App.tsx) |
 | **`GameScreen`** | [`src/screens/GameScreen.tsx`](../../src/screens/GameScreen.tsx) | Gameplay interativo, seleção e lógica de ordenação | `initialArray`, `phase`, `onComplete` | [`src/App.tsx`](../../src/App.tsx) |
 | **`SelectionGameScreen`** | [`src/screens/SelectionGameScreen.tsx`](../../src/screens/SelectionGameScreen.tsx) | Gameplay interativo do Selection Sort em 3 fases procedurais | `initialArray`, `phase`, `onComplete` | [`src/App.tsx`](../../src/App.tsx) |
 | **`ResultScreen`** | [`src/screens/ResultScreen.tsx`](../../src/screens/ResultScreen.tsx) | Exibe métricas factuais (comparações, trocas, erros, dicas) e pseudocódigo | `finalArray`, `comparisons`, `swaps`, `errors`, `hintsUsed`, `phase`, `hasNextPhase`, `onRepeat`, `onNext`, `onViewReplay` | [`src/App.tsx`](../../src/App.tsx) |

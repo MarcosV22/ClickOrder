@@ -13,6 +13,32 @@ export interface SelectionCommitCheckpointProps {
   } | null;
 }
 
+/**
+ * Gera de forma determinística e sem duplicatas as opções do checkpoint pré-commit
+ * a partir da partição inspecionada (currentValues.slice(targetIdx)):
+ * - Contém sempre o menor elemento encontrado (resposta correta);
+ * - Não utiliza ordenação crescente automática que fixe a resposta na 1ª posição;
+ * - Preserva a ordem espacial da esteira e rotaciona deterministicamente caso a fatia já esteja em ordem crescente.
+ */
+export function buildSelectionCheckpointOptions(
+  currentValues: readonly number[],
+  targetIdx: number
+): number[] {
+  const unique = Array.from(new Set(currentValues.slice(targetIdx)));
+  if (unique.length <= 1) {
+    return unique;
+  }
+
+  const isStrictlyAscending = unique.every(
+    (val, idx) => idx === 0 || unique[idx - 1] < val
+  );
+  if (isStrictlyAscending) {
+    return [...unique.slice(1), unique[0]];
+  }
+
+  return unique;
+}
+
 export default function SelectionCommitCheckpoint({
   gameState,
   onCommit,
@@ -35,10 +61,11 @@ export default function SelectionCommitCheckpoint({
   const minVal = gameState.currentValues[minIdx];
   const willSwap = targetIdx !== minIdx;
 
-  // Opções para o checkpoint: valores dos elementos da partição não ordenada
-  const candidateValues = Array.from(
-    new Set(gameState.currentValues.slice(targetIdx))
-  ).sort((a, b) => a - b);
+  // Opções para o checkpoint: valores distintos da partição não ordenada sem ordenação crescente automática
+  const candidateValues = buildSelectionCheckpointOptions(
+    gameState.currentValues,
+    targetIdx
+  );
 
   const handleSelectCheckpoint = (val: number) => {
     setSelectedAnswer(val);
@@ -59,14 +86,18 @@ export default function SelectionCommitCheckpoint({
 
   return (
     <div className="w-full flex flex-col items-center gap-4 bg-[#0d1635]/90 border border-amber-500/30 rounded-2xl p-5 sm:p-6 shadow-xl animate-fadeIn">
-      {/* Cabeçalho de Consolidação */}
+      {/* Cabeçalho de Consolidação (sem revelar minVal enquanto o checkpoint estiver aberto) */}
       <div className="text-center space-y-1">
         <span className="text-xs uppercase tracking-wider font-mono text-amber-400 font-semibold flex items-center justify-center gap-2">
           <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
           <span>Varredura Concluída • Hora de Posicionar</span>
         </span>
         <h3 className="text-lg sm:text-xl font-bold text-slate-100">
-          {willSwap ? (
+          {showCheckpoint ? (
+            <span>
+              Qual número deve ir para a {targetIdx === 0 ? "primeira" : "próxima"} posição?
+            </span>
+          ) : willSwap ? (
             <span>
               Transferir o menor encontrado (<span className="text-amber-300 font-mono">{minVal}</span>) para a {targetIdx === 0 ? "primeira" : "próxima"} posição
             </span>
@@ -81,8 +112,8 @@ export default function SelectionCommitCheckpoint({
       {/* Checkpoint Pedagógico Interativo (quando ativado) */}
       {showCheckpoint ? (
         <div className="w-full max-w-lg bg-amber-950/30 border border-amber-500/40 rounded-xl p-4 flex flex-col items-center gap-3">
-          <p className="text-sm font-semibold text-amber-200 text-center">
-            Qual número deve ir para a {targetIdx === 0 ? "primeira" : "próxima"} posição?
+          <p className="text-xs sm:text-sm font-medium text-amber-200/90 text-center">
+            Com base na busca realizada, escolha o menor valor encontrado na esteira:
           </p>
           <div className="flex flex-wrap gap-2.5 justify-center">
             {candidateValues.map((val) => (
@@ -116,7 +147,7 @@ export default function SelectionCommitCheckpoint({
           <div className="text-xs sm:text-sm text-slate-300 text-center leading-relaxed bg-[#0a1026] p-3.5 rounded-xl border border-slate-800">
             {willSwap ? (
               <span>
-                Durante o <span className="font-mono text-cyan-300">INSPECT</span> nenhuma caixa foi movida. Agora no <span className="font-mono text-amber-300 font-bold">COMMIT</span>, o menor elemento (<strong className="text-purple-300">{minVal}</strong>) será trocado com o elemento da posição a preencher (<strong className="text-slate-300">{targetVal}</strong>).
+                Durante a <span className="font-mono text-cyan-300 font-semibold">BUSCA</span> nenhuma caixa foi movida. Agora no <span className="font-mono text-amber-300 font-bold">POSICIONAMENTO</span>, o menor elemento (<strong className="text-purple-300">{minVal}</strong>) será trocado com o elemento da posição a preencher (<strong className="text-slate-300">{targetVal}</strong>).
               </span>
             ) : (
               <span>

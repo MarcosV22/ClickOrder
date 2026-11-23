@@ -454,3 +454,51 @@ Nos marcos **UX-MODULE-R1**, **UX-MODULE-R1.1** e **UX-MODULE-R3**, a visão ger
    - Análise assintótica formal: Melhor Caso $\Theta(n)$ com $0$ deslocamentos, Casos Médio e Pior $\Theta(n^2)$ com até $\frac{n(n-1)}{2}$ deslocamentos unilaterais, estabilidade algorítmica garantida e memória auxiliar $\Theta(1)$ / $O(1)$;
    - Botão para execução da Demonstração Livre.
 
+---
+
+## 22. Redesign Visual-First do Tutorial e da Prática Básica (`UX-PRACTICE-R2`)
+
+No marco **UX-PRACTICE-R2**, o Tutorial Guiado e a Prática Básica do Insertion Sort foram integralmente redesenhados segundo o padrão **Visual-First**, eliminando o formato de dashboard industrial ruidoso e centrando a experiência no ciclo cognitivo consciente:
+
+$$\text{OBSERVE A CHAVE} \longrightarrow \text{COMPARE PARA TRÁS} \longrightarrow \text{ABRA ESPAÇO} \longrightarrow \text{ENCAIXE}$$
+
+### 22.1. Arquitetura de Componentes V2
+- **`InsertionConveyorTrack.tsx`:** Rende o Trilho Aéreo de Suspensão com a `CHAVE` flutuando verticalmente (`key !== null`) e a Esteira de Triagem com a `VAGA` física aberta (`InsertionHoleSlot` em slot tracejado âmbar). Elemento observado marcado com `OBSERVANDO` (outline cyan límpido). Ausência total de badge `ORD` na camada primária de decisão;
+- **`InsertionDecisionControls.tsx`:** Botoeira contextual cujas opções e pergunta derivam estritamente do estado da engine pura (`COMPARE_AND_SHIFT` exibe `Deslizar para a direita [1]` e `Encaixar a chave na vaga [2]` com fundo slate neutro, sem indução de cores verde/vermelho; `INSERT_READY` exibe apenas o encaixe na cabeceira);
+- **`InsertionPredictionCard.tsx`:** Checkpoint apresentacional exibido antes da primeira decisão do Tutorial no vetor canônico `[4, 2, 3]` (*"A chave 2 deve ficar antes ou depois do 4?"*), estimulando intuição prévia sem alterar engine, score ou Schema v4;
+- **`InsertionConceptualCheckpoint.tsx`:** Reflexão conceitual única exibida imediatamente após o primeiro deslocamento no Tutorial (*"O que aconteceu com a carga 4?"* $\rightarrow$ *"Deslizou para abrir espaço"*), consolidando a distinção $\text{SHIFT} \neq \text{SWAP}$;
+- **`InsertionTechnicalDetails.tsx`:** Gaveta `<details>` fechada por padrão (Nível 3), contendo variáveis de telemetria formal ($i, j, \text{key}, \text{holeIndex}, \text{orderedBoundary}$) e o pseudocódigo canônico de 11 linhas com linha ativa sincronizada;
+- **`InsertionTutorialScreenV2.tsx`:** Orquestrador do tutorial interativo guiado no vetor `[4, 2, 3]`;
+- **`InsertionGameScreenV2.tsx`:** Orquestrador da Prática Básica ($n=4$, SupportProfile `full`), cálculo estrito de pontuação por fórmula canônica $\max(0, 100 - 10 \times \text{erros} - 5 \times \text{dicas})$, transições animadas e feedback causal com ícones semânticos SVG (zero emojis de sistema).
+
+### 22.2. Distinção Canônica entre Módulos
+
+| Algoritmo | Mecânica de Espaço / Posição | Comportamento das Cargas durante a Busca | Tipo de Movimento |
+| :--- | :--- | :--- | :--- |
+| **Selection Sort** | **`POSIÇÃO-ALVO`** ($i$ fixo, sem vaga física) | **Estáticas:** Nenhuma caixa se move durante as comparações ($j = i+1 \dots n-1$). | **Swap Bilateral Único** no commit ($A[i] \leftrightarrow A[\text{minIndex}]$). |
+| **Insertion Sort** | **`VAGA FÍSICA`** ($[ \_ ]$, móvel via shifts) | **Deslocamentos Unilaterais:** Cargas maiores deslizam para a direita para abrir espaço. | **Shift Unilateral** ($A[j] \rightarrow A[j+1]$) e **Drop Vertical** da Chave. |
+| **Bubble Sort** | **Pares Adjacentes** ($j, j+1$) | **Trocas Imediatas:** Elementos trocam continuamente de posição quando invertidos. | **Swaps Bilaterais Consecutivos** a cada inversão local. |
+
+---
+
+## 23. Hardening Conceitual e Redução de Ruído do Insertion Sort V2 (`UX-PRACTICE-R2.1`)
+
+O marco **UX-PRACTICE-R2.1** realizou o hardening conceitual e a redução de densidade visual do Insertion Sort V2, eliminando ambiguidades metodológicas e separando rigorosamente a tomada de decisão em 3 níveis hierárquicos:
+
+### 23.1. Invariante Epistemológica: `ORD LOCAL ≠ OK DEFINITIVO`
+- **Diagnóstico da Falha Cognitiva:** No Insertion Sort, o prefixo $[0 \dots \text{orderedBoundary}]$ encontra-se ordenado apenas relativamente a si mesmo. Ele **NÃO** representa posições consolidadas definitivas (`OK`), pois chaves subsequentes menores ainda podem forçar novos deslocamentos (*shifts*) para a direita de qualquer um desses elementos;
+- **Regra Visual Canônica:** Durante a ordenação (`completed === false`), nenhum elemento do vetor recebe acabamento esmeralda/verde (`border-emerald-500`, `bg-emerald-950`), nem badge `OK` ou `ORD` na visualização primária. O acabamento esmeralda consolidado (`role="sorted"`, "OK") é reservado **exclusivamente** para o encerramento factual da prática (`completed === true`), quando todos os elementos atingem a invariante global de ordenação;
+- **A Vaga Física:** A vaga (`InsertionHoleSlot.tsx`) é visualmente neutra/âmbar com borda tracejada. Ela **NUNCA** recebe coloração esmeralda, nem badge `ORD`, nem `OK`.
+
+### 23.2. Redução de Ruído Métrico durante a Decisão (Nível 1 Limpo)
+- **Despoluição do Cabeçalho Operacional:** Contadores concorrentes de execução (`Comparações`, `Deslocamentos`, `Inserções` e `Tentativas incorretas / Erros`) foram removidos do subcabeçalho de decisão da tela ativa de gameplay;
+- **Hierarquia de 3 Níveis de Informação:**
+  - **Nível 1 (Decisão Operacional Imediata):** Módulo ativo (`Insertion Sort • Prática Básica`), indicador sutil de progresso (`Passada X de Y` e barra percentual), trilho suspenso com chave ativa, esteira com vaga física, elemento inspecionado, pergunta central e botões balanceados;
+  - **Nível 2 (Suporte & Mediação Reflexiva):** Feedback causal imediato pós-ação e botão de auxílio opcional `[ ? Dica ]`;
+  - **Nível 3 (Auditoria Formal & Métricas):** Gaveta técnica retrátil `<details>` com pseudocódigo de 11 linhas e variáveis de FSM em tempo real ($i, j, \text{key}, \text{holeIndex}, \text{orderedBoundary}$, contadores acumulados), e Tela de Conclusão pós-prática com métricas completas e pontuação.
+
+### 23.3. Simplificação Semântica da Chave, Vaga e Scanner
+- **Chave Suspensa (`CHAVE`):** A chave no trilho aéreo superior porta um único rótulo limpo `CHAVE` em `NumberedBox` sob o cabeçalho funcional `TRILHO AÉREO • CHAVE SUSPENSA`, eliminando rótulos duplicados empilhados sob a caixa;
+- **Vaga Física (`VAGA`):** O slot tracejado apresenta um único indicador semântico `VAGA` e posição `#idx+1`, alinhado com a altura e espaçamento das demais cargas, sem badges secundários repetitivos (`ABERTA`, `⇣`) ou pulsações excessivas;
+- **Elemento Observado (`OBSERVANDO`):** Reduzido de 5 pistas visuais simultâneas e conflitantes (bouncing arrow `▼`, pulso, glow, borda e badge `SCAN`) para 2 sinais límpidos e acessíveis: contorno com foco ciano e chip textual único inferior `OBSERVANDO`, mantendo equivalência para leitores de tela via `aria-label`.
+

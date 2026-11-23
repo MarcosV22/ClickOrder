@@ -63,6 +63,7 @@ O objetivo pedagógico central é **ensinar algoritmos de ordenação por manipu
 | **11** | [`11-architecture-decisions.md`](11-architecture-decisions.md) | `IMPLEMENTADO` | Governança de ADRs, índice formal de ADRs 0001 a 0027 e catálogo de candidatos. |
 | **12** | [`12-pedagogy-and-academic-traceability.md`](12-pedagogy-and-academic-traceability.md) | `IMPLEMENTADO` | Rastreabilidade pedagógica, rigor científico, modo demonstração e inventário de seções do artigo. |
 | **V2** | [`ux-redesign-v2.md`](ux-redesign-v2.md) | `ATIVO` | Redesenho integral da UX/UI V2: auditoria de poluição, hierarquia em 3 níveis, wireframes e aprendizagem ativa. |
+| **AUD**| [`ux-practice-r3-comparative-audit.md`](ux-practice-r3-comparative-audit.md) | `ATIVO` | Auditoria comparativa visual, funcional e pedagógica das 3 Práticas Básicas V2 (`UX-PRACTICE-R3`). |
 | **EXP**| [`learning-experience-expansion.md`](learning-experience-expansion.md) | `ATIVO` | Especificação dos marcos de diferenciação curricular e Casos do Algoritmo. |
 | **LAB**| [`comparison-lab.md`](comparison-lab.md) | `BLOQUEADO (P3.4)` | Especificação técnica do Laboratório Comparativo (bloqueado até os 6 módulos estarem prontos). |
 | **QA** | [`qa-gameplay-checklist.md`](qa-gameplay-checklist.md) | `IMPLEMENTADO` | Roteiro operacional e matriz de testes manuais/homologação de mecânicas e regressão. |

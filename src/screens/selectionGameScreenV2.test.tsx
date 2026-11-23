@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import React, { act } from "react";
 import { createRoot, Root } from "react-dom/client";
 import SelectionGameScreenV2 from "./selection/SelectionGameScreenV2";
+import { buildSelectionCheckpointOptions } from "./selection/SelectionCommitCheckpoint";
 
 describe("SelectionGameScreenV2 — Prática Básica Visual-First", () => {
   let container: HTMLDivElement;
@@ -40,11 +41,16 @@ describe("SelectionGameScreenV2 — Prática Básica Visual-First", () => {
     });
 
     expect(container.textContent).toContain("Selection Sort • PRÁTICA BÁSICA");
-    expect(container.textContent).toContain("Comparações:");
-    expect(container.textContent).toContain("Trocas:");
+    expect(container.textContent).toContain("Passada 1 de 2");
     expect(container.textContent).toContain("O número 1 é menor que o menor atual, 4?");
     expect(container.textContent).toContain("Sim, é o novo menor");
     expect(container.textContent).toContain("Não, manter o menor");
+
+    // P-06: cabeçalho primário não exibe métricas concorrentes ao vivo
+    const header = container.querySelector("header");
+    expect(header?.textContent).not.toContain("Comparações:");
+    expect(header?.textContent).not.toContain("Trocas:");
+    expect(header?.textContent).not.toContain("Erros:");
   });
 
   it("deve tratar decisões incorretas incrementando erros e exibindo feedback causal sem mover caixas", async () => {
@@ -70,8 +76,11 @@ describe("SelectionGameScreenV2 — Prática Básica Visual-First", () => {
       naoBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    // Deve registrar erro
-    expect(container.textContent).toContain("Erros: 1");
+    // Deve registrar erro nos detalhes técnicos (Nível 3) sem poluir o cabeçalho de Nível 1
+    const header = container.querySelector("header");
+    expect(header?.textContent).not.toContain("Erros:");
+    const details = container.querySelector("details");
+    expect(details?.textContent).toContain("1 erro(s)");
     expect(container.textContent).toContain("Atenção: 1 é menor que 4!");
 
     // O scanner continua no mesmo lugar (não avança)
@@ -225,5 +234,77 @@ describe("SelectionGameScreenV2 — Prática Básica Visual-First", () => {
     expect(container.textContent).toContain("próxima posição");
     expect(container.textContent).toContain("menor atual");
     expect(container.textContent).toContain("Dica");
+  });
+
+  it("P-04 e P-06: checkpoint pré-commit não exibe spoiler do menor valor, não ordena opções para fixar posição e Nível 1 não expõe INSPECT/COMMIT", async () => {
+    // 1. Geração determinística sem ordenação crescente automática e sem posição fixa
+    const optMid = buildSelectionCheckpointOptions([68, 74, 6, 26], 0);
+    expect(optMid).toEqual([68, 74, 6, 26]); // 6 na posição 2 (não ordenado)
+
+    const optEnd = buildSelectionCheckpointOptions([40, 30, 20, 10], 0);
+    expect(optEnd).toEqual([40, 30, 20, 10]); // 10 na posição 3
+
+    const optAsc = buildSelectionCheckpointOptions([10, 20, 30, 40], 0);
+    expect(optAsc).toContain(10);
+    expect(optAsc[0]).not.toBe(10); // rotacionado para não denunciar a 1ª posição em fatia ordenada
+    expect(optAsc[0] < optAsc[1] && optAsc[1] < optAsc[2] && optAsc[2] < optAsc[3]).toBe(false);
+
+    const optDup = buildSelectionCheckpointOptions([30, 10, 30, 20], 0);
+    expect(optDup).toEqual([30, 10, 20]); // distintos e válidos
+
+    // 2. Renderização real do checkpoint sobre [68, 74, 6, 26]
+    const onComplete = vi.fn();
+    await act(async () => {
+      root.render(
+        <SelectionGameScreenV2
+          onComplete={onComplete}
+          initialArray={[68, 74, 6, 26]}
+          phase={1}
+        />
+      );
+    });
+
+    // Passada 1: j=1 (74 >= 68 -> 2), j=2 (6 < 68 -> 1), j=3 (26 >= 6 -> 2)
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "2" }));
+    });
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "1" }));
+    });
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "2" }));
+    });
+
+    // Agora estamos no Checkpoint Pré-Commit da Passada 1
+    expect(container.textContent).toContain("Qual número deve ir para a primeira posição?");
+    // P-04: NÃO pode revelar "Transferir o menor encontrado (6)" enquanto o checkpoint estiver aberto!
+    expect(container.textContent).not.toContain("Transferir o menor encontrado");
+
+    // Ordem dos botões no DOM deve ser [68, 74, 6, 26] (6 não está na 1ª posição!)
+    const optionBtns = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[data-testid^="checkpoint-option-"]')
+    );
+    expect(optionBtns.map((b) => Number(b.textContent))).toEqual([68, 74, 6, 26]);
+
+    // Errar no checkpoint apresentacional NÃO altera errors da engine
+    await act(async () => {
+      optionBtns[0]?.dispatchEvent(new MouseEvent("click", { bubbles: true })); // clica 68
+    });
+    const detailsBefore = container.querySelector("details");
+    expect(detailsBefore?.textContent).not.toContain("erro(s)");
+
+    // Acertar clicando em 6 libera o botão de posicionamento
+    await act(async () => {
+      optionBtns[2]?.dispatchEvent(new MouseEvent("click", { bubbles: true })); // clica 6
+    });
+
+    // P-06: Nível 1 (fora de <details>) usa BUSCA e POSICIONAMENTO, sem termos internos INSPECT/COMMIT
+    const mainWithoutDetails = Array.from(container.querySelectorAll("main > *:not(details)"))
+      .map((el) => el.textContent)
+      .join(" ");
+    expect(mainWithoutDetails).toContain("BUSCA");
+    expect(mainWithoutDetails).toContain("POSICIONAMENTO");
+    expect(mainWithoutDetails).not.toContain("INSPECT");
+    expect(mainWithoutDetails).not.toContain("COMMIT");
   });
 });

@@ -3,10 +3,12 @@ import type { SelectionSortState } from "../../game/sorting/selection";
 
 export interface SelectionTechnicalDetailsProps {
   gameState: SelectionSortState;
+  onToggleOpen?: (open: boolean) => void;
 }
 
 export default function SelectionTechnicalDetails({
   gameState,
+  onToggleOpen,
 }: SelectionTechnicalDetailsProps) {
   const currentPass = Math.min(gameState.i + 1, Math.max(1, gameState.arrayLength - 1));
   const isInspect = gameState.phase === "INSPECT";
@@ -14,6 +16,7 @@ export default function SelectionTechnicalDetails({
 
   return (
     <details
+      onToggle={(e) => onToggleOpen?.((e.currentTarget as HTMLDetailsElement).open)}
       className="w-full bg-[#0d1635]/60 border border-slate-700/60 rounded-xl p-4 text-xs font-mono text-slate-300 transition-all group"
     >
       <summary className="cursor-pointer select-none font-semibold text-slate-400 hover:text-purple-300 flex items-center justify-between">
@@ -51,8 +54,11 @@ export default function SelectionTechnicalDetails({
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500">Comparações / Trocas:</span>
-            <span className="text-slate-300 font-bold">{gameState.comparisons} comp. / {gameState.swaps} trocas</span>
+            <span className="text-slate-500">Métricas acumuladas:</span>
+            <span className="text-slate-300 font-bold">
+              {gameState.comparisons} comp. / {gameState.swaps} trocas
+              {gameState.errors > 0 ? ` / ${gameState.errors} erro(s)` : ""}
+            </span>
           </div>
         </div>
 

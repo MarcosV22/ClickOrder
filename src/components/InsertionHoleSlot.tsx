@@ -10,16 +10,18 @@
 interface InsertionHoleSlotProps {
   index: number;
   size?: "sm" | "md" | "lg";
+  showIndex?: boolean;
 }
 
 export default function InsertionHoleSlot({
   index,
   size = "lg",
+  showIndex = false,
 }: InsertionHoleSlotProps) {
   const sizeMap = {
-    sm: { box: "w-16 h-16", icon: "text-lg", label: "text-[10px]" },
-    md: { box: "w-20 h-20", icon: "text-xl", label: "text-xs" },
-    lg: { box: "w-28 h-28", icon: "text-2xl", label: "text-xs" },
+    sm: { box: "w-16 h-16", text: "text-xs" },
+    md: { box: "w-20 h-20", text: "text-sm" },
+    lg: { box: "w-28 h-28", text: "text-sm" },
   };
 
   const s = sizeMap[size];
@@ -28,34 +30,32 @@ export default function InsertionHoleSlot({
     <div
       role="status"
       aria-label={`Vaga física aberta na esteira, posição ${index + 1}`}
-      className={`relative ${s.box} rounded-xl border-2 border-dashed border-amber-400/50 bg-amber-950/20 flex flex-col items-center justify-between p-2 select-none transition-all duration-300 shadow-inner shadow-amber-900/30 animate-pulse`}
-      style={{
-        boxShadow: "inset 0 0 15px rgba(245, 158, 11, 0.15)",
-      }}
+      className="relative flex flex-col items-center gap-1 select-none"
     >
-      {/* Top Badge: Sempre VAGA (nunca ORD) */}
-      <span
-        className={`${s.label} text-amber-400 font-mono tracking-widest font-black uppercase`}
-        style={{ fontFamily: "'Space Mono', monospace" }}
-      >
-        VAGA
-      </span>
+      {/* Rótulo de índice da posição acima da vaga (alinhado com NumberedBox) */}
+      {showIndex && (
+        <span
+          className="text-slate-400 font-mono font-bold"
+          style={{ fontFamily: "'Space Mono', monospace", fontSize: "11px" }}
+        >
+          #{index + 1}
+        </span>
+      )}
 
-      {/* Central Icon indicando abertura / recepção */}
-      <div className="flex flex-col items-center justify-center">
-        <span className={`${s.icon} text-amber-400/60 leading-none`}>⇣</span>
-        <span className="text-[9px] font-mono text-amber-300/40 tracking-wider">
-          ABERTA
+      {/* Vaga física: fenda vazia limpa com borda tracejada e rótulo único VAGA */}
+      <div
+        className={`relative ${s.box} rounded-lg border-2 border-dashed border-amber-400/50 bg-amber-950/20 flex flex-col items-center justify-center transition-all duration-200`}
+      >
+        <span
+          className={`${s.text} text-amber-400 font-mono font-bold tracking-widest uppercase`}
+          style={{ fontFamily: "'Space Mono', monospace" }}
+        >
+          VAGA
         </span>
       </div>
 
-      {/* Bottom Index Label */}
-      <span
-        className={`${s.label} text-white/40 font-mono`}
-        style={{ fontFamily: "'Space Mono', monospace" }}
-      >
-        #{index + 1}
-      </span>
+      {/* Espaçador inferior para manter alinhamento com caixas com rótulo sob a esteira */}
+      <div className="h-5" aria-hidden="true" />
     </div>
   );
 }

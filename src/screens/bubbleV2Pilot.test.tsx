@@ -6,10 +6,13 @@ import React, { act } from "react";
 import { createRoot, Root } from "react-dom/client";
 import BubbleModuleOverviewV2 from "./bubble/BubbleModuleOverviewV2";
 import BubbleTutorialScreenV2 from "./bubble/BubbleTutorialScreenV2";
-import BubbleGameScreenV2 from "./bubble/BubbleGameScreenV2";
+import BubbleGameScreenV2, {
+  buildBubblePassCheckpointOptions,
+} from "./bubble/BubbleGameScreenV2";
 import BubbleResultScreenV2 from "./bubble/BubbleResultScreenV2";
 import ResultScreen from "./ResultScreen";
 import { createUxTestSession, type BubbleUxTestSession } from "./bubble/bubbleUxTest";
+import { generateSortingArray, BUBBLE_BASIC_CONSTRAINTS } from "../game/generation";
 
 describe("Bubble Sort V2 Pilot — End-to-End Educational & Visual Experience", () => {
   let container: HTMLDivElement;
@@ -215,10 +218,18 @@ describe("Bubble Sort V2 Pilot — End-to-End Educational & Visual Experience", 
         proceedBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       });
 
-      // Agora botões de ação estão visíveis com o mesmo peso
-      expect(container.textContent).toContain("⇄ TROCAR");
-      expect(container.textContent).toContain("= MANTER");
-      expect(container.textContent).toContain("Essas duas caixas estão na ordem certa?");
+      // Agora botões de ação estão visíveis com o mesmo peso neutro e pergunta semanticamente coerente
+      const swapBtn = container.querySelector<HTMLButtonElement>('[data-testid="action-swap"]');
+      const keepBtn = container.querySelector<HTMLButtonElement>('[data-testid="action-keep"]');
+      expect(swapBtn?.textContent).toContain("TROCAR");
+      expect(keepBtn?.textContent).toContain("MANTER");
+      expect(swapBtn?.className).toBe(keepBtn?.className);
+      expect(container.textContent).toContain(
+        "O que devemos fazer com esses dois números vizinhos?"
+      );
+      expect(container.textContent).not.toContain(
+        "Essas duas caixas estão na ordem certa?"
+      );
     });
 
     it("ao errar a ação, deve fornecer feedback causal amigável sem avançar a posição do algoritmo", async () => {
@@ -309,8 +320,10 @@ describe("Bubble Sort V2 Pilot — End-to-End Educational & Visual Experience", 
         hintBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       });
 
-      // Feedback de dica é exibido no banner causal
+      // Feedback de dica orienta o raciocínio sem entregar qual botão pressionar (P-03)
       expect(container.textContent).toContain("Dica pedagógica: Compare 40 e 20");
+      expect(container.textContent).toContain("ordem crescente");
+      expect(container.textContent).not.toContain("A ação correta é");
 
       // Agora inspeciona a gaveta de detalhes técnicos (Nível 3)
       const drawerToggle = container.querySelector<HTMLButtonElement>('[data-testid="drawer-toggle"]');
@@ -324,6 +337,160 @@ describe("Bubble Sort V2 Pilot — End-to-End Educational & Visual Experience", 
       expect(container.textContent).toContain("passIndex (i)");
       expect(container.textContent).toContain("se A[j] > A[j+1]");
       expect(drawerToggle?.textContent).toContain("Ocultar detalhes");
+    });
+
+    it("P-01: checkpoint pós-1ª passada sempre inclui o maior elemento sem duplicatas, sem ordenação crescente e sem posição fixa", async () => {
+      // 1. Maior no início, no meio, no final e com duplicatas / diferentes comprimentos
+      const cases: readonly (readonly number[])[] = [
+        [50, 20, 30, 10], // maior no início
+        [20, 50, 10, 30], // maior no meio (idx 1)
+        [20, 30, 50, 10], // maior no meio (idx 2)
+        [30, 20, 10, 50], // maior no final (caso crítico da auditoria!)
+        [40, 20, 40, 10], // duplicatas do maior
+        [10, 10, 50, 10], // múltiplas duplicatas de distraidor
+        [25, 25, 25, 25], // todos iguais
+        [90, 10], // n = 2
+        [10, 20, 30, 40, 50, 60], // n = 6 com maior no fim
+      ];
+
+      const observedPositions = new Set<number>();
+
+      for (const arr of cases) {
+        const opts = buildBubblePassCheckpointOptions(arr);
+        const maxVal = Math.max(...arr);
+
+        // Sempre inclui a resposta correta
+        expect(opts).toContain(maxVal);
+        // Sem alternativas duplicadas
+        expect(new Set(opts).size).toBe(opts.length);
+        // Quando há 3 alternativas, nunca está automaticamente em ordem estritamente crescente
+        if (opts.length >= 3) {
+          const isAscending = opts[0] < opts[1] && opts[1] < opts[2];
+          expect(isAscending).toBe(false);
+          observedPositions.add(opts.indexOf(maxVal));
+        }
+      }
+
+      // Resposta correta não é fixada em uma única posição (aparece em 0, 1 e 2)
+      expect(observedPositions.has(0)).toBe(true);
+      expect(observedPositions.has(1)).toBe(true);
+      expect(observedPositions.has(2)).toBe(true);
+
+      // 2. Exaustivo sobre vetores válidos da Prática Básica (sementes procedurais reais)
+      for (let seed = 1; seed <= 30; seed++) {
+        const gen = generateSortingArray({
+          length: 4,
+          minValue: 1,
+          maxValue: 99,
+          allowDuplicates: false,
+          seed,
+          constraints: BUBBLE_BASIC_CONSTRAINTS,
+        });
+        const opts = buildBubblePassCheckpointOptions(gen.values);
+        const maxVal = Math.max(...gen.values);
+        expect(opts).toContain(maxVal);
+        expect(new Set(opts).size).toBe(3);
+      }
+
+      // 3. Teste integrado no DOM para o caso crítico [30, 20, 10, 50] sem alterar score/engine
+      const onComplete = vi.fn();
+      await act(async () => {
+        root.render(
+          <BubbleGameScreenV2
+            initialArray={[30, 20, 10, 50]}
+            onComplete={onComplete}
+            onBackToSelector={vi.fn()}
+          />
+        );
+      });
+
+      // Predição inicial
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="prediction-left"]')
+          ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="prediction-confirm"]')
+          ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+
+      // Passada 1 sobre [30, 20, 10, 50]:
+      // Comp 1: 30 > 20 -> SWAP -> [20, 30, 10, 50]
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="action-swap"]')
+          ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+      // Comp 2: 30 > 10 -> SWAP -> [20, 10, 30, 50]
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="action-swap"]')
+          ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+      // Comp 3: 30 <= 50 -> KEEP -> fim da 1ª passada!
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="action-keep"]')
+          ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+
+      // Checkpoint pós-passada deve oferecer o botão pass-check-50!
+      const correctOption = container.querySelector<HTMLButtonElement>(
+        '[data-testid="pass-check-50"]'
+      );
+      expect(correctOption).toBeTruthy();
+
+      await act(async () => {
+        correctOption?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+      expect(container.textContent).toContain("Exatamente! O maior valor (50)");
+    });
+
+    it("P-05: preserva estabilidade com elementos duplicados explicando que valores iguais mantêm posição", async () => {
+      await act(async () => {
+        root.render(
+          <BubbleGameScreenV2
+            initialArray={[20, 20, 10]}
+            onComplete={vi.fn()}
+            onBackToSelector={vi.fn()}
+          />
+        );
+      });
+
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="prediction-left"]')
+          ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="prediction-confirm"]')
+          ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+
+      // Tentar trocar 20 com 20 deve ser erro explicando igualdade
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="action-swap"]')
+          ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+      expect(container.textContent).toContain("20 é igual a 20");
+
+      // Manter 20 e 20 deve avançar preservando estabilidade
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="action-keep"]')
+          ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+      expect(container.textContent).toContain("elementos iguais mantêm suas posições originais");
     });
   });
 

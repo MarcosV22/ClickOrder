@@ -23,6 +23,7 @@ import BubbleModuleOverviewV2 from "./screens/bubble/BubbleModuleOverviewV2";
 import InsertionModuleOverviewV2 from "./screens/insertion/InsertionModuleOverviewV2";
 import SelectionModuleOverviewV2 from "./screens/selection/SelectionModuleOverviewV2";
 import SelectionGameScreenV2 from "./screens/selection/SelectionGameScreenV2";
+import InsertionGameScreenV2 from "./screens/insertion/InsertionGameScreenV2";
 import BubbleGameScreenV2 from "./screens/bubble/BubbleGameScreenV2";
 import type { BubbleUxTestSession } from "./screens/bubble/bubbleUxTest";
 import InsertionReplayScreen from "./screens/InsertionReplayScreen";
@@ -1404,36 +1405,47 @@ export default function App({
             onComplete={handleSelectionComplete}
           />
         ))}
-      {screen === "insertion-practice" && (
-        <InsertionGameScreen
-          key={`insertion-${activeActivityContext?.type === "case" ? activeActivityContext.caseDefinition.id : `practice-${insertionLevel}-${insertionSeed}`}`}
-          level={insertionLevel}
-          initialArray={insertionArray}
-          seed={insertionSeed}
-          practiceTitle={
-            activeActivityContext?.type === "case"
-              ? activeActivityContext.caseDefinition.shortTitle
-              : undefined
-          }
-          practiceObjective={
-            activeActivityContext?.type === "case"
-              ? activeActivityContext.caseDefinition.learningObjective
-              : undefined
-          }
-          supportProfile={
-            activeActivityContext?.type === "case"
-              ? "reduced"
-              : insertionLevel === "basic"
-                ? "full"
-                : insertionLevel === "intermediate"
-                  ? "reduced"
-                  : "minimal"
-          }
-          onComplete={handleInsertionComplete}
-          onResetPractice={() => {}}
-          onBackToHub={handleReturnHome}
-        />
-      )}
+      {screen === "insertion-practice" &&
+        (activeActivityContext?.type !== "case" && insertionLevel === "basic" ? (
+          <InsertionGameScreenV2
+            key={`insertion-v2-practice-${insertionLevel}-${insertionSeed}`}
+            level={insertionLevel}
+            initialArray={insertionArray}
+            seed={insertionSeed}
+            practiceTitle="PRÁTICA BÁSICA"
+            onBackToHub={handleReturnHome}
+            onComplete={handleInsertionComplete}
+          />
+        ) : (
+          <InsertionGameScreen
+            key={`insertion-${activeActivityContext?.type === "case" ? activeActivityContext.caseDefinition.id : `practice-${insertionLevel}-${insertionSeed}`}`}
+            level={insertionLevel}
+            initialArray={insertionArray}
+            seed={insertionSeed}
+            practiceTitle={
+              activeActivityContext?.type === "case"
+                ? activeActivityContext.caseDefinition.shortTitle
+                : undefined
+            }
+            practiceObjective={
+              activeActivityContext?.type === "case"
+                ? activeActivityContext.caseDefinition.learningObjective
+                : undefined
+            }
+            supportProfile={
+              activeActivityContext?.type === "case"
+                ? "reduced"
+                : insertionLevel === "basic"
+                  ? "full"
+                  : insertionLevel === "intermediate"
+                    ? "reduced"
+                    : "minimal"
+            }
+            onComplete={handleInsertionComplete}
+            onResetPractice={() => {}}
+            onBackToHub={handleReturnHome}
+          />
+        ))}
       {screen === "merge-practice" && (
         <MergeGameScreen
           key={`merge-practice-${mergeLevel}-${mergeSeed}`}

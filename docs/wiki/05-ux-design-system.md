@@ -695,6 +695,55 @@ No marco `UX-PRACTICE-R1.1`, foram estabelecidas duas regras canônicas de consi
 3. **Distinção Terminológica Epistemológica:**
    - O termo "vaga" é restrito ao Insertion Sort (onde a chave desocupa fisicamente um slot e elementos sofrem *shift*). No Selection Sort, utiliza-se rigorosamente "posição-alvo", "próxima posição" ou "posição a preencher", pois não há vacância física durante a varredura.
 
+### 11.16. Padrão Visual-First na Prática Interativa: Insertion Sort (`UX-PRACTICE-R2`)
+No marco `UX-PRACTICE-R2`, o padrão Visual-First foi estendido ao gameplay interativo do Insertion Sort:
+1. **Esteira de Elevação e Vaga Física (`InsertionConveyorTrack.tsx`):**
+   - **Trilho Aéreo Superior:** A chave sob encaixe é suspensa com badge `CHAVE`, halo âmbar e indicação clara de desacoplamento vertical do vetor;
+   - **Vaga Física Transitória:** Na esteira de roletes, o slot desocupado pela chave é exibido como `[ _ ]` (`InsertionHoleSlot.tsx`), indicando graficamente o espaço vazio deixado no vetor;
+   - **Marcador Inferior `observando`:** Apenas o elemento $j$ sob comparação retroativa imediata recebe a indicação `observando`;
+   - **Eliminação de `ORD` e do Esmeralda Prematuro na Camada Primária:** Elementos consolidados da partição ordenada preliminar recebem acabamento neutro e discreto sem coloração esmeralda prematura; a sigla formal `ORD` é omitida na camada operacional para evitar ruído conceitual precoce (`ORD LOCAL ≠ OK DEFINITIVO`), permanecendo acessível na gaveta técnica de Nível 3.
+2. **Pergunta Dinâmica e Botoeira Balanceada (`InsertionDecisionControls.tsx`):**
+   - Pergunta centralizada situacional derivada dinamicamente do estado:
+     - Durante `COMPARE_AND_SHIFT`: *"O número sob análise ({scanVal}) é maior que a chave ({keyVal})?"*;
+     - Em `INSERT_READY` ($j < 0$): *"Início do vetor alcançado. A chave ({keyVal}) pode ser encaixada na vaga!"*;
+   - Dois botões neutros e balanceados sem viés cromático pré-clique: `[ 1: Deslizar para a Direita ]` e `[ 2: Encaixar a Chave ]`;
+   - Em `INSERT_READY`, apenas a ação válida de encaixe da chave é exibida;
+   - Suporte nativo a atalhos de teclado `1` e `2` (e `Enter` para encaixe único);
+   - Feedback causal imediato explicando a consequência física e lógica da regra em caso de acerto ou erro (sem avançar o estado);
+   - Apoio reflexivo de Nível 2 sob demanda via botão `[ ? Dica ]`.
+3. **Checkpoints Formativos de Previsão e Reforço:**
+   - Card de predição ativo no início do Tutorial (`InsertionPredictionCard.tsx`): *"A chave 2 deve ficar antes ou depois do 4?"*;
+   - Checkpoint conceitual pós-primeiro deslocamento (`InsertionConceptualCheckpoint.tsx`): *"O que aconteceu com o 4?"* → *"Deslizou para abrir espaço"*, fixando a distinção `DESLOCAMENTO ≠ TROCA`.
+4. **Erradicação Total de Emojis de SO:**
+   - Ícones de apoio, avisos e botões de conclusão utilizam exclusivamente SVG padronizado e selos CSS, mantendo fidelidade e seriedade educacional cross-platform.
+
+### 11.17. Hardening Conceitual e Redução de Ruído do Insertion Sort V2 (`UX-PRACTICE-R2.1`)
+No marco `UX-PRACTICE-R2.1`, o design system da esteira do Insertion Sort foi estabilizado em torno da clareza semântica e da redução de sobrecarga perceptual:
+1. **Invariante `ORD LOCAL ≠ OK DEFINITIVO`:**
+   - O prefixo ordenado do Insertion Sort $[0 \dots \text{orderedBoundary}]$ não é estático; elementos maiores podem ser deslocados para a direita repetidamente a cada nova chave processada.
+   - Proibição absoluta de acabamentos verdes/esmeralda (`#10b981`) ou badges de finalização (`OK`, `ORD`) durante a ordenação ativa.
+   - O acabamento verde consolidado (`role="sorted"`, `OK`) é de ativação exclusiva pós-término (`completed === true`).
+2. **Separação de Níveis de Decisão vs. Métricas Operacionais:**
+   - O subcabeçalho de decisão exibe estritamente a passada atual (`Passada X de Y`) e a barra de progresso.
+   - Contadores concorrentes de comparações, deslocamentos, inserções e erros pertencem ao Nível 3 (`<details>` técnico) e à tela de resultados.
+3. **Consolidação de Sinais Visuais Únicos:**
+   - **Chave:** Um único crachá textual `CHAVE` na caixa suspensa sob o cabeçalho funcional;
+   - **Vaga:** Um único indicador textual `VAGA` no slot tracejado âmbar, sem sobreposição de rótulos (`ABERTA`, setas descestivas);
+   - **Scanner ($A[j]$):** Contorno ciano e rótulo inferior `OBSERVANDO`, sem flechas animadas flutuantes.
+
+### 11.18. Simetria Transversal de Botoeiras, Compactação por Altura de Viewport e Ocultação de `#pos` (`UX-PRACTICE-R3.1`)
+No marco `UX-PRACTICE-R3.1`, os três pilotos de Prática Básica V2 foram alinhados às diretrizes contra indução visual e corte de viewport:
+1. **Neutralidade e Simetria Estrita nas Três Botoeiras Primárias:**
+   - Em Bubble (`[1] TROCAR` / `[2] MANTER`), Selection (`[1] Sim, é o novo menor` / `[2] Não, manter o menor`) e Insertion (`[1] Deslizar para a direita` / `[2] Encaixar a chave na vaga`), ambos os botões utilizam superfície neutra idêntica (`bg-slate-800/90 border-slate-600/60`), mesma altura (`54px`) e badges `<kbd>`, proibindo cores primárias assimétricas que induzam uma resposta.
+2. **Papéis `min` e `target` em `NumberedBox` (`variant="learning"`):**
+   - `role="min"` / `"scan-min"` recebe contorno roxo sutil (`#a855f7`) e `role="target"` / `"target-min"` recebe contorno âmbar sutil (`rgba(245,158,11,0.75)`), reforçando visualmente os chips externos sem poluir o interior da caixa.
+3. **Responsividade por Altura Real de Viewport em Layouts de Dois Andares (Insertion Sort):**
+   - Como o Insertion Sort empilha verticalmente o Trilho Aéreo (`CHAVE`) e a Esteira Principal (`VAGA` + cargas), viewports com altura `< 860px` (`1366×768` e `1280×650`) utilizam `size="md"` (`80×80px`, fonte `text-3xl`), enquanto monitores altos (`1600×900` e `1920×1080`) preservam `size="lg"` (`112×112px`). Isso assegura visibilidade simultânea de chave, vaga, elemento observado, pergunta e botões sem rolagem em `1366×768` e sem uso de `h-screen overflow-hidden`.
+4. **Índices Posicionais `#pos` Ocultos por Padrão na Camada Básica:**
+   - Em todos os três módulos, `showIndex` permanece `false` por padrão no Nível 1 (inclusive em `InsertionHoleSlot`), sendo ativado sob demanda ao expandir os detalhes técnicos de Nível 3, enquanto `aria-label` e `.sr-only` preservam integralmente a posição para leitores de tela.
+
+
+
 
 
 

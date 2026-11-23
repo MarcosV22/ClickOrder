@@ -124,6 +124,24 @@ export default function NumberedBox({
             badgeColor: "text-blue-300 font-semibold",
             pulse: false,
           };
+        case "min":
+        case "scan-min":
+          return {
+            bg: "bg-purple-950/50 shadow-md shadow-purple-500/15",
+            border: "2px solid #a855f7",
+            text: "text-purple-100",
+            badgeColor: "text-purple-300 font-semibold",
+            pulse: false,
+          };
+        case "target":
+        case "target-min":
+          return {
+            bg: "bg-amber-950/35",
+            border: "2px solid rgba(245,158,11,0.75)",
+            text: "text-amber-100",
+            badgeColor: "text-amber-300 font-semibold",
+            pulse: false,
+          };
         case "sorted":
         case "ordered":
           return {

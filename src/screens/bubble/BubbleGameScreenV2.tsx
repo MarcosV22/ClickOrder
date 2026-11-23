@@ -30,6 +30,45 @@ export interface BubbleGameScreenV2Props {
 
 const DEFAULT_ARRAY = [40, 20, 50, 10];
 
+/**
+ * Gera de forma determinística e sem duplicatas até 3 opções apresentacionais
+ * para o checkpoint pós-1ª passada do Bubble Sort:
+ * - Sempre inclui o maior elemento do vetor (resposta correta);
+ * - Nunca duplica valores;
+ * - Não ordena automaticamente as opções em ordem crescente;
+ * - Distribui deterministicamente a posição da resposta correta entre os índices disponíveis.
+ */
+export function buildBubblePassCheckpointOptions(
+  initialValues: readonly number[]
+): number[] {
+  const unique = Array.from(new Set(initialValues));
+  if (unique.length <= 1) {
+    return unique;
+  }
+
+  const maxVal = Math.max(...unique);
+  const k = Math.min(3, unique.length);
+  const distractors = unique.filter((v) => v !== maxVal).slice(0, k - 1);
+
+  const rawHash = initialValues.reduce((acc, v, idx) => acc * 5 + v + idx, 0);
+  const targetPos = Math.abs(rawHash) % k;
+
+  const options = [...distractors];
+  options.splice(targetPos, 0, maxVal);
+
+  // Evita ordenação estritamente crescente quando há 3 opções distintas
+  if (
+    options.length >= 3 &&
+    options.every((v, idx) => idx === 0 || options[idx - 1] < v)
+  ) {
+    const tmp = options[0];
+    options[0] = options[1];
+    options[1] = tmp;
+  }
+
+  return options;
+}
+
 export default function BubbleGameScreenV2({
   initialArray = DEFAULT_ARRAY,
   phase = 1,
@@ -201,7 +240,10 @@ export default function BubbleGameScreenV2({
           // KEEP
           setFeedback({
             type: "success",
-            text: `Correto! ${leftVal} já é menor ou igual a ${rightVal}, mantendo suas posições.`,
+            text:
+              leftVal === rightVal
+                ? `Correto! ${leftVal} é igual a ${rightVal}; elementos iguais mantêm suas posições originais.`
+                : `Correto! ${leftVal} já é menor ou igual a ${rightVal}, mantendo suas posições.`,
           });
           const nextState = stepResult.state;
           setGameState(nextState);
@@ -222,7 +264,10 @@ export default function BubbleGameScreenV2({
         } else {
           setFeedback({
             type: "error",
-            text: `Observe: ${leftVal} é menor ou igual a ${rightVal}. Eles já estão em ordem relativa. Mantenha as posições!`,
+            text:
+              leftVal === rightVal
+                ? `Observe: ${leftVal} é igual a ${rightVal} (${leftVal} ≤ ${rightVal}). Valores iguais não trocam de lugar; mantenha as posições!`
+                : `Observe: ${leftVal} é menor ou igual a ${rightVal}. Eles já estão em ordem relativa. Mantenha as posições!`,
           });
         }
       }
@@ -331,7 +376,7 @@ export default function BubbleGameScreenV2({
     }
   };
 
-  // Nível 2: Dica acessível na área de decisão
+  // Nível 2: Dica acessível na área de decisão (orienta o raciocínio sem entregar o botão)
   const handleRequestHint = () => {
     if (!expected) return;
     setHintsUsed((prev) => prev + 1);
@@ -348,10 +393,9 @@ export default function BubbleGameScreenV2({
       });
     }
 
-    const actionName = expected.shouldSwap ? "TROCAR" : "MANTER";
     setFeedback({
       type: "info",
-      text: `Dica pedagógica: Compare ${expected.leftValue} e ${expected.rightValue}. A ação correta é ${actionName}.`,
+      text: `Dica pedagógica: Compare ${expected.leftValue} e ${expected.rightValue}. Para ficar em ordem crescente, o menor valor deve estar à esquerda e o maior à direita.`,
     });
   };
 
@@ -375,7 +419,7 @@ export default function BubbleGameScreenV2({
   };
 
   return (
-    <div className="w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#0a0e1a] text-slate-100 flex flex-col items-center justify-start py-6 px-4 sm:px-6">
+    <div className="w-full min-h-screen overflow-x-hidden bg-[#0a0e1a] text-slate-100 flex flex-col items-center justify-start py-6 px-4 sm:px-6">
       <div className="w-full max-w-3xl flex flex-col items-center gap-6 my-auto">
         {/* Top Header - Zero score, zero timer, clean navigation */}
         <div className="w-full flex items-center justify-between border-b border-slate-800/80 pb-4">
@@ -445,16 +489,21 @@ export default function BubbleGameScreenV2({
                         : null
                     }
                   />
-                  {isPair && (
-                    <span className="text-xs font-mono font-bold text-blue-400 animate-fade-in">
-                      vizinho
-                    </span>
-                  )}
-                  {isSorted && (
-                    <span className="text-xs font-mono font-semibold text-emerald-400">
-                      ordenado
-                    </span>
-                  )}
+                  <div className="h-5 flex items-center justify-center">
+                    {isPair ? (
+                      <span className="text-xs font-mono font-bold text-blue-400 animate-fade-in">
+                        vizinho
+                      </span>
+                    ) : isSorted ? (
+                      <span className="text-xs font-mono font-semibold text-emerald-400">
+                        ordenado
+                      </span>
+                    ) : (
+                      <span className="text-xs font-mono opacity-0 select-none" aria-hidden="true">
+                        —
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -528,11 +577,10 @@ export default function BubbleGameScreenV2({
                   Depois desta 1ª passada completa, qual elemento já chegou à sua posição final definitiva?
                 </p>
 
-                {/* 3 options: max element and 2 others */}
+                {/* Até 3 opções determinísticas distintas contendo sempre o maior elemento */}
                 <div className="flex items-center gap-3 sm:gap-4 mt-2 flex-wrap justify-center">
-                  {Array.from(new Set(gameState.initialValues))
-                    .slice(0, 3)
-                    .map((val) => (
+                  {buildBubblePassCheckpointOptions(gameState.initialValues).map(
+                    (val) => (
                       <button
                         key={val}
                         type="button"
@@ -546,7 +594,8 @@ export default function BubbleGameScreenV2({
                       >
                         {val}
                       </button>
-                    ))}
+                    )
+                  )}
                 </div>
 
                 {passCheckFeedback && (
@@ -588,39 +637,39 @@ export default function BubbleGameScreenV2({
                 </button>
               </div>
 
-              <p className="text-base sm:text-lg text-white font-medium -mt-2">
-                Essas duas caixas estão na ordem certa?{" "}
+              <h3 className="text-lg sm:text-xl font-bold text-slate-100 -mt-1">
+                O que devemos fazer com esses dois números vizinhos?{" "}
                 <span className="text-blue-300 font-mono font-bold">
                   [{expected.leftValue}] e [{expected.rightValue}]
                 </span>
-              </p>
+              </h3>
 
-              {/* Two Main Action Buttons of Equal Weight */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md">
+              {/* Dois botões neutros e simétricos (sem indução cromática pré-clique) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full max-w-xl">
                 <button
                   type="button"
                   data-testid="action-swap"
                   onClick={() => handleDecision("SWAP")}
-                  className="w-full sm:flex-1 py-4 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold text-base shadow-lg shadow-blue-600/20 transition-all cursor-pointer flex flex-col items-center justify-center gap-1 group"
-                  aria-label="Trocar os dois elementos de posição. Tecla de atalho: 1"
+                  className="relative flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 active:bg-slate-700 text-slate-100 font-semibold border border-slate-600/60 shadow-lg hover:border-blue-400/60 transition-all cursor-pointer group text-sm sm:text-base"
+                  aria-label="Trocar os dois elementos de posição (tecla 1)"
                 >
-                  <span className="text-lg">⇄ TROCAR</span>
-                  <span className="text-[11px] font-mono font-normal text-blue-200 opacity-80 group-hover:opacity-100">
-                    Atalho: [1]
-                  </span>
+                  <kbd className="inline-flex items-center justify-center w-6 h-6 rounded bg-slate-900 border border-slate-700 text-xs font-mono font-bold text-slate-300 group-hover:border-blue-400 group-hover:text-blue-300">
+                    1
+                  </kbd>
+                  <span>TROCAR</span>
                 </button>
 
                 <button
                   type="button"
                   data-testid="action-keep"
                   onClick={() => handleDecision("KEEP")}
-                  className="w-full sm:flex-1 py-4 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-900 border border-slate-700 text-slate-100 font-bold text-base transition-all cursor-pointer flex flex-col items-center justify-center gap-1 group"
-                  aria-label="Manter a ordem dos elementos. Tecla de atalho: 2"
+                  className="relative flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 active:bg-slate-700 text-slate-100 font-semibold border border-slate-600/60 shadow-lg hover:border-blue-400/60 transition-all cursor-pointer group text-sm sm:text-base"
+                  aria-label="Manter a ordem dos elementos (tecla 2)"
                 >
-                  <span className="text-lg">= MANTER</span>
-                  <span className="text-[11px] font-mono font-normal text-slate-400 group-hover:opacity-100">
-                    Atalho: [2]
-                  </span>
+                  <kbd className="inline-flex items-center justify-center w-6 h-6 rounded bg-slate-900 border border-slate-700 text-xs font-mono font-bold text-slate-300 group-hover:border-blue-400 group-hover:text-blue-300">
+                    2
+                  </kbd>
+                  <span>MANTER</span>
                 </button>
               </div>
 

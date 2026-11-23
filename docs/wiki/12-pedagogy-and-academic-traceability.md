@@ -702,6 +702,66 @@ No marco **UX-PRACTICE-R1.1**, foram consolidadas demarcações epistemológicas
   1. **Métricas Pedagógicas Escolares:** Comparações, trocas, erros, dicas utilizadas e tempo total de resolução. Constituem dados de aprendizagem e scaffolding, integrados à FSM e ao Schema v4 de persistência;
   2. **Instrumentação de Usabilidade (UX):** Tempos de latência entre estímulo e primeiro clique, tempos de resposta a botões e padrões de navegação são restritos a sessões de teste formativo com usuários (ativadas sob flag `?uxTest=1`), sem qualquer impacto no estado algorítmico, score ou persistência do estudante.
 
+---
+
+## 23. Redesign Visual-First do Tutorial e da Prática Básica do Insertion Sort (`UX-PRACTICE-R2`)
+
+O marco **UX-PRACTICE-R2** consolida a extensão da abordagem Visual-First para o gameplay interativo do Insertion Sort, abrangendo o Tutorial Guiado (`InsertionTutorialScreenV2.tsx`) e a Prática Básica (`InsertionGameScreenV2.tsx`):
+
+### 23.1. Fundamentação Pedagógica das Intervenções de Prática
+1. **O Modelo Mental Canônico do Insertion Sort:**
+   $$\text{OBSERVE A CHAVE} \longrightarrow \text{COMPARE PARA TRÁS} \longrightarrow \text{DECIDA SE PRECISA ABRIR ESPAÇO} \longrightarrow \text{DESLOQUE OU ENCAIXE} \longrightarrow \text{ENTENDA O RESULTADO}$$
+2. **Diferenciação Espacial: Vaga Física vs. Posição-Alvo:**
+   - No Selection Sort, todas as caixas permanecem na esteira e não há vaga física aberta; o commit executa uma troca bilateral.
+   - No Insertion Sort, a chave é elevada ao trilho aéreo superior, desocupando fisicamente uma posição no vetor (`[ _ ]` - `InsertionHoleSlot`).
+   - Os elementos maiores sofrem translação lateral (*shift*), fazendo a vaga física transladar para a esquerda até que o ponto de encaixe correto seja encontrado.
+3. **Consolidação de `DESLOCAMENTO ≠ TROCA` (`SHIFT ≠ SWAP`):**
+   - Um erro clássico em estudantes iniciantes é pensar que o elemento sob comparação "troca" de posição com a chave.
+   - A interface modela explicitamente que o elemento maior desliza para a direita para ocupar a vaga aberta, sem envolver a chave elevada.
+   - No Tutorial, um checkpoint reflexivo (`InsertionConceptualCheckpoint.tsx`) reforça essa conceituação: *"O que aconteceu com o 4?"* → *"Deslizou para abrir espaço"*.
+4. **Decisões Conscientes sem Indução Cromática Prévia:**
+   - A botoeira apresenta botões simétricos e neutros: `[ 1: Deslizar para a Direita ]` e `[ 2: Encaixar a Chave ]`.
+   - Nenhuma cor verde ou vermelha antecipa a resposta correta antes do clique.
+5. **Apoio Estruturado em 3 Níveis:**
+   - Nível 1: Esteira limpa com chave suspensa e vaga física, pergunta central situacional e botões neutros;
+   - Nível 2: Dica reflexiva discreta via `[ ? Dica ]`, sem entregar diretamente a ação;
+   - Nível 3: Gaveta retrátil `<details>` com variáveis da FSM e pseudocódigo canônico de 11 instruções (`InsertionTechnicalDetails.tsx`).
+
+### 23.2. Postura Epistemológica Não-Presuntiva
+A reformulação interativa do Insertion Sort é classificada formalmente como **hipótese instrucional de design**. A validação sobre a mitigação do equívoco *shift vs swap* e a retenção da invariante da vaga física será objeto de observação empírica em sessões formativas com usuários.
+
+---
+
+## 24. Hardening Conceitual e Epistemológico: ORD Local vs. Conclusão Definitiva (`UX-PRACTICE-R2.1`)
+
+O marco **UX-PRACTICE-R2.1** formalizou a distinção epistemológica fundamental entre ordenação local relativa e consolidação definitiva na visualização de algoritmos:
+
+### 24.1. Fundamentação Teórica: `ORD LOCAL ≠ OK DEFINITIVO`
+- **Assimetria Estrutural entre Selection e Insertion Sort:**
+  - No **Selection Sort**, o elemento alocado na posição $i$ ao término da passada é matematicamente o menor do restante do vetor ($\min A[i \dots n-1]$). Uma vez fixado, **jamais** voltará a se mover até o encerramento do algoritmo. Portanto, o rótulo consolidado `OK` (esmeralda) é rigorosamente verdadeiro;
+  - No **Insertion Sort**, os elementos do prefixo $A[0 \dots \text{orderedBoundary}]$ encontram-se ordenados exclusivamente entre si. Quando a próxima chave $A[i]$ é elevada ao trilho, se ela for estritamente menor que qualquer um desses elementos, eles serão sucessivamente deslocados (*shifted*) para a direita ($A[j+1] \leftarrow A[j]$). Nenhuma dessas cargas pode ser considerada definitiva antes do esgotamento da última passada ($i = n-1$).
+- **Impacto no Design da Interface:** Apresentar elementos preliminares com coloração verde/esmeralda ou badges de sucesso (`OK`, `ORD`) induz a uma falsa sensação de completude e estabilidade posicional, quebrando a construção do modelo mental correto de inserção dinâmica. Por isso, a camada primária preserva tons neutros e reserva o acabamento verde para quando o lote estiver $100\%$ ordenado.
+
+### 24.2. Teoria da Carga Cognitiva e Eliminação de Métricas Concorrentes
+- Conforme a Teoria da Carga Cognitiva (Sweller, 1988), a memória de trabalho do estudante possui capacidade limitada.
+- A exibição simultânea e em tempo real de contadores de comparações, deslocamentos, inserções e erros durante a tomada de decisão adiciona **carga cognitiva extrínseca** desnecessária, competindo com a **carga germânica** essencial (avaliar se $A[j] > \text{chave}$).
+- O isolamento dessas métricas para a fase pós-prática (Tela de Resultados) e para o modo de aprofundamento sob demanda (Gaveta Técnica de Nível 3) garante foco atencional exclusivo na relação de ordem entre as grandezas físicas sob inspeção.
+
+---
+
+## 25. Auditoria Comparativa Transversal e Demarcação Epistemológica A/B/C (`UX-PRACTICE-R3`)
+
+No marco diagnóstico **`UX-PRACTICE-R3`** ([`ux-practice-r3-comparative-audit.md`](./ux-practice-r3-comparative-audit.md)), a auditoria comparativa das três Práticas Básicas V2 (**Bubble**, **Selection** e **Insertion Sort**) formalizou a separação metodológica em três dimensões de verificação:
+
+1. **Dimensão A — Correção e Determinismo Algorítmico (Verificável em Código):**
+   - As engines puras, FSMs e fórmulas de pontuação operam segundo suas especificações matemáticas formais (731 testes automatizados verdes).
+2. **Dimensão B — Inteligibilidade da Interface e Neutralidade contra Clique Mecânico (Auditável por Inspeção Técnica/Visual):**
+   - Exige que a camada primária apresente foco, pergunta e ações sem spoilers, sem viés cromático pré-clique e sem cortes de viewport em resoluções escolares (`1366×768`). A auditoria identificou pendências objetivas de hardening pré-teste de campo (como a dica do Bubble que revela a ação, o spoiler textual e ordenação fixa no checkpoint do Selection, o corte `.slice(0, 3)` no checkpoint do Bubble e a rolagem vertical obrigatória em `1366×768` no Insertion).
+3. **Dimensão C — Compreensão Conceitual Demonstrada pelo Estudante (Exclusiva de Avaliação Empírica Humana):**
+   - Nenhum teste automatizado de software nem auditoria de layout autoriza afirmar que o estudante compreendeu o algoritmo. A verificação da Dimensão C requer observação formativa estruturada com participantes humanos (protocolo Think-Aloud e tarefa final de transferência comparativa sobre um vetor inédito).
+
+
+
 
 
 

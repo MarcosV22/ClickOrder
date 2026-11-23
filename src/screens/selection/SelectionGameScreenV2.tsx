@@ -49,6 +49,7 @@ export default function SelectionGameScreenV2({
   } | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [hintsUsed, setHintsUsed] = useState(0);
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
   const [feedback, setFeedback] = useState<{
     text: string;
     type: "success" | "warning" | "info";
@@ -225,17 +226,16 @@ export default function SelectionGameScreenV2({
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-3 text-xs font-mono text-slate-400">
-            <span>Comparações: <strong className="text-slate-200">{gameState.comparisons}</strong></span>
-            <span>•</span>
-            <span>Trocas: <strong className="text-slate-200">{gameState.swaps}</strong></span>
-            {gameState.errors > 0 && (
-              <>
-                <span>•</span>
-                <span className="text-rose-400 font-semibold">Erros: {gameState.errors}</span>
-              </>
-            )}
-          </div>
+          <span className="hidden sm:inline-block text-xs font-mono text-slate-400">
+            Passada{" "}
+            <strong className="text-purple-300">
+              {Math.min(gameState.i + 1, Math.max(1, gameState.arrayLength - 1))}
+            </strong>{" "}
+            de{" "}
+            <strong className="text-slate-200">
+              {Math.max(1, gameState.arrayLength - 1)}
+            </strong>
+          </span>
           <button
             type="button"
             onClick={handleReset}
@@ -261,6 +261,7 @@ export default function SelectionGameScreenV2({
           sortedIndices={sortedIndices}
           animatingPair={animatingPair}
           isAnimating={isAnimating}
+          showTechnicalDetails={showTechnicalDetails}
         />
 
         {/* Controles de Decisão (Estado INSPECT) */}
@@ -342,7 +343,10 @@ export default function SelectionGameScreenV2({
         )}
 
         {/* Detalhes Técnicos em Nível 3 */}
-        <SelectionTechnicalDetails gameState={gameState} />
+        <SelectionTechnicalDetails
+          gameState={gameState}
+          onToggleOpen={setShowTechnicalDetails}
+        />
       </main>
     </div>
   );
