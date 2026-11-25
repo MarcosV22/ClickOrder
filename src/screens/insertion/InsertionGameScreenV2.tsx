@@ -21,6 +21,7 @@ export interface InsertionGameScreenV2Props {
   level?: InsertionPracticeLevel;
   seed?: SeedInput;
   practiceTitle?: string;
+  onBackToSelector?: () => void;
   onBackToHub?: () => void;
   onResetPractice?: () => void;
 }
@@ -33,6 +34,7 @@ export default function InsertionGameScreenV2({
   level = "basic",
   seed = "",
   practiceTitle = "PRÁTICA BÁSICA",
+  onBackToSelector,
   onBackToHub,
   onResetPractice,
 }: InsertionGameScreenV2Props) {
@@ -153,7 +155,11 @@ export default function InsertionGameScreenV2({
           animationTimeoutRef.current = null;
           setGameState(result.state);
           setAnimatingInsert(false);
-          isActionLockedRef.current = false;
+          if (result.state.completed) {
+            triggerCompletion(result.state);
+          } else {
+            isActionLockedRef.current = false;
+          }
         }, 350);
       }
     } else {
@@ -203,19 +209,26 @@ export default function InsertionGameScreenV2({
   };
 
   const boxSize = isCompactViewport ? "md" : "lg";
+  const handleBack = onBackToSelector ?? onBackToHub;
 
   return (
-    <div className="min-h-screen bg-[#070b19] text-slate-100 flex flex-col items-center py-3 sm:py-4 px-4 sm:px-6 pb-12">
+    <div className="w-full min-h-screen overflow-x-clip bg-[#070b19] text-slate-100 flex flex-col items-center py-3 sm:py-4 px-4 sm:px-6 pb-12">
       {/* Barra de Navegação Superior */}
       <header className="w-full max-w-4xl flex items-center justify-between pb-2.5 border-b border-amber-500/20 mb-3">
-        <button
-          type="button"
-          onClick={onBackToHub}
-          className="flex items-center gap-2 text-sm text-slate-400 hover:text-amber-300 font-mono transition-colors cursor-pointer"
-        >
-          <span>←</span>
-          <span>Voltar ao Hub</span>
-        </button>
+        {handleBack ? (
+          <button
+            type="button"
+            data-testid="back-to-practices"
+            onClick={handleBack}
+            aria-label="Voltar para a seleção de práticas"
+            className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-400 hover:text-amber-300 font-mono transition-colors cursor-pointer px-1.5 py-1 rounded"
+          >
+            <span>←</span>
+            <span>Práticas</span>
+          </button>
+        ) : (
+          <span />
+        )}
 
         <div className="flex items-center gap-3">
           <span className="text-xs px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 font-mono text-amber-300 font-bold uppercase tracking-wider">
@@ -265,63 +278,12 @@ export default function InsertionGameScreenV2({
             onToggleHint={handleToggleHint}
           />
         ) : (
-          /* Card de Conclusão da Prática */
           <div
-            role="region"
-            aria-label="Conclusão da Prática Básica"
-            className="w-full max-w-xl bg-[#0d1635]/95 border border-emerald-500/40 rounded-2xl p-6 sm:p-7 shadow-2xl flex flex-col items-center gap-5 text-center animate-fadeIn"
+            role="status"
+            aria-live="polite"
+            className="w-full max-w-xl bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-4 text-center text-sm font-mono text-emerald-200"
           >
-            <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300 text-2xl font-bold">
-              ✓
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-xl sm:text-2xl font-bold text-white">
-                Prática Básica Concluída!
-              </h3>
-              <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
-                Todas as cargas foram devidamente comparadas e inseridas em suas posições corretas.
-              </p>
-            </div>
-
-            {/* Resumo Factual das Métricas */}
-            <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#090d1f] p-3 rounded-xl border border-slate-800 text-xs font-mono">
-              <div className="flex flex-col items-center">
-                <span className="text-slate-500">Comparações</span>
-                <span className="text-cyan-300 font-bold text-sm">{gameState.comparisons}</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-slate-500">Deslocamentos</span>
-                <span className="text-cyan-300 font-bold text-sm">{gameState.shifts}</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-slate-500">Inserções</span>
-                <span className="text-amber-300 font-bold text-sm">{gameState.insertions}</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-slate-500">Pontuação</span>
-                <span className="text-emerald-400 font-bold text-sm">
-                  {calculateProtocolScore({ errors: gameState.errors, hintsUsed })}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 w-full justify-center pt-2">
-              <button
-                type="button"
-                onClick={() => triggerCompletion(gameState)}
-                className="px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
-              >
-                Concluir Prática e Ver Resultados →
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="px-5 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-700 text-slate-200 font-semibold border border-slate-700 transition-all cursor-pointer"
-              >
-                Repetir Prática
-              </button>
-            </div>
+            ✓ Ordenação concluída! Carregando resultado oficial...
           </div>
         )}
 

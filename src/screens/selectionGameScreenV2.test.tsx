@@ -191,18 +191,11 @@ describe("SelectionGameScreenV2 — Prática Básica Visual-First", () => {
       vi.advanceTimersByTime(600);
     });
 
-    // Tela de conclusão
-    expect(container.textContent).toContain("Prática Concluída com Sucesso!");
-    expect(container.textContent).toContain("Dicas Usadas");
-
-    const finishBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+    // P-08D: Conclusão única direta sem segunda confirmação redundante ("Concluir Prática")
+    const redundantFinishBtn = Array.from(container.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("Concluir Prática")
     );
-    expect(finishBtn).toBeTruthy();
-
-    await act(async () => {
-      finishBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
+    expect(redundantFinishBtn).toBeUndefined();
 
     expect(onComplete).toHaveBeenCalledTimes(1);
     const payload = onComplete.mock.calls[0][0];

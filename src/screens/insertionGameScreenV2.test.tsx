@@ -239,19 +239,11 @@ describe("InsertionGameScreenV2 — Prática Básica Visual-First", () => {
       vi.advanceTimersByTime(400);
     });
 
-    // Conclusão
-    expect(container.textContent).toContain("Prática Básica Concluída!");
-    expect(container.textContent).toContain("Pontuação");
-
-    // Clica em Concluir Prática e Ver Resultados
-    const completeBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Concluir Prática e Ver Resultados")
+    // P-08D: Conclusão única direta sem exigir segundo clique em "Concluir Prática e Ver Resultados"
+    const redundantCompleteBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Concluir Prática")
     );
-    expect(completeBtn).toBeTruthy();
-
-    await act(async () => {
-      completeBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
+    expect(redundantCompleteBtn).toBeUndefined();
 
     expect(onComplete).toHaveBeenCalledTimes(1);
     const completeData = onComplete.mock.calls[0][0];
@@ -346,14 +338,7 @@ describe("InsertionGameScreenV2 — Prática Básica Visual-First", () => {
       vi.advanceTimersByTime(400);
     });
 
-    // 5. Verificar score 100 e zero dicas/erros herdados da tentativa anterior
-    const completeBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Concluir Prática e Ver Resultados")
-    );
-    await act(async () => {
-      completeBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
-
+    // 5. Verificar disparo direto único de onComplete com score 100 e zero dicas/erros herdados
     expect(onComplete).toHaveBeenCalledTimes(1);
     const payload = onComplete.mock.calls[0][0];
     expect(payload.errors).toBe(0);

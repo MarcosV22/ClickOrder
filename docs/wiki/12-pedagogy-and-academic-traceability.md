@@ -760,12 +760,25 @@ No marco diagnóstico **`UX-PRACTICE-R3`** ([`ux-practice-r3-comparative-audit.m
 3. **Dimensão C — Compreensão Conceitual Demonstrada pelo Estudante (Exclusiva de Avaliação Empírica Humana):**
    - Nenhum teste automatizado de software nem auditoria de layout autoriza afirmar que o estudante compreendeu o algoritmo. A verificação da Dimensão C requer observação formativa estruturada com participantes humanos (protocolo Think-Aloud e tarefa final de transferência comparativa sobre um vetor inédito).
 
+---
 
+## 26. Protocolo Consolidado de Avaliação Formativa Presencial, Rubrica `0–3` e Revisão Metodológica Pré-Campo (`UX-REDESIGN-R3-B` e `R3-B.1`)
 
+Após a resolução integral dos achados `P-01` a `P-10` nos marcos `UX-PRACTICE-R3.1` e `R3.2`, os marcos **`UX-REDESIGN-R3-B`** e **`UX-REDESIGN-R3-B.1`** consolidaram e revisaram metodologicamente em [`bubble-v2-formative-evaluation.md`](./bubble-v2-formative-evaluation.md) e no diretório [`evaluation/`](./evaluation/README.md) os instrumentos para operacionalizar a **Dimensão C** sem extrapolações causais nem improviso em campo:
 
-
-
-
-
+1. **Enquadramento Exploratório/Formativo, Caminho Didático Fixo e Duração Realista (`45–60 min`):**
+   - Pergunta central: *"Como estudantes interpretam os estados visuais e justificam suas decisões durante a utilização das Práticas Básicas de Bubble, Selection e Insertion Sort?"*.
+   - Amostra de conveniência planejada (`3–5` iniciantes, `3–5` estudantes com programação e `2–3` docentes/monitores; `0` participantes reais avaliados até o momento), contrabalanceada nas seis ordens completas (`O1` a `O6`).
+   - **Caminho didático invariável por módulo (sem improviso):** `Primeira Impressão (5s na Prática Básica, sem explicar o algoritmo)` $\rightarrow$ `Tutorial Guiado V2 (obrigatório para todos os participantes)` $\rightarrow$ `Prática Básica Real em Think-Aloud` $\rightarrow$ `Justificativa Verbal Pós-Prática` $\rightarrow$ `Micro-pausa e Próximo Algoritmo`, com janela realista de **`45 a 60 minutos`** por sessão.
+2. **Demarcação de Cinco Fenômenos Analíticos (`Conhecimento Prévio ≠ Aprendizagem`):**
+   - O protocolo distingue explicitamente: **(i) reconhecimento inicial da interface** (onde dificuldade nos 5 segundos iniciais não prova falha pedagógica do algoritmo), **(ii) familiaridade prévia autodeclarada** (`prior_familiarity_algo` registrada por módulo), **(iii) execução operacional correta** (`Fonte A`, que não prova compreensão por si só), **(iv) justificativa verbal situada** (Rubrica `0–3`) e **(v) transferência para situação inédita** (`[4, 1, 3, 2]`). Permanece vedado declarar "aprendizagem comprovada".
+3. **Assimetria Real nos 5 Segundos, Comparabilidade entre Módulos e Controle de Entradas Procedurais:**
+   - **Não-equivalência das telas nos 5s:** `BubbleGameScreenV2` abre no card `Previsão Antes de Agir` (ocultando inicialmente `TROCAR`/`MANTER` e `? Dica`), enquanto `SelectionGameScreenV2` e `InsertionGameScreenV2` abrem diretamente na botoeira primária; os controles ocultos nunca são cobrados e `C3` não é comparado como se as telas fossem equivalentes.
+   - **Comparabilidade de medidas e `?uxTest=1`:** `timeToFirstActionMs` existe apenas no Bubble (`?uxTest=1`, englobando o card de predição), sendo proibido compará-lo a cronometragens manuais em Selection/Insertion; e a troca entre participantes exige reset atômico (`localStorage.removeItem("sorting_station_save"); window.location.assign("/?uxTest=1");`) para limpar também `bubbleUxSession` em memória React.
+   - **Variação procedural (`ADR 0009` vs. UI):** Como a UI invoca os geradores Mulberry32 sem expor semente customizada, registram-se literalmente os vetores exibidos nos 5s e na Prática Básica pós-tutorial (`five_sec_displayed_array` e `practice_initial_array`), reconhecendo que diferentes vetores alteram o número de movimentos e oportunidades de erro.
+4. **Concordância na Rubrica `0–3`, Acessibilidade e Condição Ética Pré-Campo:**
+   - A rubrica ([`evaluation/comprehension-rubric-0-3.md`](./evaluation/comprehension-rubric-0-3.md)) separa explicar superficialmente a ação (`1`) de justificar o mecanismo (`2–3`), aceita linguagem natural, opera cega à `Fonte A` e preserva notas brutas pré-consenso (`coder1_raw`, `coder2_raw`) antes da reconciliação de casos ambíguos;
+   - Participantes para os quais a janela visual de 5 segundos seja inacessível realizam exploração inicial sem limite de tempo, sem jamais tratar diferenças de modalidade sensorial/temporal como dificuldade cognitiva;
+   - **Status atual:** **`PREPARADO` (`R3-B.1`)** — nenhuma aprovação ética é presumida, nenhum recrutamento foi iniciado e os CSVs oficiais permanecem vazios (`0` registros).
 
 

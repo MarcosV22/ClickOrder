@@ -1,5 +1,8 @@
 import React from "react";
-import type { InsertionSortState } from "../../game/sorting/insertion";
+import {
+  INSERTION_SORT_PSEUDOCODE,
+  type InsertionSortState,
+} from "../../game/sorting/insertion";
 
 export interface InsertionTechnicalDetailsProps {
   gameState: InsertionSortState;
@@ -20,10 +23,13 @@ export default function InsertionTechnicalDetails({
       onToggle={(e) => onToggleOpen?.((e.currentTarget as HTMLDetailsElement).open)}
       className="w-full bg-[#0d1635]/60 border border-slate-700/60 rounded-xl p-3.5 text-xs font-mono text-slate-300 transition-all group"
     >
-      <summary className="cursor-pointer select-none font-semibold text-slate-400 hover:text-amber-300 flex items-center justify-between">
+      <summary
+        data-testid="drawer-toggle"
+        className="cursor-pointer select-none font-semibold text-slate-400 hover:text-amber-300 flex items-center justify-between"
+      >
         <span className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-amber-400" />
-          <span>Detalhes Técnicos Formais & Pseudocódigo (Nível 3)</span>
+          <span>Aprofundamento técnico</span>
         </span>
         <span className="text-slate-500 group-open:rotate-180 transition-transform">
           ▼
@@ -80,44 +86,40 @@ export default function InsertionTechnicalDetails({
           </div>
         </div>
 
-        {/* Pseudocódigo Canônico de 11 Linhas */}
+        {/* Pseudocódigo Canônico Oficial (11 instruções) */}
         <div className="bg-[#090d1f] p-3 rounded-lg border border-slate-800 text-[11px] leading-relaxed">
-          <div className="text-amber-400 font-bold mb-2">Pseudocódigo Canônico (11 linhas)</div>
-          <ol className="list-decimal list-inside space-y-0.5 text-slate-400 font-mono">
-            <li className={gameState.i >= 1 ? "text-cyan-300 font-bold" : ""}>
-              para i de 1 até n - 1 faça
-            </li>
-            <li className={gameState.key !== null ? "text-amber-300 font-bold" : ""}>
-              &nbsp;&nbsp;chave ← A[i]
-            </li>
-            <li className={gameState.holeIndex !== null ? "text-amber-300 font-bold" : ""}>
-              &nbsp;&nbsp;vaga ← i
-            </li>
-            <li className={isCompare || isInsertReady ? "text-cyan-300 font-bold" : ""}>
-              &nbsp;&nbsp;j ← i - 1
-            </li>
-            <li className={isCompare ? "text-cyan-200 font-bold bg-cyan-950/40 px-1 rounded" : ""}>
-              &nbsp;&nbsp;enquanto j ≥ 0 e A[j] &gt; chave faça
-            </li>
-            <li className={isCompare ? "text-slate-300" : ""}>
-              &nbsp;&nbsp;&nbsp;&nbsp;A[j + 1] ← A[j]
-            </li>
-            <li className={isCompare ? "text-slate-300" : ""}>
-              &nbsp;&nbsp;&nbsp;&nbsp;vaga ← j
-            </li>
-            <li className={isCompare ? "text-slate-300" : ""}>
-              &nbsp;&nbsp;&nbsp;&nbsp;j ← j - 1
-            </li>
-            <li className={isInsertReady ? "text-amber-200 font-bold bg-amber-950/40 px-1 rounded" : ""}>
-              &nbsp;&nbsp;fim enquanto
-            </li>
-            <li className={isInsertReady ? "text-amber-300 font-bold" : ""}>
-              &nbsp;&nbsp;A[vaga] ← chave
-            </li>
-            <li className={gameState.completed ? "text-emerald-400 font-bold" : ""}>
-              fim para
-            </li>
-          </ol>
+          <div className="text-amber-400 font-bold mb-2">
+            Pseudocódigo Canônico ({INSERTION_SORT_PSEUDOCODE.length} linhas)
+          </div>
+          <div className="space-y-0.5" data-testid="insertion-canonical-pseudocode">
+            {INSERTION_SORT_PSEUDOCODE.map((line) => {
+              const isHighlighted =
+                (isCompare &&
+                  (line.id === "WHILE_CONDITION" ||
+                    line.id === "SHIFT_RIGHT" ||
+                    line.id === "DECREMENT_J")) ||
+                (isInsertReady && line.id === "INSERT_KEY");
+              return (
+                <div
+                  key={line.id}
+                  data-pseudocode-line={line.lineNumber}
+                  className={`px-1.5 py-0.5 rounded ${
+                    isHighlighted
+                      ? isInsertReady
+                        ? "bg-amber-950/50 text-amber-200 font-bold"
+                        : "bg-cyan-950/50 text-cyan-200 font-bold"
+                      : "text-slate-400"
+                  }`}
+                  style={{ paddingLeft: `${line.indent * 12 + 6}px` }}
+                >
+                  <span className="text-slate-600 mr-1.5 select-none">
+                    {line.lineNumber}:
+                  </span>
+                  <span>{line.text}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </details>

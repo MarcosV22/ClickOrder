@@ -8,6 +8,7 @@ import {
   calculateTotalExpectedComparisons,
 } from "../../game/sorting/bubbleSortEngine";
 import type { BubbleSortState, UserDecision } from "../../game/sorting/types";
+import { BUBBLE_SORT_PSEUDOCODE, type PseudocodeLine } from "../../game/replay";
 import { calculateProtocolScore } from "../../game/session/protocolScore";
 import type { PhaseCompleteData } from "../GameScreen";
 import {
@@ -122,6 +123,15 @@ export default function BubbleGameScreenV2({
   );
   const completionTriggeredRef = useRef(false);
   const isActionLockedRef = useRef(false);
+  const swapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (swapTimeoutRef.current !== null) {
+        clearTimeout(swapTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const expected = getExpectedComparison(gameState);
   const sortedIndices = getSortedIndices(gameState);
@@ -226,14 +236,16 @@ export default function BubbleGameScreenV2({
             text: `Isso! ${leftVal} é maior que ${rightVal}, então ele vai para a direita.`,
           });
 
-          setTimeout(() => {
+          swapTimeoutRef.current = setTimeout(() => {
+            swapTimeoutRef.current = null;
             const nextState = stepResult.state;
             setGameState(nextState);
             setIsSwapping(false);
-            isActionLockedRef.current = false;
 
             if (nextState.completed) {
               handleGameComplete(nextState);
+            } else {
+              isActionLockedRef.current = false;
             }
           }, 350);
         } else {
@@ -419,18 +431,19 @@ export default function BubbleGameScreenV2({
   };
 
   return (
-    <div className="w-full min-h-screen overflow-x-hidden bg-[#0a0e1a] text-slate-100 flex flex-col items-center justify-start py-6 px-4 sm:px-6">
-      <div className="w-full max-w-3xl flex flex-col items-center gap-6 my-auto">
+    <div className="w-full min-h-screen overflow-x-clip bg-[#0a0e1a] text-slate-100 flex flex-col items-center justify-start py-4 sm:py-6 pb-12 px-4 sm:px-6">
+      <div className="w-full max-w-3xl flex flex-col items-center gap-5">
         {/* Top Header - Zero score, zero timer, clean navigation */}
-        <div className="w-full flex items-center justify-between border-b border-slate-800/80 pb-4">
+        <div className="w-full flex items-center justify-between border-b border-slate-800/80 pb-3.5">
           <button
             type="button"
+            data-testid="back-to-practices"
             onClick={onBackToSelector}
-            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors cursor-pointer px-2 py-1 rounded"
-            aria-label="Sair da prática e voltar para a seleção"
+            className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-400 hover:text-blue-300 font-mono transition-colors cursor-pointer px-2 py-1 rounded"
+            aria-label="Voltar para a seleção de práticas"
           >
-            <span>‹</span>
-            <span>Sair</span>
+            <span>←</span>
+            <span>Práticas</span>
           </button>
 
           <div className="text-center">
@@ -465,48 +478,50 @@ export default function BubbleGameScreenV2({
           </div>
 
           {/* Boxes Track */}
-          <div className="flex items-center justify-center gap-3 sm:gap-6 py-4 flex-wrap">
-            {gameState.currentValues.map((val, idx) => {
-              const isPair =
-                !gameState.completed &&
-                expected !== null &&
-                (idx === expected.leftIndex || idx === expected.rightIndex);
-              const isSorted = sortedIndices.includes(idx);
+          <div className="w-full overflow-x-auto py-2">
+            <div className="flex items-center justify-center gap-3 sm:gap-6 min-w-max mx-auto px-2">
+              {gameState.currentValues.map((val, idx) => {
+                const isPair =
+                  !gameState.completed &&
+                  expected !== null &&
+                  (idx === expected.leftIndex || idx === expected.rightIndex);
+                const isSorted = sortedIndices.includes(idx);
 
-              return (
-                <div key={idx} className="flex flex-col items-center gap-2">
-                  <NumberedBox
-                    value={val}
-                    index={idx}
-                    role={isPair ? "pair" : isSorted ? "sorted" : "default"}
-                    variant="learning"
-                    showIndex={showTechnicalDetails}
-                    animating={
-                      isSwapping && isPair
-                        ? idx === expected?.leftIndex
-                          ? "left"
-                          : "right"
-                        : null
-                    }
-                  />
-                  <div className="h-5 flex items-center justify-center">
-                    {isPair ? (
-                      <span className="text-xs font-mono font-bold text-blue-400 animate-fade-in">
-                        vizinho
-                      </span>
-                    ) : isSorted ? (
-                      <span className="text-xs font-mono font-semibold text-emerald-400">
-                        ordenado
-                      </span>
-                    ) : (
-                      <span className="text-xs font-mono opacity-0 select-none" aria-hidden="true">
-                        —
-                      </span>
-                    )}
+                return (
+                  <div key={idx} className="flex flex-col items-center gap-2">
+                    <NumberedBox
+                      value={val}
+                      index={idx}
+                      role={isPair ? "pair" : isSorted ? "sorted" : "default"}
+                      variant="learning"
+                      showIndex={showTechnicalDetails}
+                      animating={
+                        isSwapping && isPair
+                          ? idx === expected?.leftIndex
+                            ? "left"
+                            : "right"
+                          : null
+                      }
+                    />
+                    <div className="h-5 flex items-center justify-center">
+                      {isPair ? (
+                        <span className="text-xs font-mono font-bold text-blue-400 animate-fade-in">
+                          vizinho
+                        </span>
+                      ) : isSorted ? (
+                        <span className="text-xs font-mono font-semibold text-emerald-400">
+                          ordenado
+                        </span>
+                      ) : (
+                        <span className="text-xs font-mono opacity-0 select-none" aria-hidden="true">
+                          —
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           {/* Checkpoint: Pre-Action Prediction (Appears on first step) */}
@@ -691,35 +706,88 @@ export default function BubbleGameScreenV2({
           )}
         </div>
 
-        {/* Nível 3: Gaveta Sob Demanda: Detalhes Técnicos Secundários */}
-        <div className="w-full flex flex-col items-center gap-2">
-          <button
-            type="button"
+        {/* Nível 3: Gaveta Sob Demanda Harmonizada — Aprofundamento Técnico */}
+        <details
+          open={showTechnicalDetails}
+          className="w-full bg-[#0d1527]/80 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-300 transition-all group"
+        >
+          <summary
             data-testid="drawer-toggle"
-            onClick={handleToggleTechnicalDetails}
-            className="text-xs text-slate-400 hover:text-slate-200 font-mono transition-colors cursor-pointer py-1 px-3 rounded-lg hover:bg-slate-900"
+            onClick={(e) => {
+              e.preventDefault();
+              handleToggleTechnicalDetails();
+            }}
+            className="cursor-pointer select-none font-semibold text-slate-400 hover:text-blue-300 flex items-center justify-between"
           >
-            {showTechnicalDetails ? "▲ Ocultar detalhes" : "▼ Ver detalhes sob demanda"}
-          </button>
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-400" />
+              <span>Aprofundamento técnico</span>
+            </span>
+            <span className="text-slate-500 group-open:rotate-180 transition-transform">
+              ▼
+            </span>
+          </summary>
 
           {showTechnicalDetails && (
-            <div className="w-full bg-[#0d1527] border border-slate-800 rounded-xl p-5 flex flex-col gap-4 text-xs font-mono text-slate-300 animate-fade-in">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                <span>Índices do Laço: passIndex (i) = {gameState.passIndex}, compIndex (j) = {gameState.comparisonIndex}</span>
-                <span>Tamanho do Vetor (n) = {gameState.arrayLength}</span>
+            <div className="mt-4 pt-3 border-t border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+              <div className="bg-[#090d1f] p-3 rounded-lg border border-slate-800 space-y-1.5">
+                <div className="text-blue-400 font-bold mb-2">Estado Interno da FSM</div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Passada externa (passIndex / i):</span>
+                  <span className="text-blue-300 font-bold">{gameState.passIndex}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Par ativo (compIndex / j):</span>
+                  <span className="text-cyan-300 font-bold">
+                    {expected ? `${gameState.comparisonIndex} e ${gameState.comparisonIndex + 1}` : "—"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Tamanho do vetor (n):</span>
+                  <span className="text-slate-200 font-bold">{gameState.arrayLength}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Métricas acumuladas:</span>
+                  <span className="text-slate-300 font-bold">
+                    {gameState.comparisons} comp. / {gameState.swaps} trocas
+                    {gameState.errors > 0 ? ` / ${gameState.errors} erro(s)` : ""}
+                  </span>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-1">
-                <span className="text-slate-400 uppercase font-semibold">Condição formal de troca:</span>
-                <span className="text-slate-200">se A[j] &gt; A[j+1], então swap(A[j], A[j+1])</span>
+              <div className="bg-[#090d1f] p-3 rounded-lg border border-slate-800 text-[11px] leading-relaxed">
+                <div className="text-blue-400 font-bold mb-2">
+                  Pseudocódigo Canônico ({BUBBLE_SORT_PSEUDOCODE.length} linhas)
+                </div>
+                <div className="space-y-0.5" data-testid="bubble-canonical-pseudocode">
+                  {BUBBLE_SORT_PSEUDOCODE.map((line: PseudocodeLine) => {
+                    const isActive =
+                      !gameState.completed &&
+                      (line.id === "IF_CONDITION" ||
+                        (isSwapping && line.id === "SWAP_STATEMENT"));
+                    return (
+                      <div
+                        key={line.id}
+                        data-pseudocode-line={line.lineNumber}
+                        className={`px-1.5 py-0.5 rounded ${
+                          isActive
+                            ? "bg-blue-950/60 text-blue-200 font-bold"
+                            : "text-slate-400"
+                        }`}
+                        style={{ paddingLeft: `${line.indent * 12 + 6}px` }}
+                      >
+                        <span className="text-slate-600 mr-1.5 select-none">
+                          {line.lineNumber}:
+                        </span>
+                        <span>{line.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-
-              <p className="text-[11px] text-slate-400 leading-relaxed border-t border-slate-800/80 pt-2">
-                A prática básica pode ser concluída integralmente sem consultar estes detalhes técnicos.
-              </p>
             </div>
           )}
-        </div>
+        </details>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 > **Índice Mestre da Wiki:** Ponto de entrada canônico e mapa de navegação documental da plataforma **Sorting Station**.  
 > **Status:** Ativo / Base de Verdade da Plataforma  
-> **Data de Atualização:** 15/09/2026 (Marco PLATFORM-R0)  
+> **Data de Atualização:** 24/11/2026 (Marco UX-REDESIGN-R3-B: Avaliação Formativa Multi-Módulo Preparada)  
 > **Governança:** [`AGENTS.md`](../../AGENTS.md), [`ADR 0018`](../adr/0018-game-to-educational-platform-transition.md), [`SUMMARY.md`](./SUMMARY.md).
 
 ---
@@ -39,7 +39,7 @@ O objetivo pedagógico central é **ensinar algoritmos de ordenação por manipu
 - **Frontend Core:** React 19 (`react` e `react-dom` `^19.0.0`), Vite 8 (`vite` `^8.0.5`);
 - **Estilização e Design:** Tailwind CSS v4 (`@tailwindcss/vite` e `tailwindcss` `^4.0.0`) com tokens `@theme inline`, sem arquivos legados de configuração;
 - **Formatador:** `oxfmt` (baseado em Rust/Biome);
-- **Testes Automatizados:** **Vitest** com **650 testes unitários automatizados** em 50 arquivos de teste (100% verde);
+- **Testes Automatizados:** **Vitest** com **745 testes unitários e comportamentais automatizados** em 60 arquivos de teste (100% verde);
 - **Persistência:** Single Page Application (SPA) client-side com armazenamento local desacoplado via **`localStorage` (Schema v4)** e fallback defensivo em memória.
 
 ---
@@ -57,13 +57,15 @@ O objetivo pedagógico central é **ensinar algoritmos de ordenação por manipu
 | **05** | [`05-ux-design-system.md`](05-ux-design-system.md) | `IMPLEMENTADO` | Design System sci-fi, tokens cromáticos, tipografia, efeitos e vocabulário UX. |
 | **06** | [`06-development-environment.md`](06-development-environment.md) | `IMPLEMENTADO` | Guia operacional do Figma Make, porta 8443, HMR, scripts `.figma/make/*` e checklist de build. |
 | **07** | [`07-backend-and-persistence.md`](07-backend-and-persistence.md) | `IMPLEMENTADO` | Persistência Schema v4 modular por `exerciseSets` e fallback defensivo em memória. |
-| **08** | [`08-testing-and-quality.md`](08-testing-and-quality.md) | `IMPLEMENTADO` | Suíte Vitest (650 testes em 50 arquivos), pirâmide de qualidade e critérios de Definition of Done. |
+| **08** | [`08-testing-and-quality.md`](08-testing-and-quality.md) | `IMPLEMENTADO` | Suíte Vitest (745 testes em 60 arquivos), pirâmide de qualidade e critérios de Definition of Done. |
 | **09** | [`09-build-deploy.md`](09-build-deploy.md) | `IMPLEMENTADO` | Pipeline estático Vite, empacotamento `dist.tar.gz`, `FIGMA_PUBLIC_URL` e checklist pré-deploy. |
 | **10** | [`10-roadmap.md`](10-roadmap.md) | `HISTÓRICO` / `CANÔNICO` | Histórico Legacy, ciclo UX-REDESIGN (R1 a R7) e Novo Roadmap Canônico da Plataforma. |
-| **11** | [`11-architecture-decisions.md`](11-architecture-decisions.md) | `IMPLEMENTADO` | Governança de ADRs, índice formal de ADRs 0001 a 0027 e catálogo de candidatos. |
+| **11** | [`11-architecture-decisions.md`](11-architecture-decisions.md) | `IMPLEMENTADO` | Governança de ADRs, índice formal de ADRs 0001 a 0029 e catálogo de candidatos. |
 | **12** | [`12-pedagogy-and-academic-traceability.md`](12-pedagogy-and-academic-traceability.md) | `IMPLEMENTADO` | Rastreabilidade pedagógica, rigor científico, modo demonstração e inventário de seções do artigo. |
 | **V2** | [`ux-redesign-v2.md`](ux-redesign-v2.md) | `ATIVO` | Redesenho integral da UX/UI V2: auditoria de poluição, hierarquia em 3 níveis, wireframes e aprendizagem ativa. |
-| **AUD**| [`ux-practice-r3-comparative-audit.md`](ux-practice-r3-comparative-audit.md) | `ATIVO` | Auditoria comparativa visual, funcional e pedagógica das 3 Práticas Básicas V2 (`UX-PRACTICE-R3`). |
+| **AUD**| [`ux-practice-r3-comparative-audit.md`](ux-practice-r3-comparative-audit.md) | `ATIVO` | Auditoria comparativa visual, funcional e pedagógica das 3 Práticas Básicas V2 (`UX-PRACTICE-R3` a `R3.2`). |
+| **EVA**| [`bubble-v2-formative-evaluation.md`](bubble-v2-formative-evaluation.md) | `PREPARADO` | Protocolo consolidado de avaliação formativa presencial (`UX-REDESIGN-R3-B` — Bubble, Selection e Insertion; não aplicado). |
+| **KIT**| [`evaluation/README.md`](evaluation/README.md) | `PREPARADO` | Kit operacional `Itens A a K` (roteiros, fichas, rubrica `0–3`, transferência `[4, 1, 3, 2]`, ética, checklist e CSVs vazios). |
 | **EXP**| [`learning-experience-expansion.md`](learning-experience-expansion.md) | `ATIVO` | Especificação dos marcos de diferenciação curricular e Casos do Algoritmo. |
 | **LAB**| [`comparison-lab.md`](comparison-lab.md) | `BLOQUEADO (P3.4)` | Especificação técnica do Laboratório Comparativo (bloqueado até os 6 módulos estarem prontos). |
 | **QA** | [`qa-gameplay-checklist.md`](qa-gameplay-checklist.md) | `IMPLEMENTADO` | Roteiro operacional e matriz de testes manuais/homologação de mecânicas e regressão. |
@@ -110,3 +112,5 @@ O objetivo pedagógico central é **ensinar algoritmos de ordenação por manipu
 - [`0025-curriculum-practice-differentiation-and-transversal-model.md`](../adr/0025-curriculum-practice-differentiation-and-transversal-model.md) (Diferenciação Curricular)
 - [`0026-algorithm-case-architecture-and-activity-context.md`](../adr/0026-algorithm-case-architecture-and-activity-context.md) (Infraestrutura de Casos do Algoritmo)
 - [`0027-educational-and-ui-experience-redesign-v2.md`](../adr/0027-educational-and-ui-experience-redesign-v2.md) (Redesenho Integral UX/UI V2)
+- [`0028-home-redesign-ux-home-r1.md`](../adr/0028-home-redesign-ux-home-r1.md) (Redesign da Tela Inicial `UX-HOME-R1`)
+- [`0029-visual-educational-launcher-ux-home-r2.md`](../adr/0029-visual-educational-launcher-ux-home-r2.md) (Launcher Educacional Visual `UX-HOME-R2`)

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   createSelectionSortState,
   executeSelectionInspection,
@@ -53,15 +53,21 @@ export default function SelectionGameScreenV2({
   const [feedback, setFeedback] = useState<{
     text: string;
     type: "success" | "warning" | "info";
-  } | null>({
-    text: "Varredura iniciada! Observe a carga observada e compare com o menor guardado.",
-    type: "info",
-  });
+  } | null>(null);
 
   const startTimeRef = useRef<number>(Date.now());
   const hintsUsedRef = useRef<number>(0);
   const isActionLockedRef = useRef<boolean>(false);
   const completedCalledRef = useRef<boolean>(false);
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current !== null) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const sortedIndices = getSelectionSortedIndices(gameState);
   const progressPercent = calculateSelectionSortProgress(gameState);
@@ -156,11 +162,16 @@ export default function SelectionGameScreenV2({
           type: "success",
         });
 
-        setTimeout(() => {
+        animationTimeoutRef.current = setTimeout(() => {
+          animationTimeoutRef.current = null;
           setGameState(result.state);
           setAnimatingPair(null);
           setIsAnimating(false);
-          isActionLockedRef.current = false;
+          if (result.state.completed) {
+            triggerCompletion(result.state);
+          } else {
+            isActionLockedRef.current = false;
+          }
         }, 500);
       } else {
         setGameState(result.state);
@@ -168,6 +179,13 @@ export default function SelectionGameScreenV2({
           text: `Ótimo! O valor ${targetVal} já estava na posição correta e foi consolidado sem trocas.`,
           type: "success",
         });
+        if (result.state.completed) {
+          isActionLockedRef.current = true;
+          animationTimeoutRef.current = setTimeout(() => {
+            animationTimeoutRef.current = null;
+            triggerCompletion(result.state);
+          }, 350);
+        }
       }
     } else {
       setFeedback({
@@ -186,6 +204,10 @@ export default function SelectionGameScreenV2({
   };
 
   const handleReset = () => {
+    if (animationTimeoutRef.current !== null) {
+      clearTimeout(animationTimeoutRef.current);
+      animationTimeoutRef.current = null;
+    }
     if (onResetPhase) {
       onResetPhase();
     } else {
@@ -198,23 +220,22 @@ export default function SelectionGameScreenV2({
       startTimeRef.current = Date.now();
       hintsUsedRef.current = 0;
       setHintsUsed(0);
-      setFeedback({
-        text: "Prática reiniciada. Compare e decida com calma a cada passo.",
-        type: "info",
-      });
+      setFeedback(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#070b19] text-slate-100 flex flex-col items-center p-4 sm:p-6 lg:p-8">
+    <div className="w-full min-h-screen overflow-x-clip bg-[#070b19] text-slate-100 flex flex-col items-center py-3 sm:py-4 pb-12 px-4 sm:px-6">
       {/* Top Header */}
-      <header className="w-full max-w-4xl flex items-center justify-between pb-4 border-b border-purple-500/20 mb-6">
+      <header className="w-full max-w-4xl flex items-center justify-between pb-2.5 border-b border-purple-500/20 mb-3">
         <div className="flex items-center gap-3">
           {onBackToSelector && (
             <button
               type="button"
+              data-testid="back-to-practices"
               onClick={onBackToSelector}
-              className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-400 hover:text-purple-300 font-mono transition-colors cursor-pointer"
+              aria-label="Voltar para a seleção de práticas"
+              className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-400 hover:text-purple-300 font-mono transition-colors cursor-pointer px-1.5 py-1 rounded"
             >
               <span>←</span>
               <span>Práticas</span>
@@ -246,9 +267,9 @@ export default function SelectionGameScreenV2({
         </div>
       </header>
 
-      <main className="w-full max-w-4xl flex flex-col items-center gap-6">
+      <main className="w-full max-w-4xl flex flex-col items-center gap-3.5">
         {/* Barra de Progresso Real */}
-        <div className="w-full bg-slate-900/60 rounded-full h-2 overflow-hidden border border-slate-800">
+        <div className="w-full bg-slate-900/60 rounded-full h-1.5 overflow-hidden border border-slate-800">
           <div
             className="bg-gradient-to-r from-purple-500 to-cyan-400 h-full transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
@@ -287,58 +308,14 @@ export default function SelectionGameScreenV2({
           />
         )}
 
-        {/* Card de Conclusão da Prática */}
+        {/* Transição sutil sem exigir segunda confirmação (encaminha diretamente ao ResultScreen canônico) */}
         {gameState.completed && (
-          <div className="w-full bg-[#0d1635]/95 border border-emerald-500/40 rounded-2xl p-6 sm:p-8 text-center flex flex-col items-center gap-5 shadow-2xl animate-fadeIn">
-            <div className="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-400 text-2xl font-bold">
-              ✓
-            </div>
-            <div className="space-y-1">
-              <h2 className="text-2xl font-bold text-white">
-                Prática Concluída com Sucesso!
-              </h2>
-              <p className="text-sm text-slate-300">
-                Você ordenou o lote com precisão aplicando o modelo mental do Selection Sort.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-lg text-center font-mono">
-              <div className="p-3 bg-[#080d22] border border-slate-800 rounded-xl">
-                <span className="text-xs text-slate-400 block">Comparações</span>
-                <span className="text-lg font-bold text-cyan-300">{gameState.comparisons}</span>
-              </div>
-              <div className="p-3 bg-[#080d22] border border-slate-800 rounded-xl">
-                <span className="text-xs text-slate-400 block">Trocas</span>
-                <span className="text-lg font-bold text-purple-300">{gameState.swaps}</span>
-              </div>
-              <div className="p-3 bg-[#080d22] border border-slate-800 rounded-xl">
-                <span className="text-xs text-slate-400 block">Erros</span>
-                <span className={`text-lg font-bold ${gameState.errors > 0 ? "text-amber-400" : "text-emerald-400"}`}>
-                  {gameState.errors}
-                </span>
-              </div>
-              <div className="p-3 bg-[#080d22] border border-slate-800 rounded-xl">
-                <span className="text-xs text-slate-400 block">Dicas Usadas</span>
-                <span className="text-lg font-bold text-slate-200">{hintsUsed}</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full max-w-md">
-              <button
-                type="button"
-                onClick={handleReset}
-                className="py-3 px-5 rounded-xl border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white font-semibold transition-all cursor-pointer text-sm"
-              >
-                Tentar Novamente
-              </button>
-              <button
-                type="button"
-                onClick={() => triggerCompletion(gameState)}
-                className="flex-1 py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 shadow-lg shadow-purple-900/30 border border-purple-400/40 cursor-pointer transition-all text-sm"
-              >
-                Concluir Prática ➔
-              </button>
-            </div>
+          <div
+            role="status"
+            aria-live="polite"
+            className="w-full max-w-xl bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-4 text-center text-sm font-mono text-emerald-200"
+          >
+            ✓ Ordenação concluída! Carregando resultado oficial...
           </div>
         )}
 

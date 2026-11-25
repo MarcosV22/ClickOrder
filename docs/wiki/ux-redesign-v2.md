@@ -1316,9 +1316,48 @@ O marco **`UX-PRACTICE-R3.1`** executou o hardening focado sobre os achados prio
    - Oculto o menor valor do título enquanto o checkpoint está ativo; removida a ordenação crescente `.sort` via `buildSelectionCheckpointOptions`; removidos contadores operacionais do header primário; e substituídos `INSPECT`/`COMMIT` por `BUSCA` e `POSICIONAMENTO` no Nível 1.
 5. **`P-07` e `P-10a/b` Corrigidos (Reset Integral no Insertion e Higiene Visual):**
    - `handleReset` em `InsertionGameScreenV2` limpa integralmente `hintsUsed`, `hintsUsedRef`, `startTimeRef`, timeouts de animação e flags transitórias; nivelado o baseline de caixas no Bubble e adicionadas bordas semânticas sutis para `min`/`target` em `NumberedBox` (`variant="learning"`).
-6. **Pendências Registradas para Intervenção Posterior (`P-08` e `P-10c/d`):**
-   - Unificação de rotas/escopo em `App.tsx` (incluindo a restrição de `BubbleGameScreenV2` antes de avaliar práticas Intermediária/Avançada com *Scaffolding Fading*) e unificação das gavetas de Nível 3 permanecem formalmente registradas em [`ux-practice-r3-comparative-audit.md`](./ux-practice-r3-comparative-audit.md).
+6. **Pendências Registradas e Resolvidas no Marco Seguinte (`P-08` e `P-10c/d`):**
+   - Tratadas integralmente na consolidação `UX-PRACTICE-R3.2` abaixo.
+
+---
+
+## 24. Consolidação Final de Navegação, Progressão, Fluxo Único e Detalhes Técnicos (`UX-PRACTICE-R3.2`)
+
+O marco **`UX-PRACTICE-R3.2`** concluiu a estabilização transversal de navegação, progressão curricular, *Scaffolding Fading* e ergonomia de scroll/detalhes nos três módulos centrais (`Bubble`, `Selection` e `Insertion`), zerando as pendências `P-08` e `P-10` antes da avaliação formativa com usuários:
+
+1. **Roteamento Curricular Estrito e Preservação do *Scaffolding Fading* (`P-08A`):**
+   - Em `src/App.tsx`, `BubbleGameScreenV2` (e `BubbleResultScreenV2` via `ResultScreen.tsx`) atende exclusivamente a **Prática Básica regular** (`isBubbleBasicRegularPractice`: `gameMode === "CAMPAIGN"`, `activeActivityContext?.type !== "case"`, `phase === 1` / `level === "basic"`).
+   - As práticas **Intermediária** (`supportProfile="reduced"`, $n=5$) e **Avançada** (`supportProfile="minimal"`, $n=6$), os **Casos do Algoritmo** (`supportProfile="reduced"`, vetores estáticos curados) e o **Modo Desafio Early Exit** (`variant="EARLY_EXIT"`, `supportProfile="minimal"`) utilizam integralmente as telas canônicas (`GameScreen`, `SelectionGameScreen`, `InsertionGameScreen`), preservando andaimes decrescentes, geração procedural, métricas, recordes e replay.
+2. **Navegação de Retorno Padronizada (`P-08B` & `P-08C`):**
+   - Os três módulos exibem `[ ← Práticas ]` no cabeçalho da Prática Básica (`BubbleGameScreenV2`, `SelectionGameScreenV2`, `InsertionGameScreenV2`) e retornam ao `PracticeSelector` do próprio módulo (`handleOpenPracticeSelector(moduleId)`), sem desviar inesperadamente para a `HomeScreen` e sem persistir conclusões falsas.
+   - Conclusões dos três tutoriais (`Bubble`, `Selection`, `Insertion`) encaminham ao nível `basic` com `activeActivityContext` e `selectorModule` sincronizados.
+3. **Fluxo Único de Conclusão sem Dupla Confirmação (`P-08D`):**
+   - Removidos os cards intermediários redundantes de conclusão (`"Concluir Prática ➔"` / `"Concluir Prática e Ver Resultados →"`) de `SelectionGameScreenV2` e `InsertionGameScreenV2`. Ao concluir o último passo e encerrar a animação (`350ms–500ms`), `triggerCompletion` dispara uma única vez (protegido por `completedCalledRef` e limpeza de timers em `unmount`/`reset`), abrindo diretamente a `ResultScreen` oficial com `PONTUAÇÃO DO PROTOCOLO`, erros, dicas utilizadas, métricas factuais, melhor recorde salvo (quando existente), acesso ao Replay e avanço curricular.
+4. **Single Scroll Owner, Dica Subordinada do Selection e `[ Aprofundamento técnico ]` Harmonizado (`P-10`):**
+   - `App.tsx` e telas V2 utilizam `min-h-screen overflow-x-clip` e alinhamento `justify-start` (sem `h-full` concorrente, sem `my-auto` e sem `h-screen overflow-hidden`), garantindo dono único do scroll vertical (`document.scrollingElement`, `0` scrollers verticais internos em DOM).
+   - Em `SelectionDecisionControls.tsx`, o botão `[ ? Dica ]` integra o cabeçalho do card de decisão e o painel `"Orientação Pedagógica"` expande subordinadamente entre a pergunta e os botões (`top: 471px, bottom: 558px`, `100%` legível sem rolagem em `1366×768` e `1280×650`, com `scrollIntoView` condicional em cliques explícitos respeitando `prefers-reduced-motion`).
+   - As gavetas `<details>` de Nível 3 nos três módulos iniciam fechadas sob o rótulo único **`Aprofundamento técnico`** e importam diretamente as constantes oficiais sem duplicação manual: `BUBBLE_SORT_PSEUDOCODE` (`9` linhas), `SELECTION_SORT_PSEUDOCODE` (`13` linhas) e `INSERTION_SORT_PSEUDOCODE` (`11` linhas).
 
 
 
 
+---
+
+## 25. Preparação da Avaliação Formativa Presencial Multi-Módulo (`UX-REDESIGN-R3-B`)
+
+No marco **`UX-REDESIGN-R3-B`**, preparou-se e consolidou-se o pacote metodológico e operacional para avaliação formativa presencial com usuários reais sobre as Práticas Básicas V2 dos três módulos centrais (**Bubble Sort**, **Selection Sort** e **Insertion Sort**), sem alterar código-fonte, engines, FSMs, pontuação ou Schema v4, e sem introduzir telas de questionário dentro do jogo:
+
+1. **Status Factual Estrito (`PREPARADO` vs. `APLICADO` vs. `ANALISADO`):**
+   - **Estado atual:** **`PREPARADO`** (validado por *dry-run* técnico contra o código real com `60` arquivos de teste e `745` testes verdes).
+   - **Etapas pendentes:** **`APLICADO`** (execução presencial das sessões com participantes humanos após verificação ética institucional aplicável) e **`ANALISADO`** (codificação, síntese descritiva/qualitativa e relatório empírico). Zero participantes reais foram avaliados até o momento e nenhum dado fictício foi gerado.
+2. **Protocolo Canônico Único e Kit Operacional (`Itens A a K`):**
+   - Evoluiu-se diretamente [`bubble-v2-formative-evaluation.md`](./bubble-v2-formative-evaluation.md) (produzido em `UX-REDESIGN-R3-A`), unificando os três módulos sob a pergunta exploratória: *"Como estudantes interpretam os estados visuais e justificam suas decisões durante a utilização das Práticas Básicas de Bubble, Selection e Insertion Sort?"*.
+   - Os instrumentos operacionais em Markdown e CSV encontram-se organizados em [`evaluation/README.md`](./evaluation/README.md):
+     - [`evaluation/moderator-guide-and-scripts.md`](./evaluation/moderator-guide-and-scripts.md) (`Itens A, C, D, E e G`: roteiro do moderador, contrabalanceamento completo nas $3! = 6$ ordens `O1..O6`, Teste Inicial de 5 Segundos, *Think-Aloud*, perguntas verbais pós-prática + escala descritiva `E1–E5`, e Tarefa de Transferência sobre o vetor inédito `[4, 1, 3, 2]`);
+     - [`evaluation/observation-and-incident-sheets.md`](./evaluation/observation-and-incident-sheets.md) (`Itens B e H`: fichas de observação separando `Fonte A`, `Fonte B` e `Fonte C` + ficha de incidentes e intervenções do pesquisador);
+     - [`evaluation/comprehension-rubric-0-3.md`](./evaluation/comprehension-rubric-0-3.md) (`Item F`: rubrica analítica `0–3` com âncoras específicas por algoritmo e para a transferência em `[4, 1, 3, 2]`, estritamente isolada da `PONTUAÇÃO DO PROTOCOLO` do jogo);
+     - [`evaluation/consent-privacy-and-checklist.md`](./evaluation/consent-privacy-and-checklist.md) (`Itens I e K`: folha informativa, roteiro de consentimento voluntário, pseudonimização `P01..Pnn` sem PII, ressalva explícita de verificação ética institucional sem declaração de conformidade legal automática, e checklist técnico pré/pós-sessão incluindo limpeza de `localStorage`);
+     - [`evaluation/session-consolidation-template.csv`](./evaluation/session-consolidation-template.csv) e [`evaluation/transfer-and-incidents-template.csv`](./evaluation/transfer-and-incidents-template.csv) (`Item J`: planilhas-modelo vazias, sem linhas sintéticas).
+3. **Auditoria Factual de `?uxTest=1` e Limitações Documentadas:**
+   - Confirmado em `src/screens/bubble/bubbleUxTest.ts`, `BubbleGameScreenV2.tsx`, `BubbleResultScreenV2.tsx` e `App.tsx` que `?uxTest=1` opera apenas localmente em memória, sem chamadas de rede, sem PII e sem alterar engines, score ou Schema v4.
+   - Registradas cinco limitações reais para operação em campo: (i) cobertura restrita ao **Bubble Sort** (Selection e Insertion usam `ResultScreen` canônica sem painel JSON, exigindo transcrição manual na Ficha `B`); (ii) `timeToFirstActionMs` no Bubble inclui a janela do Teste de 5 Segundos e o card inicial `Previsão Antes de Agir`; (iii) `overviewStartedAt` e `tutorialStartedAt` existem no tipo TS mas não são populados; (iv) autocorreção antes de clicar em `"Continuar"` nos checkpoints sobrescreve o booleano com a escolha final; e (v) volatilidade em memória caso a aba sofra reload (`F5`) antes da exportação do JSON.

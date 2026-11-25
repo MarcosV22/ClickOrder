@@ -519,22 +519,32 @@ export default function App({
     setScreen("result");
   };
 
-  const handleSelectPracticeLevel = (level: PracticeLevel) => {
+  const handleSelectPracticeLevel = (
+    level: PracticeLevel,
+    explicitModule?: ModuleId
+  ) => {
+    const targetModule = explicitModule ?? selectorModule;
+    if (explicitModule && explicitModule !== selectorModule) {
+      setSelectorModule(explicitModule);
+    }
+
+    const practiceTitle =
+      level === "basic"
+        ? "PRÁTICA BÁSICA"
+        : level === "intermediate"
+          ? "PRÁTICA INTERMEDIÁRIA"
+          : "PRÁTICA AVANÇADA";
+
     setActiveActivityContext({
       type: "practice",
-      moduleId: selectorModule,
+      moduleId: targetModule,
       level,
-      practiceTitle:
-        level === "basic"
-          ? "PRÁTICA BÁSICA"
-          : level === "intermediate"
-            ? "PRÁTICA INTERMEDIÁRIA"
-            : "PRÁTICA AVANÇADA",
+      practiceTitle,
     });
 
     const phaseNumber = level === "basic" ? 1 : level === "intermediate" ? 2 : 3;
 
-    if (selectorModule === "bubble") {
+    if (targetModule === "bubble") {
       setGameMode("CAMPAIGN");
       setPhase(phaseNumber);
       const gen = generateBubblePhaseArray(phaseNumber);
@@ -542,7 +552,7 @@ export default function App({
       setCampaignSeed(gen.seed);
       setResult(null);
       setScreen("game");
-    } else if (selectorModule === "selection") {
+    } else if (targetModule === "selection") {
       setGameMode("SELECTION");
       setSelectionPhase(phaseNumber);
       const gen = generateSelectionPhaseArray(phaseNumber);
@@ -550,13 +560,13 @@ export default function App({
       setSelectionSeed(gen.seed);
       setResult(null);
       setScreen("selection-game");
-    } else if (selectorModule === "insertion") {
+    } else if (targetModule === "insertion") {
       setGameMode("INSERTION");
       handleStartInsertionPractice(level);
-    } else if (selectorModule === "merge") {
+    } else if (targetModule === "merge") {
       setGameMode("MERGE");
       handleStartMergePractice(level);
-    } else if (selectorModule === "quick") {
+    } else if (targetModule === "quick") {
       setGameMode("QUICK");
       handleStartQuickPractice(level);
     }
@@ -747,8 +757,7 @@ export default function App({
       TOTAL_PHASES
     );
     setSaveData(updated);
-    setSelectorModule("bubble");
-    handleSelectPracticeLevel("basic");
+    handleSelectPracticeLevel("basic", "bubble");
   };
 
   const handleSelectionTutorialComplete = () => {
@@ -759,8 +768,7 @@ export default function App({
       SELECTION_TOTAL_PHASES
     );
     setSaveData(updated);
-    setSelectorModule("selection");
-    handleSelectPracticeLevel("basic");
+    handleSelectPracticeLevel("basic", "selection");
   };
 
 
@@ -856,7 +864,7 @@ export default function App({
   const handleInsertionTutorialComplete = () => {
     const updated = recordTutorialCompletion(saveData, "insertion");
     setSaveData(updated);
-    handleStartInsertionPractice("basic");
+    handleSelectPracticeLevel("basic", "insertion");
   };
 
   const handleMergeTutorialComplete = () => {
@@ -907,12 +915,7 @@ export default function App({
     if (result?.protocol === "insertion") {
       const nextLevel = getNextInsertionPracticeLevel(result.level);
       if (nextLevel !== null) {
-        const gen = generateInsertionPracticeArray(nextLevel);
-        setInsertionArray(gen.values);
-        setInsertionSeed(gen.seed);
-        setInsertionLevel(nextLevel);
-        setResult(null);
-        setScreen("insertion-practice");
+        handleSelectPracticeLevel(nextLevel, "insertion");
       } else {
         setResult(null);
         setScreen("insertion-practice-complete");
@@ -924,12 +927,9 @@ export default function App({
     if (result?.protocol === "selection") {
       if (selectionPhase < SELECTION_TOTAL_PHASES) {
         const nextPhase = selectionPhase + 1;
-        const gen = generateSelectionPhaseArray(nextPhase);
-        setSelectionArray(gen.values);
-        setSelectionSeed(gen.seed);
-        setSelectionPhase(nextPhase);
-        setResult(null);
-        setScreen("selection-game");
+        const nextLevel: PracticeLevel =
+          nextPhase === 2 ? "intermediate" : "advanced";
+        handleSelectPracticeLevel(nextLevel, "selection");
       } else {
         setResult(null);
         setScreen("selection-campaign-complete");
@@ -953,12 +953,9 @@ export default function App({
     // Fluxo Bubble Campaign
     if (phase < TOTAL_PHASES) {
       const nextPhase = phase + 1;
-      const gen = generateBubblePhaseArray(nextPhase);
-      setCampaignArray(gen.values);
-      setCampaignSeed(gen.seed);
-      setPhase(nextPhase);
-      setResult(null);
-      setScreen("game");
+      const nextLevel: PracticeLevel =
+        nextPhase === 2 ? "intermediate" : "advanced";
+      handleSelectPracticeLevel(nextLevel, "bubble");
     } else {
       setResult(null);
       setScreen("campaign-complete");
@@ -1028,6 +1025,7 @@ export default function App({
   };
 
   const handleSelectChallenge = (source: "home" | "campaign-complete" = "home") => {
+    setActiveActivityContext(null);
     setGameMode("CHALLENGE");
     setBriefingModeId("bubble-early-exit");
     setChallengeScenarioIndex(0);
@@ -1108,23 +1106,13 @@ export default function App({
   };
 
   const handleRestartProtocol = () => {
-    setPhase(1);
-    const gen = generateBubblePhaseArray(1);
-    setCampaignArray(gen.values);
-    setCampaignSeed(gen.seed);
     setPhaseResults([]);
-    setResult(null);
-    setScreen("game");
+    handleSelectPracticeLevel("basic", "bubble");
   };
 
   const handleRestartSelection = () => {
-    setSelectionPhase(1);
-    const gen = generateSelectionPhaseArray(1);
-    setSelectionArray(gen.values);
-    setSelectionSeed(gen.seed);
     setSelectionPhaseResults([]);
-    setResult(null);
-    setScreen("selection-game");
+    handleSelectPracticeLevel("basic", "selection");
   };
 
   const handleOpenDemonstration = (
@@ -1162,7 +1150,7 @@ export default function App({
             )
             ? "intermediate"
             : "advanced";
-        handleStartInsertionPractice(startLevel);
+        handleSelectPracticeLevel(startLevel, "insertion");
       }
     } else if (demonstrationProtocol === "merge") {
       if (!isModuleTutorialCompleted(saveData, "merge")) {
@@ -1220,8 +1208,69 @@ export default function App({
   const activeVariant: BubbleSortVariant =
     gameMode === "CHALLENGE" ? "EARLY_EXIT" : "CANONICAL";
 
+  const isBubbleBasicRegularPractice =
+    gameMode === "CAMPAIGN" &&
+    activeActivityContext?.type !== "case" &&
+    phase === 1 &&
+    (activeActivityContext === null ||
+      (activeActivityContext.moduleId === "bubble" &&
+        activeActivityContext.level === "basic"));
+
+  const isSelectionBasicRegularPractice =
+    activeActivityContext?.type !== "case" &&
+    selectionPhase === 1 &&
+    (activeActivityContext === null ||
+      (activeActivityContext.moduleId === "selection" &&
+        activeActivityContext.level === "basic"));
+
+  const isInsertionBasicRegularPractice =
+    activeActivityContext?.type !== "case" &&
+    insertionLevel === "basic" &&
+    (activeActivityContext === null ||
+      (activeActivityContext.moduleId === "insertion" &&
+        activeActivityContext.level === "basic"));
+
+  const activeResultBestScore = (() => {
+    if (!result) return undefined;
+    if (activeActivityContext?.type === "case") {
+      const caseId = activeActivityContext.caseDefinition.id;
+      return saveData.modules[result.protocol]?.exerciseSets[caseId]?.bestRecord
+        ?.bestScore;
+    }
+    if (result.protocol === "bubble" && gameMode === "CAMPAIGN") {
+      const setId =
+        phase === 1
+          ? BUBBLE_EXERCISE_SETS.BASIC
+          : phase === 2
+            ? BUBBLE_EXERCISE_SETS.INTERMEDIATE
+            : BUBBLE_EXERCISE_SETS.ADVANCED;
+      return saveData.modules.bubble?.exerciseSets[setId]?.bestRecord?.bestScore;
+    }
+    if (result.protocol === "selection") {
+      const setId =
+        selectionPhase === 1
+          ? SELECTION_EXERCISE_SETS.BASIC
+          : selectionPhase === 2
+            ? SELECTION_EXERCISE_SETS.INTERMEDIATE
+            : SELECTION_EXERCISE_SETS.ADVANCED;
+      return saveData.modules.selection?.exerciseSets[setId]?.bestRecord
+        ?.bestScore;
+    }
+    if (result.protocol === "insertion") {
+      const setId =
+        result.level === "basic"
+          ? INSERTION_EXERCISE_SETS.BASIC
+          : result.level === "intermediate"
+            ? INSERTION_EXERCISE_SETS.INTERMEDIATE
+            : INSERTION_EXERCISE_SETS.ADVANCED;
+      return saveData.modules.insertion?.exerciseSets[setId]?.bestRecord
+        ?.bestScore;
+    }
+    return undefined;
+  })();
+
   return (
-    <div className="w-full h-full min-h-screen overflow-x-hidden">
+    <div className="w-full min-h-screen overflow-x-clip">
       {screen === "home" && (
         <HomeScreen
           saveData={saveData}
@@ -1365,7 +1414,7 @@ export default function App({
         />
       )}
       {screen === "selection-game" &&
-        (activeActivityContext?.type !== "case" && selectionPhase === 1 ? (
+        (isSelectionBasicRegularPractice ? (
           <SelectionGameScreenV2
             key={`selection-v2-phase-${selectionPhase}-${selectionSeed}`}
             initialArray={selectionArray}
@@ -1406,13 +1455,14 @@ export default function App({
           />
         ))}
       {screen === "insertion-practice" &&
-        (activeActivityContext?.type !== "case" && insertionLevel === "basic" ? (
+        (isInsertionBasicRegularPractice ? (
           <InsertionGameScreenV2
             key={`insertion-v2-practice-${insertionLevel}-${insertionSeed}`}
             level={insertionLevel}
             initialArray={insertionArray}
             seed={insertionSeed}
             practiceTitle="PRÁTICA BÁSICA"
+            onBackToSelector={() => handleOpenPracticeSelector("insertion")}
             onBackToHub={handleReturnHome}
             onComplete={handleInsertionComplete}
           />
@@ -1443,6 +1493,7 @@ export default function App({
             }
             onComplete={handleInsertionComplete}
             onResetPractice={() => {}}
+            onBackToSelector={() => handleOpenPracticeSelector("insertion")}
             onBackToHub={handleReturnHome}
           />
         ))}
@@ -1457,19 +1508,13 @@ export default function App({
         />
       )}
       {screen === "game" && (
-        gameMode === "CAMPAIGN" && activeActivityContext?.type !== "case" ? (
+        isBubbleBasicRegularPractice ? (
           <BubbleGameScreenV2
             key={`bubble-v2-phase-${phase}-${campaignSeed}`}
             initialArray={currentArray}
             phase={currentPhase}
             totalPhases={currentTotalPhases}
-            practiceTitle={
-              currentPhase === 1
-                ? "Prática Básica"
-                : currentPhase === 2
-                  ? "Prática Intermediária"
-                  : "Prática Avançada"
-            }
+            practiceTitle="PRÁTICA BÁSICA"
             onComplete={handleComplete}
             onBackToSelector={() => handleOpenPracticeSelector("bubble")}
             uxTestSession={bubbleUxSession || undefined}
@@ -1567,6 +1612,7 @@ export default function App({
           errors={result.errors}
           hintsUsed={result.hintsUsed}
           score={result.score}
+          bestScore={activeResultBestScore}
           elapsedTimeMs={result.elapsedTimeMs}
           phase={
             result.protocol === "quick"
@@ -1669,7 +1715,7 @@ export default function App({
           practiceResults={insertionPracticeResults}
           onRepeatPractices={() => {
             setInsertionPracticeResults([]);
-            handleStartInsertionPractice("basic");
+            handleSelectPracticeLevel("basic", "insertion");
           }}
           onOpenSelector={() => handleOpenPracticeSelector("insertion")}
           onReturnHome={handleReturnHome}

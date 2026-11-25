@@ -72,6 +72,7 @@ interface InsertionGameScreenProps {
   practiceObjective?: string;
   onComplete: (data: InsertionPracticeCompleteData) => void;
   onResetPractice?: () => void;
+  onBackToSelector?: () => void;
   onBackToHub?: () => void;
 }
 
@@ -84,6 +85,7 @@ export default function InsertionGameScreen({
   practiceObjective,
   onComplete,
   onResetPractice,
+  onBackToSelector,
   onBackToHub,
 }: InsertionGameScreenProps) {
   const practiceDefinition = getInsertionPracticeDefinition(level);
@@ -363,16 +365,28 @@ export default function InsertionGameScreen({
           >
             REINICIAR
           </GameButton>
-          {onBackToHub && (
+          {onBackToSelector ? (
             <GameButton
-              onClick={onBackToHub}
+              onClick={onBackToSelector}
               variant="ghost"
               size="sm"
-              icon="⌂"
+              icon="←"
               className="text-xs text-white/60 hover:text-white"
             >
-              HUB
+              PRÁTICAS
             </GameButton>
+          ) : (
+            onBackToHub && (
+              <GameButton
+                onClick={onBackToHub}
+                variant="ghost"
+                size="sm"
+                icon="⌂"
+                className="text-xs text-white/60 hover:text-white"
+              >
+                HUB
+              </GameButton>
+            )
           )}
         </div>
       </header>

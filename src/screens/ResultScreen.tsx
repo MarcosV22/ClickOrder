@@ -39,6 +39,7 @@ interface ResultScreenProps {
   errors: number;
   hintsUsed: number;
   score?: number;
+  bestScore?: number;
   elapsedTimeMs?: number;
   phase?: number;
   practiceTitle?: string;
@@ -74,6 +75,7 @@ export default function ResultScreen({
   errors,
   hintsUsed,
   score,
+  bestScore,
   elapsedTimeMs,
   phase = 1,
   practiceTitle,
@@ -123,7 +125,7 @@ export default function ResultScreen({
             ? BUBBLE_SORT_EARLY_EXIT_PSEUDOCODE
             : BUBBLE_SORT_PSEUDOCODE;
 
-  if (protocol === "bubble" && !isCase && !isEarlyExit) {
+  if (protocol === "bubble" && phase === 1 && !isCase && !isEarlyExit) {
     return (
       <BubbleResultScreenV2
         finalArray={finalArray}
@@ -132,6 +134,7 @@ export default function ResultScreen({
         errors={errors}
         hintsUsed={hintsUsed}
         score={score}
+        bestScore={bestScore}
         elapsedTimeMs={elapsedTimeMs}
         canonicalComparisons={canonicalComparisons}
         hasNextPhase={hasNextPhase}
@@ -147,7 +150,7 @@ export default function ResultScreen({
   }
 
   return (
-    <div className="relative w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-8 pb-16 sm:pb-24 px-4 sm:px-8 select-none">
+    <div className="relative w-full min-h-screen overflow-x-clip bg-[#060b1a] bg-grid scanlines flex flex-col items-center justify-start pt-6 sm:pt-8 pb-16 sm:pb-24 px-4 sm:px-8 select-none">
       {/* Glow effects */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-cyan-500/5 rounded-full blur-[80px] pointer-events-none" />
@@ -302,6 +305,14 @@ export default function ResultScreen({
               >
                 Erros: -10 | Dicas: -5 | Otimizações e tempo não afetam a pontuação
               </span>
+              {bestScore !== undefined && (
+                <span
+                  className="text-xs text-emerald-300 font-semibold pt-1"
+                  style={{ fontFamily: "'Space Mono', monospace" }}
+                >
+                  Melhor recorde salvo: {bestScore} / 100
+                </span>
+              )}
             </div>
 
             <span

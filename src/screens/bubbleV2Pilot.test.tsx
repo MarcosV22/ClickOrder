@@ -325,18 +325,21 @@ describe("Bubble Sort V2 Pilot — End-to-End Educational & Visual Experience", 
       expect(container.textContent).toContain("ordem crescente");
       expect(container.textContent).not.toContain("A ação correta é");
 
-      // Agora inspeciona a gaveta de detalhes técnicos (Nível 3)
-      const drawerToggle = container.querySelector<HTMLButtonElement>('[data-testid="drawer-toggle"]');
+      // Agora inspeciona a gaveta de aprofundamento técnico harmonizada (Nível 3)
+      const drawerToggle = container.querySelector<HTMLElement>('[data-testid="drawer-toggle"]');
       expect(drawerToggle).toBeTruthy();
-      expect(drawerToggle?.textContent).toContain("Ver detalhes sob demanda");
+      expect(drawerToggle?.textContent).toContain("Aprofundamento técnico");
 
       await act(async () => {
         drawerToggle?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       });
 
-      expect(container.textContent).toContain("passIndex (i)");
-      expect(container.textContent).toContain("se A[j] > A[j+1]");
-      expect(drawerToggle?.textContent).toContain("Ocultar detalhes");
+      expect(container.textContent).toContain("Passada externa (passIndex / i):");
+      expect(container.textContent).toContain("se A[j] > A[j + 1] então");
+      const pseudocodeLines = container.querySelectorAll(
+        '[data-testid="bubble-canonical-pseudocode"] [data-pseudocode-line]'
+      );
+      expect(pseudocodeLines.length).toBe(9);
     });
 
     it("P-01: checkpoint pós-1ª passada sempre inclui o maior elemento sem duplicatas, sem ordenação crescente e sem posição fixa", async () => {

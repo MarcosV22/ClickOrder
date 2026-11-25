@@ -140,7 +140,8 @@ flowchart TD
 
 ### 3.1. `src/App.tsx` (Componente Raiz)
 - **Responsabilidades:**
-  - Container raiz da aplicação estruturado estritamente segundo a **Scrollable Screen Rule** ([`05-ux-design-system.md`](./05-ux-design-system.md#10-regra-canônica-de-telas-verticais-e-rolagem-scrollable-screen-rule)), operando com `<div className="w-full h-full min-h-screen overflow-x-hidden">`, eliminando cortes acidentais de viewport e garantindo o crescimento natural e scroll vertical livre para todas as telas (Hotfix PLATFORM-UI-H1);
+  - Container raiz da aplicação estruturado estritamente segundo a **Scrollable Screen Rule — Single Scroll Owner** ([`05-ux-design-system.md`](./05-ux-design-system.md#10-responsividade-desktop-e-regra-de-layout-para-telas-longas)), operando com `<div className="w-full min-h-screen overflow-x-clip">`, eliminando contêineres verticais concorrentes (`overflow-y: auto` aninhados) e garantindo que `document.scrollingElement` seja o único dono do scroll vertical (Marcos PLATFORM-UI-H1 e UX-PRACTICE-R3.2);
+  - Roteamento estrito por identidade curricular (`isBubbleBasicRegularPractice`, `isSelectionBasicRegularPractice`, `isInsertionBasicRegularPractice`), direcionando exclusivamente as **Práticas Básicas regulares** (`level === "basic"`, `activeActivityContext?.type !== "case"`, `gameMode !== "CHALLENGE"`) para `BubbleGameScreenV2`, `SelectionGameScreenV2` e `InsertionGameScreenV2`, enquanto práticas Intermediárias (`supportProfile="reduced"`), Avançadas (`supportProfile="minimal"`), Casos do Algoritmo (`supportProfile="reduced"`) e Modo Desafio Early Exit (`supportProfile="minimal"`) utilizam as telas canônicas `GameScreen`, `SelectionGameScreen` e `InsertionGameScreen`;
   - Armazenar o estado global de navegação (`screen`: `"home" | "briefing" | "tutorial" | "selection-tutorial" | "insertion-tutorial" | "game" | "selection-game" | "insertion-game" | "result" | "replay" | "selection-replay" | "insertion-replay" | "demonstration" | "campaign-complete" | "selection-campaign-complete" | "insertion-practice-complete"`) ([`src/App.tsx`](../../src/App.tsx));
   - Armazenar o identificador ativo de briefing (`briefingModeId`: `"bubble-canonical" | "bubble-early-exit" | "selection-canonical" | "insertion-canonical"`);
   - Armazenar o contexto do Modo Demonstração (`demonstrationProtocol`: `"bubble" | "selection" | "insertion"` e `demonstrationReturnScreen`: `"home" | "briefing"`);
@@ -291,12 +292,12 @@ flowchart TD
   - **Checkpoint Pré-Commit na 1ª Passada (`SelectionCommitCheckpoint.tsx`):**
     - Pergunta diagnóstica: *"Qual número deve ir para a primeira posição?"*;
     - Confirmação explícita da transferência única antes da animação mecânica;
-  - **Conclusão Enxuta e Sem Emojis de Sistema:**
-    - Card de conclusão com checkmark estilizado e métricas factuais;
-    - CTA institucional `[ Concluir Prática ➔ ]` e navegação de retorno `← Práticas`;
-  - **Gaveta Retrátil de Nível 3 (`SelectionTechnicalDetails.tsx`):**
-    - Sincronização em tempo real das variáveis $i$, $j$, $minIndex$ e realce de linhas do `SELECTION_SORT_PSEUDOCODE`.
-- **Callbacks e Props:** `initialArray: number[]`, `phase: number`, `totalPhases?: number`, `onComplete: (data: SelectionPhaseCompleteData) => void`, `onBack?: () => void`.
+  - **Fluxo Único de Conclusão (`UX-PRACTICE-R3.2`):**
+    - Ao finalizar a última passada, dispara `onComplete` uma única vez após a animação (`completedCalledRef`), encaminhando diretamente à `ResultScreen` canônica sem exigir segunda confirmação interna;
+    - Retorno padronizado `[ ← Práticas ]` no cabeçalho (`onBackToSelector`) voltando ao `PracticeSelector` do Selection Sort;
+  - **Gaveta Retrátil Harmonizada de Nível 3 (`SelectionTechnicalDetails.tsx`):**
+    - `<details>` fechado por padrão sob o rótulo `Aprofundamento técnico`, sincronizando $i$, $j$, $minIndex$, métricas e as **13 instruções canônicas** importadas de `SELECTION_SORT_PSEUDOCODE`.
+- **Callbacks e Props:** `initialArray: number[]`, `phase: number`, `totalPhases?: number`, `onComplete: (data: SelectionPhaseCompleteData) => void`, `onBackToSelector?: () => void`.
 
 ### 3.8. `src/screens/ResultScreen.tsx`
 - **Responsabilidades:** Apresentar a avaliação de desempenho descritiva após a conclusão da ordenação da fase/exercício corrente (Bubble Sort Canônico, Bubble Modo Desafio, Selection Sort, Insertion Sort ou Casos do Algoritmo).
@@ -452,8 +453,8 @@ flowchart TD
     - Feedback causal imediato e construtivo em erros (sem avançar o algoritmo e sem penalização);
     - Micro-checagem formativa pós-passada após a primeira passada (verificação da fixação do maior elemento);
     - Gaveta retrátil sob demanda no rodapé com detalhes técnicos e solicitação de dica.
-  - `BubbleResultScreenV2.tsx`: Relatório formativo com banner de descoberta, 3 métricas essenciais sem punição, pergunta de micro-reflexão conceitual com feedback explicativo imediato e gaveta técnica sob demanda.
-- **Roteamento em `App.tsx`:** O roteador raiz direciona o fluxo canônico de campanha e briefing do Bubble Sort para as telas V2, mantendo Selection Sort e Insertion Sort integralmente operando em suas respectivas telas consolidadas.
+  - `BubbleResultScreenV2.tsx`: Relatório formativo da Prática Básica (`phase === 1`) com banner de descoberta, `PONTUAÇÃO DO PROTOCOLO` (`score / 100` e `bestScore` quando aplicável), métricas factuais (`Comparações`, `Trocas`, `Erros`, `Dicas Utilizadas`), pergunta de micro-reflexão conceitual, acesso ao Replay e avanço curricular.
+- **Roteamento em `App.tsx` (`UX-PRACTICE-R3.2`):** O roteador raiz direciona exclusivamente a **Prática Básica regular** do Bubble Sort (`isBubbleBasicRegularPractice`) para `BubbleGameScreenV2` e `BubbleResultScreenV2`, preservando `GameScreen` e `ResultScreen` canônicas com *Scaffolding Fading* (`reduced` / `minimal`) nas práticas Intermediária, Avançada, Casos do Algoritmo e Desafio Early Exit. `BubbleGameScreenV2` utiliza retorno padronizado `[ ← Práticas ]` e gaveta `<details>` `Aprofundamento técnico` com as **9 linhas** de `BUBBLE_SORT_PSEUDOCODE`.
 
 ### 3.17. Introdução Visual-First do Insertion Sort (`UX-MODULE-R1`)
 - **Diretório:** `src/screens/insertion/`
@@ -483,8 +484,8 @@ flowchart TD
   - `InsertionDecisionControls.tsx`: Pergunta central dinâmica baseada no estado (`COMPARE_AND_SHIFT` ou `INSERT_READY`), botões neutros balanceados `[ 1: Deslizar para a Direita ]` / `[ 2: Encaixar a Chave ]`, atalhos de teclado `1` e `2`, feedback causal imediato sem avanço de estado em caso de erro, e suporte pedagógico de Nível 2 `[ ? Dica ]`.
   - `InsertionPredictionCard.tsx`: Desafio prévio reflexivo para estimulação de hipótese no início do tutorial.
   - `InsertionConceptualCheckpoint.tsx`: Checkpoint reflexivo intermediário consolidando que o elemento maior apenas abriu espaço.
-  - `InsertionTechnicalDetails.tsx`: Gaveta retrátil de Nível 3 com variáveis da FSM e 11 instruções do `INSERTION_SORT_PSEUDOCODE`.
-- **Roteamento em `App.tsx`:** O roteador raiz conecta `InsertionTutorialScreenV2` no fluxo de tutorial e `InsertionGameScreenV2` na Prática Básica do Insertion Sort (fase 1), mantendo as práticas intermediária, avançada e casos na tela consolidada original.
+  - `InsertionTechnicalDetails.tsx`: Gaveta `<details>` retrátil de Nível 3 fechada por padrão sob o rótulo `Aprofundamento técnico`, exibindo variáveis da FSM e as **11 instruções oficiais** importadas diretamente de `INSERTION_SORT_PSEUDOCODE`.
+- **Roteamento e Navegação em `App.tsx` (`UX-PRACTICE-R3.2`):** O roteador raiz conecta `InsertionTutorialScreenV2` no fluxo de tutorial e `InsertionGameScreenV2` na Prática Básica regular (`isInsertionBasicRegularPractice`), com botão `[ ← Práticas ]` (`onBackToSelector`) retornando ao `PracticeSelector` do Insertion Sort e transição única direta para `ResultScreen` ao concluir, mantendo as práticas intermediária, avançada e casos em `InsertionGameScreen`.
 
 ---
 

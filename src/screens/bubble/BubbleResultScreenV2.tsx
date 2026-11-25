@@ -15,6 +15,7 @@ export interface BubbleResultScreenV2Props {
   errors: number;
   hintsUsed: number;
   score?: number;
+  bestScore?: number;
   elapsedTimeMs?: number;
   canonicalComparisons?: number;
   hasNextPhase?: boolean;
@@ -34,6 +35,7 @@ export default function BubbleResultScreenV2({
   errors,
   hintsUsed,
   score = 100,
+  bestScore,
   elapsedTimeMs = 0,
   canonicalComparisons = 6,
   hasNextPhase = true,
@@ -154,8 +156,8 @@ export default function BubbleResultScreenV2({
   };
 
   return (
-    <div className="w-full h-full min-h-screen overflow-y-auto overflow-x-hidden bg-[#0a0e1a] text-slate-100 flex flex-col items-center justify-start py-8 px-4 sm:px-6">
-      <div className="w-full max-w-2xl flex flex-col items-center gap-6 my-auto">
+    <div className="w-full min-h-screen overflow-x-clip bg-[#0a0e1a] text-slate-100 flex flex-col items-center justify-start py-6 sm:py-8 pb-16 px-4 sm:px-6">
+      <div className="w-full max-w-2xl flex flex-col items-center gap-6">
         {/* Success Header */}
         <div className="text-center flex flex-col items-center gap-2">
           <div className="w-12 h-12 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-2xl font-bold">
@@ -199,32 +201,65 @@ export default function BubbleResultScreenV2({
           </p>
         </div>
 
-        {/* 3 Essential Metrics */}
-        <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-[#111827]/80 border border-slate-800 rounded-xl p-4 flex flex-col items-center text-center gap-1">
-            <span className="text-xs font-mono text-slate-400 uppercase">Comparações</span>
-            <span className="text-2xl font-bold text-white font-mono">{comparisons}</span>
-            <span className="text-[11px] text-slate-400 leading-tight">
-              Referência desta variante: {canonicalComparisons} comparações
-            </span>
+        {/* Essential Metrics + Canonical Protocol Score */}
+        <div className="w-full flex flex-col gap-3">
+          <div className="w-full bg-[#111827]/80 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex flex-col">
+              <span className="text-xs font-mono text-blue-400 uppercase font-bold tracking-wider">
+                PONTUAÇÃO DO PROTOCOLO
+              </span>
+              <span className="text-[11px] font-mono text-slate-400">
+                Erros: -10 | Dicas: -5 | Tempo não afeta a pontuação
+              </span>
+            </div>
+            <div className="flex items-baseline gap-3">
+              <span className="text-2xl font-bold text-white font-mono">
+                {score} <span className="text-xs text-slate-400">/ 100</span>
+              </span>
+              {bestScore !== undefined && (
+                <span className="text-xs font-mono text-emerald-400 font-semibold">
+                  Recorde: {bestScore} / 100
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="bg-[#111827]/80 border border-slate-800 rounded-xl p-4 flex flex-col items-center text-center gap-1">
-            <span className="text-xs font-mono text-slate-400 uppercase">Trocas</span>
-            <span className="text-2xl font-bold text-white font-mono">{swaps}</span>
-            <span className="text-[11px] text-slate-400 leading-tight">
-              Movimentações efetuadas
-            </span>
-          </div>
+          <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-[#111827]/80 border border-slate-800 rounded-xl p-4 flex flex-col items-center text-center gap-1">
+              <span className="text-xs font-mono text-slate-400 uppercase">Comparações</span>
+              <span className="text-2xl font-bold text-white font-mono">{comparisons}</span>
+              <span className="text-[11px] text-slate-400 leading-tight">
+                Referência desta variante: {canonicalComparisons} comparações
+              </span>
+            </div>
 
-          <div className="bg-[#111827]/80 border border-slate-800 rounded-xl p-4 flex flex-col items-center text-center gap-1">
-            <span className="text-xs font-mono text-slate-400 uppercase">Erros</span>
-            <span className={`text-2xl font-bold font-mono ${errors > 0 ? "text-amber-400" : "text-emerald-400"}`}>
-              {errors}
-            </span>
-            <span className="text-[11px] text-slate-400 leading-tight">
-              {errors === 0 ? "Execução sem erros" : "Tentativas corrigidas"}
-            </span>
+            <div className="bg-[#111827]/80 border border-slate-800 rounded-xl p-4 flex flex-col items-center text-center gap-1">
+              <span className="text-xs font-mono text-slate-400 uppercase">Trocas</span>
+              <span className="text-2xl font-bold text-white font-mono">{swaps}</span>
+              <span className="text-[11px] text-slate-400 leading-tight">
+                Movimentações efetuadas
+              </span>
+            </div>
+
+            <div className="bg-[#111827]/80 border border-slate-800 rounded-xl p-4 flex flex-col items-center text-center gap-1">
+              <span className="text-xs font-mono text-slate-400 uppercase">Erros</span>
+              <span className={`text-2xl font-bold font-mono ${errors > 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                {errors}
+              </span>
+              <span className="text-[11px] text-slate-400 leading-tight">
+                {errors === 0 ? "Execução sem erros" : "Tentativas corrigidas"}
+              </span>
+            </div>
+
+            <div className="bg-[#111827]/80 border border-slate-800 rounded-xl p-4 flex flex-col items-center text-center gap-1">
+              <span className="text-xs font-mono text-slate-400 uppercase">Dicas Utilizadas</span>
+              <span className={`text-2xl font-bold font-mono ${hintsUsed > 0 ? "text-blue-300" : "text-slate-300"}`}>
+                {hintsUsed}
+              </span>
+              <span className="text-[11px] text-slate-400 leading-tight">
+                {hintsUsed === 0 ? "Nenhuma dica pedida" : "Auxílio sob demanda"}
+              </span>
+            </div>
           </div>
         </div>
 

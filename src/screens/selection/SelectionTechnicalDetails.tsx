@@ -1,5 +1,6 @@
 import React from "react";
 import type { SelectionSortState } from "../../game/sorting/selection";
+import { SELECTION_SORT_PSEUDOCODE } from "../../game/replay";
 
 export interface SelectionTechnicalDetailsProps {
   gameState: SelectionSortState;
@@ -10,19 +11,21 @@ export default function SelectionTechnicalDetails({
   gameState,
   onToggleOpen,
 }: SelectionTechnicalDetailsProps) {
-  const currentPass = Math.min(gameState.i + 1, Math.max(1, gameState.arrayLength - 1));
   const isInspect = gameState.phase === "INSPECT";
   const isCommit = gameState.phase === "COMMIT";
 
   return (
     <details
       onToggle={(e) => onToggleOpen?.((e.currentTarget as HTMLDetailsElement).open)}
-      className="w-full bg-[#0d1635]/60 border border-slate-700/60 rounded-xl p-4 text-xs font-mono text-slate-300 transition-all group"
+      className="w-full bg-[#0d1635]/60 border border-slate-700/60 rounded-xl p-3.5 text-xs font-mono text-slate-300 transition-all group"
     >
-      <summary className="cursor-pointer select-none font-semibold text-slate-400 hover:text-purple-300 flex items-center justify-between">
+      <summary
+        data-testid="drawer-toggle"
+        className="cursor-pointer select-none font-semibold text-slate-400 hover:text-purple-300 flex items-center justify-between"
+      >
         <span className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-purple-400" />
-          <span>Detalhes Técnicos Formais & Pseudocódigo (Nível 3)</span>
+          <span>Aprofundamento técnico</span>
         </span>
         <span className="text-slate-500 group-open:rotate-180 transition-transform">
           ▼
@@ -62,23 +65,40 @@ export default function SelectionTechnicalDetails({
           </div>
         </div>
 
-        {/* Pseudocódigo Canônico */}
+        {/* Pseudocódigo Canônico Oficial (13 instruções) */}
         <div className="bg-[#090d1f] p-3 rounded-lg border border-slate-800 text-[11px] leading-relaxed">
-          <div className="text-purple-400 font-bold mb-2">Pseudocódigo Canônico</div>
-          <div className={gameState.phase !== "COMPLETED" ? "text-slate-200" : "text-slate-600"}>
-            <span className="text-slate-500">1:</span> para i ← 0 até n - 2 faça
+          <div className="text-purple-400 font-bold mb-2">
+            Pseudocódigo Canônico ({SELECTION_SORT_PSEUDOCODE.length} linhas)
           </div>
-          <div className={isInspect || isCommit ? "text-purple-300 font-semibold" : "text-slate-600"}>
-            <span className="text-slate-500">2:</span> &nbsp;&nbsp;minIndex ← i
-          </div>
-          <div className={isInspect ? "text-cyan-300 font-bold bg-cyan-950/40 px-1 rounded" : "text-slate-600"}>
-            <span className="text-slate-500">3:</span> &nbsp;&nbsp;para j ← i + 1 até n - 1 faça
-          </div>
-          <div className={isInspect ? "text-cyan-300 font-bold bg-cyan-950/40 px-1 rounded" : "text-slate-600"}>
-            <span className="text-slate-500">4:</span> &nbsp;&nbsp;&nbsp;&nbsp;se A[j] &lt; A[minIndex] então minIndex ← j
-          </div>
-          <div className={isCommit ? "text-amber-300 font-bold bg-amber-950/40 px-1 rounded" : "text-slate-600"}>
-            <span className="text-slate-500">5:</span> &nbsp;&nbsp;se minIndex ≠ i então trocar(A[i], A[minIndex])
+          <div className="space-y-0.5" data-testid="selection-canonical-pseudocode">
+            {SELECTION_SORT_PSEUDOCODE.map((line) => {
+              const isHighlighted =
+                (isInspect &&
+                  (line.id === "INNER_LOOP" ||
+                    line.id === "IF_CONDITION" ||
+                    line.id === "UPDATE_MIN")) ||
+                (isCommit &&
+                  (line.id === "CHECK_SWAP" || line.id === "SWAP_STATEMENT"));
+              return (
+                <div
+                  key={line.id}
+                  data-pseudocode-line={line.lineNumber}
+                  className={`px-1.5 py-0.5 rounded ${
+                    isHighlighted
+                      ? isCommit
+                        ? "bg-amber-950/50 text-amber-200 font-bold"
+                        : "bg-purple-950/50 text-purple-200 font-bold"
+                      : "text-slate-400"
+                  }`}
+                  style={{ paddingLeft: `${line.indent * 12 + 6}px` }}
+                >
+                  <span className="text-slate-600 mr-1.5 select-none">
+                    {line.lineNumber}:
+                  </span>
+                  <span>{line.text}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

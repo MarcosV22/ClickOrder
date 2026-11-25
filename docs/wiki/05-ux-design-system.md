@@ -742,6 +742,18 @@ No marco `UX-PRACTICE-R3.1`, os três pilotos de Prática Básica V2 foram alinh
 4. **Índices Posicionais `#pos` Ocultos por Padrão na Camada Básica:**
    - Em todos os três módulos, `showIndex` permanece `false` por padrão no Nível 1 (inclusive em `InsertionHoleSlot`), sendo ativado sob demanda ao expandir os detalhes técnicos de Nível 3, enquanto `aria-label` e `.sr-only` preservam integralmente a posição para leitores de tela.
 
+### 11.19. Single Scroll Owner, Fluxo Único de Conclusão, Dica Subordinada do Selection e Gaveta `[ Aprofundamento técnico ]` (`UX-PRACTICE-R3.2`)
+No marco `UX-PRACTICE-R3.2`, os fluxos estruturais e detalhes ergonômicos remanescentes dos três módulos centrais foram estabilizados:
+1. **Single Scroll OwnerEstrito (`overflow-x-clip` sem `h-full` concorrente):**
+   - O container raiz em `src/App.tsx` e as telas de prática/resultado V2 operam com `w-full min-h-screen overflow-x-clip` e alinhamento `justify-start` (sem `h-full` bloqueando a altura em `100vh`, sem `my-auto` e jamais `h-screen overflow-hidden`). Como `overflow-x: clip` corta transbordos horizontais sem forçar `overflow-y: auto` pelo CSS Overflow Spec, `document.scrollingElement` atua como **único dono do scroll vertical** em todas as resoluções (`1280×650`, `1366×768`, `1600×900`, `1920×1080`).
+2. **Navegação Padronizada `[ ← Práticas ]` e Fluxo Único `Prática → Resultado Oficial`:**
+   - Todas as três Práticas Básicas V2 apresentam `[ ← Práticas ]` retornando ao `PracticeSelector` do próprio módulo sem gravar conclusão espúria.
+   - Eliminadas telas internas duplicadas de encerramento: concluir o último passo aciona uma única transição direta (`completedCalledRef`) para a `ResultScreen` oficial.
+3. **Dica Subordinada na Área de Decisão do Selection Sort (`1366×768` e `1280×650`):**
+   - O acionador `[ ? Dica ]` reside no cabeçalho do card `SelectionDecisionControls` e o painel `"Orientação Pedagógica"` expande subordinadamente entre a pergunta e os botões (`top: 471px, bottom: 558px`), mantendo esteira, dica e botões `100%` visíveis simultaneamente sem rolagem em `1366×768` e `1280×650` (com fallback `scrollIntoView({ block: "nearest" })` restrito ao clique explícito do usuário e respeitando `prefers-reduced-motion`).
+4. **Padrão Único de Nível 3 (`[ Aprofundamento técnico ]`):**
+   - Nos três módulos básicos V2, o aprofundamento técnico utiliza `<details>` nativo fechado por padrão com `<summary>` padronizado como `Aprofundamento técnico`, importando diretamente as fontes canônicas imutáveis de pseudocódigo: `BUBBLE_SORT_PSEUDOCODE` (`9` linhas), `SELECTION_SORT_PSEUDOCODE` (`13` linhas) e `INSERTION_SORT_PSEUDOCODE` (`11` linhas).
+
 
 
 

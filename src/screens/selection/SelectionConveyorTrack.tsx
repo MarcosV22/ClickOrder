@@ -22,7 +22,7 @@ export default function SelectionConveyorTrack({
 
   return (
     <div
-      className="w-full bg-[#0d1635]/90 border border-purple-500/20 rounded-2xl p-5 sm:p-7 flex flex-col items-center gap-5 shadow-xl"
+      className="w-full bg-[#0d1635]/90 border border-purple-500/20 rounded-2xl p-4 sm:p-5 flex flex-col items-center gap-3 shadow-xl"
       role="region"
       aria-label="Esteira de triagem do Selection Sort"
     >
@@ -51,7 +51,8 @@ export default function SelectionConveyorTrack({
       </div>
 
       {/* Esteira com caixas e rótulos contextuais: uma informação visual principal por papel */}
-      <div className="flex items-center justify-center gap-3 sm:gap-6 py-2 flex-wrap">
+      <div className="w-full overflow-x-auto py-1">
+        <div className="flex items-center justify-center gap-3 sm:gap-6 min-w-max mx-auto px-2">
         {gameState.currentValues.map((val, idx) => {
           const isSorted = sortedIndices.includes(idx);
           const isTarget = !gameState.completed && idx === gameState.i;
@@ -143,6 +144,7 @@ export default function SelectionConveyorTrack({
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
